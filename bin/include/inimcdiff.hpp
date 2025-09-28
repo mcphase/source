@@ -41,8 +41,8 @@ Matrix rtoijk,rtoijk_rez; // lattice abc and reciprocal lattice in ijk coordinat
    void save(); // save parameters to results/_mcdiff.in
    void save(const char * filename); // save parameters to file filename
    void print_usrdefcolhead(FILE *fout);
-   void print_usrdefcols(FILE *fout,float ** out,int i);
-  inimcdiff (const char * file, char * prefix,int verbose); //constructor
+   void print_usrdefcols(FILE *fout,float ** out,int & i);
+  inimcdiff (const char * file, char * prefix,int & verbose); //constructor
   inimcdiff (const inimcdiff & p);//kopier-konstruktor
  ~inimcdiff ();//destruktor
 };

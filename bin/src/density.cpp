@@ -11,7 +11,7 @@
   Vector **rfiteta;
   
   */
-  Vector & density::rtf(int p) // pointer to rft (i=1 ... nofpts)
+  Vector & density::rtf(int & p) // pointer to rft (i=1 ... nofpts)
 {if (p>(*this).nofpts){fprintf(stderr,"Error class density: point index %i exceed maximum nofpts %i \n",p,nofpts);exit (EXIT_FAILURE);}
  return (*rtetafi[p]);
 }

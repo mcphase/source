@@ -89,10 +89,17 @@ dis(ii-1,1)=nnew;
 dis(ii-1,2)=nscoeff[ii];
                           }
    if(n<i){int anp1=strtod (substr[n+1], NULL);if((int)an<=(int)anp1){fprintf(stderr,"Error program reduce_unitcell option -delatoms atom numbers have to be given in ascending order\n");exit(1);}}
-if(nn>1){   a.delatom((int)an,dis,verbose); // distribute onto neighbours
-}else{ a.delatom(-(int)an,dis,verbose);} // do not distribute onto neighbours. In case of phonon module put effective multipolar interaction to 
+if(nn>1){ int ian=(int)an;  a.delatom(ian,dis,verbose); // distribute onto neighbours
+}
+else  
+{// do not distribute onto neighbours.
+ //In case of phonon module put effective multipolar interaction between other magnetic ions
+ // (to trigger this make ian negative in call to delatoms)
+int ian=-(int)an; a.delatom(ian,dis,verbose);}  
+           
   }
 }
+
  a.save(stdout,noindexchange);
  a.save_mcdiff_in("reduce_unitcell");
 

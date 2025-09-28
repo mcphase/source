@@ -35,7 +35,7 @@ int maxnofhkls,nofhkls;
 spincf  sps;
 mfcf mf;
    
-physproperties (int nofspincorrs,int maxnofhkls,int na, int nm);	//konstruktor
+physproperties (int & nofspincorrs,int & maxnofhkls,int & na, int & nm);	//konstruktor
 //na number of atoms in basis,nm number of spin components
 physproperties (const physproperties & props);	// kopier-konstruktor
 
@@ -49,17 +49,17 @@ physproperties (const physproperties & props);	// kopier-konstruktor
    //                 puts into outstr the numbers  nn[i>8] formatted for output into mcphas.fum
    //  if setnn false: reads nn  into parameters fe, u, etc  
  // for fum file
-double fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int ortho,par & inputpars,int verbose);
+double fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int & ortho,par & inputpars,int & verbose);
  // for xyt file
-double xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose);
+double xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int & verbose);
  
-void update_maxnofhkls(int mxnofhkli);
+void update_maxnofhkls(int & mxnofhkli);
 // save physical properties to output files
-double save(int verbose,const char * filemode, int j,inipar & ini,par & inputpars,char * prefix);
+double save(int & verbose,const char * filemode, int & j,inipar & ini,par & inputpars,char * prefix);
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise
 // returns 1
-int read(int verbose, par & inputpars,char * readprefix,inipar & ini);
+int read(int & verbose, par & inputpars,char * readprefix,inipar & ini);
 };
 
 

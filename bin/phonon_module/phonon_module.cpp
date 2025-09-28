@@ -129,6 +129,7 @@ F(3)=Fxc(3)+Hext(6)*charge*a0*1e9;
  K(2,1)=MODPAR[5];
  K(3,1)=MODPAR[6];
  K(3,2)=MODPAR[7];
+
 // printf("Icalc phonon Kij= %g %g %g %g %g %g %g %g %g\n",K(1,1),K(2,2),K(3,3),K(2,1),K(3,1),K(3,2),K(1,2),K(1,3),K(2,3));
 if(Norm(K)==0){U=0; // last term  to correct energy
 lnZ=0; // last term  to correct energy
@@ -266,6 +267,7 @@ return true;
 
 bool phonon_module::pcalc(Vector & u0,double & T, Vector &Fxc, Vector & Hext,double & g_J, Vector & MODPAR,char * sipffilename) 
 {double lnZ,U;
+
  Icalc(u0,T,Fxc,Hext,g_J,MODPAR,sipffilename,lnZ,U);
  double a0=0.5219; // Bohr radius in A
  u0*=a0;

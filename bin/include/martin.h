@@ -28,7 +28,7 @@
 #define NOFOBS  12
 enum ob    { I=0, M=1, pel=2, P=3, L=4, S=5, sx=6,  sy=7,  sz=8,  lx=9,  ly=10,  lz=11, MQ=12,U=13 } ;
 
-ob obint(int i);
+ob obint(int  i);
 
 // choose random complex number c with 0<|c|<r, returns complex number and in r the randomly chosen |c|
 complex<double> crnd(double & r);
@@ -53,7 +53,7 @@ extern  int extract(char * instr,const char * parameter,double & var,parser & ob
 
 
 extern   int setvar(char * instr,const char * parameter,double & var);
-extern   int setvar(char * instr,const char * parameter,int var);
+extern   int setvar(char * instr,const char * parameter,int & var);
 
 
 
@@ -64,7 +64,7 @@ void print_col_numbers(FILE * fout,char * str);
 // and m >0 is the maximum number of space separations in the extracted string 
 // (e.g. m=1 will read from instr "G= one two three four" the parameter "G"
 // to var as "one",  putting m=2 will set var to "one two", m=3 will yield "one two three"
-extern   int extract(char * instr,const char * parameter,char * var, size_t n,int m);
+extern   int extract(char * instr,const char * parameter,char * var, size_t n,int  m);
 
 // extract a variable which is there also if it is preceded by a prefix returns 0 on success, 1 if not successful
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var);
@@ -74,12 +74,12 @@ extern int extract_with_prefix(char * instr,char * prefix, const char * paramete
 extern int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var,parser & ob);
 extern int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var,parser & ob);
 
-extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n,int m);
+extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n,int  m);
 
 // open file: like fopen but with error check 
 extern  FILE * fopen_errchk (const char * filename, const char * mode);
 // get string instr: like fgets but with error check
-extern  char * fgets_errchk (char * instr,int size, FILE * file);
+extern  char * fgets_errchk (char * instr,int  size, FILE * file);
 
 //where not more than len characters are searched.  Characters that
 //     appear after a ‘\0’ character are not searched.  Since the strnstr() function is a FreeBSD specific API, it should only be used when portability is not a concern.
@@ -114,16 +114,16 @@ extern int inputparline (const char * parname, FILE * fin_coq, float *nn)
 // return random number between 0 and z
 extern  double rnd(float z);
 // return random integer from 1,2,...,i
-extern  int rndint(int i);
+extern  int rndint(int & i);
 
 #ifndef __linux_
-extern int arc4random_uniform(int i);
+extern int arc4random_uniform(int & i);
 #endif
 // return integer of floating number (like basic integer function)
 extern  float integer (float s);
 
 //return rounded integer of floating number
-extern int cint (float s);
+extern int cint (float &s);
 
 // round to 1e-11 precision
 extern double myround(double s);
@@ -140,7 +140,7 @@ const int facts[13] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 3
 // 39916800, 479001600, 6227020800, 87178291200, 1307674368000, 20922789888000,
 // 355687428096001,  6402373705727994, 121645100408832080, 2432902008176640000};
 inline
-int fact(int number) {
+int fact(int  number) {
    if(number<0||number>13) { fprintf(stderr,"factorial(%i) not handled\n",number); exit(1); }
    return facts[number];
 // return (number>13)?0:facts[number];  // Fast but if number>13 gives wrong results!
@@ -176,8 +176,8 @@ Vector crossp(Vector a,Vector b);
 //  stored in the lower triangle of z,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
-double matelr (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
-double mateli (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
+double matelr (int & i,int & j,Matrix & zr, Matrix & zi, Matrix & op);
+double mateli (int & i,int & j,Matrix & zr, Matrix & zi, Matrix & op);
 // the same for two Complex Vectors si and sj
 double matelr (ComplexVector & si, ComplexVector &sj , Matrix & op);
 double mateli (ComplexVector & si, ComplexVector &sj , Matrix & op);
@@ -189,7 +189,7 @@ double mateli (ComplexVector & si, ComplexVector &sj , Matrix & op);
 //  stored in the lower triangle of z,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
-void  opZcol(int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi);
+void  opZcol(int & i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi);
 
 
 // some matrix functions for hermitian matrices in
@@ -200,16 +200,16 @@ void  opZcol(int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi);
 ComplexMatrix toStandard(Matrix A); // transform to conventional matrix notation
 Matrix herm_dirprod(Matrix  A, Matrix  B); // direct product
 Matrix herm_prod(Matrix  A, Matrix  B); // normal herm product (AB+BA)/2
-double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // transition matrix element
-double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // <a|M|b>  a,b are columns ia and ib
-complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc
-double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib);
-double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
-complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
+double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int & ia, int & ib,Matrix*V);            // transition matrix element
+double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int & ia, int & ib,Matrix*V);            // <a|M|b>  a,b are columns ia and ib
+complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int & ia,int & ib);  // of zr+izc
+double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int & ia, int & ib);
+double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int & ia, int & ib);
+complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int & ia, int & ib);
 
 
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);
-void SetColumn(int i,Matrix M,Vector &v); // fills column i in Matrix M with vector v
+void SetColumn(int & i,Matrix M,Vector &v); // fills column i in Matrix M with vector v
 
 // calculate reciprocal lattice rezi from real lattice ri
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3);
@@ -241,16 +241,17 @@ void ijk2hkl(Vector & hkl, Vector & qijk,Vector & abc);
 // transforms Q vector in ijk coordinate system to Miller indices (in terms of reciprocal lattice abc*)
 
 // evaluates equation 23 in Bowden 81
-Matrix ER(double R, Vector & rl);
+Matrix ER(double& R, Vector & rl);
 
 // calculates classical dipole interaction Fourier transform with Ewald Method accorind 
 // to bowden 1981 p 827 - to be use in line 216 of mcdisp.c and for q=0 in mcphas 
-ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & rA,double gJA, Vector & rB,double gJB,bool deltaAB);
+ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB);
 // input: hkl ... q-vector in Miller indices with respect to reciprocal lattice
 //        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
-//        dA ... atomic position of atom a with respect to vectors of lattice
+//         v ........ volume of unit cell in A^3
+//        rez ........reciprocal lattice as columns in rez from real lattice columns in MAtrix r
+//        tauAB ... difference of atomic positions of atom B - A with respect to vectors of lattice
 //        gJA .. Lande factor of atom A
-//        dB ... atomic position of atom a with respect to vectors of lattice
 //        gJB .. Lande factor of atom B
 //        deltaAB ... 1 if dA=dB and zero otherwise
 // ouput DAB(q) according to equation (26) including a prefactor to obtain units of meV 
@@ -261,7 +262,7 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & rA,double gJA, Vector
 //                   ( 3xij.zij          3yij.zij       3zij^2-rij^2 )
 
 // the same at q=0: DAB(q=0)
-Matrix DAB0(Matrix & lattice, Vector & rA,double gJA, Vector & rB,double gJB,bool deltaAB);
+Matrix DAB0(Matrix & lattice, double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB);
 
 void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
 // problem: we want to find all lattice vectors Rn=ni*ai which are within a
@@ -277,7 +278,7 @@ Vector dr(Vector & epsilon,Vector & r);
 
 void set_zlm_constants(Matrix & cnst);
 
-FILE * open_sipf(char * sipf_filename,char * modulename,int verbose);
+FILE * open_sipf(char * sipf_filename,char * modulename,int & verbose);
 // opens sipf file and returns filehandle and modulename 
 
 // A C program to match wild card characters 

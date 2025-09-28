@@ -19,7 +19,8 @@ void qvectors::save(const char * filemode)
   fprintf (fout, "%6.4g  %6.4g %6.4g      %4i %4i %4i %i\n",   
                   hkl(1),hkl(2),hkl(3),
 		  na(k),nb(k),nc(k),-k);
-    if (verbose){ sps.spinfromq(na(k),nb(k),nc(k),q(k),nettom(k),momentq0(k),phi(k));
+    if (verbose){ int nak=na(k),nbk=nb(k),nck=nc(k);
+                  sps.spinfromq(nak,nbk,nck,q(k),nettom(k),momentq0(k),phi(k));
                   sps.print(fout);
 		}  
  }      
@@ -28,14 +29,14 @@ void qvectors::save(const char * filemode)
 }
 
 // subs to calculate 3dim indices of qvector component
-int qvectors::ia(int j){div_t result; result = div(j-1,hchkn[2][0]*hchkn[3][0]);
+int qvectors::ia(int & j){div_t result; result = div(j-1,hchkn[2][0]*hchkn[3][0]);
               return result.quot+1;}
 
-int qvectors::ib(int j){div_t result; result = div(j-1,hchkn[2][0]*hchkn[3][0]);
+int qvectors::ib(int & j){div_t result; result = div(j-1,hchkn[2][0]*hchkn[3][0]);
               result=div(result.rem,hchkn[3][0]);
               return result.quot+1;}
 
-int qvectors::ic(int j){div_t result; result = div(j-1,hchkn[2][0]*hchkn[3][0]);
+int qvectors::ic(int & j){div_t result; result = div(j-1,hchkn[2][0]*hchkn[3][0]);
               result=div(result.rem,hchkn[3][0]);
               return result.rem+1;}
 	      
@@ -48,28 +49,28 @@ int qvectors::nofqs () //returns nofqvectors
 {return nofq;
 }    
 
-Vector & qvectors::q(int i) // returns (hkl) of qvector i
+Vector & qvectors::q(int & i) // returns (hkl) of qvector i
 {return (*q0[i]);
 }
 
-Vector & qvectors::nettom(int i) // returns pointer to nettom[i]
+Vector & qvectors::nettom(int & i) // returns pointer to nettom[i]
 {return (*nm[i]);}
 
-Vector & qvectors::momentq0(int i) // returns pointer to momentq0[i]
+Vector & qvectors::momentq0(int & i) // returns pointer to momentq0[i]
 { return (*mq0[i]);}
 
-Vector & qvectors::phi(int i) // returns pointer to phi[i]
+Vector & qvectors::phi(int & i) // returns pointer to phi[i]
 {return (*ph[i]);}
 
-int qvectors::na (int i) // returns period for i.th qvector
+int qvectors::na (int & i) // returns period for i.th qvector
 {return (int)(*n[i])(1);
 }
 
-int qvectors::nb (int i) // returns period for i.th qvector
+int qvectors::nb (int & i) // returns period for i.th qvector
 {return (int)(*n[i])(2);
 }
 
-int qvectors::nc (int i) // returns period for i.th qvector
+int qvectors::nc (int & i) // returns period for i.th qvector
 {return (int)(*n[i])(3);
 }
 
@@ -96,7 +97,7 @@ bool qvectors::is_in_1stBZ(Vector & hkl, Vector & abc,Matrix & rezijk)
         v               verbose switch
 */
 qvectors::qvectors (inipar & ini,par & inputpars,
-                    Vector & mmax,const char * savfile, int v)
+                    Vector & mmax,const char * savfile, int & v)
 { savfilename= new char [strlen(savfile)+1];
   strcpy(savfilename,savfile);
   verbose=v;

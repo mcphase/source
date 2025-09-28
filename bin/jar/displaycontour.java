@@ -579,15 +579,15 @@ protected void reload_data(int i)
                     sint=sint.replace('D','E');
                      data[0][j]=p.parseDouble(sx);if(j>0){double bwg=Math.abs(data[0][j]-xold);if(bwg>0&&(bwg<bw||bw==0)){bw=bwg;}}
                       xold=data[0][j];
-                      if (detxmax&data[0][j]<xmin){xmin=data[0][j];}
+                      if (detxmin&data[0][j]<xmin){xmin=data[0][j];}
                       if (detxmax&data[0][j]>xmax){xmax=data[0][j];}
                      data[1][j]=p.parseDouble(sy);if(j>0){double bhg=Math.abs(data[1][j]-yold);if(bhg>0&&(bhg<bh||bh==0)){bh=bhg;}}
                      yold=data[1][j];
                       if (detymin&data[1][j]<ymin){ymin=data[1][j];}
                       if (detymax&data[1][j]>ymax){ymax=data[1][j];}
                      data[2][j]=p.parseDouble(sint);
-                      if (detxmax&data[2][j]<zmin){zmin=data[2][j];}
-                      if (detxmax&data[2][j]>zmax){zmax=data[2][j];}
+                      if (detzmin&data[2][j]<zmin){zmin=data[2][j];}
+                      if (detzmax&data[2][j]>zmax){zmax=data[2][j];}
                     ++j;
                    }
                    catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);

@@ -29,9 +29,9 @@ class qvectors
     int nofq; // number of qvectors
     Matrix rez,r,rezprim;
     
-    int ia(int j); //index functions
-    int ib(int j);
-    int ic(int j);
+    int ia(int & j); //index functions
+    int ib(int & j);
+    int ic(int & j);
     Vector **q0; // array of pointers to the q-vectors
     Vector **n; // array of pointers to the periodicity vectors (na,nb,nc)... in case of memory
 	        // problems this could be subsituted by integer fields
@@ -42,19 +42,19 @@ class qvectors
         
   public:
     int nofqs (); //returns nofqvectors
-    Vector & q(int i); // returns (hkl) (i)
-    int na (int i); // returns period for i.th qvector
-    int nb (int i); // returns period for i.th qvector
-    int nc (int i); // returns period for i.th qvector
+    Vector & q(int & i); // returns (hkl) (i)
+    int na (int & i); // returns period for i.th qvector
+    int nb (int & i); // returns period for i.th qvector
+    int nc (int & i); // returns period for i.th qvector
     int nofatoms; //number of atoms in primitive cryst unit cell
     int nofcomponents; //number of moments in spin vector
     int verbose;  /*    switch: if 1 the generation of q vectors is commented explicitely on stdout
 	                and qvectors::save(const char * filemode) puts a large set of information into mcphas.qom (including
 			magnetic structures corresponding to qvector)*/
 
-    Vector & nettom(int i); // nettomoment
-    Vector & momentq0(int i); // moment amplitude
-    Vector & phi(int i); // phase
+    Vector & nettom(int & i); // nettomoment
+    Vector & momentq0(int & i); // moment amplitude
+    Vector & phi(int & i); // phase
     
    bool is_in_1stBZ(Vector & hkl, Vector & abc, Matrix & rezijk);
     //save table of all qvectors on file
@@ -73,7 +73,7 @@ class qvectors
     */
    
  qvectors (inipar & ini,par & inputpars,
-              Vector & mmax,const char * filename,int v);	//konstruktor
+              Vector & mmax,const char * filename,int & v);	//konstruktor
 
     qvectors (const qvectors & qs);	// kopier-konstruktor
 

@@ -22,7 +22,7 @@ class inipar
   bool outcolset; // indicates wether in mcphas.ini user has set some output columns
   
   public:
-  bool defaultcolcode(int col,int colcode); // resets default columns if not set by user (outcolset==true)
+  bool defaultcolcode(int  col,int  colcode); // resets default columns if not set by user (outcolset==true)
                                              // returns true if reset has been successful
    char * savfilename;
    char * program;
@@ -105,10 +105,10 @@ class inipar
  void calcTHfromxy(double & T,Vector & Hext,double x, double y,cryststruct & cs);
 
 // calculate the value of different output data for user defined column with colcod i...
- double   calccolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
+ double   calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
 
 // return pointer to value of user defined column with colcod i
-double * colvaluepointer(int i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
+double * colvaluepointer(int & i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
                  Vector & Eabc,double & NormH, double & NormE);
 
  // set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
@@ -124,7 +124,7 @@ bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc);
    void print (const char * file);
    void print (FILE * fout);
 void print_with_prefix(FILE * fout, inipar p);
-bool checkpr(FILE* fout,const char * var,int val,int masterval);
+bool checkpr(FILE* fout,const char * var,int & val,int & masterval);
 bool checkpr(FILE* fout,const char * var,double val,double masterval);
 
 // estimeate time until finishing of mcphas
@@ -142,7 +142,7 @@ bool checkpr(FILE* fout,const char * var,double val,double masterval);
 
  // exit with error message
    void errexit();
-   void finish_mcphas(int nofqs,int nofspincf);
+   void finish_mcphas(int  nofqs,int  nofspincf);
   //load parameters from file, returns 1 on error, 0 on success
    int load();
    int load (int & nofinis,char**lofpref);

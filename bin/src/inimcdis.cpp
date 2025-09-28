@@ -53,7 +53,7 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                                };
 
 // different output data for user defined columns ...
-double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr,Vector & qprim,Vector & hkl)
+double inimcdis::setcolvalue(int & i,Vector & Qvec, double & Qincr,Vector & qprim,Vector & hkl)
 {      switch (i) {
 case 0:  return Qincr;break;
 case 1:  return Qvec(1);break;
@@ -325,7 +325,7 @@ void inimcdis::save(const char * filename)
 }
 
 
-void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc)
+void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int & do_jqfile,Vector & abc)
 {int i,j;
  float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;  
                  while (feof(finhkl)==0)
@@ -391,7 +391,7 @@ ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
 if(ret==0)var=ob.eval_exp(val);
 return ret;
 }
-int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int m)
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int  m)
 {
  if(findnewmatch==true)
  {if(pref[0]!='\0')
@@ -432,7 +432,7 @@ int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * i
 }
 
 // *************************************************************************
-int inimcdis::load (int & nofinis,char**lofpref,char * mffile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat,int verbose)
+int inimcdis::load (int & nofinis,char**lofpref,char * mffile,char * pref,int & do_jqfile,Vector & abc,int & nofcomp,int & nofat,int  verbose)
 { bool findnewmatch=true;if(nofinis==-1){findnewmatch=false;}
    errno=1;do_jqf=do_jqfile;nofthreads=0;outcolset=false;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
@@ -793,7 +793,7 @@ return 0;
 
 // *************************************************************************
 //load parameters from file
-int inimcdis::load (char * mffile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
+int inimcdis::load (char * mffile,char * pref,int & do_jqfile,Vector & abc,int & nofcomp,int & nofat)
 {int n=-1;char ** lp; lp=NULL;
 return load(n,lp,mffile,pref,do_jqfile, abc,nofcomp,nofat,0);
 }
@@ -899,7 +899,7 @@ if(hkls!=NULL)
 //constructor ... load initial parameters from file
 inimdpars::inimdpars (const char * file,char * pref,char * mffile,
              int & do_jqfile,bool inc_cd,Vector & abc,
-             int & nofcomponents,int & nofatoms, int verbose)
+             int & nofcomponents,int & nofatoms, int & verbose)
 { inis=new inimcdis*[MAXNOFINIS];
   char * lofprefixes[MAXNOFINIS];
   int nofinisold=-1;nofinis=0;

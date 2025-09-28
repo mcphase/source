@@ -120,7 +120,7 @@ void checksquare (const Matrix &M)
 
 //----------------------------------------------------------------------------//
 
-static double** newmat (int nrl, int nrh, int ncl, int nch)
+ double** newmat (int nrl, int nrh, int ncl, int nch)
 //
 // allocate the dynamic part of a matrix on the heap, 
 // allocate matrix in one block to faciliate many matrix functions !

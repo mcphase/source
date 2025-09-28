@@ -146,6 +146,8 @@ pchr=strstr(filename+10,"\\");
          while(tc<nmax&&!trs_write_next_line(fout_trs,jjj,nt,1,1,1,i,tc,TT,Hxc,Hext,
                           jjj.est,d,-1e100,maxE,observable,Q)){if(d>=0)--tc;}
         }
+
+
           fclose(fout_trs);
       }
        
@@ -166,7 +168,8 @@ pchr=strstr(filename+10,"\\");
       fin = fopen_errchk(filename,"rb");
       // clear X matrices (put sign of qcounter negative
       if(calcX){jjj.eigenstates(Hxc,Hext,T); // ... this is to recalculate population numbers for new temperature
-                jjj.chi0(X,Estart, dE,Esteps,0.1,qijk,-qcounter,nn[6],T,Hxc,Hext, jjj.est,1,1,1,i);
+                int mqcounter=-qcounter,d1=1;
+                jjj.chi0(X,Estart, dE,Esteps,0.1,qijk,mqcounter,nn[6],T,Hxc,Hext, jjj.est,d1,d1,d1,i);
                }
        int i1=0,j1=0;jmin=0;
        while (feof(fin)==0)
@@ -182,7 +185,8 @@ pchr=strstr(filename+10,"\\");
          jjj.transitionnumber=tn; // try calculation for transition  tn
          if(verbose==1)jjj.transitionnumber=-tn;
          // fill X matrices
-      if(calcX){jjj.chi0(X,Estart, dE,Esteps,-epsilon,qijk,obint(observable),nn[6],T,Hxc,Hext, jjj.est,1,1,1,i);
+      if(calcX){int oi=obint(observable),d1=1;
+                 jjj.chi0(X,Estart, dE,Esteps,-epsilon,qijk,oi,nn[6],T,Hxc,Hext, jjj.est,d1,d1,d1,i);
                                  }
            jjj.transitionnumber=j1; // put back transition number for 1st transition
         }} if(jmin==0){fprintf(stderr,"Warning singleion reading %s: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"

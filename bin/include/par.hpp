@@ -37,13 +37,13 @@ class par
   //jjjpar 
    
    par (const char *filejjj,int verbose=0);	//konstruktor
-   par (Vector abc,int nofcompi); // simple contructor: needed in clusterize
+   par (Vector abc,int  nofcompi); // simple contructor: needed in clusterize
    par (const par & pars);	// kopier-konstruktor
    
 ~par ();		//destruktor
 
 int newatom(jjjpar * p); //creates new atom from an existing and returns its index
-int delatom(int n, Matrix & distribute,int verbose); //removes atom n and returns new nofatoms
+int delatom(int & n, Matrix & distribute,int & verbose); //removes atom n and returns new nofatoms
 // if n<0 then atom number |n| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
 // if n>0 interactions with the other atoms are kept and transferred to 
@@ -54,24 +54,24 @@ int delatom(int n, Matrix & distribute,int verbose); //removes atom n and return
 //            -- thus after running it sublattice[s] refers still to
 //            original numbering with all atoms in the parameters set !
 
-void reduce_unitcell(int verbose);//checks every atom in the unit cell and removes
+void reduce_unitcell(int & verbose);//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
 void scale(double scalefactor); // scale all interaction parameters by scalefactor
 void save(FILE * fout,int noindexchange,bool pd=false,bool ps=false); // save lattice, atoms and exchange parameters to file
-void print_interaction(FILE * fout,int pa,int pi,int prl,int prh,int pcl,int pch); 
+void print_interaction(FILE * fout,int & pa,int & pi,int & prl,int & prh,int & pcl,int & pch); 
                   // prints interaction tensor (rows prl-prh,columns pcl-pch) pi of atom pa to fout
 void print_G(FILE * fout); 
                   // prints magnetoelastic interaction parameters to Fout
-void save(const char * filename,int noindexchange); // save lattice, atoms and exchange parameters to file
+void save(const char * filename,int  noindexchange); // save lattice, atoms and exchange parameters to file
 void savelattice(FILE *fout);// save lattice to file
 void saveatoms(FILE *fout);// save atom positions and properties  to file
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
 void save_mcdiff_in (const char * program); // save structure in mcdiff.in program is program name calling this
-void set_nofcomponents (int n); //sets the number of components in the interaction vector to n
-void increase_nofcomponents (int n); //increases the number of components in the interaction vector
-void decrease_nofcomponents (int n); //decreases the number of components in the interaction vector
-void remove_components(int rml,int rmh,int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh
+void set_nofcomponents (int & n); //sets the number of components in the interaction vector to n
+void increase_nofcomponents (int & n); //increases the number of components in the interaction vector
+void decrease_nofcomponents (int & n); //decreases the number of components in the interaction vector
+void remove_components(int & rml,int & rmh,int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh
 
 
 // operator!= returns 8 7 6 5 4 3 2 1 0depending on agreement of

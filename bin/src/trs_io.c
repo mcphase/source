@@ -189,7 +189,7 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
      if(jjj.transitionnumber>nt){return 1;}
      jjj.du1calc(T,mf,Hext,u1,d,n,nd,est);
      }
-   //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
+//   fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
     gamma=Norm2(u1);ComplexVector dm1(1,3);double intensityp=0, intensitym=0; dm1=0;
 ComplexVector m1(1,SPINDENS_EV_DIM); m1=0;int ch=0;
     switch(observable)

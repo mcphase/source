@@ -48,8 +48,8 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
                                                //mf ... exchange field vector of atom s
 
   if(do_Erefine) // clear chi0 matrices (put sign of qcounter negative
-  {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2),md.nofEstps,epsilon,
-                  qijk,-qcounter,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
+  {int mqc=-qcounter;(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2),md.nofEstps,epsilon,
+                  qijk,mqc,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
 
   jmin=0;
   while (feof(fin)==0)
@@ -207,7 +207,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
         mfcf & qes_real,mfcf & qes_imag,ComplexMatrix & Espin,
         mfcf & qel_real,mfcf & qel_imag,ComplexMatrix & Eorbmom,
         int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,
-       const par & inputpars,Vector & hkl, mdcf & md,int do_verbose,int calc_rixs,int do_phonon,double & QQ)
+       const par & inputpars,Vector & hkl, mdcf & md,int do_verbose,int calc_rixs,int calcXobs,int do_phonon,double & QQ)
 #endif
 {//calculates approximate intensity for energylevel i - according to chapter 8.2 mcphas manual
 
@@ -576,12 +576,12 @@ double intcalc_Erefine(ComplexMatrix & ch, int Estp,inimcdis & ini,par & inputpa
     for(j=1;j<=md.nofcomponents;++j){
      Bc(s+i,s+j)=(*md.chi0pointer(i1,j1,k1,l1)[Estp])(i,j);
      }}
-      b=(md.baseindex(i1,j1,k1,l1,1)-1)*md.nofcomponents;
+      int t11=1;b=(md.baseindex(i1,j1,k1,l1,t11)-1)*md.nofcomponents;
 
   for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
        for(l2=1;l2<=ini.nofatoms;++l2){
        ss=md.inM(i2,j2,k2,l2)*md.nofcomponents;
-      bb=(md.baseindex(i2,j2,k2,l2,1)-1)*md.nofcomponents;
+      bb=(md.baseindex(i2,j2,k2,l2,t11)-1)*md.nofcomponents;
      for(i=1;i<=md.nofcomponents;++i){for(j=1;j<=md.nofcomponents;++j){
       cc1(i,j)=J.mati(J.in(i1,j1,k1),J.in(i2,j2,k2))(b+i,bb+j);}}
       cc1=(*md.chi0pointer(i1,j1,k1,l1)[Estp])*cc1;

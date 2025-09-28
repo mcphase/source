@@ -57,9 +57,14 @@ corresponding eigenvector) or option
 \item[\prg mcphas\index{mcphas} -cd] treat classical dipole interaction internally (for the the first three 
    the interaction operators $I_1,I_2,I_3$, which must correspond to angular momentum $J$, such as in the so1ion module)
              and it
-                 is assumed that $(g_J.I_1,g_J.I_2,g_J.I_3)$ are the components of the magnetic moment ($g_J$ given in sipf file),
- the classical dipole interaction is calculated using the series expansion for the classical dipolar expansion 
-   given by Bowden\cite{bowden81-827}. Using this option permits to avoid a large number of interaction constants in
+                 is assumed that $(g_J.I_1,g_J.I_2,g_J.I_3)$ are 
+the components of the magnetic moment ($g_J$ given in sipf file, thus setting it zero there will exclude the
+corresponding ion from the dipolar interaction calculation - this is the way for example to include 
+phonon degrees of freedom in such a calculation),
+ the classical dipole interaction is calculated using the series expansion for 
+the classical dipolar expansion 
+   given by Bowden\cite{bowden81-827}. Using this option permits to avoid a 
+large number of interaction constants in
 {\prg mcphas.j}
 				\item [{\prg -v}] option is to display\index{display} more information.
                                 

@@ -774,7 +774,7 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
    //if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zi,x;
    int noft=0; 
-   for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   for(i=0; (i<ninit)&&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
    {
       noft += Hsz-i; 
       zsum += zi;

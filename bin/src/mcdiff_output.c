@@ -21,13 +21,13 @@ time_t curtime;
   fprintf(fout,"#! r1c=%8.5f r2c=%8.5f r3c=%8.5f   (strained using strain tensor)\n",ini.nr1*ini.r1s[3],ini.nr2*ini.r2s[3],ini.nr3*ini.r3s[3]);
   fprintf(fout,"#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",ini.natmagnetic,spins.nofcomponents);
   fprintf(fout,"#*********************************************************************\n");
-
+int d1=1;
  for (i=1;i<=ini.natmagnetic;++i)
  { Vector abc(1,3);
    abc=(*ini.jjjpars[i]).xyz(1)*ini.nr1*ini.r1s+(*ini.jjjpars[i]).xyz(2)*ini.nr2*ini.r2s+(*ini.jjjpars[i]).xyz(3)*ini.nr3*ini.r3s;
-   spins.m(1,1,1)(nofcomponents*(i-1)+1)=(*ini.jjjpars[i]).mom(1);
-   spins.m(1,1,1)(nofcomponents*(i-1)+2)=(*ini.jjjpars[i]).mom(2);
-   spins.m(1,1,1)(nofcomponents*(i-1)+3)=(*ini.jjjpars[i]).mom(3);
+   spins.m(d1,d1,d1)(nofcomponents*(i-1)+1)=(*ini.jjjpars[i]).mom(1);
+   spins.m(d1,d1,d1)(nofcomponents*(i-1)+2)=(*ini.jjjpars[i]).mom(2);
+   spins.m(d1,d1,d1)(nofcomponents*(i-1)+3)=(*ini.jjjpars[i]).mom(3);
    fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g sipffilename=%s\n",
    abc(1),abc(2),abc(3), (*ini.jjjpars[i]).paranz, (*ini.jjjpars[i]).diagonalexchange, (*ini.jjjpars[i]).gJ, (*ini.jjjpars[i]).sipffilename);
  }

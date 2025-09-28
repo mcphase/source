@@ -268,7 +268,7 @@ printf("#module cluster initialized\n");
 //------------------------------------------------------------------------------------------------
 // Routine to calculate the Iaa (Ia_i) matrix for some particular a,i
 //------------------------------------------------------------------------------------------------
-void jjjpar::cluster_Iaa(zsMat<double> *Iai, int a, int i)
+void jjjpar::cluster_Iaa(zsMat<double> *Iai, int & a, int & i)
 {
  Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,HEXT_DIMENSION);
  // initialize matrices
@@ -348,7 +348,7 @@ myPrintMatrix(stdout,outmat);printf("\n");*/
 //------------------------------------------------------------------------------------------------
 //routine Icalc for cluster
 //------------------------------------------------------------------------------------------------
-void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
+void jjjpar::cluster_Icalc_mcalc_Micalc (int  code,Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
 {if(T==0){fprintf(stderr,"Error - T=0 in module Cluster - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
 
 Matrix JM(1,Jret.Hi(),1,1);
@@ -361,7 +361,7 @@ Matrix JM(1,Jret.Hi(),1,1);
  for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
 }
 
-void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Matrix & Jret,Vector & TT, Vector &  Hxc,Vector & Hext, Vector & lnZ, Vector & U)
+void jjjpar::cluster_Icalc_mcalc_Micalc (int  code,Matrix & Jret,Vector & TT, Vector &  Hxc,Vector & Hext, Vector & lnZ, Vector & U)
 { /*on input
    code         defining, what should be calculated
          1....   Ia (interaction operators for Icalc)
@@ -457,7 +457,7 @@ if(T==0){fprintf(stderr,"Error - T=0 in module Cluster - Monte Carlo stepping no
 //routine ducalc for cluster
 //------------------------------------------------------------------------------------------------
 
-int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & delta,int & ni, int & nf,ComplexMatrix & ests)
+int jjjpar::cluster_dm(int  code,int & tn,double & T,ComplexVector & u1,float & delta,int & ni, int & nf,ComplexMatrix & ests)
 { 
   /*on input
    delta        maxE
@@ -563,7 +563,7 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
       if (n>dim)n=dim;
       double zsum=0,zii,x;
       int noft=0;
-      if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
+      if(T>0)for(int i=1;(i<=n)&&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
       {noft+=dim-i+1;zsum+=zii;}
    
       if(T<0)for(int i=1;i<=n;++i)
@@ -575,7 +575,7 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
 
 }
 
-int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int nev, iterwork &workspace)
+int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int & nev, iterwork &workspace)
 {
    int n = M.nr();
    int ido=0,ncv=(2*nev>n?n:2*nev),iparam[]={1,0,10000,1,nev,0,1,0,0,0,0};

@@ -105,7 +105,7 @@ fprintf(fout,"\n#");
 }
 
 // print user defined columns
-void inimcdiff::print_usrdefcols(FILE *fout,float ** out,int i)
+void inimcdiff::print_usrdefcols(FILE *fout,float ** out,int & i)
 {
 for(int j=1;j<= nofoutputcolumns;++j){switch(colcod[j]){case 31: case 32: case 33: case 44: case 45:case 46:{fprintf(fout,"%6.3f ",myround(out[j][i]));break;}default: fprintf(fout,"%5.4E ",out[j][i]);}}
       
@@ -313,7 +313,7 @@ fprintf(fout,"\n");
 }
 // *************************************************************************
 //constructor ... load initial parameters from file
-inimcdiff::inimcdiff (const char * file,char * pref,int verb)
+inimcdiff::inimcdiff (const char * file,char * pref,int & verb)
 { errno=1;long int pos=0;int j,k;nofoutputcolumns=12;
   verbose=verb;
   char instr[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE],sipffilename[MAXNOFCHARINLINE],infile[MAXNOFCHARINLINE]; 
@@ -700,7 +700,7 @@ if(
                     else {fprintf (stderr,"using da db dc and recalculating dr1 dr2 dr3...\n");}                
  }
 
-                      
+                      int d1=1;
 if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1(2)+numbers[3]*rez1(3))/2/PI;
                                  numbers[5]= (numbers[1]*rez2(1)+numbers[2]*rez2(2)+numbers[3]*rez2(3))/2/PI;
                                  numbers[6]= (numbers[1]*rez3(1)+numbers[2]*rez3(2)+numbers[3]*rez3(3))/2/PI;
@@ -749,7 +749,7 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                               j=inputline(fin,numbers,ob);if(verbose)printf("dimension of mf = %i\n",j);
                               if(j>maxmfcomponents){maxmfcomponents=j;}
                               if(j>mfields.nofcomponents){fprintf(stderr,"ERROR mcdiff: number of exchange field components too large (%i>%i) recompile with larger MAX_NOF_MF_COMPONENTS\n",j,mfields.nofcomponents);exit(EXIT_FAILURE);}
-                              Vector gjmbHxc(1,j);for(k=1;k<=j;++k){gjmbHxc(k)=numbers[k];mfields.mf(1,1,1)(mfields.nofcomponents*(i-1)+k)=gjmbHxc(k);}
+                              Vector gjmbHxc(1,j);for(k=1;k<=j;++k){gjmbHxc(k)=numbers[k];mfields.mf(d1,d1,d1)(mfields.nofcomponents*(i-1)+k)=gjmbHxc(k);}
                               (*jjjpars[i]).eigenstates(gjmbHxc,H,T); // calculate eigenstates
                               (*jjjpars[i]).Icalc_parameter_storage_init(gjmbHxc,H,T);// initialise parameter storage for Icalc
                               // do some consistency checks

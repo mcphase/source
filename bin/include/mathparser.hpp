@@ -39,7 +39,7 @@ Last modified: Aug. 2016.
 #endif
 
 using namespace std;
-
+#define ERRMSIZE 128
 enum types { DELIMITER = 1, VARIABLE, NUMBER, FUNCTION };
 //const int NUMVARS = 58; 
 class parser {
@@ -58,6 +58,6 @@ class parser {
 public:
 	parser();
 	double eval_exp(char *exp);
-	char errormsg[64];
+	char errormsg[ERRMSIZE];
 };
 #endif

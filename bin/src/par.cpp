@@ -14,7 +14,7 @@
 
 
 //constructor - simple only lattice and nofcomponents are given - needed in clusterize
-par::par(Vector abc,int nofci)
+par::par(Vector abc,int  nofci)
 {rez=Matrix(1,3,1,3);
  Cel=Matrix(1,6,1,6);CelInv=Matrix(1,6,1,6);CelInv=0;
  cs.nofcomponents=nofci;
@@ -27,7 +27,7 @@ par::par(Vector abc,int nofci)
   jjj=new jjjpar * [cs.nofatoms+1];
 }
 
-par::par (const char *filejjj,int verbose)
+par::par (const char *filejjj,int  verbose)
 { int i,j,n,l;
   FILE *fin_coq;
   char instr[MAXNOFCHARINLINE];
@@ -172,7 +172,7 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
 return cs.nofatoms;                 
 }
 
-int par::delatom(int nn, Matrix & distribute,int verbose) // removes atom number n 
+int par::delatom(int & nn, Matrix & distribute,int & verbose) // removes atom number n 
 // 1)if nn<0 then atom number |nn| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
 // In case the atoms to be removed have the phonon module, 
@@ -185,6 +185,7 @@ int par::delatom(int nn, Matrix & distribute,int verbose) // removes atom number
 // if the coefficient in col 2 of distribute is negative, the sipf files 
 // are rewritten resetting the charge (distributed similar to the interactions)
 {jjjpar ** nnn;
+   
  int j,s,again=0,n=nn; if(nn<0)n=-nn;
  FILE * out;
  if(n<1||n>cs.nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,cs.nofatoms);exit(EXIT_FAILURE);}
@@ -198,8 +199,8 @@ if(verbose)fprintf(stderr,"Deleting atom %i\n",n);
  for (j=1;j<=cs.nofatoms+1;++j){if(j==n)++j;
 if(verbose)fprintf(stderr,"caring about interactions of atom %i\n",j);
 // take care of all interactions to be removed because atom n is removed
- for(s=1;s<=(*jjj[j]).paranz;++s){
-     if((*jjj[j]).sublattice[s]==n){if(nn>0){// atom j has a interaction with atom n:
+if(j<=cs.nofatoms+1)for(s=1;s<=(*jjj[j]).paranz;++s){
+     if((*jjj[j]).sublattice[s]==n){if(nn>0){// atom j has an interaction with atom n:
                                              // transfer interactions to the remaining atoms
                                              // unless atom j is to be distributed on
                                              int j_in_distribute=0;
@@ -241,20 +242,21 @@ if(found!=1){fprintf(stderr,"Error reduce_unitcell on distributing interaction %
           }
 // now all interactions for ion j are removed  / redistributed from other ions neighbour list
 
-   if(j>n){    // if ion j is after the ion to be deleted in the list, move its sipffilenam and xyz down in the list            
+if(j<=cs.nofatoms+1)if(j>n){    // if ion j is after the ion to be deleted in the list, move its sipffilenam and xyz down in the list            
  cs.sipffilenames[j-1]=(*jjj[j]).sipffilename;
  cs.x[j-1]=(*jjj[j]).xyz[1];
  cs.y[j-1]=(*jjj[j]).xyz[2];
  cs.z[j-1]=(*jjj[j]).xyz[3];
           }
-if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
+if(j<=cs.nofatoms+1)if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
               if(j+1==n)++j;// if next ion is the ion to be deleted jump over it and treat in the next loops the remaining ions
 }
 
 if(nn<0){totalcharge-=(*jjj[n]).charge;// recalculate charge in case the ion is removed without redistributing charge
 // here create the effective multipolar and magnetoelastic interactions in case the ion has the phonon module
 // check if external module and pcalc is defined --> then it is a phonon module
-Vector u0(1,3),Hxc(1,3),Hext(1,3);double T=1,g_J=0;
+Vector u0(1,3),Hxc(1,3),Hext(1,6);double T=1;
+
 if((*jjj[n]).module_type==external_class&&(*jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage))
     { if(verbose)fprintf(stderr,"%s is phonon module - creating effective multipolar interactions\n",(*jjj[n]).sipffilename);
 Matrix K(1,3,1,3);K=0;
@@ -282,21 +284,23 @@ K*=factor;
 //  B.T.Smith et al: Matrix Eigensystem Routines
 //  EISPACK Guide,Springer,Heidelberg,New York 1976.
 // 
- EigenSystemSymmetric (K,Omega,sort,maxiter); // K is destroyed by this and will contain eigenvectors
+ EigenSystemSymmetric (K,Omega,sort,maxiter); // K is destroyed by this and will contain eigenvectors S
 Omega/=factor; 
        for(s=1;s<=(*jjj[n]).paranz;++s){int j=(*jjj[n]).sublattice[s];// loop all neighbours in list
         if(!(*jjj[j]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage)) // if neighbour is no phonon
          {Vector dabc(1,3),drijk(1,3);
-          // here treat magnetoelastic term of neighbour s -------------------
-          for(int a=1;a<=3;++a) // for to be deleted atom nn loop all components a=1,2,3 (eigenvalues of K)
+          // here treat magnetoelastic term (second term in eq 145 in manual on reduce_unitcell)
+          // of neighbour s  which is on sublattice j -------------------
+          for(int ad=1;ad<=3;++ad) // for to be deleted atom nn loop all components a=1,2,3 (eigenvalues of K)
            for(int b=1;b<=3;++b)
             for(int bd=1;bd<=3;++bd)
              for(int g=4;g<=cs.nofcomponents;++g)
-              for(int gd=1;gd<=6;++gd)
-              { (*(*jjj[j]).G)(gd,g)-=K(b,a)*K(bd,a)*(*jjj[n]).jij[s](b,g)*(*(*jjj[n]).G)(gd,bd)/Omega(a);
+              for(int a=1;a<=6;++a) // add to G of ion j the contribution of ion i=n
+                             // S_bad S_bdad Gamma^bg(ij) G^abd_mix(i)/Omeaga_adad
+              { (*(*jjj[j]).G)(a,g)-=K(b,ad)*K(bd,ad)*(*jjj[n]).jij[s](b,g)*(*(*jjj[n]).G)(a,bd)/Omega(ad);
               }
           // ------------------------
-          // now treat multipolar interaction term
+          // now treat multipolar interaction term (first term in in eq 145 in manual on reduce_unitcell)
           for(int sd=1;sd<=(*jjj[n]).paranz;++sd) // loop all neighbours in list
           {// identify which magnetic ion adresses the neighbour s and sd
             int jd=(*jjj[n]).sublattice[sd];
@@ -314,16 +318,22 @@ Omega/=factor;
               int ff=0;dabc*=-1.0;drijk*=-1.0;
               for(int ss=1;ss<=(*jjj[jd]).paranz;++ss)if(Norm((*jjj[jd]).dn[ss]-dabc)<SMALL_MATCH_LATTICEVECTOR)ff=ss;
                if(ff==0){ff=(*jjj[jd]).addpar(dabc,drijk,j);}
+              // ... so now we have identified by f and ff the neighbours in the list
+              // of atom j(i.e. neighbour s of to be deleted ion n) and 
+              // jd(i.e. neighbour sd of to be deleted ion n) to which ion jd and j corresponds, respectively
 
-
-      for(int a=1;a<=3;++a) // for to be deleted atom nn loop all components a=1,2,3 (eigenvalues of K)
+      for(int ad=1;ad<=3;++ad) // for to be deleted atom nn loop all components ad=1,2,3 (eigenvalues of K)
        for(int b=1;b<=3;++b)
         for(int bd=1;bd<=3;++bd)
          for(int g=4;g<=cs.nofcomponents;++g)for(int gd=4;gd<=cs.nofcomponents;++gd)  
              // loop all interactions with higher order multipoles of other atoms
-           { // add multipolar effective interaction to ion j
-             (*jjj[j]).jij[f](g,gd)-=K(b,a)*K(bd,a)*(*jjj[n]).jij[s](b,g)*(*jjj[n]).jij[sd](bd,gd)/Omega(a);
-             if(Norm(dabc)>SMALL_MATCH_LATTICEVECTOR)(*jjj[jd]).jij[ff](g,gd)-=K(b,a)*K(bd,a)*(*jjj[n]).jij[s](b,g)*(*jjj[n]).jij[sd](bd,gd)/Omega(a);
+           { // add multipolar effective interaction to ion j - neighbour f 
+            (*jjj[j]).jij[f](g,gd)-=K(b,ad)*K(bd,ad)*(*jjj[n]).jij[s](b,g)*(*jjj[n]).jij[sd](bd,gd)/Omega(ad);
+             // and, in addition add the same multipolar effective interaction also to ion jd - neighbour ff 
+           if(Norm(dabc)>SMALL_MATCH_LATTICEVECTOR)   // (do this only if jd and j are not the same atom !
+             (*jjj[jd]).jij[ff](g,gd)-=K(b,ad)*K(bd,ad)*(*jjj[n]).jij[s](b,g)*(*jjj[n]).jij[sd](bd,gd)/Omega(ad);
+            // now a comment on the case where j=jd are the same atom, then f=ff
+
            }// ------------------------
          }}}}
     }}
@@ -339,23 +349,24 @@ for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];}
 // correct the sublattice numbering 
 for (j=1;j<=cs.nofatoms;++j){
 for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]>n)--(*nnn[j]).sublattice[s];}
-                             }
-
+                              }
 if(again==0){out=fopen("reduce_unitcell_sipf.del","a");
 fprintf(out,"%s\n",(*jjj[n]).sipffilename);fclose(out);} 
+delete jjj[n];
  delete []jjj;
- jjj=nnn;           
+ jjj=nnn;      
+
 return cs.nofatoms; 
 }
 
 
-void par::reduce_unitcell(int verbose)
+void par::reduce_unitcell(int & verbose)
 {//checks every atom in the unit cell and removes
 // any atom, which is connected to another by a lattice vector
- int i,j,nold=cs.nofatoms;
+ int i,j,k,nold=cs.nofatoms;
  Vector d(1,3),n(1,3);Matrix dis(1,1,1,1);dis=0;
 FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
-
+  
  for(i=1;i<cs.nofatoms;++i){int ct=0;
   for(j=i+1;j<=cs.nofatoms;++j){//printf("nofatoms=%i %i %i\n",cs.nofatoms,i,j);
   d=(*jjj[j]).xyz-(*jjj[i]).xyz;
@@ -363,7 +374,8 @@ FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
   if(fabs(rint(n(1))-n(1))<SMALL_MATCH_LATTICEVECTOR&&
      fabs(rint(n(2))-n(2))<SMALL_MATCH_LATTICEVECTOR&&
      fabs(rint(n(3))-n(3))<SMALL_MATCH_LATTICEVECTOR){//printf("del %i\n",j);
-                                                      delatom(-j,dis,verbose);--j;++ct;
+                                                      k=-j;
+                                                      delatom(k,dis,verbose);--j;++ct;
                                                       }
     }
   if(verbose){fprintf(stderr,"For atom %i there have been deleted %i equivalent atoms\n",i,ct);}
@@ -386,9 +398,9 @@ void par::add (par & p1)
 //    if (cs.nofcomponents!=p1.cs.nofcomponents)
 //    {fprintf(stderr,"ERROR adding parameter sets: number of spin components not equal\n");exit(EXIT_FAILURE);}
     if (cs.nofcomponents>p1.cs.nofcomponents)
-{p1.increase_nofcomponents(cs.nofcomponents-p1.cs.nofcomponents);}
+{int dd=cs.nofcomponents-p1.cs.nofcomponents; p1.increase_nofcomponents(dd);}
     if (cs.nofcomponents<p1.cs.nofcomponents)
-{increase_nofcomponents(p1.cs.nofcomponents-cs.nofcomponents);}
+{int dd=p1.cs.nofcomponents-cs.nofcomponents; increase_nofcomponents(dd);}
 
 if(p1.cs.nofatoms<cs.nofatoms)
 {fprintf(stderr,"# Warning program addj: nofatoms=%i of 1. parameter set greater than %i - continuing, check result with care ! \n",cs.nofatoms,p1.cs.nofatoms);
@@ -432,12 +444,13 @@ void par::scale(double scalefactor) // scale all interaction parameters by scale
  }
 }
 
-void par::set_nofcomponents (int n)
+void par::set_nofcomponents (int & n)
 {// sets the numberofcomponents to n
- if(n<cs.nofcomponents){decrease_nofcomponents(cs.nofcomponents-n);}
- if(n>cs.nofcomponents){increase_nofcomponents(n-cs.nofcomponents);}
+ if(n<cs.nofcomponents){int dd= cs.nofcomponents-n;decrease_nofcomponents(dd);}
+ if(n>cs.nofcomponents){int dd=n-cs.nofcomponents;increase_nofcomponents(dd);}
+
 }
-void par::increase_nofcomponents (int n)
+void par::increase_nofcomponents (int & n)
 {//increases the number of components in the interaction vector by n
 
  int i;
@@ -451,9 +464,9 @@ void par::increase_nofcomponents (int n)
  cs.nofcomponents+=n;
 }
 
-void par::decrease_nofcomponents (int n)
+void par::decrease_nofcomponents (int & n)
 {//decreases the number of components in the interaction vector by n
-
+ 
  int i;
  if (n<1) {fprintf(stderr,"ERROR decreasing number of compoments in parameter set: n negative - number cannot be decreased\n");exit(EXIT_FAILURE);}
  if (cs.nofcomponents-1<n) {fprintf(stderr,"ERROR decreasing number of compoments in parameter set: n = %i must be smaller than nofcomponents = %i\n",n,cs.nofcomponents);exit(EXIT_FAILURE);}
@@ -463,10 +476,11 @@ void par::decrease_nofcomponents (int n)
  {
     (*jjj[i]).decrease_nofcomponents(n);
  }
+
  cs.nofcomponents-=n;
 }
 
-void par::remove_components(int rml,int rmh, int verbose)
+void par::remove_components(int & rml,int & rmh, int  verbose)
 {// decreases the number of components by removing components rml, rml+1,...,rmh
 if(rmh>cs.nofcomponents){fprintf(stderr,"ERROR removing compoments in parameter set: rmh=%i > nofcomponents = %i \n",rmh,cs.nofcomponents);exit(EXIT_FAILURE);}
 if(rml>rmh){fprintf(stderr,"ERROR removing compoments in parameter set: rmh=%i < rml=%i\n",rmh,rml);exit(EXIT_FAILURE);}
@@ -480,7 +494,7 @@ if(rml<1){fprintf(stderr,"ERROR removing compoments in parameter set: rml=%i <1 
 }
 
 //save to file
-void par::save (const char * filename,int noindexchange)
+void par::save (const char * filename,int  noindexchange)
 { FILE * fout;
   fout = fopen_errchk (filename, "w");
   save (fout,noindexchange);
@@ -489,7 +503,7 @@ void par::save (const char * filename,int noindexchange)
 
 
 
-void par::save (FILE * file,int noindexchange,bool pd, bool ps)
+void par::save (FILE * file,int  noindexchange,bool pd, bool ps)
 { int i;
   errno = 0;
   fprintf(file,"%s",rems[1]);
@@ -513,7 +527,7 @@ void par::save (FILE * file,int noindexchange,bool pd, bool ps)
  
 }
 
-void par::print_interaction(FILE * fout,int pa,int pi,int prl,int prh,int pcl,int pch)
+void par::print_interaction(FILE * fout,int & pa,int & pi,int & prl,int & prh,int & pcl,int & pch)
 {if (pa>cs.nofatoms){fprintf(stderr,"Error addj: option -pi atom index %i > nofatoms =%i\n",pa,cs.nofatoms);exit(EXIT_FAILURE);}
  fprintf(fout,"# Interaction tensor of atom number %i at (%g a, %g b, %g c), sipf file %s\n",pa,(*jjj[pa]).xyz(1),(*jjj[pa]).xyz(2),(*jjj[pa]).xyz(3),cs.sipffilenames[pa]);
 (*jjj[pa]).print_interaction(fout,pi,prl,prh,pcl,pch);

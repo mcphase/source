@@ -77,7 +77,7 @@ int strncomp(const char * s1,const char * s2, size_t n)
 
 
 
-void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
+void jjjpar::increase_nofcomponents(int & n) // increase nofcomponents by n
 {int i,j,k,nold;
   Matrix Gsav(1,6,1,nofcomponents);
   Gsav=(*G);
@@ -94,9 +94,9 @@ void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
     if(j<=nold){(*G)(i,j)=Gsav(i,j);}else{(*G)(i,j)=0;}
 
   Matrix * jijstore;
-  jijstore = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
-  if (jijstore == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
-
+  jijstore = new Matrix[paranz+1];if (jijstore == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+   for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  
   for (i=1;i<=paranz;++i)
    {jijstore[i]=0;
     for (j=1;j<=nold;++j)
@@ -106,49 +106,59 @@ void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
  
 
  delete []jij;
-  jij = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
-  if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
-
+  jij = new Matrix[paranz+1];if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+   for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  
   for (i=1;i<=paranz;++i)
   {jij[i]=jijstore[i];}
 
   delete[] jijstore;
 }
 
-void jjjpar::decrease_nofcomponents(int n) // decrease nofcomponents by n
-{remove_components(nofcomponents-n+1,nofcomponents);
+void jjjpar::decrease_nofcomponents(int & n) // decrease nofcomponents by n
+{int rml=nofcomponents-n+1,rmh=nofcomponents;remove_components(rml,rmh);
 }  
 
-void jjjpar::remove_components(int rml,int rmh,int verbose)
+void jjjpar::remove_components(int & rml,int & rmh,int  verbose)
 // decreases the number of components by removing components rml, rml+1,...,rmh
 {int i,j,k,nold;
   nold=nofcomponents;
   if(rmh>nofcomponents){fprintf(stderr,"ERROR removing compoments in jjjpar set: rmh=%i > nofcomponents = %i \n",rmh,nofcomponents);exit(EXIT_FAILURE);}
   if(rml>rmh){fprintf(stderr,"ERROR removing compoments in jjjpar set: rmh=%i < rml=%i\n",rmh,rml);exit(EXIT_FAILURE);}
    if(rml<1){fprintf(stderr,"ERROR removing compoments in jjjpar set: rml=%i <1  \n",rml);exit(EXIT_FAILURE);}
-
   nofcomponents-=rmh-rml+1;
   if(nofcomponents<1){fprintf (stderr, "Error decreasing Nofcomponents=%i gets less than 1\n",nofcomponents);exit (EXIT_FAILURE);}
   //mom.Resize(1,nofcomponents); // not needed, because mom is always Vector (1,9) !!!
    Vector MFsav(1,nold); MFsav=MF;
-    MF.Resize(1,nofcomponents); 
-    for(i=0;i<nold-rmh;++i)MF(rml+i)=MFsav(rmh+i+1);   
 
+
+    //MF.Remove();
+   // MF=Vector(1,nofcomponents);
+
+    MF.Resize(1,nofcomponents); 
+    for(i=1;i<rml;++i)MF(i)=MFsav(i); 
+
+    for(i=0;i<nold-rmh;++i){MF(rml+i)=MFsav(rmh+i+1); }  
+  
    Matrix Gsav(1,6,1,nold);
   Gsav=(*G);
+
   delete G;
   G=new Matrix(1,6,1,nofcomponents);
+
   for(i=1;i<=6;++i){for(j=1;j<rml;++j)(*G)(i,j)=Gsav(i,j);
+
  if(verbose){for(j=rml;j<=rmh;++j)
               if(fabs(Gsav(i,j))>0)
                fprintf(stderr,"Warning removing nonzero G(%i,%i)=%g\n",i,j,Gsav(i,j));
             }
-                    for(j=0;j<nold-rmh;++j)(*G)(i,rml+j)=Gsav(i,rmh+j+1);
+
+            for(j=0;j<nold-rmh;++j)(*G)(i,rml+j)=Gsav(i,rmh+j+1);
                    }
 
   Matrix * jijstore;
-  jijstore = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
-  if (jijstore == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+  jijstore = new Matrix[paranz+1];  if (jijstore == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+   for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
 
   for (i=1;i<=paranz;++i)
    {jijstore[i]=0;
@@ -171,15 +181,16 @@ void jjjpar::remove_components(int rml,int rmh,int verbose)
   }
  
 
+
  delete []jij;
+
   jij = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
   if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
+
   for (i=1;i<=paranz;++i)
   {jij[i]=jijstore[i];}
-
   delete[] jijstore;
-//  exit(0);
 
 }
 
@@ -217,7 +228,7 @@ void jjjpar::add(jjjpar & b,Vector & abc) // add set b to this (abc: lattice con
  }
 }
 
-int jjjpar::addpar (Vector & dabc,Vector & drijk,int subl)
+int  jjjpar::addpar (Vector & dabc,Vector & drijk,int & subl)
 // add a neighbour with distance dabc and zero exchange, return index (=paranz) of this parameter
 { Matrix * jijn;
   Vector * dnn;
@@ -248,9 +259,9 @@ int jjjpar::addpar (Vector & dabc,Vector & drijk,int subl)
   if (dr == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   sublattice = new int[paranz+1];
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
-  jij = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
-  if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
-
+  jij = new Matrix[paranz+1];if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+  for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  
 // setup new field jij, dn
   for (i=1;i<paranz;++i)
   {jij[i]=jijn[i];dn[i]=dnn[i];dr[i]=drr[i];sublattice[i]=sl[i];}
@@ -269,7 +280,7 @@ int jjjpar::addpar (Vector & dabc,Vector & drijk,int subl)
 // enlarge the set of parameters 
 // inserting a set of exchange parameters
 // into field at position number
-void jjjpar::addpars (int number, jjjpar & addjjj)
+void jjjpar::addpars (int & number, jjjpar & addjjj)
 { Matrix * jijn;
   Vector * dnn;
   Vector * drr;
@@ -329,7 +340,7 @@ void jjjpar::scalepars (double scalefactor)
 }
 
 // remove neighbour from list
-void jjjpar::delpar (int number)
+void jjjpar::delpar (int & number)
 { Matrix * jijn;
   Vector * dnn;
   Vector * drr;
@@ -362,8 +373,9 @@ void jjjpar::delpar (int number)
 /************************************************************************************/
 
 //saving parameters to file
-void jjjpar::save(FILE * file,int noindexchange,bool pd, bool ps) 
+void jjjpar::save(FILE * file,int & noindexchange,bool pd, bool ps) 
 { int i,i1,j1,npairs=0,symmetric=1;
+
   int *n1= new int[nofcomponents*nofcomponents+2];if (n1 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
            
   int *n2= new int[nofcomponents*nofcomponents+2];if (n2 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
@@ -586,9 +598,9 @@ void jjjpar::save_sipf(FILE * fout)
           //while(feof(cfin)==false){fgets(instr, MAXNOFCHARINLINE, cfin);}
                       // strip /r (dos line feed) from line if necessary
                       while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
-                      setvar(instr,"CHARGE",charge);
-                      setvar(instr,"MAGNETIC",(double)magnetic);
-                      setvar(instr,"nof_electrons",(double)nof_electrons);
+                      setvar(instr,"CHARGE",charge);double dmag=(double)magnetic;
+                      setvar(instr,"MAGNETIC",dmag);double nofe=(double)nof_electrons;
+                      setvar(instr,"nof_electrons",nofe);
                       fprintf(fout,"%s\n",instr);
                                     }
            // rewind the stringstream ss for next use..
@@ -650,7 +662,7 @@ void jjjpar::save_sipf(FILE * fout)
 
 }
 
-void jjjpar::print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pch)
+void jjjpar::print_interaction(FILE * fout,int & pi,int & prl,int & prh,int & pcl,int & pch)
                  //prints interaction tensor (rows prl-prh,columns pcl-pch) pi  to fout
 {if(pi>paranz){fprintf(stderr,"Error printing interaction - neighbour index %i > number of neighbours %i\n",pi,paranz);exit(EXIT_FAILURE);} 
  fprintf(fout,"Interaction number %i to neighbour at (%g a, %g b, %g c),sublattice %i\n",pi,dn[pi](1),dn[pi](2),dn[pi](3),sublattice[pi]);
@@ -673,7 +685,7 @@ void jjjpar::print_G(FILE * fout)
 }
 /*****************************************************************************************/
 //constructor with file handle of mcphas.j
-jjjpar::jjjpar(FILE * file,int nofcomps,parser & ob,int verbose) 
+jjjpar::jjjpar(FILE * file,int & nofcomps,parser & ob,int  verbose) 
 { jl_lmax=6;
   char instr[MAXNOFCHARINLINE],Gstr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE],Gindicesstr[MAXNOFCHARINLINE];
   sipffilename= new char [MAXNOFCHARINLINE];
@@ -858,7 +870,7 @@ else
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot and pointc
-jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n,int verbose)
+jjjpar::jjjpar(double x,double y,double z, char * sipffile, int  n,int verbose)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0;dr=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; nofcomponents=n;
@@ -907,7 +919,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 }
 
 //constructor without file
-jjjpar::jjjpar(int n,int diag,int nofmom) 
+jjjpar::jjjpar(int  n,int diag,int  nofmom) 
 { sipffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
   clusterfilename=new char [MAXNOFCHARINLINE];
   diagonalexchange=diag;
@@ -1097,11 +1109,10 @@ if(!pp.Icalc_parstorage.Empty())
 
 //destructor
 jjjpar::~jjjpar ()
-{// printf("hello destruktor jjjpar\n");  
-  delete G;
-   if(jij!=0)        delete []jij; //will not work in linux
-   if(dn!=0)         delete []dn;  // will not work in linux
-   if(dr!=0)         delete []dr;  // will not work in linux
+{ delete G;
+   if(jij!=NULL)        delete []jij; //will not work in linux
+   if(dn!=NULL)         delete []dn;  // will not work in linux
+   if(dr!=NULL)         delete []dr;  // will not work in linux
    if(sublattice!=0) delete []sublattice;
    delete []sipffilename;// will not work in linux
   delete []clusterfilename;
@@ -1124,7 +1135,6 @@ jjjpar::~jjjpar ()
 //#ifdef __linux__
 // if (module_type==external)dlclose(handle);
 //#endif
-// printf("hello end destruktor jjjpar\n");  
 //  if (module_type==external_class){ std::cout << "Unloading external_class "  << std::endl;
 //dlloader.DLCloseLib(); // this should go to the destructor .. yet copy constructor only copies the 
                         // pointer to the loader of the library: i.e. the shared
@@ -1138,15 +1148,15 @@ jjjpar::~jjjpar ()
 
 // Class to store work matrices for iterative eigensolvers (e.g. ARPACK, FEAST) - since these routines are called many times per
 // MF iterations, deleting/allocating them many times seems to give memory errors.
-iterwork::iterwork(int lzwork, int ldwork, int liwork)
+iterwork::iterwork(int & lzwork, int & ldwork, int & liwork)
 {
    zwork = new complexdouble[lzwork]; zsize=lzwork;
    dwork = new double[ldwork]; dsize=ldwork;
    iwork = new int[liwork]; isize=liwork;
 }
-void iterwork::realloc_z(int lzwork) { if(zsize>0) delete[]zwork; printf("reallocating z from %d to %d\n",zsize,lzwork); zwork = new complexdouble[lzwork]; zsize=lzwork; }
-void iterwork::realloc_d(int ldwork) { if(dsize>0) delete[]dwork; printf("reallocating d from %d to %d\n",dsize,ldwork); dwork = new double[ldwork]; dsize=ldwork; }
-void iterwork::realloc_i(int liwork) { if(isize>0) delete[]iwork; printf("reallocating i from %d to %d\n",isize,liwork); iwork = new int[liwork]; isize=liwork; }
+void iterwork::realloc_z(int & lzwork) { if(zsize>0) delete[]zwork; printf("reallocating z from %d to %d\n",zsize,lzwork); zwork = new complexdouble[lzwork]; zsize=lzwork; }
+void iterwork::realloc_d(int & ldwork) { if(dsize>0) delete[]dwork; printf("reallocating d from %d to %d\n",dsize,ldwork); dwork = new double[ldwork]; dsize=ldwork; }
+void iterwork::realloc_i(int & liwork) { if(isize>0) delete[]iwork; printf("reallocating i from %d to %d\n",isize,liwork); iwork = new int[liwork]; isize=liwork; }
 iterwork::~iterwork()
 {
    if(zsize>0) {delete[]zwork;} if(dsize>0) {delete[]dwork;} if(isize>0) {delete[]iwork;}

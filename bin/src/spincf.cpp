@@ -31,16 +31,16 @@ return true;
 }
 
 // returns momentum of ion [i=na,j=nb,k=nc] 
-Vector & spincf::m(int na, int nb, int nc)
+Vector & spincf::m(int & na, int & nb, int & nc)
 { return mom[in(na,nb,nc)];  // return <J(ijk)>
 }
 
 // the same but for spin number "i"
-Vector & spincf::mi(int i)
+Vector & spincf::mi(int & i)
 { return mom[i];
 }
 
-Vector spincf::moment(int i,int j,int k,int l) // returns moment of atom l (1,nofcomponents)
+Vector spincf::moment(int & i,int & j,int & k,int & l) // returns moment of atom l (1,nofcomponents)
 {Vector xyz(1,nofcomponents);
  int m;
  for(m=1;m<=nofcomponents;++m){xyz(m)=mom[in(i,j,k)](nofcomponents*(l-1)+m);}
@@ -56,22 +56,25 @@ void  spincf::FT(ComplexVector * mq)
      {mq[in(qh,qk,ql)]=0;
      for(i=0;i<na();++i){for(j=0;j<nb();++j){for(k=0;k<nc();++k)
       { g=exp(piq*((double)qh*i/na()+(double)qk*j/nb()+(double)ql*k/nc()));
-	for (l=1;l<=nofcomponents*nofatoms;++l) {mq[in(qh,qk,ql)](l)+=g*m(i+1,j+1,k+1)(l);}
+	for (l=1;l<=nofcomponents*nofatoms;++l) {int u=i+1,v=j+1,w=k+1;
+          mq[in(qh,qk,ql)](l)+=g*m(u,v,w)(l);}
       }}}
 //      fprintf(stdout,"%g %g %g %g %g \n",qh,qk,ql,imag(mq[in(qh,qk,ql)](1)),real(mq[in(qh,qk,ql)](1)));
      }}}
+ int n0=0;
+ int a=na(),b=nb(),c=nc();
  for (qk=1;qk<=nb();++qk)
- {for (ql=1;ql<=nc();++ql) mq[in(na(),qk,ql)]=mq[in(0,qk,ql)];}
+ {for (ql=1;ql<=nc();++ql) mq[in(a,qk,ql)]=mq[in(n0,qk,ql)];}
  for (qh=1;qh<=na();++qh)
- {for (ql=1;ql<=nc();++ql) mq[in(qh,nb(),ql)]=mq[in(qh,0,ql)];}
+ {for (ql=1;ql<=nc();++ql) mq[in(qh,b,ql)]=mq[in(qh,n0,ql)];}
  for (qh=1;qh<=na();++qh)
- {for (qk=1;qk<=nb();++qk) mq[in(qh,qk,nc())]=mq[in(qh,qk,0)];}
- mq[in(na(),nb(),nc())]=mq[in(0,0,0)];
+ {for (qk=1;qk<=nb();++qk) mq[in(qh,qk,c)]=mq[in(qh,qk,n0)];}
+ mq[in(a,b,c)]=mq[in(n0,n0,n0)];
  return;
 }
 
 // get index ijk=iv(1-3)  of spinconfiguration number in 
-int * spincf::ijk(int in)
+int * spincf::ijk(int & in)
 {div_t result; result=div(in,mxb*mxc); 
  iv[1]= result.quot;
  result=div(result.rem,mxc);
@@ -80,7 +83,7 @@ int * spincf::ijk(int in)
  return iv;}
 
 // the inverse: get number of spin from indizes i,j,k
-int spincf::in(int i, int j, int k)
+int spincf::in(int  i, int  j, int  k)
 {while (i>nofa)i-=nofa;
  while (j>nofb)j-=nofb;
  while (k>nofc)k-=nofc;
@@ -88,7 +91,7 @@ int spincf::in(int i, int j, int k)
 }
 
 // this subtracts n2 if n1>n2
-int spincf::mod(int n1,int n2)
+int spincf::mod(int & n1,int & n2)
 {if (n1>n2) return n1-n2;
  else return n1;
 }
@@ -140,7 +143,7 @@ void spincf::invert()
  }  
 }
 
-int spincf::in(int i, int j, int k,int oa,int ob,int oc,int oxb,int oxc)
+int spincf::in(int i, int  j, int  k,int & oa,int & ob,int & oc,int & oxb,int & oxc)
 {while (i>oa)i-=oa;
  while (j>ob)j-=ob;
  while (k>oc)k-=oc;
@@ -148,7 +151,7 @@ int spincf::in(int i, int j, int k,int oa,int ob,int oc,int oxb,int oxc)
 }
 
 // extend spinconfiguration  to ia ib ic times the original one periodically enlarging supercell
-void spincf::extend(int ia,int ib,int ic)
+void spincf::extend(int & ia,int & ib,int & ic)
 { 
   epsilon=0;
   int oa=nofa,ob=nofb,oc=nofc;
@@ -166,8 +169,8 @@ void spincf::extend(int ia,int ib,int ic)
  for (i=1;i<=nofa;++i)
  { for (j=1;j<=nofb;++j)
    {for (k=1;k<=nofc;++k)
-    {
-     mn[in(i+oa*(ii-1),j+ob*(jj-1),k+oc*(kk-1))]= mom[in(i,j,k,oa,ob,oc,oxb,oxc)];
+    {int a=i+oa*(ii-1),b=j+ob*(jj-1),c=k+oc*(kk-1);
+     mn[in(a,b,c)]= mom[in(i,j,k,oa,ob,oc,oxb,oxc)];
     }
    }
  } 
@@ -194,7 +197,7 @@ for (perprob=1;perprob<=pp;++perprob)
      for (j=1;j<=nofb;++j)
       {for (k=1;k<=nofc;++k)
        {for (nn=1;nn<=nofa-perprob;++nn)
-        {if (!spequal(mom[in(nn,j,k)],mom[in(nn+perprob,j,k)])){goto nexta;}
+        {int nnp=nn+perprob;if (!spequal(mom[in(nn,j,k)],mom[in(nnp,j,k)])){goto nexta;}
 	 if(nn==nofa-perprob&&j==nofb&&k==nofc)
         	{this->nofa=perprob;
 	// here we could reduce the memory of this confuration
@@ -220,7 +223,7 @@ for (perprob=1;perprob<=pp;++perprob)
      for (j=1;j<=nofa;++j)
       {for (k=1;k<=nofc;++k)
        {for (nn=1;nn<=nofb-perprob;++nn)
-        {if(!spequal(mom[in(j,nn,k)],mom[in(j,nn+perprob,k)])){goto nextb;}
+        {int nnp=nn+perprob;if(!spequal(mom[in(j,nn,k)],mom[in(j,nnp,k)])){goto nextb;}
 	 if(nn==nofb-perprob&&j==nofa&&k==nofc)
         	{this->nofb=perprob;
 	// here we could reduce the memory of this confuration
@@ -244,7 +247,7 @@ for (perprob=1;perprob<=pp;++perprob)
      for (j=1;j<=nofa;++j)
       {for (k=1;k<=nofb;++k)
        {for (nn=1;nn<=nofc-perprob;++nn)
-        {if(!spequal(mom[in(j,k,nn)],mom[in(j,k,nn+perprob)])){goto nextc;}
+        {int nnp=nn+perprob;if(!spequal(mom[in(j,k,nn)],mom[in(j,k,nnp)])){goto nextc;}
 	 if(nn==nofc-perprob&&j==nofa&&k==nofb)
         	{this->nofc=perprob;
 	// here we could reduce the memory of this confuration
@@ -270,7 +273,7 @@ return success;
 // qvector ... wave vector in units of reciprocal lattice
 // momentq0 .. ferromagnetic component (between 0 and 1)
 // phi ....... phase (for each component)
-void spincf::spinfromq (int n1,int n2, int n3,Vector & qvector,Vector & nettom, 
+void spincf::spinfromq (int & n1,int & n2, int & n3,Vector & qvector,Vector & nettom, 
        Vector & momentq0, Vector & phi)
 { int rra,rrb,rrc,qv;
   qv=1; // evtl koennte hier noch ein vorzeichen uebergeben werden (sodass nettom positiv)
@@ -392,7 +395,7 @@ double spincf::nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Ve
 return mindist;
 }
 
-Vector spincf::pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z)
+Vector spincf::pos(int & i, int & j, int & k, int & l,Vector & abc,Matrix & r,float * x,float *y,float*z)
 {//returns position 
  // of atom l at lattice site (i j k) (Angstrom) as vector components in Euclidean ijk coordinate system
  // where i j k are defined by  j||b, k||(a x b) and i normal to k and j
@@ -408,13 +411,13 @@ if(l>nofatoms){fprintf(stderr,"Error spincf.cpp::pos - index l > nofatoms\n");ex
          dd+=p.Column(1)*((double)(i-1)/nofa)+p.Column(2)*((double)(j-1)/nofb)+p.Column(3)*((double)(k-1)/nofc);
 return dd;
 }
-Vector spincf::pos(int i, int j, int k, int l,cryststruct & cs)
+Vector spincf::pos(int & i, int & j, int & k, int & l,cryststruct & cs)
 {if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos nofatoms=%i not equal to cs.nofatoms=%i\n",nofatoms,cs.nofatoms);exit(1);}
 return pos(i,j,k,l,cs.abc,cs.r,cs.x,cs.y,cs.z);
 
 }
     
-Vector spincf::pos_dabc(int i, int j, int k, int l,cryststruct & cs)
+Vector spincf::pos_dabc(int & i, int & j, int & k, int & l,cryststruct & cs)
                       //returns position of atom l at lattice site (i j k) 
                       // as vector components  refering to lattice vectors abc
 {Vector dd(1,3),dd0(1,3);
@@ -424,7 +427,7 @@ Vector spincf::pos_dabc(int i, int j, int k, int l,cryststruct & cs)
          dd=abc_in_ijk.Inverse()*dd0;
  return dd;
 }    
-Vector spincf::pos_dr123 (int i, int j, int k, int l,cryststruct & cs)
+Vector spincf::pos_dr123 (int & i, int & j, int & k, int & l,cryststruct & cs)
                       //returns position of atom l at lattice site (i j k) as
                       // vector components refering to primitive lattice vectors r1 r2 r3
 {Vector dd(1,3),dd0(1,3);
@@ -536,9 +539,9 @@ for (chka=1;chka<=nofa;++chka)
      {for (nna=1;nna<=nofa;++nna)
          {for (nnb=1;nnb<=nofb;++nnb)
 	     {for (nnc=1;nnc<=nofc;++nnc)
-              {ma=mod(nna+chka,nofa);
-	       mb=mod(nnb+chkb,nofb);
-	       mc=mod(nnc+chkc,nofc);
+              {int nns=nna+chka;ma=mod(nns,nofa);
+	       nns=nnb+chkb;mb=mod(nns,nofb);
+	       nns=nnc+chkc;mc=mod(nns,nofc);
                if (!spequal(mom[in(nna,nnb,nnc)],op1.mom[op1.in(ma,mb,mc)]))
                   {goto nextchk;}
 	       if (nna==nofa&&nnb==nofb&&nnc==nofc) return 1;
@@ -555,7 +558,7 @@ return 0; //not equal
 
 //constructors
 //from n1xn2xn3 unit cells with na number in the cryst. basis and nc number of components of the spin of each atom
-spincf::spincf (int n1,int n2,int n3,int na,int nc)
+spincf::spincf (int  n1,int  n2,int  n3,int na,int  nc)
 { wasstable=0;
   int l;epsilon=Vector(1,6);epsilon=0;
   nofa=n1;nofb=n2;nofc=n3;

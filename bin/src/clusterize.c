@@ -124,7 +124,8 @@ $M3=$M3+$M%i_3;\n",n,n,n);
     // first: increase the number of components in the in file so that we can store
      // these atoms correctly
      int nofcomponents=inp.cs.nofcomponents;
-     inp.increase_nofcomponents(noc-nofcomponents);
+     int ndn=noc-nofcomponents;
+     inp.increase_nofcomponents(ndn);
  
 
   // here we need to go through the atoms of all of the clusters and check all their neighbours

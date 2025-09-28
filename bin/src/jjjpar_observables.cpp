@@ -607,7 +607,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
     } return value;
   }
 
-   int jjjpar::checkFFcoeffnonzero(int l)
+   int jjjpar::checkFFcoeffnonzero(int  l)
    {
      switch (l)
      {case 0:if(Norm(magFFj0)==0){fprintf(stderr,"WARNING: <j0(Q)> coefficients not found or zero in file %s\n",sipffilename);return 1;}else {return 0;}
@@ -639,7 +639,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
     fprintf(fout,"%s FFj4A=%+7.4f FFj4a=%+7.4f FFj4B=%+7.4f FFj4b=%+7.4f FFj4C=%+7.4f FFj4c=%+7.4f FFj4D=%+7.4f FFj4d=%+7.4f FFj4E=%+7.4f\n",linestart,magFFj4[1],magFFj4[2],magFFj4[3],magFFj4[4],magFFj4[5],magFFj4[6],magFFj4[7],magFFj4[8],magFFj4[9]);
     fprintf(fout,"%s FFj6A=%+7.4f FFj6a=%+7.4f FFj6B=%+7.4f FFj6b=%+7.4f FFj6C=%+7.4f FFj6c=%+7.4f FFj6D=%+7.4f FFj6d=%+7.4f FFj6E=%+7.4f\n",linestart,magFFj6[1],magFFj6[2],magFFj6[3],magFFj6[4],magFFj6[5],magFFj6[6],magFFj6[7],magFFj6[8],magFFj6[9]);    
    }
-   double jjjpar::jl(int l,double QA){
+   double jjjpar::jl(int  l,double QA){
     int p,q, pmax=0;
     double Q=QA*0.5292;// convert Q from 1/A into 1/a0
     Vector coeff(1,9);
@@ -662,7 +662,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
 
 
 
-long double jjjpar::tl(int l,int N,long double x)
+long double jjjpar::tl(int l,int  N,long double x)
      {double value=0.0;
       switch (l)
        { case 0: value=sn(1,N,x);break;
@@ -677,13 +677,13 @@ long double jjjpar::tl(int l,int N,long double x)
      return value;
      }
 /*
-long double jjjpar::sn(int n,int N,long double x)
+long double jjjpar::sn(int n,int & N,long double x)
    {complex <double> c(x,-1.0);
     long double value;
     value=(double)fact(N-n)*imag(pow(c,-N+n-1));
     return value;
    }
-long double jjjpar::cn(int n,int N,long double x)
+long double jjjpar::cn(int  n,int & N,long double x)
    {complex <double> c(x,-1.0);
     long double value;
     value=(double)fact(N-n)*real(pow(c,-N+n-1));
@@ -713,7 +713,7 @@ long double jjjpar::cn(int n,int N,long double x)
  * 1-28 x^2+70 x^4-28 x^6+x^8  +I( 8 x-56 x^3+56 x^5-8 x^7)
  */
 
-long double jjjpar::sn(int n,int N,long double x)    // Need imaginary part
+long double jjjpar::sn(int  n,int & N,long double x)    // Need imaginary part
  {
     long double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
     switch(-N+n-1) {
@@ -738,7 +738,7 @@ long double jjjpar::sn(int n,int N,long double x)    // Need imaginary part
          complex <double> c(x,-1.0); return (long double)(fact((double)(N-n))*imag(pow(c,-N+n-1.)));
     }
  }
-long double jjjpar::cn(int n,int N,long double x)    // Need real part
+long double jjjpar::cn(int  n,int & N,long double x)    // Need real part
  {
     long double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
     switch(-N+n-1) {
@@ -866,7 +866,7 @@ return R;
 /************************************************************************************/
    //functions to calculate radial matrix elements <r^n> from radial wave function in units of a0=0.5292 A
 /************************************************************************************/
-   double jjjpar::rk_from_radial_wavefunction(int k)
+   double jjjpar::rk_from_radial_wavefunction(int  k)
    {int p,q, pmax=0;
     Vector coeff(1,9);
 

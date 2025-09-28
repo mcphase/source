@@ -13,15 +13,16 @@
 #define MAXNOFSPINS  200
 
 // returns jq of spin [i=na,j=nb,k=nc] 
-ComplexMatrix & jq::mat(int na, int nb, int nc,int ma,int mb,int mc)
-{ return (*jj[iin(in(na,nb,nc),in(ma,mb,mc))]);
+ComplexMatrix & jq::mat(int & na, int & nb, int & nc,int & ma,int & mb,int & mc)
+{int s=in(na,nb,nc),ss=in(ma,mb,mc);int t=iin(s,ss); 
+ return (*jj[t]);
 }
 // the same but for spin number "i,j"
-ComplexMatrix & jq::mati(int i,int j)
+ComplexMatrix & jq::mati(int  i,int  j)
 { return (*jj[iin(i,j)]);
 }
 // get index ijk=iv(1-3)  of spinconfiguration number in 
-int * jq::ijk(int in)
+int * jq::ijk(int & in)
 {div_t result; result=div(in,mxb*mxc); 
  iv[1]= result.quot;
  result=div(result.rem,mxc);
@@ -30,12 +31,12 @@ int * jq::ijk(int in)
  return iv;}
 
 // the inverse: get number of spin from indizes i,j,k
-int jq::in(int i, int j, int k)
+int jq::in(int & i, int & j, int & k)
 {int ret;ret=(i*mxb+j)*mxc+k;
  if(ret>mx-1){fprintf(stderr,"ERROR mcdisp - internal indexing error\n");exit(EXIT_FAILURE);}
  return ret;}
 
-int jq::iin(int i, int j)
+int jq::iin(int & i, int & j)
 {return (i*mx+j);}
 
 
@@ -57,7 +58,7 @@ int jq::nc()
 /**************************************************************************/
 
 //constructors
-jq::jq (int n1,int n2,int n3,int nofcomp,mdcf & m)
+jq::jq (int  n1,int  n2,int  n3,int  nofcomp,mdcf & m)
 {  nofa=n1;nofb=n2;nofc=n3;
    nofatoms=m.nofatoms;nofcomponents=nofcomp;
 
@@ -76,7 +77,9 @@ jq::jq (int n1,int n2,int n3,int nofcomp,mdcf & m)
  for (i2=1;i2<=nofa;++i2){
  for (j2=1;j2<=nofb;++j2){
  for (k2=1;k2<=nofc;++k2){mbm2=m.baseindex_max(i2,j2,k2);if(mbm2<1){mbm2=1;} // MR 2011.08.08 for zero transitions in subsystem
- jj[iin(in(i1,j1,k1),in(i2,j2,k2))]= new ComplexMatrix(1,nofcomponents*mbm1,1,nofcomponents*mbm2);
+ int t=in(i1,j1,k1),tt=in(i2,j2,k2);
+ int s=iin(t,tt);
+ jj[s]= new ComplexMatrix(1,nofcomponents*mbm1,1,nofcomponents*mbm2);
  }}}}}} 
 }
 
@@ -96,7 +99,8 @@ jq::jq (const jq & p)
 
  for (int i1=1;i1<=nofa;++i1){ for (int j1=1;j1<=nofb;++j1){ for (int k1=1;k1<=nofc;++k1){
  for (int i2=1;i2<=nofa;++i2){ for (int j2=1;j2<=nofb;++j2){ for (int k2=1;k2<=nofc;++k2){
-    ind = iin(in(i1,j1,k1),in(i2,j2,k2)); 
+     int t=in(i1,j1,k1),tt=in(i2,j2,k2);
+    ind = iin(t,tt); 
     jj[ind]= new ComplexMatrix(1,(*p.jj[ind]).Rhi(),1,(*p.jj[ind]).Chi()); 
     (*jj[ind])=(*p.jj[ind]);
  }}}}}} 
@@ -113,7 +117,9 @@ jq::~jq ()
  for (i2=1;i2<=nofa;++i2){
  for (j2=1;j2<=nofb;++j2){
  for (k2=1;k2<=nofc;++k2){
- delete jj[iin(in(i1,j1,k1),in(i2,j2,k2))];
+ int s=in(i1,j1,k1),ss=in(i2,j2,k2);
+ int t=iin(s,ss);
+ delete jj[t];
  }}}}}} 
   delete []jj;
 }

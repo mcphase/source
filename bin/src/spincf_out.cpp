@@ -136,7 +136,7 @@ void spincf::calc_minmax_scale(Vector & minv,Vector & maxv,Vector & ijkmin,Vecto
 }
 
 
-Vector spincf::xy(Vector xyz,int orientation,Vector minv,Vector maxv,float bbwidth,float bbheight)
+Vector spincf::xy(Vector  xyz,int orientation,Vector minv,Vector maxv,double& bbwidth,double& bbheight)
  {Vector p(1,2);
   switch(orientation)
   {case 1: p(1)=(xyz(1)-minv(1))/(maxv(1)-minv(1))*bbwidth*0.8+bbwidth*0.15;
@@ -163,7 +163,7 @@ Vector spincf::xy(Vector xyz,int orientation,Vector minv,Vector maxv,float bbwid
  }
 
 
-void spincf::eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, spincf & magmom)
+void spincf::eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int  orientation, spincf & magmom)
  {// function to plot spins in a 3d manner
   // orientation:1 ab 2 ac 3 bc projection
   //             4 ab 5 ac 6 bc side view
@@ -392,7 +392,8 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
        int i0,j0,k0;
        for(i0=-1;i0<=1;++i0){for(j0=-1;j0<=1;++j0){for(k0=-1;k0<=1;++k0){
        for (i1=1;i1<=nofa;++i1){for(j1=1;j1<=nofb;++j1){for(k1=1;k1<=nofc;++k1){
-        dd0=pos(i0*nofa+i1,j0*nofb+j1,k0*nofc+k1,l, cs);
+        int ta=i0*nofa+i1,tb=j0*nofb+j1,tc=k0*nofc+k1;
+        dd0=pos(ta,tb,tc,l, cs);
         // here the ijk range is be more special according to the sphere radius rp
         imax=1+(int)((dd0(1)+rp-minv(1))*nofpointsi/max_min(1)+0.5);
         imin=-1+(int)((dd0(1)-rp-minv(1))*nofpointsi/max_min(1)+0.5);
@@ -422,7 +423,8 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
    int i0,j0,k0;
    for(i0=-1;i0<=1;++i0){for(j0=-1;j0<=1;++j0){for(k0=-1;k0<=1;++k0){
    for (i1=1;i1<=nofa;++i1){for(j1=1;j1<=nofb;++j1){for(k1=1;k1<=nofc;++k1){
-   dd0=pos(i0*nofa+i1,j0*nofb+j1,k0*nofc+k1,l, cs);
+   int ta=i0*nofa+i1,tb=j0*nofb+j1,tc=k0*nofc+k1;
+   dd0=pos(ta,tb,tc,l, cs);
  
    Vector moments(1,nofcomponents);
    density cd(gp.title,6,6);
@@ -694,7 +696,7 @@ fprintf(fout,"}\n");
 void spincf::print(FILE * fout) //print spinconfiguration to stream
 {print(fout,nofcomponents);}
 
-void spincf::print(FILE * fout,int nofcomp) //print spinconfiguration to stream
+void spincf::print(FILE * fout,int & nofcomp) //print spinconfiguration to stream
 {int i,j,k,l;
  if(nofcomp>nofcomponents){fprintf(stderr,"Error spincf::print: nofcomp=%i > nofcomponents=%i\n",nofcomp,nofcomponents);exit(1);}
  if(nofcomp<1){fprintf(stderr,"Error spincf::print: nofcomp=%i <1 \n",nofcomp);exit(1);}
@@ -716,7 +718,7 @@ void spincf::print(FILE * fout,int nofcomp) //print spinconfiguration to stream
 //  numeric output of spinconfiguration to file with comments and only large spin-coponents
 // components in interval [min,max] are shown
 
-void spincf::print_commented(FILE * fout,const char * string,int min, int max, int maxnofpars, double & absvallimit)
+void spincf::print_commented(FILE * fout,const char * string,int & min, int & max, int & maxnofpars, double & absvallimit)
 {int i,j,k,l;div_t result;
  if (maxnofpars<1){fprintf(stderr,"Error spincf print_commented: maxnofpars <1\n");exit(1);}
  else

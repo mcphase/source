@@ -24,7 +24,7 @@ Vector momentlz;
   public:
   double dtheta;
   double dfi;
-  Vector & rtf(int i); // pointer to rft (i=1 ... nofpoints)
+  Vector & rtf(int & i); // pointer to rft (i=1 ... nofpoints)
   int nofpoints(); // returns nofpoints in densitysurface  
   
   // sub for calculation of charge density given a radiu R and polar angles teta, 

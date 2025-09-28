@@ -65,7 +65,7 @@ double fecalc(double & U, double & Eelastic,int & r,double & sc,Vector H,double 
 
 // this sub checks if a spinconfiguration has already been added to
 // table testspins and adds it if necessary
-int checkspincf(int j,spincf & sps,qvectors & testqs, Vector & nettom,
+int checkspincf(int & j,spincf & sps,qvectors & testqs, Vector & nettom,
 		    Vector & momentq0, Vector & phi,
                      testspincf & testspins,physproperties & physprops,inipar & ini);
 

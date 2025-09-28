@@ -14,7 +14,7 @@ class mfcf
  // number of spins  
    int nofa,nofb,nofc;
  // this subtracts n2 if n1>n2
-   int mod(int n1,int n2);
+   int mod(int& n1,int& n2);
    int mxa,mxb,mxc;
  // frame of display
    Vector * mfi; // mean fields = gjmbHeff [meV]
@@ -24,14 +24,14 @@ class mfcf
    int nofatoms;
    int nofcomponents;
     Vector epsmf;
-   void resetnofc(int n);
+   void resetnofc(int& n);
  // array of spins 
-   int in(int i,int j, int k); 
+   int in(int &i,int& j, int &k); 
     int wasstable; // index to remember if it was stable
    
-    Vector & mf(int i,int j,int k); // returns pointer to mean field (ijk) 
-    Vector & mi(int in); // returns pointer to mean field i
-    int * ijk(int in);  // returns mf indizes (ijk)(in): in=0,...,n(=na*nb*nc)
+    Vector & mf(int &i,int& j,int& k); // returns pointer to mean field (ijk) 
+    Vector & mi(int &in); // returns pointer to mean field i
+    int * ijk(int &in);  // returns mf indizes (ijk)(in): in=0,...,n(=na*nb*nc)
     
     int n() const; // returns total number of spins
     int na() const; // returns number of spins

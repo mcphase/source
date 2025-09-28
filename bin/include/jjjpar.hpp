@@ -61,11 +61,11 @@ class iterwork {
      double *dwork;
      int *iwork, zsize, dsize, isize;
      iterwork(): zsize(0), dsize(0), isize(0) {}; 
-     iterwork(int lzwork, int ldwork, int liwork);
+     iterwork(int & lzwork, int & ldwork, int & liwork);
     ~iterwork(); 
-     void realloc_z(int lzwork);
-     void realloc_d(int ldwork);
-     void realloc_i(int liwork);
+     void realloc_z(int & lzwork);
+     void realloc_d(int & ldwork);
+     void realloc_i(int & liwork);
 };
 
 class par;
@@ -90,29 +90,29 @@ public:
   Vector *dr; // exchange - coordinates of neighbours in Angstrom in Euclidean ijk system
   int *sublattice; // sublattice of neighbours
   int diagonalexchange;  // switch 1=exchange is diagonal, 0=exchange is not diagonal
-   void increase_nofcomponents(int n); // increase nofcomponents by n
-   void decrease_nofcomponents(int n); // decrease nofcomponents by n
-   void remove_components(int rml,int rmh, int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh
+   void increase_nofcomponents(int & n); // increase nofcomponents by n
+   void decrease_nofcomponents(int & n); // decrease nofcomponents by n
+   void remove_components(int & rml,int & rmh, int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh
    void add(jjjpar & b, Vector & abc); // add parameters b to this
-   void addpars (int number, jjjpar & addjjj); // enlarge the set of parameters by
+   void addpars (int & number, jjjpar & addjjj); // enlarge the set of parameters by
                                                         // inserting a new exchange parameters addjjj
 							// into field at position number
    void scalepars (double scalefactor); // multiply all exchange parameters with scale factor
-   void delpar (int number); // remove a neighbour from list
-   int addpar (Vector & dabc,Vector & drijk,int subl); // add a neighbour with distance dabc and zero exchange, returns index of this parameter
+   void delpar (int & number); // remove a neighbour from list
+   int addpar (Vector & dabc,Vector & drijk,int & subl); // add a neighbour with distance dabc and zero exchange, returns index of this parameter
 
-   void save (FILE *file,int noindexchange,bool pd=false, bool ps=false); // to save the parameters to a filehandle
+   void save (FILE *file,int & noindexchange,bool pd=false, bool ps=false); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
    void saveG(FILE * file); // save coupling constants G
    void save_sipf(const char * path); //save single ion parameter file filename to path*
    void save_sipf(FILE *file); //save single ion parameter file filename to path*
-  void print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pch); 
+  void print_interaction(FILE * fout,int & pi,int & prl,int & prh,int & pcl,int & pch); 
                  //prints interaction tensor (rows prl-prh,columns pcl-pch) pi  to fout
   void print_G(FILE * fout); 
                  //prints magnetoelastic interaction matrix  to fout
 
-   jjjpar (FILE * fin, int nofcomp,parser & ob, int verbose=0); //constructor with filehandle of mcphas.j file
-   jjjpar (double x, double y, double z,char * sipffile,int n,int verbose=0); // constructor with filename of single ion parameter file
+   jjjpar (FILE * fin, int & nofcomp,parser & ob, int verbose=0); //constructor with filehandle of mcphas.j file
+   jjjpar (double x, double y, double z,char * sipffile,int  n,int verbose=0); // constructor with filename of single ion parameter file
                // constructor with positions scattering length dwf
    jjjpar(double x,double y,double z, double slr,double sli, double dwf);
    jjjpar (int n=1,int diag=0,int nofmom=3); // constructor without file
@@ -135,7 +135,7 @@ private:
 
   std::stringstream ss;
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
-  void get_parameters_from_sipfile(char * sipffilename,int verbose,parser & ob); // function to read single ion parameter files
+  void get_parameters_from_sipfile(char * sipffilename,int & verbose,parser & ob); // function to read single ion parameter files
   int  get_exchange_indices(char *instr, Matrix *exchangeindices,const char * ie);
 
 public:
@@ -170,7 +170,7 @@ public:
    //        delta ... sign determines if energy gain or loss term is added
 /****************************************************************************/
  int chi0(ComplexMatrix ** chi0pointer,double & emin, double estp, int & nofstps,const double & eps,Vector & Q, 
-            int qcounter,float & delta, double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,int i1,int j1,int k1,int l1);
+            int & qcounter,float & delta, double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,int & i1,int & j1,int & k1,int & l1);
 
    ComplexMatrix est; // eigenstates
    ComplexMatrix Icalc_parstorage; // paramter storage for Icalc
@@ -180,13 +180,13 @@ public:
    // initialises parameter storage for Icalc parameters (if possible)
    ComplexMatrix & Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T);
    // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
-   Matrix opmat(int n,Vector &  Hxc,Vector & Hext);
+   Matrix opmat(int  n,Vector &  Hxc,Vector & Hext);
 
 //private:
   // external module functions, intern_Icalc=0
 #ifdef __MINGW32__
 #else
-  void loadfunction(void  *(&symbol),void *handle,const char * func,int verbose);
+  void loadfunction(void  *(&symbol),void *handle,const char * func,int & verbose);
 #endif
   void (*I)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*);
   void (*IM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*);
@@ -276,7 +276,7 @@ void FFinfo(FILE * fout); // formfactor information print to fout, for mcdiff an
                          // info about formactor is printed according to settings of FFtype
                          // FF_type has to be set by mcdiff / mcdisp correctly before calling
                          // this function
-  int checkFFcoeffnonzero(int l);
+  int checkFFcoeffnonzero(int  l);
   void magFFout(const char * linestart ,FILE * fout);
 private:
   Vector magFFj0; // magnetic formfactor numbers
@@ -308,10 +308,10 @@ public:
                //calculation of jjjpar::F(Q) from radial wave function, used for printout mcdiff.out mdisp*.*
 
 private:
-   double jl(int l,double Q);
-   long double tl(int l,int N,long double x);
-   long double sn(int n,int N,long double x);
-   long double cn(int n,int N,long double x);
+   double jl(int  l,double Q);
+   long double tl(int l,int  N,long double x);
+   long double sn(int  n,int & N,long double x);
+   long double cn(int  n,int & N,long double x);
    double Fsaved[MAXSAVEQ+1],Qsaved[MAXSAVEQ+1]; int nsaved;
    double DBWsaved[MAXSAVEQ+1],DBWQsaved[MAXSAVEQ+1]; int DBWnsaved;
 
@@ -339,7 +339,7 @@ public:
    int magnetic;
 
 private:
-  double rk_from_radial_wavefunction(int k); // needed for public radial wave function <r^n> calculation
+  double rk_from_radial_wavefunction(int  k); // needed for public radial wave function <r^n> calculation
    // sum over different Zlm using the coefficients a(l,m)
    double zlmsum(Matrix & a, double & teta, double & fi);
 
@@ -457,14 +457,14 @@ private:
   int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
 
   // cluster internal module functions, module_type=5
-  void cluster_Icalc_mcalc_Micalc (int code,Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
-  void cluster_Icalc_mcalc_Micalc (int code,Matrix &mom,Vector & T,Vector &  Hxc,Vector & Hext, Vector & Z,Vector & U);
+  void cluster_Icalc_mcalc_Micalc (int  code,Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  void cluster_Icalc_mcalc_Micalc (int  code,Matrix &mom,Vector & T,Vector &  Hxc,Vector & Hext, Vector & Z,Vector & U);
   void cluster_Micalc (Vector &mom,ComplexMatrix & ests);
-  int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & ests);
+  int  cluster_dm (int  code,int & tn,double & T, ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & ests);
   void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
   void cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector & Hxc,Vector & Hext);
   void cluster_ini_Imat();
-  void cluster_Iaa(zsMat<double> *Iai, int a, int i);
+  void cluster_Iaa(zsMat<double> *Iai, int & a, int & i);
   zsMat<double> ** Ia; zsMat<double> ** cluster_M; 
   zsMat<double> *clusterH; Vector *oldHext; bool justinit; // Added to cache Hamiltonian matrices between iterations when Hext=same
   int * dnn; int dim; bool useperl;

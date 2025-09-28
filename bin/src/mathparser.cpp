@@ -37,9 +37,9 @@ char *chngChar (char *str, char oldChar, char newChar) {
 // Parser constructor.
 parser::parser()
 {
-	int i;
+	
 	exp_ptr = NULL;
-//	for (i = 0; i < NUMVARS; i++)vars[i] = 0.0;
+//	for (int i = 0; i < NUMVARS; i++)vars[i] = 0.0;
 	errormsg[0] = '\0';
 }
 // Parser entry point.
@@ -62,7 +62,7 @@ while (isspace(*exp_ptr))  // skip over white space at beginning
 	}
 	eval_exp1(result);
 	if (*token) // last token must be null or space or newline or =
-		if(!isspace(*token)&&!strchr("=)\n\t\r",*token))sprintf(errormsg, " Last char %c not space or newline",*token);
+		if(!isspace(*token)&&!strchr("=)\n\t\r",*token))snprintf(errormsg,ERRMSIZE, " Last char %c not space or newline",*token);
          if (*errormsg){
 			cout << "Parse Variable Error: expression " << exp << "\n" << errormsg << "\n\n";
                         exit(EXIT_FAILURE);
@@ -73,7 +73,7 @@ while (isspace(*exp_ptr))  // skip over white space at beginning
 // Process an assignment.
 void parser::eval_exp1(double &result)
 {
-	int slot;
+//	int slot;
 	char temp_token[80];
 	if (tok_type == VARIABLE) 
 	{
@@ -158,7 +158,7 @@ void parser::eval_exp5(double &result)
 {
 	register char op;
 	op = 0;
-	if ((tok_type == DELIMITER) && *token == '+' || *token == '-')
+	if ((tok_type == DELIMITER) && (*token == '+' || *token == '-'))
 	{
 		op = *token;
 		get_token();

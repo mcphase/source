@@ -564,24 +564,53 @@ given by th parametrisation in file.sipf.
                         crystal field phonon interactions with 4f shells can be treated in an effective way:
                         Minimizing the energy by setting zero the derivative of the Hamiltonian (\ref{Htot}) with respect to the phonon coordinate
                         $\hat u_i^{\alpha}$ and in the spirit of the Einstein model neglecting bilinear terms 
-                        ($K_{\alpha\beta}(ij)$) in $K_{\alpha\beta}(ii)$,  the phonon displacement $u_i^{\alpha}$
+                        (i.e. $K_{\alpha\beta}(ij)$ with $i \neq j$\footnote{in princpiple it is possible
+                        to go beyond this approximation, this would involve an inversion of the complete phonon
+                        dynamics, i.e. all  $K_{\alpha\beta}(ij)$ ... this has not been programmed}) in $K_{\alpha\beta}(ii)$,  the phonon displacement $u_i^{\alpha}$
                         can be estimated in a mean field approach by 
    \begin{equation}\label{findu}
-     K_{\alpha\beta}(ii)u_i^{\beta}=\sum_{j,\gamma} -\Gamma^{\alpha\gamma}(ij) \langle O_{\gamma}(\hat \mbf J_j)\rangle - G_{mix}^{\gamma\alpha}(i) \epsilon_{\gamma} 
+     K_{\alpha\beta}(ii)u_i^{\beta}=\sum_{j\neq i,\gamma} -\Gamma^{\alpha\gamma}(ij) \langle O_{\gamma}(\hat \mbf J_j)\rangle - G_{mix}^{\gamma\alpha}(i) \epsilon_{\gamma} 
    \end{equation}
 From $\m{K}=\m{S}^T\m{\Omega}\m{S}$ (compare equations (\ref{phonsiham}) ff.) we compute the inverse 
-$\m{K}^{-1}=\m{S}\m{\Omega}^{-1}\m{S}^T$, compute $u_i^{\alpha}$ from equation (\ref{findu}) and substitute
- into (\ref{Htot}). Thus we get an effective multipole interaction contribution and an additional
+$\m{K}^{-1}=\m{S}\m{\Omega}^{-1}\m{S}^T$, or in index notation 
+$K^{-1}_{\alpha\beta}=\sum_{\alpha'=1,2,3}S_{\alpha\alpha'}\Omega^{-1}_{\alpha'\alpha'}S_{\beta\alpha'}$,
+ and compute $u_i^{\alpha}$ from equation (\ref{findu})
+
+\begin{equation}\label{u}
+    u_i^{\alpha}=\sum_{\alpha'\beta=1,2,3}S_{\alpha\alpha'}\Omega^{-1}_{\alpha'\alpha'}S_{\beta\alpha'}\left[\sum_{j\neq i,\gamma} -\Gamma^{\beta\gamma}(ij) \langle O_{\gamma}(\hat \mbf J_j)\rangle - G_{mix}^{\gamma\beta}(i) \epsilon_{\gamma} \right]
+   \end{equation}
+
+This expression (\ref{u}) for  $u_i^{\alpha}$   we substitute
+ into the total Hamiltonian (\ref{Htot}) and neglect terms quadratic in the strain 
+$\epsilon$. Thus we get an effective multipole interaction contribution and an additional
 magnetoelastic contribution instead of the Einstein term $K_{\alpha\beta}(ii)$ and the crystal field 
 phonon interaction $\Gamma^{\alpha\gamma}(ij) $ and the mixing term $G_{mix}^{\gamma\alpha}(i)$:
  \begin{eqnarray}
-  \hat H_{\rm tot}&=& \dots + \frac{1}{2}\sum_{\alpha',ijj',\beta\beta'\gamma\gamma'}
+  \hat H_{\rm tot}&=& \dots + \frac{1}{2}\sum_{\alpha'\beta\beta',i \neq jj',\gamma\gamma'=1,\dots}
   \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij')  }
-  {\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j) O_{\gamma'}(\hat \mbf J_{j'}) + \nonumber\\
-  &&+\sum_{\alpha',ij,\beta\beta'\gamma\alpha} \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij) G_{mix}^{\alpha\beta'}(i) }
+  {\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j) \langle O_{\gamma'}(\hat \mbf J_{j'}) \rangle + \nonumber\\
+  &&+\sum_{\alpha'\beta\beta',i\neq j,\alpha=1-6,\gamma=1,\dots} \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij) G_{mix}^{\alpha\beta'}(i) }
   {\Omega_{\alpha'\alpha'}(ii)} \epsilon_{\alpha}O_{\gamma}(\hat \mbf J_j)+ \dots
  \end{eqnarray}   
 This effective multipole interaction and  magnetoelastic terms are added in the output in case an atom which is removed has the phonon module.
+Special attention deserves in this context the first term with $j=j'$ which in general for $\gamma=\gamma'$
+has to be positive and corresponds to a phonon induced quadrupolar self interaction 
+$\frac{1}{2}\sum_{\alpha'\beta\beta',i \neq j}\frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij)}
+{\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j) O_{\gamma}(\hat \mbf J_{j})$.
+Note that this term actually is a sum of 
+$\sum_{\alpha'\beta\beta',i \neq j}\frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij)}
+{\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j)\langle O_{\gamma}(\hat \mbf J_{j})\rangle$.
+and
+$-\frac{1}{2}\sum_{\alpha'\beta\beta',i \neq j}\frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij)}
+{\Omega_{\alpha'\alpha'}(ii)}\langle O_{\gamma}(\hat \mbf J_j) \rangle\langle O_{\gamma}(\hat \mbf J_{j})\rangle$.
+Thus the mean field (\ref{meanfield}) is computed without the $1/2$ prefactor and the second term is considered in the energy 
+correction term (\ref{Ecorrterm}) after the end of the mean field loop. The self interactions
+ is always ferroquadrupolar (note that by definition $\Omega_{\alpha'\alpha'}(ii)<0$) and thus enhances the 
+crystal field. The self interaction describes the effect, that when a crystal field is produced by a 
+point charge, then the charge density on the magnetc ion deforms according to the crystal field. This deformation
+increases the electrostatic force between the point charge and the magnetic ion and the point charge moves accordingly  and 
+this movement leads to a further increase of the crystal field. The movement continues until the restoring elastic 
+force is equal to the increase in electrostatic force.
 \item[Option: -delatoms 1:3+-0.75:4+-0.25,2,5,7]  removes atoms number 1,2,5,7 for atom 1 the interactions
  			 are transferred to 75\% to atom 3 and 25\% to atom 4 and interactions to atoms 3 and 4 are
  			 removed, for 2 5 7 all the interactions with other atoms are removed

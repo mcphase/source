@@ -21,71 +21,71 @@ int sum(IntVector & v)
 }
 
 // returns md of cf [i=na,j=nb,k=nc] 
-ComplexMatrix & mdcf::U(int na, int nb, int nc) const
+ComplexMatrix & mdcf::U(int & na, int & nb, int & nc) const
 { return (*s[in(na,nb,nc)]);
 }
 
-//ComplexMatrix & mdcf::V(int na, int nb, int nc) const
+//ComplexMatrix & mdcf::V(int & na, int & nb, int & nc) const
 //{ return (*sb[in(na,nb,nc)]);}
 
-ComplexVector & mdcf::dPs(int na, int nb, int nc) const
+ComplexVector & mdcf::dPs(int & na, int & nb, int & nc) const
 { return (*dps[in(na,nb,nc)]);
 }
-ComplexVector & mdcf::dMQs(int na, int nb, int nc) const
+ComplexVector & mdcf::dMQs(int & na, int & nb, int & nc) const
 { return (*dmqs[in(na,nb,nc)]);
 }
-ComplexVector & mdcf::dMQ_dips(int na, int nb, int nc) const
+ComplexVector & mdcf::dMQ_dips(int & na, int & nb, int & nc) const
 { return (*dmq_dips[in(na,nb,nc)]);
 }
-ComplexMatrix & mdcf::M(int na, int nb, int nc)
+ComplexMatrix & mdcf::M(int & na, int & nb, int & nc)
 { if(!mr){errexit();}
 return (*m[in(na,nb,nc)]);
 }
 
-ComplexVector & mdcf::sqrt_gamma(int na, int nb, int nc) const
+ComplexVector & mdcf::sqrt_gamma(int & na, int & nb, int & nc) const
 { return (*l[in(na,nb,nc)]);
 }
-ComplexVector & mdcf::sqrt_GammaP(int na, int nb, int nc) const
+ComplexVector & mdcf::sqrt_GammaP(int & na, int & nb, int & nc) const
 { return (*Pb[in(na,nb,nc)]);
 }
-ComplexVector & mdcf::sqrt_Gamma(int na, int nb, int nc) const
+ComplexVector & mdcf::sqrt_Gamma(int & na, int & nb, int & nc) const
 { return (*lb[in(na,nb,nc)]);
 }
-ComplexVector & mdcf::sqrt_Gamma_dip(int na, int nb, int nc) const
+ComplexVector & mdcf::sqrt_Gamma_dip(int & na, int & nb, int & nc) const
 { return (*lb_dip[in(na,nb,nc)]);
 }
-Vector & mdcf::delta(int na, int nb, int nc)
+Vector & mdcf::delta(int & na, int & nb, int & nc)
 { return (*d[in(na,nb,nc)]);
 }
 // the same but for cf number "i"
-ComplexMatrix & mdcf::Ui(int i)
+ComplexMatrix & mdcf::Ui(int & i)
 { return (*s[i]);
 }
-//ComplexMatrix & mdcf::Vi(int i)
+//ComplexMatrix & mdcf::Vi(int & i)
 //{ return (*sb[i]);}
 
-ComplexMatrix & mdcf::Mi(int i)
+ComplexMatrix & mdcf::Mi(int & i)
 { if(!mr){ errexit();}
 return (*m[i]);
 }
 
-ComplexVector & mdcf::sqrt_gammai(int i)
+ComplexVector & mdcf::sqrt_gammai(int & i)
 { return (*l[i]);
 }
-ComplexVector & mdcf::sqrt_GammaPi(int i)
+ComplexVector & mdcf::sqrt_GammaPi(int & i)
 { return (*Pb[i]);
 }
-ComplexVector & mdcf::sqrt_Gammai(int i)
+ComplexVector & mdcf::sqrt_Gammai(int & i)
 { return (*lb[i]);
 }
-ComplexVector & mdcf::sqrt_Gamma_dipi(int i)
+ComplexVector & mdcf::sqrt_Gamma_dipi(int & i)
 { return (*lb_dip[i]);
 }
-Vector  & mdcf::deltai(int i)
+Vector  & mdcf::deltai(int & i)
 { return (*d[i]);
 }
 // get index ijk=iv(1-3)  of cf configuration number in 
-int * mdcf::ijk(int in)
+int * mdcf::ijk(int & in)
 {div_t result; result=div(in,mxb*mxc); 
  iv[1]= result.quot;
  result=div(result.rem,mxc);
@@ -94,18 +94,18 @@ int * mdcf::ijk(int in)
  return iv;}
 
 // the inverse: get number of cf from indizes i,j,k
-int mdcf::in(int i, int j, int k) const
+int mdcf::in(int & i, int & j, int & k) const
 {return ((i*mxb+j)*mxc+k);}
 
 // get number of cf from indizes i,j,k,l
-int mdcf::inM(int i, int j, int k, int l)
+int mdcf::inM(int & i, int & j, int & k, int & l)
 {//int indd=(((i*mxb+j)*mxc+k)*nofatoms+l);
  //if(indd<0||indd>mxa*mxb*mxc*(nofatoms+1)) {fprintf(stderr,"mdcf indexing error");exit(EXIT_FAILURE);}
  int indd=((((i-1)*nofb+j-1)*nofc+k-1)*nofatoms+l-1);
  return indd;}
 
 // get number of cf from indizes i,j,k,l
-int mdcf::ind(int i, int j, int k, int l)
+int mdcf::ind(int & i, int & j, int & k, int & l)
 {int indd=(((i*mxb+j)*mxc+k)*nofatoms+l);
  if(indd<0||indd>mxa*mxb*mxc*(nofatoms+1)) {fprintf(stderr,"mdcf indexing error");exit(EXIT_FAILURE);}
  return indd;}
@@ -127,20 +127,20 @@ int mdcf::nc()
 /**************************************************************************/
 
 
-ComplexMatrix & mdcf::est(int i, int j, int k, int l)
+ComplexMatrix & mdcf::est(int & i, int & j, int & k, int & l)
 {return (*eigenstates[ind(i,j,k,l)]);}
 
-ComplexMatrix ** mdcf::chi0pointer(int i, int j, int k, int l)
+ComplexMatrix ** mdcf::chi0pointer(int & i, int & j, int & k, int & l)
 {return chi0s[ind(i,j,k,l)];}
 
 
-void mdcf::est_ini(int i, int j, int k, int l,ComplexMatrix & M) // initialize est
+void mdcf::est_ini(int & i, int & j, int & k, int & l,ComplexMatrix & M) // initialize est
 {eigenstates[ind(i,j,k,l)]=new ComplexMatrix(M.Rlo(),M.Rhi(),M.Clo(),M.Chi());
  (*eigenstates[ind(i,j,k,l)])=M;
 }
 
 // has to be called before mdcf object can be used for calculation
-void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
+void mdcf::set_noftransitions(int & i, int & j, int & k, IntVector & notr,int & mqd)
 {      (*nt[in(i,j,k)])=notr;mqdim=mqd;
  if(storage){
        int sumnt=sum((*nt[in(i,j,k)]));
@@ -159,7 +159,7 @@ void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
      } 
 }
 
-int mdcf::baseindex(int i, int j, int k, int l, int tn) const
+int mdcf::baseindex(int & i, int & j, int & k, int & l, int & tn) const
 {// the baseindex is used to number the rows an columns of the
  // matrices associated with the crystallographic unit number ijk
  // it starts at one and combines indices l (atom number) and t (number of
@@ -174,17 +174,17 @@ bi+=tn;
 return bi;
 }
 
-int mdcf::baseindex_max(int i, int j, int k) const
+int mdcf::baseindex_max(int & i, int & j, int & k) const
 {return sum((*nt[in(i,j,k)]));}
 
-int mdcf::noft(int i, int j, int k,int l) const
+int mdcf::noft(int & i, int & j, int & k,int & l) const
 {return (*nt[in(i,j,k)])(l);}
 
 void mdcf::errexit()
 { fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
 //constructors
-mdcf::mdcf (int n1,int n2,int n3,int n,int nc,int stps,int do_Erefine)
+mdcf::mdcf (int  n1,int  n2,int  n3,int  n,int  nc,int  stps,int  do_Erefine)
 {  int i; mr=do_Erefine;
    nofa=n1;nofb=n2;nofc=n3;
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
@@ -216,7 +216,7 @@ mdcf::mdcf (int n1,int n2,int n3,int n,int nc,int stps,int do_Erefine)
 }
 
 //kopier-konstruktor
-mdcf::mdcf (const mdcf & p,int store)
+mdcf::mdcf (const mdcf & p,int  store)
 { int i,j,k;mr=p.mr;
   nofa=p.nofa;nofb=p.nofb;nofc=p.nofc;
   mxa=p.mxa; mxb=p.mxb; mxc=p.mxc;

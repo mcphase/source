@@ -80,13 +80,13 @@ public:
 public:
     Vector epsilon; // strain
     void print(FILE * fout);
-    void print(FILE * fout, int nofcomp);
+    void print(FILE * fout, int & nofcomp);
   //print list of atoms + positions + moments
-    void print_commented(FILE * fout,const char * string,int min, int max, int maxnofpars, double & absvallimit);
+    void print_commented(FILE * fout,const char * string,int & min, int  & max, int & maxnofpars, double & absvallimit);
   
     void eps(FILE * fout);
     void eps(FILE * fout,const char * text);
-    void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation,spincf & magmom);
+    void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int  orientation,spincf & magmom);
     void fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,spincf & magmom);
 
   // output of chargedensity on grid as ascii file points are equally spaced as specified
@@ -102,7 +102,7 @@ public:
 private:
  // frame of display
    void epsarrow(FILE * fout,Vector a,Vector b);
-   Vector xy(Vector xyz,int orientation,Vector min,Vector max,float bbwidth,float bbheight);
+   Vector xy(Vector  xyz,int  orientation,Vector  min,Vector max,double  & bbwidth,double & bbheight);
    void calc_minmax(Vector & min,Vector & max,Vector & ijkmin,Vector & ijkmax,Matrix & p,Vector & abc);
    void calc_minmax_scale(Vector & min,Vector & max,Vector & ijkmin,Vector & ijkmax,Matrix & p,Vector & abc,double scale_view_1,double scale_view_2,double scale_view_3);
   // ----------------------------------------------------------
@@ -111,7 +111,7 @@ private:
    // number of spins  
    int nofa,nofb,nofc;
 // this subtracts n2 if n1>n2
-   int mod(int n1,int n2);
+   int mod(int & n1,int & n2);
    int mxa,mxb,mxc;
    Vector * mom; // momentums <J>
    int iv[4];
@@ -122,39 +122,39 @@ private:
      
    // take vector dd and calculate distance nearest atom in spinconfiguration
    double nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Vector &dd);
-    Vector pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z);
+    Vector pos(int & i, int  & j, int & k, int & l,Vector & abc,Matrix & r,float * x,float *y,float*z);
                       //returns position of atom l at lattice site (i j k) (Angstrom)
                       // as vector components in Euclidean ijk coordinate system
                       // defined by  j||b, k||(a x b) and i normal to k and j
-  int in(int i, int j, int k,int oa,int ob,int oc,int oxb,int oxc);
+  int in(int  i, int  j, int  k,int&  oa,int & ob,int & oc,int & oxb,int & oxc);
     
  public:
-    Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
+    Vector moment(int & i,int & j,int & k,int & l); // returns moment of atom l (1,nofcomponents)
 
-    Vector pos(int i, int j, int k, int l,cryststruct & cs);
+    Vector pos(int & i, int & j, int & k, int & l,cryststruct & cs);
                       //returns position of atom l at lattice site (i j k) (Angstrom)
                       // as vector components in Euclidean ijk coordinate system
                       // defined by  j||b, k||(a x b) and i normal to k and j
 
-    Vector pos_dabc(int i, int j, int k, int l,cryststruct & cs);
+    Vector pos_dabc(int & i, int & j, int & k, int & l,cryststruct & cs);
                       //returns position of atom l at lattice site (i j k) 
                       // as vector components  refering to lattice vectors abc
-    Vector pos_dr123 (int i, int j, int k, int l,cryststruct & cs);
+    Vector pos_dr123 (int & i, int & j, int & k, int & l,cryststruct & cs);
                       //returns position of atom l at lattice site (i j k) as
                       // vector components refering to primitive lattice vectors r1 r2 r3
 
 
     int  load(FILE * fin_coq);	// load spincf from file returns 1 on success and 0 on failure
  // array of spins 
-   int in(int i,int j, int k); 
+   int in(int  i,int j, int  k); 
     int wasstable; // index to remember if it was stable: if a sinconfiguration is set stable, its periodicity key is stored in wasstable
    
     int nofatoms;
     int nofcomponents;
-    Vector & m(int i,int j,int k); // returns pointer to spin (ijk) 
-    Vector & mi(int in); // returns pointer to spin i
+    Vector & m(int& i,int &j,int &k); // returns pointer to spin (ijk) 
+    Vector & mi(int &in); // returns pointer to spin i
     void  FT(ComplexVector * mq); // returns Fourier transform mq of spins (for use see htcalc.c)
-    int * ijk(int in);  // returns spin indizes (ijk)(in): in=0,...,n(=na*nb*nc)
+    int * ijk(int &in);  // returns spin indizes (ijk)(in): in=0,...,n(=na*nb*nc)
     
     int n(); // returns total number of primitive crystal basis in supercell
     int na(); // returns number of primitive crystal basis in supercell along a
@@ -164,10 +164,10 @@ private:
     Vector totalJ (); // returns nettomoment <J>
     void invert();// inverts all spins (AND higher order moments)
      // extend spinconfiguration  to ia ib ic times the original one periodically enlarging supercell
-     void extend(int ia,int ib,int ic);
+     void extend(int& ia,int& ib,int& ic);
 
     int reduce();// reduces spinconfiguration, if reduction is possible returns 1, otherwise 0
-    void spinfromq (int n1,int n2, int n3,Vector & qvector, Vector & nettom,Vector & momentq0, Vector & phi);
+    void spinfromq (int& n1,int& n2, int &n3,Vector & qvector, Vector & nettom,Vector & momentq0, Vector & phi);
 
 
     spincf operator + (const spincf & op2); // addition    

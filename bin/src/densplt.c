@@ -257,9 +257,9 @@ if(gp.show_pointcharges>0) nofpc=read_pointcharge_parameters(gp,cs.sipffilenames
   Vector hkl(1,3);hkl=0;s=s*0;magmom=magmom*0;
   spincf ev_real(s),ev_imag(s);
   spincf magmomev_real(magmom),magmomev_imag(magmom);
-
-  for(i=1;i<=dim;++i)s.m(1,1,1)(i)=moments(i);
-  for(i=1;i<=3;++i)magmom.m(1,1,1)(i)=mom(i);
+  int d1=1;
+  for(i=1;i<=dim;++i)s.m(d1,d1,d1)(i)=moments(i);
+  for(i=1;i<=3;++i)magmom.m(d1,d1,d1)(i)=mom(i);
 
   printf("# T=%g K field H=(%g,%g,%g) Tesla\n",T,Hext(1),Hext(2),Hext(3));
   printf("#%s\n",gp.title);

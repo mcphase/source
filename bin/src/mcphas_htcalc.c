@@ -56,11 +56,12 @@ class htcalc_input { public:
    int j; 
    int thread_id;
    par *inputpars;
-   htcalc_input(int _j, int _tid, par *pars_in) 
+   htcalc_input(int  _j, int & _tid, par *pars_in) 
    { 
       thread_id = _tid; j = _j; inputpars = new par(*pars_in);
    }
-   ~htcalc_input(){delete inputpars;}
+   ~htcalc_input(){
+    delete inputpars;}
 };
 // ----------------------------------------------------------------------------------- //
 // Declares these variables global, so all threads can see them
@@ -101,7 +102,7 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
          testqs.save(filemode);
          ini.finish_mcphas(testqs.nofqs (),testspins.n);
 #ifdef _THREADS
-for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
+ for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
 #endif
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program %s\n",ini.program);
@@ -140,10 +141,9 @@ void *htcalc_iteration(void *input)
 DWORD WINAPI htcalc_iteration(void *input)
 #endif
 #else
-int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
+int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector H, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
 #endif
 {
- fflush(stderr); fflush(stdout);
  #ifdef _THREADS
  htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector H(1,HEXT_DIMENSION); H = thrdat.H;
  THRLC_SET(threadSpecificKey, myinput); int tlsfemin=0;  // Thread local variable to judge whether to print output
@@ -161,27 +161,25 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  char text[MAXNOFCHARINLINE];
  char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
- mfcf * mf;
- mfcf * mf1;
- spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
  FILE * fout;
-
+int s1=1,s2=2;
   for (tryrandom=0;(tryrandom<=ini.nofrndtries)&&j!=0;++tryrandom)
    {if (j>0){sps=(*testspins.configurations[j]);// take test-spinconfiguration
              #ifndef _THREADS
 	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)< "  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #else
-	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)<[%i] "  ,j,sps.na(),sps.nb(),sps.nc(),thread_id); fflush(stdout); }
+	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)<[%i] "  ,j,sps.na(),sps.nb(),sps.nc(),thread_id+1); fflush(stdout); }
              #endif 
-            while(sps.na()<ini.minnr1)sps.extend(2,1,1); 
-            while(sps.nb()<ini.minnr2)sps.extend(1,2,1); 
-            while(sps.nc()<ini.minnr3)sps.extend(1,1,2); 
+            
+            while(sps.na()<ini.minnr1)sps.extend(s2,s1,s1); 
+            while(sps.nb()<ini.minnr2)sps.extend(s1,s2,s1); 
+            while(sps.nc()<ini.minnr3)sps.extend(s1,s1,s2); 
             }
     else     // take q vector and choose phase and mom dir randomly
-            {q=testqs.q(-j);  
+            {int mj=-j;q=testqs.q(mj);  
 	     if (tryrandom==0)
-	     {nettom=testqs.nettom(-j);momentq0=testqs.momentq0(-j);phi=testqs.phi(-j);
+	     {nettom=testqs.nettom(mj);momentq0=testqs.momentq0(mj);phi=testqs.phi(mj);
 	     }
 	     else
 	     {for(i=1;i<=inputpars.cs.nofatoms;++i)
@@ -193,37 +191,38 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	         phi(iii)=rnd(1)*3.1415;
 		}
 	      }
-	     }
-	     sps.spinfromq(testqs.na(-j),testqs.nb(-j),testqs.nc(-j),
+	     }int ta=testqs.na(mj),tb=testqs.nb(mj),tc=testqs.nc(mj);
+	     sps.spinfromq(ta,tb,tc,
 	                   q,nettom,momentq0,phi);
-             while(sps.na()<ini.minnr1)sps.extend(2,1,1); 
-             while(sps.nb()<ini.minnr2)sps.extend(1,2,1); 
-             while(sps.nc()<ini.minnr3)sps.extend(1,1,2); 
+             while(sps.na()<ini.minnr1)sps.extend(s2,s1,s1); 
+             while(sps.nb()<ini.minnr2)sps.extend(s1,s2,s1); 
+             while(sps.nc()<ini.minnr3)sps.extend(s1,s1,s2); 
                 // for Monte Carlo we have minimum number of spins
              hkl=inputpars.rez.Transpose()*q;  
              #ifndef _THREADS
    	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)< ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #else
-   	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)<[%i] ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc(),thread_id); fflush(stdout); }
+   	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)<[%i] ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc(),thread_id+1); fflush(stdout); }
              #endif 
 	    }	 
-    if (tryrandom>0){nr=rndint(sps.n()*inputpars.cs.nofatoms);
+    if (tryrandom>0){
+                      int g1=sps.n()*inputpars.cs.nofatoms;nr=rndint(g1);
 	             for (i=1;i<=nr;++i) // randomize nr spins
-                      {rr=rndint(sps.n());
+                      {g1=sps.n();rr=rndint(g1);
 		       ri=inputpars.cs.nofcomponents*arc4random_uniform(inputpars.cs.nofatoms);
 	               for(ii=1;ii<=inputpars.cs.nofcomponents;++ii)
 		       {sps.mi(rr)(ri+ii)*=(2*rnd(1.0)-1) ;}
 		       } // randomize spin rr
+                      
                     }
  
       //!!!calculate free energy - this is the heart of this loop !!!!
-      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-      fe=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs);
+      mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+      fe=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps,mf,testspins,testqs);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( ">for_str_%i(%ix%ix%i) "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">for(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
-                                             }
-          
+                              fflush(stdout);}
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
             {if(ini.nofMCsteps>0)
@@ -240,25 +239,25 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              {  
                // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
-                   mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-               if ((fered=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
-                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
+                   mfcf mf1(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+               if ((fered=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps1,mf1,testspins,testqs))<=fe*(1.0000000000001)){mf=mf1;
+                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
-                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
+                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
                                                                                                        }
-                               delete mf1;  }
+                                                }
                                        else {
-                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%fmeV ",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
+                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
                                             }
-                   magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
+                    spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
                    for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}
+                   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
-                   for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
+                   for(m1=1;m1<=3;++m1){magmom.m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}} 
                   
                  // display spinstructure
@@ -274,24 +273,24 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,magmom);
                     fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,magmom);
                     fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,magmom);
                     fclose (fout);
 		   
                     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     (*magmom).eps(fout,text);
+                     magmom.eps(fout,text);
                     fclose (fout);
 		delete[]x;delete []y; delete []z;
 	        }
-                delete magmom;   
+               // printf("C");fflush(stdout);delete magmom;   
                            // see if spinconfiguration is already stored
              #ifndef _THREADS
 	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini))//0 means error in checkspincf/addspincf
@@ -312,13 +311,13 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
              #endif 
 	     }}
-            delete mf;
-            //printout fe
+            //delete mf;
+             //printout fe
             #ifdef _THREADS
 	    if (tryrandom==ini.nofrndtries)if(verbose==1) {
-               if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id,fe,physprops.j,j); 
-	       if(j>0) printf ( ">[%i]str %i(%ix%ix%i)done "  ,thread_id,j,sps.na(),sps.nb(),sps.nc());
-               else    printf ( ">[%i](%g %g %g)(%ix%ix%i)done ",thread_id,hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
+               if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id+1,fe,physprops.j,j); 
+	       if(j>0) printf ( ">[%i]str %i(%ix%ix%i)done "  ,thread_id+1,j,sps.na(),sps.nb(),sps.nc());
+               else    printf ( ">[%i](%g %g %g)(%ix%ix%i)done ",thread_id+1,hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }
             #endif
             if (tryrandom==ini.nofrndtries)if(verbose==1){printf("\n");}
@@ -330,15 +329,17 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                  ComplexVector b1(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
                  float inmax=0;int qh,qk,ql,l,nk=0;
                  ComplexVector * mq;  
-                 mq = new ComplexVector [sps.in(sps.na(),sps.nb(),sps.nc())+2];for(l=0;l<=sps.in(sps.na(),sps.nb(),sps.nc())+1;++l){mq[l]=ComplexVector(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);}
+                 int na=sps.na(),nb=sps.nb(),nc=sps.nc();
+                 mq = new ComplexVector [sps.in(na,nb,nc)+2];
+                 for(l=0;l<=sps.in(na,nb,nc)+1;++l){mq[l]=ComplexVector(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);}
                  Vector sq2(1,3*inputpars.cs.nofatoms),qs(1,3),qt(1,3);float in;qs(1)=1000;
                  sps.FT(mq); //Fourier trafo of spincf
 		 // get the main propagation vector by looking for the
 		 // biggest Fourier component of the magnetic moment arrangement 
                  for(qh=0;qh<sps.na();++qh){for(qk=0;qk<sps.nb();++qk){for(ql=0;ql<sps.nc();++ql)
                   {// get magnetic moment from momentum fouriercomponent into b 
-		   b=0;
-		   b1 = mq[sps.in(sps.na()-qh,sps.nb()-qk,sps.nc()-ql)];
+		   b=0;na=sps.na()-qh,nb=sps.nb()-qk,nc=sps.nc()-ql;
+		   b1 = mq[sps.in(na,nb,nc)];
                    for(l=1;l<=inputpars.cs.nofatoms;++l)
 		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
 		    for (m1=1;m1<=m1max;++m1)
@@ -420,7 +421,6 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	           fclose(felog);
                   delete []mq;
                  }
-
       }
       #ifndef _THREADS
       return 1;
@@ -474,8 +474,6 @@ int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
  double femin=FEMIN_INI;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
  spincf  spsmin(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
- mfcf * mf;
- spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
  FILE * fout;
 
@@ -579,10 +577,12 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        #if defined  (__linux__) || defined (__APPLE__)
        rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
        if(rc) 
-       {
-          pthread_join(threads[ithread], &status); 
+       { // rc not zero - error means the system does not have the resources or permission to create thread
+          if(rc) { printf("Warning return code %i when creating thread %i - trying again ...\n",rc,ithread+1);  }
+          rc = pthread_join(threads[ithread], &status); 
+          if(rc) { printf("Warning return code %i when joining thread %i\n",rc,ithread+1);  }
           rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
-          if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+          if(rc) { printf("Error return code %i from creating thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
        }
        #else
        threads[ithread] = CreateThread(NULL, 0, htcalc_iteration, (void *) tin[ithread], 0, &tid[ithread]);
@@ -597,10 +597,13 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
           ithread = thrdat.thread_id;
           thrdat.thread_id=-1; 
           pthread_mutex_unlock (&mutex_loop); 
-
+          rc = pthread_join(threads[ithread], &status); 
+          if(rc) { printf("Error return code %i from joining thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+     
           #else
           WaitForSingleObject(checkfinish,INFINITE);
           ithread = thrdat.thread_id;
+          CloseHandle(threads[ithread]);
           thrdat.thread_id=-1; 
           ResetEvent(checkfinish);
           #endif
@@ -610,7 +613,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 #ifdef _THREADS
 // Wait for all threads to finish, before moving on to calculate physical properties!
   for(int th=0; th<(all_threads_started?NUM_THREADS:ithread); th++)
-  {
+  if(th!=ithread){ // thread ithread does not exist or has already been closed above    
      #if defined  (__linux__) || defined (__APPLE__)
      rc = pthread_join(threads[th], &status); 
      if(rc) { printf("Error return code %i from joining thread %i\n",rc,th+1); exit(EXIT_FAILURE); }
@@ -618,7 +621,8 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
      if(WaitForSingleObject(threads[th],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for thread %i to end\n",th+1); exit(EXIT_FAILURE); }
      CloseHandle(threads[th]);
      #endif
-  }
+                
+                }
   femin = thrdat.femin;
 
  #if defined  (__linux__) || defined (__APPLE__)
@@ -673,17 +677,17 @@ else // if yes ... then
      #endif
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
-      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
-      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs,&physprops); 
+      mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
+      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,mf,testspins,testqs,&physprops); 
 
-      magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
+      spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
                    for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                  for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}                  
+                  for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}                  
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
-                    for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
+                    for(m1=1;m1<=3;++m1){magmom.m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
              // display spinstructure
                 if (verbose==1)
@@ -697,23 +701,24 @@ else // if yes ... then
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fout = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,magmom);
                     fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,magmom);
                     fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,magmom);
                     fclose (fout);
 		    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fout = fopen_errchk (outfilename, "w");
-                     (*magmom).eps(fout,text);
+                     magmom.eps(fout,text);
                     fclose (fout);
                 delete[]x;delete []y; delete []z;
 		}
-  delete magmom;if(verbose==1){printf(">");}
+  //printf("G");fflush(stdout);delete magmom;
+   if(verbose==1){printf(">");}
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofMCsteps==0){int eq=0;
    #ifndef _THREADS
@@ -741,13 +746,15 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                fclose(felog);
 	      }
                              physprops.sps.epsilon=0;physprops.Eelastic=0;
-                             physprops.m=0;delete mf;return 1;
+                             physprops.m=0;
+//                printf("I\n");fflush(stdout);delete mf;
+                              return 1;
                              }
  //if(verbose==1){printf(".\n");}
-if(ini.nofMCsteps==0) physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
+if(ini.nofMCsteps==0) physpropclc(H,T,sps,mf,physprops,ini,inputpars);
 else physprops.sps=sps;
 
-      delete mf;
+//    printf("H"); fflush(stdout); delete mf;
  }
 
 return 0; // ok we are done with this (HT) point- return ok
@@ -763,7 +770,7 @@ return 0; // ok we are done with this (HT) point- return ok
 /*****************************************************************************/
 // this sub checks if a spinconfiguration has already been added to
 // table testspins and adds it if necessary
-int checkspincf(int j,spincf & sps1,qvectors & testqs,Vector & nettom,
+int checkspincf(int & j,spincf & sps1,qvectors & testqs,Vector & nettom,
 		     Vector & momentq0, Vector & phi, 
                      testspincf & testspins,physproperties & physprops,inipar & ini)
 { int i;
@@ -785,8 +792,9 @@ int checkspincf(int j,spincf & sps1,qvectors & testqs,Vector & nettom,
 	 physprops.j=i;return 1;} //ok
    }
   if (i<0)
-  { spq.spinfromq(testqs.na(-i),testqs.nb(-i),testqs.nc(-i),testqs.q(-i),
-                   testqs.nettom(-i),testqs.momentq0(-i),testqs.phi(-i));
+  { int mi=-i;int ta=testqs.na(mi),tb=testqs.nb(mi),tc=testqs.nc(mi);
+    spq.spinfromq(ta,tb,tc,testqs.q(mi),
+                   testqs.nettom(mi),testqs.momentq0(mi),testqs.phi(mi));
     if (spq==sps){
     physprops.j=i;return 1;} //ok
    
@@ -795,10 +803,11 @@ int checkspincf(int j,spincf & sps1,qvectors & testqs,Vector & nettom,
 
    //  check initial config: take just used nettom,momentq0,phi for comparison
    if (j<0)
-   {spq.spinfromq(testqs.na(-j),testqs.nb(-j),testqs.nc(-j),testqs.q(-j),
+   {int mj=-j;int ta=testqs.na(mj),tb=testqs.nb(mj),tc=testqs.nc(mj);
+    spq.spinfromq(ta,tb,tc,testqs.q(mj),
                   nettom,momentq0,phi);
-    if (spq==sps) {physprops.j=j;testqs.nettom(-j)=nettom;
-                  testqs.momentq0(-j)=momentq0;testqs.phi(-j)=phi;return 1;} //ok
+    if (spq==sps) {physprops.j=j;testqs.nettom(mj)=nettom;
+                  testqs.momentq0(mj)=momentq0;testqs.phi(mj)=phi;return 1;} //ok
    } 
 
 // check newly added configuration

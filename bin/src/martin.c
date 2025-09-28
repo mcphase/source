@@ -12,7 +12,7 @@
 
 
 
-ob obint(int i)
+ob obint(int  i)
 {switch(i)
 {case 1: return M;
  case 2: return pel;
@@ -44,9 +44,9 @@ return c;
  double rnd(float z){return  z*rand()/RAND_MAX;}
 
 // return random integer number from  1,2,3,..,i
-int rndint(int i){return rand()%i+1;}
+int rndint(int & i){return rand()%i+1;}
 
-int arc4random_uniform(int i){return rand()%i;}
+int arc4random_uniform(int & i){return rand()%i;}
 
 #else
 
@@ -55,7 +55,7 @@ int arc4random_uniform(int i){return rand()%i;}
 double rnd(float z){return  z*arc4random()/ARC4RANDOM_MAX;}
 
 // return random integer number from  1,2,3,..,i
-int rndint(int i){return arc4random_uniform(i)+1;}
+int rndint(int & i){return arc4random_uniform(i)+1;}
 
 #endif
 
@@ -168,7 +168,7 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   return 0;
 }
 // same for int
-int setvar(char * instr,const char * parameter,int  var)
+int setvar(char * instr,const char * parameter,int &  var)
 {double vv=(double)var;return setvar(instr,parameter,vv);
 }
 
@@ -276,7 +276,7 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
 // (e.g. m=1 will read from instr "G= one two three four" the parameter "G"
 // to var as "one",  putting m=2 will set var to "one two", m=3 will yield "one two three"
 
-int extract(char * instr,const char * parameter,char * var,size_t n,int m)
+int extract(char * instr,const char * parameter,char * var,size_t n,int  m)
 { const char delimiters[] = " \n";
   char *token,*td,*te; size_t n0;
 
@@ -342,7 +342,7 @@ int extract_with_prefix(char * instr,char * prefix, const char * parameter,int &
  return 1;
 }
 // same for char variable with prefix
-int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var,size_t n,int m)
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var,size_t n,int  m)
 {if(0==extract(instr,parameter,var,n,m)){return 0;}
  else{char par[MAXNOFCHARINLINE];snprintf(par,MAXNOFCHARINLINE,"%s%s",prefix,parameter);  if(0==extract(instr,par,var,n,m)){return 0;}}
  return 1;
@@ -364,7 +364,7 @@ FILE * fopen_errchk (const char * filename,const char * mode)
 } 
 
 //input file from string with error check
-char * fgets_errchk (char * instr,int size, FILE * file)
+char * fgets_errchk (char * instr,int  size, FILE * file)
 {char * s;
  errno=0; 
  if(feof(file)!=false){fprintf (stderr,"ERROR fgets_errchk: end of file\n"); 
@@ -564,7 +564,7 @@ int cint (float s){  double result;if(modf(s,&result)<0.5){return (int)result;}{
 
 // round to 1e-11 precision
 double myround(double s){return myround(1e-10,s);}
-double myround(double prec,double s){
+double myround(double prec,double  s){
 double result;result=prec*rint(s/prec);
 if (result==0){result*=result;}
 return result;
@@ -685,7 +685,7 @@ Vector crossp(Vector a, Vector b)
 //  stored in the lower triangle of z,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
-double matelr (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
+double matelr (int & k,int & l,Matrix & zr, Matrix & zi, Matrix & op)
 {double sumr=0;//,p1r,p1i,p2r,p2i;
   //xisyj,xjsyi,im(0,1);
   int dl,dh;
@@ -751,7 +751,7 @@ double mateli (ComplexVector & sk, ComplexVector &sl , Matrix & op)
  return sumi;
 }
 
-double mateli (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
+double mateli (int & k,int & l,Matrix & zr, Matrix & zi, Matrix & op)
 {double sumi=0;//,p1r,p1i,p2r,p2i;
   //xisyj,xjsyi,im(0,1);
   int dl,dh;
@@ -789,7 +789,7 @@ double mateli (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
 //  stored in the lower triangle of z,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
-void opZcol (int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi)
+void opZcol (int & i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi)
 {int k,l,d=op.Rhi(); // no check of dimensions to improve speed !!
  for(k=1;k<=d;++k){opZ[k][i]=complex<double>(op[k][k]*zr[k][i],op[k][k]*zi[k][i]);
                    for(l=1;l<k;++l)    opZ[k][i]+=complex<double>(op[l][k]*zr[l][i]-op[k][l]*zi[l][i],op[l][k]*zi[l][i]+op[k][l]*zr[l][i]);
@@ -1137,7 +1137,7 @@ for (i=1;i<=A.Rhi();++i){
  return P;
 }
 
-double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib  // transition matrix element
+double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int & ia, int & ib  // transition matrix element
                ,Matrix *V)
 {double real=0.0;                                                    // <a|M|b>  a,b are columns ia and ib
                                                                      // of zr+izc
@@ -1270,7 +1270,7 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib  // transiti
  return real;
 }
 
-double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib, Matrix*V)
+double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int & ia, int & ib, Matrix*V)
 {double imag=0.0;
 /*
  if(M.Rhi()!=M.Chi()){fprintf(stderr,"Error martin.c aMb_imag: Matrix M not square\n");exit(EXIT_FAILURE);}
@@ -1351,7 +1351,7 @@ double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib, Matrix*V)
  return imag;
 }
 
-complex<double> aMb_complex(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib) // transition matrix element
+complex<double> aMb_complex(zsMat<double> & M, Matrix & zr,Matrix & zc, int & ia, int & ib) // transition matrix element
 {
  char up = 'L'; int n=M.nr(), inc=1;
  complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
@@ -1383,7 +1383,7 @@ complex<double> aMb_complex(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, 
  return complex<double>(val.r,val.i);
 }
 
-double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib) // transition matrix element
+double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int & ia, int & ib) // transition matrix element
 {
  char up = 'L'; int n=M.nr(), inc=1;
  complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
@@ -1441,7 +1441,7 @@ double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib) // t
  return val.r;
 }
 
-double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib) // transition matrix element
+double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int & ia, int & ib) // transition matrix element
 {
  char up = 'L'; int n=M.nr(), inc=1;
  complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
@@ -1456,7 +1456,7 @@ double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib) // transi
  free(zM);
  return val.r;
 }
-complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib) // transition matrix element
+complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int & ia, int & ib) // transition matrix element
 {
  char up = 'L'; int n=M.nr(), inc=1;
  complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
@@ -1490,13 +1490,13 @@ void myPMatrix(Matrix & M,const char * s=NULL){myPMatrix(stdout,M,s);}
 void myPMatrix(FILE * file,ComplexMatrix & M,const char * s=NULL)
 {int i1,j1;
 if(s!=NULL)fprintf (file,"%s ",s);
-fprintf (file,"real part\n",s);
+fprintf (file,"real part\n");
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
     for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%8.6g ",myround(real(M(i1,j1))));
     fprintf (file,"\n");
     }
 if(s!=NULL)fprintf (file,"%s ",s);
-fprintf (file,"imaginary part\n",s);
+fprintf (file,"imaginary part\n");
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
     for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%8.6g ",myround(imag(M(i1,j1))));
     fprintf (file,"\n");
@@ -1517,12 +1517,13 @@ void myPVector(Vector & M,const char * s=NULL){myPVector(stdout,M,s);}
 
 // calculates classical dipole interaction Fourier transform with Ewald Method accorind 
 // to bowden 1981 p 827 - to be use in line 216 of mcdisp.c and for q=0 in mcphas 
-ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bool deltaAB)
+ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB)
 // input: hkl ... q-vector in Miller indices with respect to reciprocal lattice
 //        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
-//        dA ... atomic position of atom a with respect to vectors of lattice
+//         v ........ volume of unit cell in A^3
+//        rez ........reciprocal lattice as columns in rez from real lattice columns in MAtrix r
+//        tauAB ... difference of atomic positions of atom B - A with respect to vectors of lattice
 //        gJA .. Lande factor of atom A
-//        dB ... atomic position of atom a with respect to vectors of lattice
 //        gJB .. Lande factor of atom B
 //        deltaAB ... 1 if dA=dB and zero otherwise
 // ouput DAB(q) according to equation (26) including a prefactor to obtain units of meV 
@@ -1538,18 +1539,15 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & dA,double gJA, Vector
  //m^3=10^30Angstroem^3
  //1meV= 16.0218e-23 J
  // factor=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
-   double factor=gJA*gJB*.927405*.927405/16.02183;  //[meV A^3]
- // volume of unit cell
- double v=lattice.Column(1)*crossp(lattice.Column(2),lattice.Column(3));
- Matrix rez(1,3,1,3);
- rez= rezcalc(lattice);// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
+ double factor=gJA*gJB*0.053681760075; // .053681760075=.927405*.927405/16.02183;  //[meV A^3]
+
  Vector q(1,3);
  // reduce hkl to first Brillouin zone
  Vector hkl_red(1,3);
  // reduce q to first BZ
  for(int i=1;i<=3;++i)hkl_red(i)=hkl(i)-rint(hkl(i)); 
  // .. and remember phase factor to multiply to compensate 
- double phase =2*PI*(hkl-hkl_red)*(dB-dA);
+ double phase =2*PI*(hkl-hkl_red)*(tauAB);
  complex <double> eph(factor*cos(phase),factor*sin(phase));
  q=rez*hkl_red;
  double qn=Norm(q);
@@ -1560,10 +1558,10 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & dA,double gJA, Vector
  double RR=R*R;
 
  int L=2;
- for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)
- {
+ 
+ double f2=-4*PI/v;
   // TERM I
-  D(al,be) =q(al)*q(be)*exp(-qq/4/RR)/qq;
+  for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be) =f2*q(al)*q(be)*exp(-qq/4/RR)/qq;
   // TERM II
   for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
   {
@@ -1573,21 +1571,22 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & dA,double gJA, Vector
    Q+=(double)k*rez.Column(3);
    double Qn=Norm(Q);
    double QQ=Qn*Qn;
-   double qLtAB=2*PI*((dB(1)-dA(1))*i+(dB(2)-dA(2))*j+(dB(3)-dA(3))*k);
-   complex <double>expitau(cos(qLtAB),-sin(qLtAB));
-   D(al,be)+=expitau*Q(al)*Q(be)*exp(-QQ/4/RR)/QQ ;
+   double qLtAB=2*PI*((tauAB(1))*i+(tauAB(2))*j+(tauAB(3))*k);
+   double f0=f2*exp(-QQ/4/RR)/QQ;
+   complex <double>expitau(f0*cos(qLtAB),-f0*sin(qLtAB));
+   for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be)+=expitau*Q(al)*Q(be) ;
   }
-  D(al,be)*=-4*PI/v;
+  
   // TERM IV
-  if(deltaAB&&al==be){D(al,be)+=4*RR*R/3/sqrt(PI);}
- }
+  if(deltaAB)for(int al=1;al<=3;++al){D(al,al)+=4*RR*R/3/sqrt(PI);}
+ 
  // term III
  for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0||!deltaAB)
  {
   double qrl=2*PI*(hkl_red(1)*i+hkl_red(2)*j+hkl_red(3)*k);
-  qrl+=2*PI*hkl_red*(dB-dA);
+  qrl+=2*PI*hkl_red*tauAB;
   complex <double> eqrl(cos(qrl),sin(qrl));
-  Vector rl(1,3);rl=lattice*(dB-dA);
+  Vector rl(1,3);rl=lattice*tauAB;
   rl+=(double)i*lattice.Column(1);
   rl+=(double)j*lattice.Column(2);
   rl+=(double)k*lattice.Column(3);
@@ -1599,17 +1598,17 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & dA,double gJA, Vector
  /* printf("***********\n");
  myPVector(hkl,"hkl");
  myPVector(q,"q");printf("R=%g\n",R);
- myPVector(dA,"dA");
- myPVector(dB,"dB");
+ myPVector(tauAB,"tauAB");
  myPMatrix(lattice,"lattice");
  myPMatrix(D,"DAB");
  */
  return D;
 }
 
-Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bool deltaAB)
+Matrix DAB0( Matrix & lattice, double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB)
 // input: 
 //        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
+ //       v  ...      volume of unit cell
 //        dA ... atomic position of atom a with respect to vectors of lattice
 //        gJA .. Lande factor of atom A
 //        dB ... atomic position of atom a with respect to vectors of lattice
@@ -1628,21 +1627,18 @@ Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bo
  //m^3=10^30Angstroem^3
  //1meV= 16.0218e-23 J
  // factor=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
-   double factor=gJA*gJB*.927405*.927405/16.02183;  //[meV A^3]
- // volume of unit cell
- double v=lattice.Column(1)*crossp(lattice.Column(2),lattice.Column(3));
- Matrix rez(1,3,1,3);
- rez= rezcalc(lattice);// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
+   double factor=gJA*gJB*0.053681760075; // .053681760075=.927405*.927405/16.02183;  //[meV A^3]
  
+// DUMMY: for testing increas dipolar strength artificially  a facto
+//factor*=10;
+
  // put R (1/A) to reasonable value
  double R=2/cbrt(v);
  double RR=R*R;
-
  int L=2;
- for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)
- {
   // TERM I =0
   // TERM II
+  double f2=-4*PI/v;
   for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
   {
    Vector Q(1,3); 
@@ -1651,17 +1647,16 @@ Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bo
    Q+=(double)k*rez.Column(3);
    double Qn=Norm(Q);
    double QQ=Qn*Qn;
-   double qLtAB=2*PI*((dB(1)-dA(1))*i+(dB(2)-dA(2))*j+(dB(3)-dA(3))*k);
-   D(al,be)+=cos(qLtAB)*Q(al)*Q(be)*exp(-QQ/4/RR)/QQ ;
+   double qLtAB=2*PI*((tauAB(1))*i+(tauAB(2))*j+(tauAB(3))*k);
+   double f0=f2*cos(qLtAB)*exp(-QQ/4/RR)/QQ;
+   for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be)+=f0*Q(al)*Q(be) ;
   }
-  D(al,be)*=-4*PI/v;
-  // TERM IV
-  if(deltaAB&&al==be){D(al,be)+=4*RR*R/3/sqrt(PI);}
- }
+ // TERM IV
+  if(deltaAB)for(int al=1;al<=3;++al)D(al,al)+=4*RR*R/3/sqrt(PI);
  // term III
  for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0||!deltaAB)
  {
-  Vector rl(1,3);rl=lattice*(dB-dA);
+  Vector rl(1,3);rl=lattice*tauAB;
   rl+=(double)i*lattice.Column(1);
   rl+=(double)j*lattice.Column(2);
   rl+=(double)k*lattice.Column(3);
@@ -1669,8 +1664,7 @@ Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bo
  }                  
  D*=factor;
  /*printf("***********\n");
- myPVector(dA,"dA");
- myPVector(dB,"dB");
+ myPVector(tauAB,"tauAB");
  myPMatrix(lattice,"lattice");
  myPMatrix(rez,"rez");
   
@@ -1680,7 +1674,7 @@ Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bo
 }
 
 // evaluates equation 23 in Bowden 81
-Matrix ER(double R, Vector & rl)
+Matrix ER(double & R, Vector & rl)
 {Matrix E(1,3,1,3);double RR=R*R;
  double rln=Norm(rl);double rrl=rln*rln;
  for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)
@@ -1696,7 +1690,7 @@ Matrix ER(double R, Vector & rl)
  return E;
 }
 
-void SetColumn(int j,Matrix M,Vector &v) // fills column i in Matrix M with vector v
+void SetColumn(int & j,Matrix M,Vector &v) // fills column i in Matrix M with vector v
 {for(int i=v.Lo();i<=v.Hi();++i){M(i,j)=v(i);}
 }
 
@@ -1743,7 +1737,7 @@ int l,m;
 for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 }
 
- FILE * open_sipf(char * sipf_filename,char * modulename, int verbose){
+ FILE * open_sipf(char * sipf_filename,char * modulename, int & verbose){
  // opens sipf file and returns filehandle and modulename 
  FILE * cf_file;
  char instr[MAXNOFCHARINLINE];

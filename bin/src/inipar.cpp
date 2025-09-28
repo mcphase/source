@@ -102,7 +102,7 @@ printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
       exit (EXIT_FAILURE);
 } 
 
-void inipar::finish_mcphas(int nofqs,int nofspincf)
+void inipar::finish_mcphas(int  nofqs,int nofspincf)
 {
 printf("RESULTS saved in directory ./results/  - files:\n");
    printf("#RESULTS saved in directory ./results/  - files:\n");
@@ -177,14 +177,14 @@ const char * colhead []= {  "T [K]", //      0
                             "|H| [T]",   //    21
                             "|E| [T]"   //    22
                                };
- bool inipar::defaultcolcode(int col,int colcode) // resets default columns if not set by user (outcolset==true)
+ bool inipar::defaultcolcode(int col,int  colcode) // resets default columns if not set by user (outcolset==true)
 { bool ret=false;                                            // returns true if reset has been successful
  if(!outcolset)for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]==col)
  {colcod[i]=colcode;ret=true;}
 return ret;
 }
 // calculate the value of different output data for user defined columns ...
-double inipar::calccolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
+double inipar::calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
 {double xx=x,yy=y;
  Vector Habc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hext(1,3);
           ijk2dadbdc(Habc,v,abcu);
@@ -196,7 +196,7 @@ double ret=(*colvaluepointer(i,xx,yy,T,Hext,Habc,Eabc,NormH,NormE));
 return ret;
 }
 
-double * inipar::colvaluepointer(int i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
+double * inipar::colvaluepointer(int & i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
                  Vector & Eabc,double & NormH, double & NormE)
 {      switch (i) {
 case 0:  return &T;break;
@@ -483,7 +483,7 @@ int inipar::load (int & nofinis,char**lofpref)
   minnr1=0;
   minnr2=0;
   minnr3=0;
-  maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;repeat=0;
+  maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;repeat=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
@@ -585,7 +585,7 @@ int inipar::load (int & nofinis,char**lofpref)
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxspinchange",maxspinchange); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnoftestspincf",maxnoftestspincf);
 
-    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofthreads",nofthreads);
+    if(nofthreads==0)extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofthreads",nofthreads);
 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofspincorrs",nofspincorrs); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofhkls",maxnofhkls); 
@@ -656,7 +656,7 @@ void inipar::print (const char * filename)
   fclose(fout);
 }
 
-bool inipar::checkpr(FILE* fout,const  char * var,int val,int masterval)
+bool inipar::checkpr(FILE* fout,const  char * var,int & val,int & masterval)
 {
 if(masterval!=val){fprintf(fout,"%s%s=%i\n",prefix,var,val);return true;}
 else {return false;}
@@ -940,6 +940,8 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   strcpy(savfilename+strlen(pref),file);
   prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,pref);
+  nofthreads=0; // set nof threads zero so initially load() will load them, on following call to load
+                // from checkini it will then not load nofthreads to ensure the program is stable.
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;include_cd=false;

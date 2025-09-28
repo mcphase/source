@@ -14,7 +14,7 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 
 #ifdef __MINGW32__
 
-/*void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
+/*void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int & verbose)
 {
 *(void **)(&symbol)=GetProcAddress(handle,func);
     // *(int **)(&p)=GetProcAddress(handle,"pcalc");
@@ -23,7 +23,7 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 }
 */
 #else
-void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
+void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int & verbose)
   {char * error;
    *(void **)(&symbol)=dlsym(handle,func);
    if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL&&strstr(error,"undefined symbol")==NULL){fprintf (stderr," %s - continuing\n",error);}symbol=NULL;}
@@ -35,20 +35,20 @@ void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int ve
 /************************************************************************************/
 // get parameters from sipf file
 /************************************************************************************/
-void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser & ob)
+void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int & verbose,parser & ob)
 {int i,j;
  float nn[MAXNOFNUMBERSINLINE];
  nn[0]=MAXNOFNUMBERSINLINE;
  modulefilename=new char[MAXNOFCHARINLINE];
  char instr[MAXNOFCHARINLINE];
- FILE * cf_file;    
- cf_file=open_sipf(sipf_filename,modulefilename,verbose);
+ FILE * sipf_handle;    
+ sipf_handle=open_sipf(sipf_filename,modulefilename,verbose);
   if(strcmp(modulefilename,"kramer")==0)
     {module_type=kramer;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
       MODPARS=Vector(1,3);i=3;
       nof_electrons=0; // not to be used in module kramer !!
-      while(feof(cf_file)==false)
-      {fgets(instr, MAXNOFCHARINLINE, cf_file);
+      while(feof(sipf_handle)==false)
+      {fgets(instr, MAXNOFCHARINLINE, sipf_handle);
       parseline(instr,ob);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
                                            i+=extract(instr,"A",MODPARS(1),ob)-1;
@@ -69,8 +69,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
      {module_type=brillouin;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
       MODPARS=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module brillouin !!
-      while(feof(cf_file)==false)
-      {fgets(instr, MAXNOFCHARINLINE, cf_file);
+      while(feof(sipf_handle)==false)
+      {fgets(instr, MAXNOFCHARINLINE, sipf_handle);
       parseline(instr,ob);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
                                            i+=extract(instr,"J",MODPARS(1),ob)-1;
@@ -86,9 +86,9 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
      else
      {if(strcmp(modulefilename,"cfield")==0)
      {module_type=cfield;orientation=abc_yzx;if(verbose)fprintf (stderr,"#[internal]\n");
-      //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
-       fseek(cf_file,0,SEEK_SET);
-      iops=new ionpars(cf_file,sipf_filename,verbose,ob);
+      //fclose(sipf_handle);sipf_handle = fopen_errchk (sipf_filename, "rb"); // reopen file
+       fseek(sipf_handle,0,SEEK_SET);
+      iops=new ionpars(sipf_handle,sipf_filename,verbose,ob);
 
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -100,9 +100,9 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
      else
      {if(strcmp(modulefilename,"so1ion")==0)
      {module_type=so1ion;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
-     // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
-      fseek(cf_file,0,SEEK_SET);
-      iops=new ionpars(cf_file,sipf_filename,verbose,ob);
+     // fclose(sipf_handle);sipf_handle = fopen_errchk (sipf_filename, "rb"); // reopen file
+      fseek(sipf_handle,0,SEEK_SET);
+      iops=new ionpars(sipf_handle,sipf_filename,verbose,ob);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -114,8 +114,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
      {module_type=cluster;orientation=abc_xyz;module_clust=true;if(verbose)fprintf (stderr,"#[internal]\n");
       MODPARS=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module cluster !!
-      while(feof(cf_file)==false)
-      {fgets(instr, MAXNOFCHARINLINE, cf_file);
+      while(feof(sipf_handle)==false)
+      {fgets(instr, MAXNOFCHARINLINE, sipf_handle);
         parseline(instr,ob);
        i+=extract(instr,"structurefile",clusterfilename,MAXNOFCHARINLINE,1)-1;
       }// input all  lines starting with comments
@@ -131,8 +131,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
      else
       {if(verbose)fprintf (stderr,"#[external]\n");
       i=0;nof_electrons=0;
-      while(feof(cf_file)==false)
-      {fgets(instr, MAXNOFCHARINLINE, cf_file);
+      while(feof(sipf_handle)==false)
+      {fgets(instr, MAXNOFCHARINLINE, sipf_handle);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
                                            i-=extract(instr,"MODPAR1",nn[1],ob)-1;
                                            i-=extract(instr,"MODPAR2",nn[2],ob)-1;
@@ -147,7 +147,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
                                           }
       }
        // input all  lines starting with comments
-    //while((i=inputparline ("params",cf_file, nn))==0&&feof(cf_file)==false);
+    //while((i=inputparline ("params",sipf_handle, nn))==0&&feof(sipf_handle)==false);
     // now we have the numbers corresponding to vector MODPARS() in nn[] - these are the module parameters !
     if(verbose)fprintf(stderr,"#MODPARs: ");
     if(i>0){
@@ -376,7 +376,7 @@ dlloader=dlloader::DLLoader <singleion_module>(path);
  dlloader.DLOpenLib();
 // fprintf(stderr,"-->Loaded singleion_module library %s\n",modulefilename);
 module_type=external_class;
-//si_mod=dlloader.DLGetInstance(); // this should remain here .. moved downwards after closing cf_file
+//si_mod=dlloader.DLGetInstance(); // this should remain here .. moved downwards after closing sipf_handle
 
 //fprintf(stderr,"-->got handle si_mod\n");
 
@@ -387,8 +387,8 @@ module_type=external_class;
     }
    }
   }
- // fclose(cf_file);
- fseek(cf_file,0,SEEK_SET);
+ // fclose(sipf_handle);
+ fseek(sipf_handle,0,SEEK_SET);
 
   magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=0;  magFFj0[1]=1;
   magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=0;
@@ -402,9 +402,9 @@ module_type=external_class;
 
   DWF=0;  gJ=0;maxE=1e10;pinit=0;ninit=1e10;
 
- // cf_file = fopen_errchk (sipf_filename, "rb");
-  while(feof(cf_file)==false)
-  {fgets(instr, MAXNOFCHARINLINE, cf_file);
+ // sipf_handle = fopen_errchk (sipf_filename, "rb");
+  while(feof(sipf_handle)==false)
+  {fgets(instr, MAXNOFCHARINLINE, sipf_handle);
 
   parseline(instr,ob);
    if(instr[strspn(instr," \t")]!='#'||instr[strspn(instr," \t#")]=='!'){//unless the line is commented ...
@@ -479,7 +479,7 @@ module_type=external_class;
   }
  }
 
- fclose (cf_file);
+ fclose (sipf_handle);
 if(module_type==external_class)si_mod=dlloader.DLGetInstance(sipffilename); // this loads a class object 
 
 // load file into buffer ss ...
@@ -644,8 +644,8 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
    //        delta ... sign determines if energy gain or loss term is added
 /****************************************************************************/
 int jjjpar::chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int & nofstps, const double & epsilon, Vector & Q, 
-                  int qcounter,float & delta,double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,
-                   int i1,int j1,int k1,int l1)
+                  int & qcounter,float & delta,double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,
+                   int & i1,int & j1,int & k1,int & l1)
 { // for the moment do nothing module specific but use existing module function to calculate internal
   // well defined chi0
   // ... in future we may then do something more clever by putting here values from a file which is created by external
@@ -830,7 +830,7 @@ ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hex
 /****************************************************************************/
 // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
 /****************************************************************************/
-Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
+Matrix jjjpar::opmat(int  n,Vector &  Hxc,Vector & Hext)
 {
  int retval;
  if(n>=0){

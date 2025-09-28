@@ -23,8 +23,8 @@ class inimcdis
   char * parfile;
   char * mf_file;
   Vector qmin,qmax,deltaq;
-  void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc);   
-  double setcolvalue(int i,Vector & Qvec, double & Qincr, Vector & qprim,Vector & hkl);
+  void read_hkl_list(FILE * finhkl,double ** hkls,int  readqxqyqz,int & do_jqfile,Vector & abc);   
+  double setcolvalue(int & i,Vector & Qvec, double & Qincr, Vector & qprim,Vector & hkl);
   Vector Eabc,Habc;
   bool outcolset;// indicates wether in mcphas.ini user has set some output columns
 
@@ -65,13 +65,13 @@ class inimcdis
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,float & var,parser & ob);
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var,parser & ob);
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var,parser & ob);
-int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int m);
+int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int  m);
 
   inimcdis(const char * file,char * prefix,char * mffile,
              int & do_jqfile,bool inc_cd,Vector & abc,
              int & nofcomponents,int & nofatoms);
-  int load (char * mffile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
-  int load (int & nofinis,char**lofpref,char * mffile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat,int verbose); //constructor
+  int load (char * mffile, char * prefix,int & do_jqfile, Vector & abc,int & nofcomp,int & nofat); //constructor
+  int load (int & nofinis,char**lofpref,char * mffile, char * prefix,int & do_jqfile, Vector & abc,int & nofcomp,int & nofat,int  verbose); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };
@@ -85,7 +85,7 @@ class inimdpars
   
   inimdpars (const char * file,char * prefix,char * mffile,
              int & do_jqfile,bool inc_cd,Vector & abc,
-             int & nofcomponents,int & nofatoms,int verbose); //constructor
+             int & nofcomponents,int & nofatoms,int & verbose); //constructor
 
   inimdpars (const inimdpars & p);//kopier-konstruktor
 

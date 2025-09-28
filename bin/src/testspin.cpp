@@ -63,7 +63,7 @@ void testspincf::save (const char*filename, const char * filemode)
 
 //constructor - read maximum of nofconf spinconfigurations from file file and 
 // rememeber filename for lateron save of the list (savfile)
-testspincf::testspincf (int nofconf, const char * file,const char * savfile,int na,int nm)
+testspincf::testspincf (int & nofconf, const char * file,const char * savfile,int & na,int & nm)
 { savfilename= new char [strlen(savfile)+1];
   strcpy(savfilename,savfile);
   FILE *fin_coq;

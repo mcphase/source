@@ -61,7 +61,7 @@ die "exiting" unless GetOptions("rkky3d=s{4}"=>\@rkky3d,
 
 # substitute all m0.132 back to -0.132 ...:
 foreach(@rkkynest,@ARGV,@rkky3d,@kaneyoshi3d,@rkkz3d,@rkkydummy,@kaneyoshi,
-       @rkkz,$bvk,$cfph,$e,$f,$jp,$dm,$d,$npc,$nm,$cfphr,$rfunc.$djdx,$djdy,$djdz){$_=~s/\Am(\d)/-$1/g;}
+       @rkkz,$bvk,$cfph,$e,$f,$jp,$dm,$d,$npc,$nm,$cfphr,$rfunc,$djdx,$djdy,$djdz){$_=~s/\Am(\d)/-$1/g;}
 
 # .... insufficienarguments: check  getOpt module how to get @rkkynest with optional 1+3n arguments
 #tag=i{2,}	–tag 1	Error: Insufficient arguments for option tag
@@ -125,8 +125,10 @@ elsif(@rkky3d)
  #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
  #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
  #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
-   print "#calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
-   print "#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";}
+   $rfuncheader=" RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
+   $rfuncheader=$rfuncheader."#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";
+   print "#calculating".$rfuncheader;
+}
 elsif(@kaneyoshi3d)
   {$rkky=5;
    $s=$kaneyoshi3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -139,9 +141,10 @@ elsif(@kaneyoshi3d)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Db=eval $ARGV[0];shift @ARGV;
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Dc=eval $ARGV[0];shift @ARGV;
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
-   print "#calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
-   print "# J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
-   print "#with RD=sqrt(Ri^2/Di^2+Rj^2/Dj^2+Rk^2/Dk^2) with Di=$Da A Dj=$Db A Dk=$Dc A  and alpha=$aa\n";}
+   $rfuncheader=" kaneyoshi parametrization for the Bethe-Slater curve\n";
+   $rfuncheader=$rfuncheader."# J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
+   $rfuncheader=$rfuncheader."#with RD=sqrt(Ri^2/Di^2+Rj^2/Dj^2+Rk^2/Dk^2) with Di=$Da A Dj=$Db A Dk=$Dc A  and alpha=$aa\n";
+print "#calculating".$rfuncheader;}
 elsif(@rkkz3d)
   {$rkky=6;
    $s=$rkkz3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -153,8 +156,9 @@ elsif(@rkkz3d)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
-   print "#calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
-   print "#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";}
+   $rfuncheader=" RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
+   $rfuncheader=$rfuncheader."#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";
+print "#calculating".$rfuncheader;}
 elsif(@rkkydummy)
   {$rkky=1;
    $s=$rkkydummy[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -591,21 +595,33 @@ else{die "Error makenn - creating sample table for options -e -f -dm -jp \n";}
     $kn=$kn->append( pdl ([$rvec->at(2)]));
 
 if ($rfunc&&$rfuncdone!=1&&$rfuncheader)  
-{
- open(ff,">results/makenn.func.r");
+{open(ff,">results/makenn.func.r");
  print ff "#".$rfuncheader;
- print ff "#r[A] J(meV) interaction-present\n";
+ if($rkky<4) {print ff "#r[A] ";} else {print ff "#rx[A] ry[A] rz[A] ";}
+ print ff "J(meV) interaction-present\n";
+if($rkky<4) {
  for($myr=0.1;$myr<$rmax;$myr+=0.1){
  my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$myr,0,0,$myr);
  my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
  print ff $myr." ".$jaa."  0.1\n";
-    }
+            }
+           }
+ else      {
+ for($myrx=0.1;$myrx<$rmax;$myrx+=0.1){
+ for($myry=0.1;$myry<$rmax;$myry+=0.1){
+ for($myrz=0.1;$myrz<$rmax;$myrz+=0.1){$myr=sqrt($myrx*$myrx+$myry*$myry+$myrz*$myrz);
+ my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$myr,$myrx,$myry,$myrz);
+ my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
+ print ff $myrx." ".$myry." ".$myrz." ".$jaa."  0.1\n";
+            }}}
+
+            }
 $rfuncdone=1;
 }
 # calculate the interaction
     my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$r,$rvec->at(0),$rvec->at(1),$rvec->at(2));
     my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
-if ($rfunc&&$rfuncheader){print ff $r." ".$jaa." 1\n";}
+if ($rfunc&&$rfuncheader){if($rkky<4){print ff $r." ".$jaa." 1\n";}else{print ff $rvec->at(0)." ".$rvec->at(1)." ".$rvec->at(2)." ".$jaa." 1\n";}}
 
     if($djdx||$djdy||$djdz){my $dx=0; my $dy=0; my $dz=0;
               if($djdx){$dx=$delta;}

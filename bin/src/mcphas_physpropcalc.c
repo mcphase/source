@@ -94,9 +94,9 @@ physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=
     complex<double> piq(0,2*3.1415926535),g,gFT;
   ComplexVector * mq;
   Vector ri(1,3);
-        double QQ;
-  mq = new ComplexVector [mf.in(mf.na(),mf.nb(),mf.nc())+2];
-  for(i=0;i<=mf.in(mf.na(),mf.nb(),mf.nc())+1;++i)
+        double QQ;int na=mf.na(),nb=mf.nb(),nc=mf.nc();
+  mq = new ComplexVector [mf.in(na,nb,nc)+2];
+  for(i=0;i<=mf.in(na,nb,nc)+1;++i)
   {mq[i]=ComplexVector(1,3*mf.nofatoms);}
   float in;
 
@@ -105,8 +105,8 @@ physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=
      {mq[mf.in(qh,qk,ql)]=0;
      for(i=0;i<mf.na();++i){for(j=0;j<mf.nb();++j){for(k=0;k<mf.nc();++k)
       { g=exp(piq*((double)qh*i/mf.na()+(double)qk*j/mf.nb()+(double)ql*k/mf.nc()));
-	for (l=1;l<=mf.nofatoms;++l) {
-                                    for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i+1,j+1,k+1)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
+	for (l=1;l<=mf.nofatoms;++l) {int ip1=i+1,jp1=j+1,kp1=k+1;
+                                    for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(ip1,jp1,kp1)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
                                     (*inputpars.jjj[l]).mcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+1)+=g*mom(1);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+2)+=g*mom(2);
@@ -116,13 +116,14 @@ physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=
 //      fprintf(stdout,"%g %g %g %g %g \n",qh,qk,ql,imag(mq[in(qh,qk,ql)](1)),real(mq[in(qh,qk,ql)](1)));
      }}}
 //printf(".. calculating (hkl)\n");
+  int n0=0;
  for (qk=1;qk<=mf.nb();++qk)
- {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(mf.na(),qk,ql)]=mq[mf.in(0,qk,ql)];}
+ {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(na,qk,ql)]=mq[mf.in(n0,qk,ql)];}
  for (qh=1;qh<=mf.na();++qh)
- {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(qh,mf.nb(),ql)]=mq[mf.in(qh,0,ql)];}
+ {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(qh,nb,ql)]=mq[mf.in(qh,n0,ql)];}
  for (qh=1;qh<=mf.na();++qh)
- {for (qk=1;qk<=mf.nb();++qk) mq[mf.in(qh,qk,mf.nc())]=mq[mf.in(qh,qk,0)];}
- mq[mf.in(mf.na(),mf.nb(),mf.nc())]=mq[mf.in(0,0,0)];
+ {for (qk=1;qk<=mf.nb();++qk) mq[mf.in(qh,qk,nc)]=mq[mf.in(qh,qk,n0)];}
+ mq[mf.in(na,nb,nc)]=mq[mf.in(n0,n0,n0)];
 
      // mq[n]=mq[0];
 

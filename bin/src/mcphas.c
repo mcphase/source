@@ -21,7 +21,7 @@ const char * filemode="w";
 
 // for exchange striction - load exchange striction parameters into ip and store _file
 // returns true if successful
-bool parload(par *& ip,char * iniprefix, const char * filename, int verbose,par & inputpars, par * ipx = NULL)
+bool parload(par *& ip,char * iniprefix, const char * filename, int & verbose,par & inputpars, par * ipx = NULL)
 { char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   FILE * fin=NULL; 
   strcpy(prefix,iniprefix);strcpy(prefix+strlen(iniprefix),filename);
@@ -60,7 +60,7 @@ int main (int argc, char **argv)
   int nofreppoints=0,nofconvrep=0;
 
 fprintf(stderr,"**************************************************************************\n");
-//fprintf(stderr,"*\n");
+//fprintf(stderr,"*%i %i %i\n",EDEADLK,EINVAL,ESRCH);
 fprintf(stderr,"*  %s \n",MCPHASVERSION);
 fprintf(stderr,"* program to calculate static magnetic properties (phase diagram)\n");
 fprintf(stderr,"* reference: M. Rotter JMMM 272-276 (2004) 481\n");
@@ -233,10 +233,11 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
  if(verbose==1)printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);                              
 }
 // ***********************************************
+#ifdef _THREADS
 if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
- 
+#endif
 fin=NULL; if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)

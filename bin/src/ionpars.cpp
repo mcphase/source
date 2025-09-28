@@ -33,7 +33,7 @@
     for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i){In[i]= new Matrix(1,(*p.In[i]).Rhi(),1,(*p.In[i]).Chi());
                    (*In[i])=(*p.In[i]);}  
  }
-ionpars::ionpars (int dimj) // constructor from dimj
+ionpars::ionpars (int  dimj) // constructor from dimj
  { 
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;nof_electrons=0;
    so1ion=0;
@@ -93,7 +93,7 @@ ionpars::~ionpars(){
    delete[] In; 
  } //destructor
 
-ionpars::ionpars(FILE * cf_file, char * cffilename,int verbose,parser & ob) 
+ionpars::ionpars(FILE * cf_file, char * cffilename,int & verbose,parser & ob) 
 //constructor with commands from file handle (filename of cf parameters etc)
 // MIND: this code has to be kept consistent with the code in cf1ion_module/eingabe.c (function read_new_format())
 // ( reason: the stand alone c-progams so1ion, cfield should be consistent with the c++ programs
@@ -858,7 +858,7 @@ return (*In[n]);
 // *************************************************************************************************
 // ************************* private helper functions *********************************************
 // ************************************************************************************************
-void ionpars::setup_and_solve_Hamiltonian(Vector &  Hxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int sort)
+void ionpars::setup_and_solve_Hamiltonian(Vector &  Hxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int & sort)
 {
 Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
 for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)=Hxc(i);
@@ -937,7 +937,7 @@ int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
    if (n>dj)n=dj;
    double zsum=0,zii,x;
    int noft=0;
-   if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
+   if(T>0)for(int i=1;(i<=n)&&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
    {noft+=dj-i+1;zsum+=zii;}
    
    if(T<0)for(int i=1;i<=n;++i)
@@ -1146,7 +1146,7 @@ ComplexVector & ionpars::MQ(double th, double ph,double J0,double J2,double J4,d
     }
 // --------------- some helper functions for that ---------------------------------------------
 // just another routine to calculakte Z(K)
-double Z(int K, float J0, float J2, float J4, float J6, Vector Zc)
+double Z(int & K, float J0, float J2, float J4, float J6, Vector Zc)
 {// calculate Z(K)
  if (K==1) return Zc(1)*J0+Zc(2)*J2;
  if (K==3) return Zc(3)*J2+Zc(4)*J4;

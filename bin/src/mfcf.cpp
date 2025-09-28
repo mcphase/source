@@ -13,17 +13,17 @@
 #define MAXNOFSPINS  200
 
 // returns mf of spin [i=na,j=nb,k=nc] 
-Vector & mfcf::mf(int na, int nb, int nc)
+Vector & mfcf::mf(int & na, int & nb, int & nc)
 { return mfi[in(na,nb,nc)];
 }
 
 // the same but for spin number "i"
-Vector & mfcf::mi(int i)
+Vector & mfcf::mi(int & i)
 { return mfi[i];
 }
 
 // get index ijk=iv(1-3)  of mfonfiguration number in 
-int * mfcf::ijk(int in)
+int * mfcf::ijk(int & in)
 {div_t result; result=div(in,mxb*mxc); 
  iv[1]= result.quot;
  result=div(result.rem,mxc);
@@ -32,11 +32,11 @@ int * mfcf::ijk(int in)
  return iv;}
 
 // the inverse: get number of spin from indizes i,j,k
-int mfcf::in(int i, int j, int k)
+int mfcf::in(int & i, int & j, int & k)
 {return ((i*mxb+j)*mxc+k);}
 
 // this subtracts n2 if n1>n2
-int mfcf::mod(int n1,int n2)
+int mfcf::mod(int & n1,int & n2)
 {if (n1>n2) return n1-n2;
  else return n1;
 }
@@ -205,7 +205,7 @@ void mfcf::clear()
 
 
 //constructors
-mfcf::mfcf (int n1,int n2,int n3,int na,int nc)
+mfcf::mfcf (int  n1,int  n2,int  n3,int na,int nc)
 { wasstable=0;
   nofa=n1;nofb=n2;nofc=n3;
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
@@ -220,7 +220,7 @@ mfcf::mfcf (int n1,int n2,int n3,int na,int nc)
       exit (EXIT_FAILURE);} 
 }
 
-void mfcf::resetnofc(int n)
+void mfcf::resetnofc(int & n)
 {Vector * mfn;
  //dimension arrays
   mfn = new Vector[mxa*mxb*mxc+1];
@@ -266,8 +266,9 @@ mfcf::mfcf (const mfcf & p)
 
 //destruktor
 mfcf::~mfcf ()
-{
+{      
   delete []mfi;
+ 
 }
 
 

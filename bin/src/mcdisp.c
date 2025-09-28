@@ -144,17 +144,18 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
     int nofneighbours=myinput->dimA, ll=myinput->level;
     int thread_id = myinput->thread_id;
 #endif
-    Matrix maglat(1,3,1,3); Vector maghkl(1,3);
+    Matrix maglat(1,3,1,3),magrez(1,3,1,3);double maglattvol; Vector maghkl(1,3);
   if(ini.include_cd){maglat=inputpars.cs.prim_unitcell_ijk();
                      for(int i=1;i<=3;++i){ 
                      maglat(i,1)*=ini.mf.na();
                      maglat(i,2)*=ini.mf.nb();
                      maglat(i,3)*=ini.mf.nc();
-                     
                      }
                      maghkl(1)=q(1)*ini.mf.na();
                      maghkl(2)=q(2)*ini.mf.nb();
                      maghkl(3)=q(3)*ini.mf.nc();
+                     maglattvol=maglat.Column(1)*crossp(maglat.Column(2),maglat.Column(3));
+                     magrez= rezcalc(maglat);// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
                      }
     complex<double> i2pi(0,2*PI), expqd;
     int i,j,k,l,i1,j1,k1,s,ss,sl,tl,tll,m,n,jsi,jsj;
@@ -192,7 +193,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          i=i-(int)ij(1)+1;
 	 j=j-(int)ij(2)+1;
 	 k=k-(int)ij(3)+1;
-	 ss=md.in(i,j,k);
+	 ss=md.in(i,j,k);  // ijk range from 1 to ini.mf.nabc()
 //          if (do_verbose==1) {printf("#s=%i %i %i  s'=%i %i %i\n",i,j,k,i1,j1,k1);}
           // sum up 
 //         mdl - Changed 110710 - To speed up computation by calculating exp(+2i.Pi.Q.d) real and imag parts separately, 
@@ -232,12 +233,12 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
           ++nofneighbours; // count neighbours summed up
 	 }}}
    }
-  if(ini.include_cd)
+  if(ini.include_cd&&(*inputpars.jjj[ll]).gJ!=0)
  {ComplexMatrix cd(1,3,1,3); int cddim=3; if(inputpars.cs.nofcomponents<3)cddim=inputpars.cs.nofcomponents;
- Vector dA(1,3),dB(1,3),dll(1,3),dl(1,3),xyz(1,3);bool deltaAB;
+ Vector dA(1,3),dAB(1,3),dll(1,3),dl(1,3),xyz(1,3);bool deltaAB;
 // transform distance vector xyz to primitive lattice
  xyz=(*inputpars.jjj[ll]).xyz;dll=inputpars.rez*(const Vector&)xyz;
-   for(l=1;l<=inputpars.cs.nofatoms;++l){ // loop all atoms in magnetic unit cell
+   for(l=1;l<=inputpars.cs.nofatoms;++l)if((*inputpars.jjj[l]).gJ!=0){ // loop all atoms in magnetic unit cell
 // transform distance vector xyz to primitive lattice
  xyz=(*inputpars.jjj[l]).xyz;dl=inputpars.rez*(const Vector&)xyz;
     for(i1=1;i1<=ini.mf.na();++i1)for(j1=1;j1<=ini.mf.nb();++j1)for(k1=1;k1<=ini.mf.nc();++k1){
@@ -248,14 +249,14 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
    for(i=1;i<=ini.mf.na();++i)for(j=1;j<=ini.mf.nb();++j)for(k=1;k<=ini.mf.nc();++k){
    ss=md.in(i,j,k);
   complex<double> **jsss = J.mati(s,ss).M;
-  dB(1)=(dl(1)+i-1)/ini.mf.na();
-  dB(2)=(dl(2)+j-1)/ini.mf.nb();
-  dB(3)=(dl(3)+k-1)/ini.mf.nc();
+  dAB(1)=(dl(1)+i-1)/ini.mf.na()-dA(1);
+  dAB(2)=(dl(2)+j-1)/ini.mf.nb()-dA(2);
+  dAB(3)=(dl(3)+k-1)/ini.mf.nc()-dA(3);
   if(i==i1&&j==j1&&k==k1&&l==ll)deltaAB=true;
                            else deltaAB=false;
  // in contrast to mcphasit it is not necessary to divide here DAB by ini.mf.n() to get
 // consistent results for a supercell. Tested 20.9.2025 MR on HoVO4 with Gd3+ -cd 
-  cd=DAB(maghkl, maglat, dA,(*inputpars.jjj[ll]).gJ, dB, (*inputpars.jjj[l]).gJ, deltaAB);
+  cd=DAB(maghkl, maglat,maglattvol,magrez,(*inputpars.jjj[ll]).gJ, dAB, (*inputpars.jjj[l]).gJ, deltaAB);
    for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,l);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,l,tll)-1);
 	  for(m=1;m<=cddim;++m)for(n=1;n<=cddim;++n)jsss[jsi+m][jsj+n] +=cd(m,n);

@@ -6,7 +6,7 @@
  // *************************************************************************
 
 
-void   sort(float * v,int jmin,int jmax,int * jnew) // sorting function
+void   sort(float * v,int jmin,int & jmax,int * jnew) // sorting function
 {// input: v[jmin ... jmax] vector to be sorted
  // jnew [jmin .... jmax]   sort index - after sorting the 
  //                         vector jnew contains the indices
@@ -28,7 +28,7 @@ void   sort(float * v,int jmin,int jmax,int * jnew) // sorting function
 }
  
 //constructor
-physproperties::physproperties (int nofspincorrs,int maxnofhkli,int na,int nm)
+physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,int & na,int & nm)
 {washere=0;
  int i;
  nofspincorr=nofspincorrs;
@@ -101,7 +101,7 @@ delete []jj;delete []hkli;
  
 }
 
-void physproperties::update_maxnofhkls(int maxnofhkli)
+void physproperties::update_maxnofhkls(int & maxnofhkli)
 {delete []hkli;
  maxnofhkls=maxnofhkli;
  int i;
@@ -122,7 +122,7 @@ void physproperties::update_maxnofhkls(int maxnofhkli)
    //                 puts into outstr the numbers  nn[i>8] formatted for output into mcphas.fum
    //  if setnn false: reads nn[8-nofcols]  into parameters fe, u, etc  
    // for fum file
-double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini, int ortho,par & inputpars,int verbose)
+double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini, int & ortho,par & inputpars,int & verbose)
  {double sta=0;double * ptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';
     int nofcolsin=0;if(!setnn){nofcolsin=nofcols; Pel=0;Pelabc=0;m=0;mabc=0;fe=0;u=0;sps.epsilon=0;}
@@ -220,7 +220,7 @@ return sta;
 }
 
    // for xyt file
-double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose)
+double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int & verbose)
  {double sta=0;double * ptr;int * iptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';int nofa=sps.na(),nofb=sps.nb(),nofc=sps.nc();
     int nofcolsin=0;if(!setnn){nofcolsin=nofcols;j=0;nofa=0;nofb=0;nofc=0;totalJ=0;}
@@ -262,7 +262,7 @@ return sta;
 
 //*********************************************************************************************************
 // methode save
-double physproperties::save (int verbose, const char * filemode, int htfailed,inipar & ini, par & inputpars,char * prefix)
+double physproperties::save (int & verbose, const char * filemode, int & htfailed,inipar & ini, par & inputpars,char * prefix)
 { FILE *fout;
   char filename[MAXNOFCHARINLINE],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
   time_t curtime;
@@ -642,7 +642,7 @@ else
    ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    fprintf (fout, " %i %i %i ",
             sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
-   if (htfailed!=0){fprintf(fout,"1 ");sps.spinfromq(1,1,1,null1,null,null,null);} // failed
+   if (htfailed!=0){fprintf(fout,"1 ");int d1=1;sps.spinfromq(d1,d1,d1,null1,null,null,null);} // failed
     else {fprintf(fout,"0 ");}
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
     sps.print(fout);fprintf(fout,"\n");
@@ -714,9 +714,9 @@ return sta;
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise
 // return 1
-int physproperties::read(int verbose, par & inputpars,char * readprefix,inipar & ini)
+int physproperties::read(int & verbose, par & inputpars,char * readprefix,inipar & ini)
 { FILE *fin;int n;float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
-  char filename[50],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
+  char filename[MAXNOFCHARINLINE],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
   int i,j2,l,nmax;
   float nn[200];nn[0]=199;
   int ortho=1; bool found=0;
