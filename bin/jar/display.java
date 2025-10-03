@@ -55,10 +55,10 @@ import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 
+import expr.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-
 
 //import com.sun.image.codec.jpeg.JPEGCodec;
 //import com.sun.image.codec.jpeg.JPEGImageEncoder;
@@ -147,6 +147,8 @@ public void mouseExited(MouseEvent e){
 public void windowClosing(WindowEvent e) {
          windowclose();
         }
+static   DataOutputStream GnuOutputStream;
+
 static public void windowclose(){
         if(jpgfilename.length()!=0)
          {  BufferedImage image= chart.createBufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB,null);
@@ -158,6 +160,75 @@ static public void windowclose(){
               }
           }
                 //dispose();
+// here we create results/display.gnu or if it fails display.gnu to be able to recreate the plot easily in gnuplot
+    try{ //Oeffnen der gnu Datei
+      System.out.println("Writing results/display.gnu");
+     GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("results/display.gnu")));
+     }
+   catch (FileNotFoundException e)
+    {System.out.println("Writing display.gnu");
+     try{ GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("display.gnu")));
+          }
+       catch (FileNotFoundException e1)
+       {
+      System.out.println("Error opening " + e1.getLocalizedMessage());System.exit(0);
+       }
+    }
+    
+   try{ int w=panel.getWidth();
+        int h=panel.getHeight();
+       GnuOutputStream.writeBytes("""
+set term png enhanced size """+" "+w+" , "+ h + """ 
+
+#set terminal postscript eps  enhanced color "Arial" 22
+
+set style line 1 lt 1 lw 7 lc rgb "blue" ps 0.3
+set style line 2 lt 1 lw 7 lc rgb "red" ps 0.3
+set style line 3 lt 1 lw 7 lc rgb "forest-green" ps 0.3
+set style line 4 lt 1 lw 7 lc rgb "black" ps 0.3
+set style line 5 lt 1 lw 7 lc rgb "magenta" ps 0.3
+set style line 6 lt 1 lw 7 lc rgb "orange" ps 0.3
+set style line 7 lt 1 lw 7 lc rgb "black" ps 0.3
+set style line 8 lt 1 lw 7 lc rgb "cyan" ps 0.3
+set style line 9 lt 2 lw 7 lc rgb "blue" ps 0.3
+#unset key
+#set yr [0.01:20]
+#set xr [0.5:1.5]\n """);
+ GnuOutputStream.writeBytes("set xlabel '"+chart.getXYPlot().getRangeAxis().getLabel()+"'\n");
+ GnuOutputStream.writeBytes("set ylabel '"+chart.getXYPlot().getDomainAxis().getLabel()+"'\n");
+ GnuOutputStream.writeBytes("set title '"+chart.getTitle()+"'\n");
+GnuOutputStream.writeBytes("""
+set out 'display.png'
+#set size ratio 2
+#set origin 0, 0
+ plot """);
+ for(int i=0;i<noffiles;i+=1)
+       {
+GnuOutputStream.writeBytes(" \""+file[i]+"\" using ");
+if(colx[i].contains("c")){GnuOutputStream.writeBytes("("+colx[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
+}else{GnuOutputStream.writeBytes(colx[i]);}
+GnuOutputStream.writeBytes(":");
+if(coly[i].contains("c")){GnuOutputStream.writeBytes("("+coly[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
+}else{GnuOutputStream.writeBytes(coly[i]);}
+GnuOutputStream.writeBytes(" with points ls "+(i+1));
+if(i<noffiles-1)GnuOutputStream.writeBytes(", \\\n");
+       }
+// "results/001mcdisp.qei" using 7:9:(sqrt($10)*2) with points pt 4 pointsize variable , \\
+//      "results/002mcdisp.qei" using 7:9:(sqrt($10)*2) with points pt 6 pointsize variable 
+GnuOutputStream.writeBytes("""
+
+replot
+      """);
+       GnuOutputStream.close();
+
+
+    }
+    //Sonstiger Dateifehler
+    catch (IOException e)
+    { System.out.println("File Error: " + e.getLocalizedMessage());
+    }
+
+
                 System.exit(0);
 }
         public void windowOpened(WindowEvent e) {}
@@ -176,7 +247,7 @@ static public void windowclose(){
                                     if (e.getKeyChar()=='-'||e.getKeyChar()=='-'){
                                                XYPlot plot = (XYPlot) chart.getPlot();
                                               for (int i=0;i<noffiles;++i)
-                                             { if(colyerr[i]==0&&colxerr[i]==0)
+                                             { if(colyerr[i]=="0"&&colxerr[i]=="0")
                                                { XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer(i);
                                                 renderer.setSeriesLinesVisible(i,!renderer.getSeriesLinesVisible(i));
                                                 renderer.setSeriesShapesVisible(i,!renderer.getSeriesShapesVisible(i));
@@ -222,7 +293,8 @@ static public void windowclose(){
       {System.out.println("- too few arguments...");
        System.out.println("  program display - show and watch data file by viewing a xy graphic on screen\n");
        System.out.println("use as:  display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]\n");
-       System.out.println("         xcol,ycol ... column to be taken as x-, y- axis in a lineplot");
+       System.out.println("         xcol,ycol ... column to be taken as x-, y- axis in a lineplot, expressions such as 'c1xc2+1' are allowed\n");
+       System.out.println("         to plot sum/ productof columns");
        System.out.println("	 filename ..... filename of datafile");
        System.out.println("	 Data files may contain lines to tune the display output, such as");
        System.out.println("	 # displaytitle=My new Graph");
@@ -230,9 +302,10 @@ static public void windowclose(){
        System.out.println("	 # displayxtext=meV ");
        System.out.println("       if optional errorcolumns are added then instead of lines symbols and errorbars are shown");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to");
-       System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')");
+       System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b' by factor 2)");
        System.out.println("	  (toggle lines also with '-' key))");
 //    System.out.println("	 # displaylegend=false (toggle also with 'L' key)\n");
+       System.out.println("	 a a file results/display.gnu or display.gnu is created for use with gnuplot");
        System.out.println("       options:  -o file.jpg  create a jpg file on exiting");
        System.out.println("                 -c file.jpg  only creates a jpg file and exit immediately");
        System.out.println("                 -logx -logy  make x(y) a logarithmic axis");
@@ -244,15 +317,16 @@ static public void windowclose(){
        System.out.println("                 -g shows gridlines");
        System.out.println("                 -dim 400 200  set dimension of plot (in pixels width 400 height 200)\n");
        System.out.println("                 Press Enter to Continue");
+
        System.exit(0);
       } scale=0.01;
        file = new String[MAX_NOF_FILES];
        lastmod = new long[MAX_NOF_FILES];
-       colx = new int[MAX_NOF_FILES];
-       coly = new int[MAX_NOF_FILES];
-       colxerr = new int[MAX_NOF_FILES];
-       colyerr = new int[MAX_NOF_FILES];
-       Double p = new Double(0.0);
+       colx = new String[MAX_NOF_FILES];
+       coly = new String[MAX_NOF_FILES];
+       colxerr = new String[MAX_NOF_FILES];
+       colyerr = new String[MAX_NOF_FILES];
+       Double p = Double.valueOf(0.0);
        //      System.out.println(sx+" "+sy);
        //      p.valueOf(strLine);
        //    double[] myDatax = {};
@@ -341,13 +415,13 @@ static public void windowclose(){
        for(int i=k;s.length()>0;	i+=0)
        {Integer pp;
        ss=SF.FirstWord(s);
-       colx[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
-       colxerr[j]=p.valueOf(SF.ErrorCol(ss)).intValue();
+       colx[j]=SF.DataCol(ss);       title=title+" "+ss;
+       colxerr[j]=SF.ErrorCol(ss);
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
-       coly[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
-       colyerr[j]=p.valueOf(SF.ErrorCol(ss)).intValue();
-       if (colyerr[j]==0) {colyerr[j]=-p.valueOf(SF.BubbleCol(ss)).intValue();}
+       coly[j]=SF.DataCol(ss);       title=title+" "+ss;
+       colyerr[j]=SF.ErrorCol(ss);
+       if (colyerr[j]=="0") {colyerr[j]=SF.BubbleCol(ss);}
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
        file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>=MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
@@ -375,14 +449,18 @@ static public void windowclose(){
 // JButton bRot=new JButton("save display.jpg");                       //erstellt einen Button
 // Box.Filler bRot1=new Box.Filler (new Dimension(350,10),new Dimension(350,10),new Dimension(370,10));                       //erstellt einen Button
 // AbstractButton bRot= new AbstractButton();
+ static Expr pclx;
+ static Expr pcly;
+ static Expr pclxerr;
+ static Expr pclyerr;
  static int noffiles;
  static String[] file;
  static String jpgfilename;
  static long[] lastmod;
- static int[] colx;
- static int[] coly;
- static int[] colxerr;
- static int[] colyerr;
+ static String[] colx;
+ static String[] coly;
+ static String[] colxerr;
+ static String[] colyerr;
  static double scale;
  static double xmin,xmax,ymin,ymax;
  static Integer prefxsize,prefysize;
@@ -543,17 +621,17 @@ plot.setDomainGridlinePaint(Color.BLACK);
         xAxis.setUpperMargin(0.15);
         xAxis.setAutoRangeIncludesZero(false);
         yAxis.setAutoRangeIncludesZero(false);
-        
+        Double p = Double.valueOf(0.0);
     for(int i=0;i<noffiles;++i){
-         if(colyerr[i]>=0){plot.setRenderer(i,renderer);
+             if(colyerr[i].startsWith("b")) {    plot.setRenderer(i,brenderer);
+                      plot.setDataset(i,bdataset);
+                           //            legendItemsNew.add(brenderer.getLegendItem(i,i));
+                      }else{plot.setRenderer(i,renderer);
                            plot.setDataset(i,dataset);
                            renderer.setSeriesLinesVisible(i,false);
                            renderer.setSeriesShapesVisible(i, true);
                            }
-            else {    plot.setRenderer(i,brenderer);
-                      plot.setDataset(i,bdataset);
-                           //            legendItemsNew.add(brenderer.getLegendItem(i,i));
-                      }
+        
 
         reload_data(i);
                                }
@@ -579,7 +657,7 @@ plot.setDomainGridlinePaint(Color.BLACK);
 //     plot.addAnnotation(axy);
 // we plot vertical lines at the positions specified in the numbers of string Vlines
 
-    String hl [] = Hlines.split(",");Double p = new Double(0.0);
+    String hl [] = Hlines.split(",");
 for (String s : hl) {
 if(!s.isEmpty()){
     String sn [] = s.split("\\|"); 
@@ -656,12 +734,29 @@ protected static void reload_data(int i){    try{
              String sye;
              String sxerr;
              String syerr;
-             int clx = colx[i];
-             int cly = coly[i];
-             int clxerr = colxerr[i];
-             int clyerr = colyerr[i];
-
+             String clx = colx[i];
+             String cly = coly[i];
+             String clxerr = colxerr[i];
+             String clyerr = colyerr[i];
+           Double p = Double.valueOf(0.0);
+             boolean bubbles=false;
              j=0;int dxtf=0; int dytf=0;
+          //                System.out.println(clx+" "+cly+" "+clxerr+" "+clyerr);
+             if(clyerr.startsWith("b")){clyerr=clyerr.substring(1);bubbles=true;}
+             
+             if(clx.contains("c")){// parse expression
+              try { pclx = Parser.parse(clx.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+             if(cly.contains("c")){// parse expression
+              try { pcly = Parser.parse(cly.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+             if(clxerr.contains("c")){// parse expression
+              try { pclxerr = Parser.parse(clxerr.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+             if(clyerr.contains("c")){// parse expression
+              try { pclyerr = Parser.parse(clyerr.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+
              //Auslesen der Datei
             while (inStream.available() > 0&&j<maxnofpoints)
             {
@@ -682,7 +777,8 @@ protected static void reload_data(int i){    try{
               chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,clx));}
+               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0)if(clx.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(clx);}
+                         else{chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
                }
                                                    }
         if(detyText==true){
@@ -690,7 +786,8 @@ protected static void reload_data(int i){    try{
               chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,cly));}
+               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0)if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
+                         else{chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
                }
                                                    }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
@@ -699,14 +796,34 @@ protected static void reload_data(int i){    try{
         }
         continue;
              }
-             // select colx and coly
-                 sx=SF.NthWord(strLine,clx);if(clx==0){sx=s.valueOf(j);}
-                 sy=SF.NthWord(strLine,cly);if(cly==0){sy=s.valueOf(j);}
-                 sxe=SF.NthWord(strLine,clxerr);
-                 sye=SF.NthWord(strLine,Math.abs(clyerr));
-             // System.out.println(sx+" "+sy+" "+sxe+" "+sye);
+               // select colx and coly
+            if(clx.contains("c")||cly.contains("c")||clxerr.contains("c")||clyerr.contains("c")){     
+           Variable [] c=new Variable[SF.NofCols(strLine)+1];
+               for(int ii=0;ii<=SF.NofCols(strLine);++ii){c[ii]=Variable.make("c"+ii);
+                           if(ii==0){c[ii].setValue(j);}
+                          else{String cv=SF.NthWord(strLine,ii);
+                                 cv=cv.replace("+-"," ");cv=SF.NthWord(cv,1);cv=cv.replace('D','E');
+                                 cv=cv.replaceAll("[a-d,f-z,A-D,F-Z]"," ");cv=SF.NthWord(cv,1);
+//System.out.println("c"+ii+"  "+cv);
+                              c[ii].setValue(p.parseDouble(cv));
+                           }
+                               }
+                //System.out.println(expr.value());
+                if(clx.contains("c")){sx=s.valueOf(pclx.value());}else{sx=SF.NthWord(strLine,p.valueOf(clx).intValue());if(clx=="0"){sx=s.valueOf(j);}}
+                if(cly.contains("c")){sy=s.valueOf(pcly.value());}else{sy=SF.NthWord(strLine,p.valueOf(cly).intValue());if(cly=="0"){sy=s.valueOf(j);}}
+                if(clxerr.contains("c")){sxe=s.valueOf(pclxerr.value());}else{sxe=SF.NthWord(strLine,p.valueOf(clxerr).intValue());}
+                if(clyerr.contains("c")){sye=s.valueOf(pclyerr.value());}else{sye=SF.NthWord(strLine,Math.abs(p.valueOf(clyerr).intValue()));}
+               }   
+           else{sx=SF.NthWord(strLine,p.valueOf(clx).intValue());if(clx=="0"){sx=s.valueOf(j);}
 
-               Double p = new Double(0.0);
+                 sy=SF.NthWord(strLine,p.valueOf(cly).intValue());if(cly=="0"){sy=s.valueOf(j);}
+                 sxe=SF.NthWord(strLine,p.valueOf(clxerr).intValue());
+                 sye=SF.NthWord(strLine,Math.abs(p.valueOf(clyerr).intValue()));
+                }
+
+         //    System.out.println(sx+" "+sy+" "+sxe+" "+sye);
+
+              
    if(sx.length()!=0&&sy.length()!=0&&sxe.length()!=0&&sye.length()!=0){
                try{sx=sx.replace("+-"," ");sx=SF.NthWord(sx,1);
                    sy=sy.replace("+-"," ");sy=SF.NthWord(sy,1);
@@ -718,9 +835,19 @@ protected static void reload_data(int i){    try{
                    syerr=SF.NthWord(sye,2);if(syerr.length()==0){syerr=SF.NthWord(sye,1);}
                     sxerr=sxerr.replace('D','E');
                     syerr=syerr.replace('D','E');
-                    if(clyerr>=0)
-                   { if(clxerr==0){sxerr="0";}
-                     if(clyerr==0){syerr="0";}
+                    if(bubbles)
+                   {bdata[1][j]=p.parseDouble(sx);
+                     if (detxmin&bdata[1][j]<xmin){xmin=bdata[1][j];}
+                     if (detxmax&bdata[1][j]>xmax){xmax=bdata[1][j];}
+                    bdata[0][j]=p.parseDouble(sy);
+                     if (detymin&bdata[0][j]<ymin){ymin=bdata[0][j];}
+                     if (detymax&bdata[0][j]>ymax){ymax=bdata[0][j];}
+                    bdata[2][j]=p.parseDouble(syerr);
+                    if (bdata[2][j]<0){bdata[2][j]=0;}
+                    bdata[2][j]=scale*Math.sqrt(bdata[2][j]);
+                  }else
+                  {if(clxerr=="0"){sxerr="0";}
+                     if(clyerr=="0"){syerr="0";}
                      data[0][j]=p.parseDouble(sy);
                       if (detymin&data[0][j]<ymin){ymin=data[0][j];}
                       if (detymax&data[0][j]>ymax){ymax=data[0][j];}
@@ -736,17 +863,6 @@ protected static void reload_data(int i){    try{
                      data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
                       if (detxmin&data[5][j]<xmin){xmin=data[5][j];}
                    }
-                   else
-                   {bdata[1][j]=p.parseDouble(sx);
-                     if (detxmin&bdata[1][j]<xmin){xmin=bdata[1][j];}
-                     if (detxmax&bdata[1][j]>xmax){xmax=bdata[1][j];}
-                    bdata[0][j]=p.parseDouble(sy);
-                     if (detymin&bdata[0][j]<ymin){ymin=bdata[0][j];}
-                     if (detymax&bdata[0][j]>ymax){ymax=bdata[0][j];}
-                    bdata[2][j]=p.parseDouble(syerr);
-                    if (bdata[2][j]<0){bdata[2][j]=0;}
-                    bdata[2][j]=scale*Math.sqrt(bdata[2][j]);
-                  }
                     ++j;
                    }
                    catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);
@@ -760,12 +876,12 @@ protected static void reload_data(int i){    try{
                {// here fill the rest of the array with the same values
                 for(int jj=j;jj<maxnofpoints;++jj)
                   {data[0][jj]=data[0][j-1];data[1][jj]=data[1][j-1];data[2][jj]=data[2][j-1];
-                    if(clyerr>=0){data[3][jj]=data[3][j-1];data[4][jj]=data[4][j-1];data[5][jj]=data[5][j-1];
+                    if(!bubbles){data[3][jj]=data[3][j-1];data[4][jj]=data[4][j-1];data[5][jj]=data[5][j-1];
                                 }
                    
                   }
 
-               if(clyerr>=0)
+               if(!bubbles)
                    {//dataset.removeSeries(file[i]+s.valueOf(i));
                     dataset.addSeries(file[i]+s.valueOf(i),data);
                     

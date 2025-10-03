@@ -7,6 +7,7 @@ public int NofCols (String strLine)
  // select N
       sx=TrimString(strLine);
       int cx =0;
+      if(sx.length() > 0){++cx;}   
       int iPos = sx.indexOf(" ");
       while (iPos >= 0)
       {++cx;
@@ -51,19 +52,28 @@ public String FirstWord(String strSource)
  }
 
 public String DataCol(String strSource)
- { String fw;
-  fw=TrimString(strSource);
-       int iPos = fw.indexOf("e");
+ { String fw;String f;
+  fw=TrimString(strSource);f=fw;
+       int iPos = fw.indexOf("e");int tipos=iPos;
+       // try to exclude "exp" function from being detected es error separator
+       while(iPos>=0&&fw.substring(iPos+1).startsWith("x")){fw=fw.substring(iPos+1); iPos = fw.indexOf("e");tipos+=iPos+1;}
+     
        if (iPos >= 0)
        {
-       fw=strSource.substring(0,iPos);
+       fw=f.substring(0,tipos);
        fw=TrimString(fw);
        }
-       iPos = fw.indexOf("b");
+       else
+       {iPos = f.indexOf("b");
+      // try to exclude "abs" function from being detected es error separator
+       while(iPos>=0&&fw.substring(iPos+1).startsWith("s")){fw=fw.substring(iPos+1); iPos = fw.indexOf("b");tipos+=iPos+1;}
+     
        if (iPos >= 0)
        {
-       fw=strSource.substring(0,iPos);
+       fw=f.substring(0,iPos);
        fw=TrimString(fw);
+       } else
+       {fw=f;}
        }
  return(fw);
  }
@@ -71,10 +81,11 @@ public String DataCol(String strSource)
 public String ErrorCol(String strSource)
  { String fw;
   fw=TrimString(strSource);
-       int iPos = fw.indexOf("e");
+       int iPos = fw.indexOf("e"); // try to exclude "exp" function from being detected es error separator
+       while(iPos>=0&&fw.substring(iPos+1).startsWith("x")){fw=fw.substring(iPos+1); iPos = fw.indexOf("e");}
        if (iPos >= 0)
        {
-       fw=strSource.substring(iPos+1);
+       fw=fw.substring(iPos+1);
        fw=TrimString(fw);
        }
        else
@@ -85,10 +96,11 @@ public String ErrorCol(String strSource)
 public String BubbleCol(String strSource)
  { String fw;
   fw=TrimString(strSource);
-       int iPos = fw.indexOf("b");
+       int iPos = fw.indexOf("b");// try to exclude "abs" function from being detected es bubble separator
+       while(iPos>=0&&fw.substring(iPos+1).startsWith("s")){fw=fw.substring(iPos+1); iPos = fw.indexOf("b");}
        if (iPos >= 0)
        {
-       fw=strSource.substring(iPos+1);
+       fw="b"+fw.substring(iPos+1);
        fw=TrimString(fw);
        }
        else

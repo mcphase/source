@@ -40,6 +40,8 @@ import org.jfree.data.general.DatasetUtils;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 
+import expr.*;
+
 //import com.sun.image.codec.jpeg.JPEGCodec;
 //import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
@@ -51,12 +53,16 @@ public class displaycontour extends ApplicationFrame implements WindowListener {
 static myStringfunc SF=new myStringfunc();
 static final int MAX_NOF_FILES = 1;
 static int noffiles;
+ static Expr pclx;
+ static Expr pcly;
+ static Expr pclint;
+
  static String[] file;
  static String jpgfilename;
  static long[] lastmod;
- static int[] colx;
- static int[] coly;
- static int[] colint;
+ static String[] colx;
+ static String[] coly;
+ static String[] colint;
  static double scale;
  static double bw;
  static double bh;
@@ -76,6 +82,7 @@ static int noffiles;
  static JFreeChart chart;
  static ChartPanel panel;
  public ChartPanel chartPanel;
+ static   DataOutputStream GnuOutputStream;
 
 public void windowClosing(WindowEvent e) {
          windowclose();
@@ -91,6 +98,87 @@ static public void windowclose(){
               }
           }
                 //dispose();
+
+try{ //Oeffnen der gnu Datei
+      System.out.println("Writing results/displaycontour.gnu");
+     GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("results/displaycontour.gnu")));
+     }
+   catch (FileNotFoundException e)
+    {System.out.println("Writing displaycontour.gnu");
+     try{ GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("displaycontour.gnu")));
+          }
+       catch (FileNotFoundException e1)
+       {
+      System.out.println("Error opening " + e1.getLocalizedMessage());System.exit(0);
+       }
+    }
+    
+   try{ int w=panel.getWidth();
+        int h=panel.getHeight();
+       GnuOutputStream.writeBytes("""
+set term png enhanced size """+" "+w+" , "+ h + """ 
+
+#set terminal postscript eps  enhanced color "Arial" 22
+
+#unset key
+#set yr [0.01:20]
+#set xr [0.5:1.5]
+#set cbrange [-21:21]
+#set cbtics -20, 5, 20
+#set contours
+#set cntrparam cubic
+#set cntrparam levels incremental -20, 5, 20
+#set cntrlabel onecolor
+#unset colorbox
+#unset hidden3d
+set palette viridis positive
+#set contourfill cbtics
+#set pm3d scansauto border retrace
+set view map
+#set tics scale 0
+#set key inside samplen .1 reverse
+#set key title "&{----} z = x^2 + y^2(1-x)^3" \n """);
+
+ GnuOutputStream.writeBytes("set xlabel '"+chart.getXYPlot().getDomainAxis().getLabel()+"'\n");
+ GnuOutputStream.writeBytes("set ylabel '"+chart.getXYPlot().getRangeAxis().getLabel()+"'\n");
+ GnuOutputStream.writeBytes("set title '"+chart.getTitle()+"'\n");
+GnuOutputStream.writeBytes("""
+set out 'display.png'
+#set size ratio 2
+#set origin 0, 0
+#splot g(x,y) with contourfill fs solid border notitle, \
+#      g(x,y) nosurface lt black title "Contour levels Δz = 5"
+# set dgrid3d  splines
+ splot """);
+ for(int i=0;i<noffiles;i+=1)
+       {
+GnuOutputStream.writeBytes(" \""+file[i]+"\" using ");
+if(colx[i].contains("c")){GnuOutputStream.writeBytes("("+colx[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
+}else{GnuOutputStream.writeBytes(colx[i]);}
+GnuOutputStream.writeBytes(":");
+if(coly[i].contains("c")){GnuOutputStream.writeBytes("("+coly[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
+}else{GnuOutputStream.writeBytes(coly[i]);}
+GnuOutputStream.writeBytes(":");
+if(colint[i].contains("c")){GnuOutputStream.writeBytes("("+colint[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
+}else{GnuOutputStream.writeBytes(colint[i]);}
+GnuOutputStream.writeBytes(" with points pointtype 5 pointsize 1 palette linewidth 30 ");
+if(i<noffiles-1)GnuOutputStream.writeBytes(", \\\n");
+       }
+// "results/001mcdisp.qei" using 7:9:(sqrt($10)*2) with points pt 4 pointsize variable , \\
+//      "results/002mcdisp.qei" using 7:9:(sqrt($10)*2) with points pt 6 pointsize variable 
+GnuOutputStream.writeBytes("""
+
+replot
+      """);
+       GnuOutputStream.close();
+
+
+    }
+    //Sonstiger Dateifehler
+    catch (IOException e)
+    { System.out.println("File Error: " + e.getLocalizedMessage());
+    }
+
                 System.exit(0);
 }
         public void windowOpened(WindowEvent e) {}
@@ -332,9 +420,9 @@ zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
       }
        file = new String[args.length/3];
        lastmod = new long[args.length/3];
-       colx = new int[args.length/3];
-       coly = new int[args.length/3];
-       colint = new int[args.length/3];
+       colx = new String[args.length/3];
+       coly = new String[args.length/3];
+       colint = new String[args.length/3];
        Double p = new Double(0.0);
        //      System.out.println(sx+" "+sy);
        //      p.valueOf(strLine);
@@ -397,19 +485,19 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
              detymax=false;ss=SF.FirstWord(s);ymax=p.parseDouble(ss);
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
-            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ztext")) // option "-ytext meV"
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ztext")) // option "-ztext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detyText=false;ss=SF.FirstWord(s);zText=ss;
+             detzText=false;ss=SF.FirstWord(s);zText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ytext")) // option "-ytext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detxText=false;ss=SF.FirstWord(s);yText=ss;
+             detyText=false;ss=SF.FirstWord(s);yText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detyText=false;ss=SF.FirstWord(s);xText=ss;
+             detxText=false;ss=SF.FirstWord(s);xText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title meV"
@@ -432,19 +520,19 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
        for(int i=k;s.length()>0;	i+=0)
        {Integer pp;
        ss=SF.FirstWord(s);
-       colx[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
+       colx[j]=SF.DataCol(ss);       title=title+" "+ss;
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
-       coly[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
+       coly[j]=SF.DataCol(ss);       title=title+" "+ss;
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
-       colint[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
+       colint[j]=SF.DataCol(ss);       title=title+" "+ss;
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
        file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
        s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
        }noffiles=j;
-       
+//       System.out.println(xText);
         displaycontour demo = new displaycontour(title,prefxsize,prefysize);
         demo.pack();
         //RefineryUtilities.centerFrameOnScreen(demo);
@@ -512,10 +600,20 @@ protected void reload_data(int i)
              String sx;
              String sy;
              String sint;
-             int clx = colx[i];
-             int cly = coly[i];   
-             int clint = colint[i];
-
+             String clx = colx[i];
+             String cly = coly[i];   
+             String clint = colint[i];
+            Double p = Double.valueOf(0.0);
+             if(clx.contains("c")){// parse expression
+              try { pclx = Parser.parse(clx.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+             if(cly.contains("c")){// parse expression
+              try { pcly = Parser.parse(cly.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+            if(clint.contains("c")){// parse expression
+              try { pclint = Parser.parse(clint.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+                                 }
+            
              j=0;int dxtf=0; int dytf=0;int dztf=0;
              //Auslesen der Datei
             while (inStream.available() > 0&&j<maxnofpoints)
@@ -536,40 +634,60 @@ protected void reload_data(int i)
               chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,clx));}
-               }
+               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0)if(clx.contains("c")){chart.getXYPlot().getDomainAxis().setLabel(clx);}
+                         else{if(SF.NofCols(strLine)>p.valueOf(clx).intValue())chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
+              }
                                                    }
         if(detyText==true){
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
               chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,cly));}
+               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0)if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
+                         else{if(SF.NofCols(strLine)>p.valueOf(cly).intValue())chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
                }
                                                    }
         if(detzText==true){
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayztext=")){
-              zAxis.setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
+              zAxis.setLabel(strLine.substring(i1+13,strLine.length()));dztf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dztf==0&&j==0&&SF.NofCols(strLine)>0){zAxis.setLabel(SF.NthWord(strLine,clint));
-                                                        }
+               {if(dztf==0&&j==0&&SF.NofCols(strLine)>0)if(clint.contains("c")){zAxis.setLabel(clint);}
+                         else{if(SF.NofCols(strLine)>p.valueOf(clint).intValue())zAxis.setLabel(SF.NthWord(strLine,p.valueOf(clint).intValue()));
+//System.out.println(SF.NthWord(strLine,p.valueOf(clint).intValue())+"ddd"+zAxis.getLabel());
+                             }
+                                                       }
                }
-                                                   }
-        
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
         }
         continue;
              }
-             // select colx and coly
-                 sx=SF.NthWord(strLine,clx);
-                 sy=SF.NthWord(strLine,cly);
-                 sint=SF.NthWord(strLine,clint);
+            
+          // select colx and coly
+            if(clx.contains("c")||cly.contains("c")||clint.contains("c")){     
+           Variable [] c=new Variable[SF.NofCols(strLine)+1];
+               for(int ii=0;ii<=SF.NofCols(strLine);++ii){c[ii]=Variable.make("c"+ii);
+                           if(ii==0){c[ii].setValue(j);}
+                          else{String cv=SF.NthWord(strLine,ii);
+                                 cv=cv.replace("+-"," ");cv=SF.NthWord(cv,1);cv=cv.replace('D','E');
+                                 cv=cv.replaceAll("[a-d,f-z,A-D,F-Z]"," ");cv=SF.NthWord(cv,1);
+//System.out.println("c"+ii+"  "+cv);
+                              c[ii].setValue(p.parseDouble(cv));
+                           }
+                               }
+                if(clx.contains("c")){sx=s.valueOf(pclx.value());}else{sx=SF.NthWord(strLine,p.valueOf(clx).intValue());if(clx=="0"){sx=s.valueOf(j);}}
+                if(cly.contains("c")){sy=s.valueOf(pcly.value());}else{sy=SF.NthWord(strLine,p.valueOf(cly).intValue());if(cly=="0"){sy=s.valueOf(j);}}
+                if(clint.contains("c")){sint=s.valueOf(pclint.value());}else{sint=SF.NthWord(strLine,p.valueOf(clint).intValue());if(clint=="0"){sint=s.valueOf(j);}}
+                  }   
+           else{sx=SF.NthWord(strLine,p.valueOf(clx).intValue());if(clx=="0"){sx=s.valueOf(j);}
+                 sy=SF.NthWord(strLine,p.valueOf(cly).intValue());if(cly=="0"){sy=s.valueOf(j);}
+                 sint=SF.NthWord(strLine,p.valueOf(clint).intValue());if(clint=="0"){sint=s.valueOf(j);}
+                  }
 //             System.out.println(sx+" "+sy+" "+clx+" "+cly);
 
-               Double p = new Double(0.0);
+              
    if(sx.length()!=0&&sy.length()!=0&&sint.length()!=0){
                try{sx=sx.replace("+-"," ");sx=SF.NthWord(sx,1);
                    sy=sy.replace("+-"," ");sy=SF.NthWord(sy,1);
@@ -613,9 +731,9 @@ protected void reload_data(int i)
                    
                }
               }
-             }
+             
     //double[] myDatay = {stringToDouble(strLine,0),stringToDouble(strLine,0)};
-   }
+   }}
  catch(EOFException e)
     {
       System.out.println("EOF: " + e.getLocalizedMessage());

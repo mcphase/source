@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-# BEGIN{@ARGV=map{glob($_)}@ARGV}
+# the next line is important to be able to use wildcards in command line such as mcphas*.j
+BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use Scalar::Util qw(looks_like_number);
 

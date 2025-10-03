@@ -46,7 +46,7 @@ return c;
 // return random integer number from  1,2,3,..,i
 int rndint(int & i){return rand()%i+1;}
 
-int arc4random_uniform(int & i){return rand()%i;}
+int arc4random_uniform(int  i){return rand()%i;}
 
 #else
 

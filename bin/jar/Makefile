@@ -20,7 +20,7 @@ OBJS = IniConfigurator.java IniFile.java IniItem.java IniKey.java display.java \
        simannfitstatus.java Viewer.java ToolTipManager.java graphic_parameters_configurator.java
 
 compile : $(OBJS)
-	javac -source 8 -target 8 ./*.java
+	javac -source 15 -target 15 ./*.java
 #	gcj ./*.java
 
 pack    : compile
