@@ -2,19 +2,44 @@
 use Cwd;
 use File::Basename;
 
+# implemented automatic creation of documentation output as (links in html, footnotes in tex)
+%implemented = qw(
+display            display
+displaydensities   displaydensities
+displaydensity     displaydensity
+makenn             makenn
+singleion          Smagpoly
+mcphasit           runmcphas
+mcdispit           mcdisp
+mcdiff             mcdiff
+                 );
+$URL="$ENV{'MCPHASE_DIR'}/doc/manual";
+$DOC="$ENV{'MCPHASE_DIR'}/doc/";
+
+require "$URL/labels.pl";
+
 unless ($#ARGV >=0)
 {print STDOUT << "EOF";
  program script2html used to create html documentation from McPhase scripts
 
- usage: script2html [options] calc1.bat [options] calc2.bat ...
+ usage: script2html [-latex][options] calc1.bat [options] calc2.bat ...
 
  This program creates a html file from scripts containing just the text
- in the scripts.
+ in the scripts. Many html commands such as <h1> HEADER </h1> can be used in
+ script commments to structure the text. Latex formulas are accepted by enclosing it 
+ in brackets  \\( \\) for inline or \\[ \\] for equations  , e.g.  \\(e^{i\pi}+1=0\\) 
+ Some abbreviations are acceptable: 
+  \\( ... \\)      --> € ... €
+  <ol><li>         --> /§
+  </li><li>        --> §
+  <li></ol>        --> §/
 
  input: calc1.bat, calc2.bat ...    scripts (bat files)
                                    (must be located in the current directory)
  output: stdout      ...........   html file created from the scripts
                                    (use ">" to pipe into file)
+
+ In order to create a latex output use script2html -latex.
 
  options: -fromline 3 ..........  only part of the file is html coded starting at line 3
           -toline   10 .........  only part of the file is html coded (until line 10)
@@ -26,8 +51,170 @@ unless ($#ARGV >=0)
 
 EOF
 exit 0;}else{print STDERR "#* $0 *\n";}
+if($ARGV[0]=~/-latex/){$l="-latex";shift @ARGV;}
+if($l){print STDERR "#* Latex Output *\n";}else{print STDERR "#* Html Output *\n";}
  $date=localtime( time);$dir=getcwd;
+
+if($l){$dir=~s/_/\\_/g;@DD=@ARGV;foreach(@DD){$_=~s/_/\\_/g;}
+open (Fout, ">placeins.sty");
+print Fout << "EOF";
+%  P L A C E I N S . S T Y          ver 2.2  April 18, 2005
+%  Donald Arseneau                  asnd\@triumf.ca
+%  Keep floats `in their place'; don't let them float into another section.
+%  Instructions are below.
+%
+%  placeins.sty is freely released to the public domain.
+
+
+\\def\\\@fb\@botlist{\\\@botlist}
+\\def\\\@fb\@topbarrier{\\suppressfloats[t]}
+
+\\catcode`\\V=14 % `V' is a comment character unless [verbose]
+
+\\\@ifundefined{DeclareOption}{}%
+{\\DeclareOption{below}{\\def\\\@fb\@botlist{}}
+ \\DeclareOption{above}{\\def\\\@fb\@topbarrier{}}
+ \\DeclareOption{section}{\\AtBeginDocument{%
+     \\expandafter\\renewcommand\\expandafter\\section\\expandafter
+       {\\expandafter\\\@fb\@secFB\\section}%
+     \\newcommand\\\@fb\@secFB{\\FloatBarrier
+     \\gdef\\\@fb\@afterHHook{\\\@fb\@topbarrier \\gdef\\\@fb\@afterHHook{}}}
+     \\g\@addto\@macro\\\@afterheading{\\\@fb\@afterHHook}
+     \\gdef\\\@fb\@afterHHook{}
+  }}
+ \\DeclareOption{verbose}{\\catcode`\\V=9 }% Activate things after `V'
+ \\ProvidesPackage{placeins}[2005/04/18 \\space  v 2.2]
+ \\ProcessOptions 
+} % end of \\\@ifundefined
+
+\\def\\FloatBarrier{\\par\\begingroup \\let\\\@elt\\relax
+V\\edef\\\@tempa{\\write\\m\@ne{Package placeins Info: Float barrier, from
+V  input line \\the\\inputlineno, processed on page \\thepage, lands on
+V  page \\noexpand\\thepage. }}\\\@tempa
+ \\edef\\\@tempa{\\\@fb\@botlist\\\@deferlist\\\@dbldeferlist}%
+ \\ifx\\\@tempa\\\@empty V\\PackageInfo{placeins}{No floats held,}%
+ \\else
+    \\ifx\\\@fltovf\\relax % my indicator of recursion
+       \\if\@firstcolumn V\\PackageWarning{placeins}{Some floats are stuck,}%
+         \\clearpage 
+       \\else V\\PackageInfo{placeins}{Eject a column and check again:}%
+         \\null\\newpage\\FloatBarrier 
+       \\fi
+    \\else V\\PackageInfo{placeins}{Must dump some floats}%
+       \\newpage \\let\\\@fltovf\\relax V\\PackageInfo{placeins}{Check again:}%
+       \\FloatBarrier % recurse once only
+ \\fi\\fi \\endgroup
+ \\\@fb\@topbarrier }
+
+\\catcode`\\V=11
+\\endinput
+
+%====================== BEGIN INSTRUCTIONS ===========================
+
+  p l a c e i n s . s t y          ver 2.2  April 18, 2005
+  Donald Arseneau                  asnd\@triumf.ca
+
+
+Placeins.sty keeps floats `in their place', preventing them from floating
+past a "\\FloatBarrier" command into another section.  To use it, declare
+"\\usepackage{placeins}" and insert "\\FloatBarrier" at places that floats 
+should not move past, perhaps at every "\\section".  
+
+Option:  [section]
+
+A more convenient way to stop floats at section boundaries is to change 
+the definition of "\\section" to include "\\FloatBarrier", either at the
+beginning, before "\\\@startsection", or in the `style' specification (see 
+The LaTeX Companion, section 2.2.2; or 2.3 in the 1st ed).  If you specify 
+"\\usepackage[section]{placeins}", then the "\\section" command will be 
+redefined with "\\FloatBarrier" inserted at the beginning.
+
+Options:  [above]  [below]
+
+Something you may not like is that, by default, "\\FloatBarrier" is very 
+strict, and will (try to) prevent a float from appearing above the start 
+of the current section or below the start of the next section, even 
+though the float is still on the same page as its intended section.  
+Each restriction can be relaxed separately by using the "[above]" and 
+"[below]" package options: "[above]" allows floats to appear above their 
+section, if on the same page; "[below]" allows below.
+
+NOTE!  The original version of placeins.sty acted like it was loaded
+with the option "[above]" specified.
+
+There is a problem with LaTeX's "\\suppressfloats" being out of step with 
+the page breaking (see usenet msg <yfi656pbsn0.fsf\@triumf.ca> and thread)
+which sometimes allows a float to go above a "\\FloatBarrier" placed near
+the top of a page. Maybe placeins will fix it sometime later.
+
+Option: [verbose]
+
+There is a package option "[verbose]" that causes many messages to be
+written in the log file.  It might be used to answer the question:
+`How did *that* get *there*?!?'
+
+%====================== END INSTRUCTIONS ========================
+
+Test file integrity:  ASCII 32-57, 58-126:  !"#$%&'()*+,-./0123456789
+:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+EOF
+close Fout;
 print STDOUT << "EOF";
+\\documentclass[twoside]{article}
+\\hoffset-2.5cm
+\\voffset-2.5cm
+\\textwidth16cm
+\\textheight25cm
+\\oddsidemargin2.4cm
+\\evensidemargin2.4cm
+\\usepackage[pdftex]{graphicx}
+% \\usepackage{makeidx}
+\\usepackage{lscape}
+\\usepackage{amssymb}
+\\usepackage{amsbsy}
+\\usepackage{afterpage}
+\\usepackage{xcolor}
+%\\usepackage{lipsum}
+\\usepackage{placeins}
+%\\usepackage[utf8]{inputenc}
+%\\usepackage{amsmath}
+%\\usepackage{empheq}
+%\\usepackage{bbm}
+%\\usepackage{dsfont}
+\\usepackage{hyperref} 
+%\\makeindex
+\\newcommand\\mybar[1][black]{\\begingroup\\color{#1}\\kern1pt\\rule[-\\dp\\strutbox]{1pt}{\\baselineskip}\\kern1pt\\endgroup}
+\\newcommand{\\highlight}[1]{\\colorbox{red!10}{\$\\displaystyle#1\$}}
+\\newcommand{\\m}[1]{\\overline{#1}}
+\\newcommand{\\M}[1]{\\underline{#1}}
+\\newcommand{\\mbf}[1]{\\mathbf #1}
+\\newcommand{\\V}[1]{ \\stackrel{=}{\\mathbf #1}}
+\\newcommand{\\B}[1]{#1}
+\\newcommand{\\prg}{\\sl}
+\\newcommand{\\use}[1]{\\vspace{0.5cm} Usage: {\\prg{ #1}} \\vspace{0.5cm}}
+\\newcommand{\\bra}[1]{\\langle #1|}
+\\newcommand{\\ket}[1]{|#1\\rangle}
+\\newcommand{\\threej}[2]{\\left( \\begin{array}{ccc} #1 \\\\ #2 \\end{array} \\right)}
+\\newcommand{\\sixj}[2]{\\left\\{ \\begin{array}{ccc} #1 \\\\ #2 \\end{array} \\right\\}}
+\\newcommand{\\hili}[1]{{#1}}
+\\newcommand{\\hl}[1]{{#1}}
+\\newcommand{\\Bell}{\\ensuremath{\\boldsymbol\\ell}}
+\\newcommand{\\bm}[1]{\\boldsymbol #1}
+\\newcommand{\\Trace}[1]{\\rm Tr \\{ #1 \\} }
+
+\\begin{document}
+ \\title{Output of script2html -latex @DD \\\\
+  ...in directory $dir}
+\\date{ $date , latex run on \\today }
+\\author{McPhase Project\\thanks{mcphase@icloud.com}}
+\\maketitle
+\\tableofcontents
+EOF
+}
+else{
+
+print STDOUT << "EOF";
+<!DOCTYPE html>
 <html>
 <head>
  <title>$date</title>
@@ -35,7 +222,14 @@ print STDOUT << "EOF";
 .r { font-family:'Courier',monospace; }
 body { font-family:'Times',monospace;font-style=italic; }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex\@0.16.23/dist/katex.min.css" integrity="sha384-//SZkxyB7axjCAopkAL1E1rve+ZSPKapD89Lo/lLhcsXR+zOYl5z6zJZEFXil+q0" crossorigin="anonymous">
 
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex\@0.16.23/dist/katex.min.js" integrity="sha384-cpAIxua0Xbyc+XrpHQpCtJzGSZ6U2kS/FeyoKjnS+BgAYNV6uVUetVs/LC9+l3rs" crossorigin="anonymous"></script>
+
+    <!-- To automatically render math in text elements, include the auto-render extension: -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex\@0.16.23/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
 
 </head><body>
  ...this document was created $date <br>
@@ -43,11 +237,14 @@ body { font-family:'Times',monospace;font-style=italic; }
  ...by the command: script2html @ARGV <br><br>
 
 EOF
+}
 @ARGV=map{glob($_)}@ARGV;$i=0;
 @BB=@ARGV;while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
                      if($BB[0]=~/-toline/){shift @BB;shift @BB;}
-                     print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';shift @BB;
+                     if(!defined $l){print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';}
+                      shift @BB;
                     } 
+if($l){print "\% ";$fignr=1;}
 print "<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->";
 $br="<br>";
 while (@ARGV)
@@ -58,18 +255,49 @@ while (@ARGV)
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    # get path from filename
    $dir=dirname($file);print "\n";
-   print '<a name="'.$file.'"><hr>Source File '.$i.$linetext.':<h1>'.$file.'</h1></a>';print "\n";
+  if($l){$file=~s/_/\\_/g;print "\\section{Source File ".$i.$linetext.":".$file."}\n";}
+  else
+  {   print '<a name="'.$file.'"><hr>Source File '.$i.$linetext.':<h1>'.$file.'</h1></a>';print "\n";}
    #print '<p class="c">';
-   $lnr=0;
+   $lnr=0;$verbatim=0;
+# *****************************************************************************
+# Process lines 
+# *****************************************************************************
+
    while(($line=<Fin>)&&$lnr<$toline)
    {++$lnr;if($lnr>=$fromline){
     if ($line=~/^\s*#/||$line=~/^\s*[rR][eE][mM]/)
+# *****************************************************************************
      { # if the line starts with a comment
-
+      if($l){    
+ 
+           #remove comment for latex
+             $line=~s/^\s*#//;$line=~s/^\s*[rR][eE][mM]//;
+           # substitute **** with \n****\n for latex
+             $line=~s/(\*\*+)/\n\1\n/;
+           # substitute --- with \n---\n for latex
+             $line=~s/(\-\-+)/\n\1\n/;
+             if($verbatim==1){$verbatim=0;$line="\\end\{verbatim\}".$line;}
+            }
+# *****************************************************************************
+        #  brackets opern close --- look if line should be continued in next line  ( not closed \( \[  € ) then
+          # load next line, check if it is a comment, remove comment sign (at least for latex) and append 
+           # line 
+           req2("€","€","\\\(","\\\)");
+           req2("\\\\\\(","\\\\\\)","\\\(","\\\)");
+           req2("\\\\\\[","\\\\\\]","\\\[","\\\]");
+# *****************************************************************************
+         # substitute enumeration § by html commands
+         $line=~s/\/§/\<ol\>\<li\>/g;
+         $line=~s/\§\//\<\/li\>\<\/ol\>/g;
+         $line=~s/\§/\<\/li\>\<li\>/g;
+# *****************************************************************************
        # take care for verbatim \ pre commands
        if ($line=~/.*\<pre\>/&&$line!=~/.*\<pre\>.*\<\/pre\>/){$br="";}
        if ($line=~/.*\<\/pre\>/&&$line!=~/.*\<\/pre\>.*\<pre\>/){$br="<br>";} 
- 
+       if($l){$line=~s/\<pre\>/\\begin{verbatim}/g;$line=~s/\<\/pre\>/\\end{verbatim}/g;} 
+# *****************************************************************************
+
       if($line=~/.*\<\s*script2html.*\>/)
        { # look if another file should be included
          # if yes run script2htlm on this file
@@ -86,49 +314,232 @@ while (@ARGV)
                         $aa=$a;
                        } $arguments=join(' ',@arg);
         # print "script2html $arguments > ".$arg[$#arg].".htm\n";
-         system("script2html $arguments > ".$arg[$#arg].".htm");
+         system("script2html $l $arguments > ".$arg[$#arg].".htm");
         if(-e  $arg[$#arg].".htm") {open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
             until($line1=~/.*<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->/){$line1=<Fin1>;}
             while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/){
-                                 $line1=~s/\<hr\>Source File\s*/\<hr\>Source File $i\./;
+                                 if($l){$line1=~s/section\{Source File\s*/section{Source File $i\./; # }}
+                                        $line1=~s/\\end\{document\}//;
+                                       }
+                                 else
+                                 {$line1=~s/\<hr\>Source File\s*/\<hr\>Source File $i\./;}
                                  print $line1;}}
         close Fin1;unlink($arg[$#arg].".htm");
                                     }
                        else { print stderr "Error script2html: unable to open ".$arg[$#arg].".htm\n";}
        }
+# *****************************************************************************
         else
        {
         # take care about <img src=""> commands and insert path
-        $line=~s!(\s*#?\s*)\<img(.*)src\s*="(.*)"!<p style="width:50%;word-wrap: break-word; "> \1 &lt img\2src="$dir/\3"&gt </p> \<img\2src="$dir/\3"!;
-        # replace html commands <...> by &aaa& ... &bbb& 
+        if($l){if($line=~/\<figure\>/){$figure=1;$line=~s/\<figure\>/see fig.\\ref\{fig$fignr\}\n\\begin\{figure\}[ht]\\begin\{center\}/;}
+               if($line=~/\<figcaption\>/){$line=~s!\<figcaption\>!\\caption\{\\label\{fig$fignr\}\n!;}
+               if($line=~/.*\<\/figcaption\>/){$line=~s!\<\/figcaption\>!\}\n!;}
+               if($line=~/\<img(.*)src\s*=/){
+               ($filename)=($line=~m|\<img.*src\s*=\s*"([^\s^>^<^=]+)"|);
+             if($filename=~/\.gif$/){$filen=$filename;$filen=~s/\\_/_/g;
+                                    ($heightref, $widthref) = gifdim($filen);
+                                    # convert gif files to jpg so they can be processed by pdflatex
+                                    system("giftopnm $filename | pnmtojpeg > $filename.jpg");
+                                    }
+                 
+         if($figure==1)              
+           { if($filename=~/\.gif$/){
+              $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!\\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3.jpg\}!;
+                                    }
+                                else{
+              $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!\\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3\}!;
+                                    }
+           }else
+           {if($filename=~/\.gif$/){$line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!see fig.\\ref\{fig$fignr\}
+          \\begin\{figure\}[ht]\\begin\{center\}
+           \\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3.jpg\}
+           \\caption{\\label\{fig$fignr\}
+            $dir/\3}
+           \\end\{center\}
+           \\end\{figure\}!;
+                                  }
+                                else{
+          $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!see fig.\\ref\{fig$fignr\}
+          \\begin\{figure\}[ht]\\begin\{center\}
+           \\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3\}
+           \\caption{\\label\{fig$fignr\}
+            $dir/\3}
+           \\end\{center\}
+           \\end\{figure\}!;   }
+          }
+         ++$fignr;$line=$line."\n\\afterpage\{\\FloatBarrier\}\n";}
+          if($line=~/.*\<\/figure\>/){$figure=0;$line=~s!\<\/figure\>!\\end\{center\}\\end\{figure\}!;}
+               
+        }
+        else
+        {$line=~s!(\s*#?\s*)\<img(.*)src\s*="(.*)"!<p style="width:50%;word-wrap: break-word; "> \1 &lt img\2src="$dir/\3"&gt </p> \<img\2src="$dir/\3"!;
+         }
+# *****************************************************************************
+# replace html commands
+       if($l){# replace html commands <...> by nothing
+        $line=~s/\<h1\>/\\subsection\{/g; $line=~s/\<\/h1\>/\}/g;
+        $line=~s/\<h2\>/\\subsubsection\{/g; $line=~s/\<\/h2\>/\}/g;
+        $line=~s/\<h3\>/\\paragraphn\{/g; $line=~s/\<\/h3\>/\}/g;
+        $line=~s/\<h4\>/\\subparagraph\{/g; $line=~s/\<\/h4\>/\}/g;
+        $line=~s/\<sub\>/\$_\{/g;$line=~s/\<\/sub\>/\}\$/g;
+        $line=~s/\<ol\>/\\begin\{itemize\}/g;$line=~s/\<\/ol\>/\\end\{itemize\}/g;
+        $line=~s/\<li\>/\\item /g;$line=~s/\<\/li\>//g;
+        
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
-                         |dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
+                         |dd|del|dfn|div|dl|dt|em|fieldset|figure|figcaption|form|frame|
+                         |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
+                         |map|meta|noframes|noscript|object|ol|optgroup|option|
+                         |p|pre|small|span|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>//g; 
+        $line=~s/\<(\/?)([i])(\s*?)\>//g;# html tag <i>
+        }
+        else
+        { # replace html commands <...> by &aaa& ... &bbb& 
+        $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
+                         |dd|del|dfn|div|dl|dt|em|fieldset|figure|figcaption|form|frame|
                          |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
                          |map|meta|noframes|noscript|object|ol|optgroup|option|
                          |p|pre|small|span|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
+        }
+       if($l)
+       { 
+# *****************************************************************************
+ #unless we are in an equation treat _ & ^ | < > symbols
+# ...  first remove all normal brackets except \( \) \[ \]
+$line=~s/(?<!\\)\[/myleftrectangularbracket/g;
+$line=~s/(?<!\\)\]/myrightrectangularbracket/g;
+$line=~s/(?<!\\)\(/myleftangularbracket/g;
+$line=~s/(?<!\\)\)/myrightangularbracket/g;
+             # substitute underscore with \_ for latex - use lookahead to exclude being between () []
+             #  brackets \( \) or \[ \]  math mode of latex
+             $line=~s/_(?![^\[\]\(\)]*\\[\]\)])/\\_/g; # s/_/\\_/g;
+             # substitute & with \& for latex
+             $line=~s/\&(?![^\[\]\(\)]*\\[\]\)])/\\\&/g; # ~s/\&/\\\&/g;
+             # substitute ^ with \^ for latex
+             $line=~s/\^(?![^\[\]\(\)]*\\[\]\)])/\\\^/g; # ~s/\^/\\\^/g;
+             # substitute | with $|$ for latex
+             $line=~s/\|(?![^\[\]\(\)]*\\[\]\)])/\$\|\$/g; # ~s/\|/\$\|\$/g;
+             # substitute <> with $<$ $>$ for latex
+             $line=~s/>(?![^\[\]\(\)]*\\[\]\)])/\$\>\$ /g;
+             $line=~s/<(?![^\[\]\(\)]*\\[\]\)])/\$\<\$ /g;
+$line=~s/myleftrectangularbracket/\[/g; # substitute back all brackets
+$line=~s/myrightrectangularbracket/\]/g;
+$line=~s/myleftangularbracket/\(/g;
+$line=~s/myrightangularbracket/\)/g;
 
+           #do substituion to get in latex an equation\( \) \[ \] should become $ and begin equation ...
+             $line=~s/\\\(/\$/g; # inline math
+             $line=~s/\\\)/\$/g;
+             $line=~s/\\\[/\n\\begin\{equation\}\n/g; # equation
+             $line=~s/\\\]/\n\\end\{equation\}\n/g; 
+             
+
+        }else{
        # substitute all remaining < and > signs by the html code &gt and &lt
         $line=~s/>/&gt /g;$line=~s/</&lt /g; 
        # replace back &aaa& ... &bbb& to < ... > so that html commands are interpreted properly
         $line=~s/&aaa&/\</g;$line=~s/&bbb&/\>/g;
        $line=~s/\n/$br\n/g;  # print comments in style "c" (default)
+       }
        print  $line;
        }
-    }else{ # line did not start with a comment - thus it is a command and should be printed as it is
+# *****************************************************************************
+    }else{ 
+# line did not start with a comment - thus it is a command and should be printed as it is
+if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{verbatim\}".$line;}
+      foreach(keys %implemented)
+        {my $com=$_;
+         if($line=~/ $_ /){# $_  matches a command ? --> insert a footnote with exlanation of the command
+                          # and delete command from hash %implemented so footnotes do not double on next use
+                   # scan doc/*.tex for %script2html_begin{singleion} some text to be processed
+                   #                    %script2html_end{singleion} some text to be processed
+                   my $ftexfile="results/".$_.".tex";
+                   open(FOUT, '>', $ftexfile);
+                    opendir my $dir, $DOC; my @files = readdir $dir;
+                    foreach(@files){if($_=~/\.tex$/){$store=0;
+                                      open(FH, '<',$DOC."/".$_) or die $!;while(<FH>){
+                                      if($_=~/\%script2html_begin\{$com\}/){$store=1;$_=~s/\%script2html_begin\{$com\}/$com:/;}
+                                      if($_=~/\%script2html_end\{$com\}/){$store=0;$_=~s/\%script2html_end\{$com\}//;print FOUT $_;}
+                                      if($store==1){ print FOUT $_;}
+                                     } close FH;
+                                   }
+                                   }
+                   close FOUT;
+                  $line=$line."\\end\{verbatim\}\\footnote\{\\input\{".$ftexfile."\}\}\\begin\{verbatim\}";                  
+                  delete($implemented{$com});
+                   }
+         }   
+
+
+       }else{
+   
+
     # substitute all  < and > signs by the html code &gt and &lt
         $line=~s/>/&gt /g;$line=~s/</&lt /g;
    $line='<span class="r">'.$line.'</span>'.$br; #print commands in style "r"
+   foreach(keys %implemented)
+   {
+    if($line=~/\s$_\s/){# $_  matches a command ? --> insert a link to the formula in 
+                    $label=$implemented{$_}; # this is the label of an equation etc
+                    $link=$external_labels{$label}."#$label";  # this is the link to manual/node...html#label
+                    # insert the link here
+                    $line=~s/$_/\<A HREF="$link"\>$_\<\/A\>/;           
+                   }
+    }   
+
+  }
    print  $line;
    }
   
    }} # print "</p>\n";
 close Fin; 
+if($verbatim==1){$verbatim=0;print "\\end\{verbatim\}";}
+       
 } 
 close Fout;
+if($l){print "\\end\{document\}\n";}
+else{
 print "<hr>\n";
 print "</body></html>\n";
- 
+ }
+
+sub gifdim ($) {
+    my $filename = $_[0];
+
+    open(GIF, $filename) || return (undef, undef);
+    my $buf = '';
+    my $n = read GIF, $buf, 10;
+    close GIF;
+
+    return (undef, undef) if $n < 10;
+    my ($head, $width, $height) = unpack("A6vv", $buf);
+    return (undef, undef) unless $head =~ /^GIF8[79]a/;
+    return \($width, $height);
+}
 
 
+sub req2   # check if all $S are closed by $Z symbols and substitute $S by $SS and $Z by $ZZ in $line
+{my ($S,$Z,$SS,$ZZ)=@_;
+          while(cu($S,$Z)){if (!($more=<Fin>)||!($more=~/^\s*#/||$more=~/^\s*[rR][eE][mM]/)) 
+                                       { die "Error reading  line $lnr unclosed $S \n$line\n";}
+                               ++$lnr;
+                                  $more=~s/^\s*#//;$more=~s/^\s*[rR][eE][mM]//; # remove comment
+                                  $line=$line.$more; # attach
+                                  }
 
+          if($line=~/$S/){#print STDERR $line."1\n";
+ $line=~s/$S(.*?)$Z/$SS\1$ZZ/sg;
+#print STDERR $line."2\n";
+                          }
+                
+}
+    
+sub cu   # check if all $S are closed by $Z symbols in $line
+{my ($S,$Z)=@_;my $check=$line;
+ while($check=~/$S(.*?)$Z/s) {#print STDERR $check."3\n";
+                              $check=~s/$S(.*?)$Z/\1/s;} 
+if($check=~/$S/){#print STDERR "cu  $S $Z true\n";
+return true;}else{#print STDERR "cu $S $Z false\n";
+return undef;}
+}

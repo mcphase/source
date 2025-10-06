@@ -1,5 +1,6 @@
 \section{{\prg mcdiff}\index{mcdiff} - calculate and fit  magnetic Neutron or Resonant Xray 
 Scattering}\label{mcdiff}
+%script2html_begin{mcdiff} 
 
 In order to calculate neutron diffraction and resonant magnetic Xray scattering
 at a specified temperature and magnetic field you can use the module {\prg mcdiff\index{mcdiff}}.
@@ -12,6 +13,7 @@ the output file {\prg mcphas.sps} by the program {\prg setup\_mcdiff\_in\index{s
 Miller indices always refer to the lattice $\vec a^*, \vec b^*, \vec c^*$, which
 is the reciprocal lattice of $\vec a, \vec b, \vec c$ as defined by lattice
 parameters $a,b,c$ and angles $\alpha,\beta,\gamma$.
+%script2html_end{mcdiff} 
 
 Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff}.in):
 
@@ -485,6 +487,7 @@ of $\mbf Q|| \mbf x$ when $\mbf y$ points to the x-ray source).
 
 \subsection{Formalism II - Neutron Cross section}
 
+%script2html_begin{mcdiff} 
 {\prg mcdiff\index{mcdiff}} uses the standard formalism to calculate the elastic neutron scattering
 cross section, which can be obtained from the elastic part of the double differential
 cross section:
@@ -555,7 +558,9 @@ el,\alpha\beta}&=&\delta(\hbar \omega)
 \end{eqnarray}
 
 In dipole approximation the products  $F_d(Q) M_{d\alpha}$ are evaluated as follows
+%script2html_end{mcdiff} 
  (see also appendix~\ref{ffacts}):
+%script2html_begin{mcdiff} 
 \begin{quotation}
 \item[rare earth ($g_J\neq0$ in sipf file):] $F_d(Q) M_{d\alpha}=g_J \mu_B\langle J_{d\alpha} \rangle_{T,H}\left [\langle j_0(Q) \rangle + \frac{2-g_J}{g_J}\langle j_2(Q) \rangle \right ]$
 \item[transition metals ($g_J=0$ in sipf file) given (only) magnetic moments $\langle Ma \rangle, \langle Mb \rangle, \langle Mc \rangle$  in {\prg mcdiff.in}:] $F_d(Q) M_{d\alpha}= \langle M_{d\alpha} \rangle_{T,H}\left [\langle j_0(Q) \rangle  \right ]$ (i.e. a quenched orbital moment is assumed)
@@ -565,6 +570,7 @@ In dipole approximation the products  $F_d(Q) M_{d\alpha}$ are evaluated as foll
 	Here $g_J$, $F_d(Q)$, $\langle S_{d\alpha} \rangle_{T,H}$ , $\langle L_{d\alpha} \rangle_{T,H}$  and $\langle J_{d\alpha} \rangle_{T,H}$ denote the
 Land\'e factor, the form factor, the expectation value of the spin-, orbital- and total angular
 momentum operator of the atom $d$ in the unit cell, respectively.
+%script2html_end{mcdiff} 
 
 Program {\prg mcdiff\index{mcdiff}} calculates the 
 scattering angle $2\Theta$ of a reflection 

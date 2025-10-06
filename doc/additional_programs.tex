@@ -1,4 +1,4 @@
-\section{Programs for Specific Tasks in the World of McPhase}\label{addprog}
+    \section{Programs for Specific Tasks in the World of McPhase}\label{addprog}
 
 This section  contains some further programs which do some important manipulations
 in magnetism, ...
@@ -281,7 +281,9 @@ using the {\prg $>$} operator for futher use, for example to set up McPhase inpu
 mcphas.j\index{mcphas.j}} format
 - output is written to stdout
 
-\item[\prg makenn 23.3{[options]}:]\addcontentsline{toc}{subsubsection}{\prg makenn} Program to calculate neighbors of atoms given a crystal structure.
+%script2html_begin{makenn} \begin{description}
+
+\item\label{makenn}[\prg makenn 23.3{[options]}:]\addcontentsline{toc}{subsubsection}{\prg makenn} Program to calculate neighbors of atoms given a crystal structure.
 Note that in order to use {\prg makenn\index{makenn}} you have to set up a 
 working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure. 
 The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
@@ -455,6 +457,7 @@ Thus for options
 
  Note: $xyz$ refers to a right handed Euclidean coordinate system with 
  $y||\vec b$, $z||(\vec a \times \vec b)$ and $x$ perpendicular to $y$ and $z$.
+%script2html_end{makenn} \end{description}
 
 \item [\prg mcphas2jvx mcphas.j] 
 Creates a JavaView input file (by default {\prg results/mcphas.jvx}) which shows the atomic positions 
@@ -764,6 +767,8 @@ program to setup{\prg mcdisp.mf} with information on meanfields
       to calculate the standard deviation and then you can start
       a fit by simannfit or searchspace
 \end{verbatim}\index{simannfit}\index{searchspace}
+%script2html_begin{singleion} \begin{description}
+
 \item [\prg singleion\index{singleion} [options] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents]
 \addcontentsline{toc}{subsubsection}{\prg singleion}
  single ion  - calculate single ion expectations values $<Ia>, <Ib> $... and transition energies.
@@ -864,12 +869,14 @@ single ion neutron scattering cross section
 in dipole approximation for a polycrystal neglecting
 form factor, Debye Waller factor by the following relation
 
-\begin{equation}
+\begin{equation}\label{Smagpoly}
 S_{\rm mag,poly}^{inel}(Q=0,z)=  \frac{2}{3}\frac{(\gamma r_0)^2}{4\pi} \frac{1}{1-exp(- z/k_bT)}     \sum_{\alpha=1,2,3}\chi''_{\alpha\alpha}(z)
 \end{equation}
 
-Compare (\ref{fluctdissbeyond}), (\ref{Sinelperp}) and (\ref{sinelmag}). Note, the prefactor $2/3$ comes
+Note, the prefactor $2/3$ comes
 from the average of the polarisation factor. 
+%script2html_end{singleion} For more information see manual.\end{description}
+Compare (\ref{fluctdissbeyond}), (\ref{Sinelperp}) and (\ref{sinelmag}). 
 
 \begin{verbatim}
                        units: standard unit is (unit of observable)^2/meV, e.g. for -XM
@@ -1096,18 +1103,14 @@ with column 5 as x axis and columns 6 as y axis. By default graphic is a line gr
 However, if error columns (in the example x error column is 7 and y error column is 8)
 are given, then symbols with x and y error bars are shown. Several files
 can be plotted in the same graph by extending the commandline. If the contents of a file
-changes, the plot is automatically updated.
-\item [\prg displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei]\addcontentsline{toc}{subsubsection}{\prg displaybubbles} works similar as %%@
-display, however
-a third column is given and the radius of the symbols varied according to the data in 
-this column.
+changes, the plot is automatically updated. See also section \ref{graphics}.
 \item [\prg displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot]\addcontentsline{toc}{subsubsection}{\prg displaycontour} produces a %%@
 graphical
 display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
 denote the x,y and z column in file {\prg ./results/mcdisp.dsigma.tot}, which should
-be plotted. Figure~\ref{ho2ti2o7diffuse} shows an sample output of this program.
+be plotted. Figure~\ref{ho2ti2o7diffuse} shows an sample output of this program. See also section \ref{graphics}.
 \item [\prg displaytext\index{displaytext} ./results/mcphas.hkl]\addcontentsline{toc}{subsubsection}{\prg displaytext} monitors the file mcphas.hkl in %%@
-a text window on screen.
+a text window on screen. See also section \ref{graphics}.
 \item [\prg displayhtml\index{displayhtml} calc.bat.html]\addcontentsline{toc}{subsubsection}{\prg displayhtml} monitors the file calc.bat.html in 
 a text window on screen.
 \item [\prg expcol\index{expcol} col const file:]\addcontentsline{toc}{subsubsection}{\prg expcol} calculates exponent of a column exp(col) 

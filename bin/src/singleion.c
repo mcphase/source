@@ -329,7 +329,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
               Vector & Hstart,int Hsteps,Vector & dH,
               double epsilon,double lambda, double X00,int verbose,double opmat,int no_trs_write,int HEnofcomp,
               int calcX,Xunit unit)
-  { char filename[MAXNOFCHARINLINE],trsstring[MAXNOFCHARINLINE];trsstring[0]='\0';
+  { char filename[MAXNOFCHARINLINE];
     char  * pchr;int j;
     Matrix I(1,observable_nofcomponents,1,Tsteps);complex <double> X0 (X00,0);
     Vector lnz(1,Tsteps),u(1,Tsteps);
@@ -345,9 +345,10 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
                                                 if(Xcf[Ei]==NULL)exit(EXIT_FAILURE);}
                   }
    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
-
- if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i,HEnofcomp); // write transition trs files
+   if(nmax==0)jjj.eigenstates(Hxc,Hext,Tstart);
+   if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i,HEnofcomp); // write transition trs files
      for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
+     char trsstring[MAXNOFCHARINLINE];trsstring[0]='\0';
       switch(observable)
       {case L: jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case S: jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
@@ -371,6 +372,30 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
        case lz: jjj.orbmomdensity_coeff (I,-3,T,Hxc,Hext, jjj.Icalc_parstorage);break;
        default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parstorage);
       }  
+     if(Hi==0){ // create levels.cef file   ******************************************
+      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+
+      fout=fopen_errchk(filename,"w"); 
+     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
+                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
+                                   if(HEnofcomp>5)for(j=1;j<=3;++j)fprintf(fout,"Eext%c=%g kV/mm ",'a'-1+j,Hext(j+3)); 
+                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
+                                   switch(observable)
+                                   {case MQ: fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
+                                              for(j=1;j<=observable_nofcomponents;++j){fprintf(fout," M%s%c=%g%+gi ",obs[observable],'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));}fprintf(fout,"(muB) ");break;
+                                    case M: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %s%c=%g ",obs[observable],'a'-1+j,I(j,1));fprintf(fout,"(muB) ");break;
+                                    case pel: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," pel%c=%g ",'a'-1+j,I(j,1));fprintf(fout,"(|e|pm) ");break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %s%c=%g ",obs[observable],'a'-1+j,I(j,1));
+                                   }
+                                   fprintf(fout,"\n");jjj.print_eigenstates(fout);fclose(fout);
+             } // Hi==0
+// end create levels.cef file   ******************************************
 
 for(int Ti=1;Ti<=Tsteps;++Ti){
     int jmin=0;  
@@ -460,28 +485,6 @@ printf("%3i %8g ",i,T(Ti)); // printout ion number and temperature
     
       }}} // Ei,Ti,Hi
 
-// create levels.cef file   ******************************************
-      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
-// if sipffilename contains path (e.g. "./" or "./../")
-// do some substitutions to avoid opening error
- pchr=strstr(filename+10,"/");
- while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
-pchr=strstr(filename+10,"\\");
- while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
-
-      fout=fopen_errchk(filename,"w"); 
-     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
-                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
-                                   if(HEnofcomp>5)for(j=1;j<=3;++j)fprintf(fout,"Eext%c=%g kV/mm ",'a'-1+j,Hext(j+3)); 
-                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
-                                   switch(observable)
-                                   {case MQ: fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j){fprintf(fout," M%s%c=%g%+gi ",obs[observable],'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));}fprintf(fout,"(muB) ");break;
-                                    case M: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %s%c=%g ",obs[observable],'a'-1+j,I(j,1));fprintf(fout,"(muB) ");break;
-                                    case pel: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," pel%c=%g ",'a'-1+j,I(j,1));fprintf(fout,"(|e|pm) ");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %s%c=%g ",obs[observable],'a'-1+j,I(j,1));
-                                   }
-                                   fprintf(fout,"\n");jjj.print_eigenstates(fout);fclose(fout);
  
 // continue writing op.mat file   ******************************************  
 if(opmat<1e10){

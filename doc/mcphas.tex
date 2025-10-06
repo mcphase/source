@@ -2,8 +2,11 @@
 Diffraction, etc.)}
 \label{runmcphas}
 
+%script2html_begin{mcphasit} 
 In order to perform calculations beyond the capabilities of {\prg singleion\index{so1ion}} it is necessary
 to use the program {\prg mcphas}. 
+%script2html_end{mcphasit} 
+
 \begin{itemize}
 \item As a first step it is possible to
 calculate the thermodynamic properties such as magnetisation or specific heat
@@ -33,6 +36,8 @@ calculated data (section~\ref{graphics}).
 
 
 \subsection{Input Files}
+%script2html_begin{mcphasit} 
+
 The program {\prg McPhase} needs the following input files (all in the same directory)
  in order to run:
 
@@ -47,6 +52,7 @@ The program {\prg McPhase} needs the following input files (all in the same dire
  - directory where calculated data is stored
 \item {\prg directory ./fit} - experimental data for fit (optional)
 \end{enumerate}
+%script2html_end{mcphasit} 
 
 
  All
@@ -143,11 +149,15 @@ and restrict the parameters step by step if insufficient speed is obtained.
 Also the examples included in the program package may serve as starting
 points.
 
-\item [PARAMETERS FOR SUB FECALC SELFCONSISTENCY PROCESS:] the most important
+\item [PARAMETERS FOR SUB FECALC SELFCONSISTENCY PROCESS:]
+%script2html_begin{mcphasit} 
+ the most important
 procedure in the module {\prg mcphas} is the sub {\prg fecalc}\index{fecalc}. In this part of the 
 program the self consistent calculation of the magnetic moment configuration
 is performed as shown schematically in fig.~\ref{fecalc}, for the code see bin/src/mcphas\_fecalc.c. 
-In addition or alternatively a Monte Carlo calculation can be performed~\footnote{
+In addition or alternatively a Monte Carlo calculation can be performed
+%script2html_end{mcphasit} 
+~\footnote{
 To trigger the Monte Carlo calculation set NOFMCSTEPS to a nonzero value. Then
 after MAXNOFMFLOOPS has been reached the program switches into Monte Carlo walk mode with randomly
 choosing energy eigenstates and computing total energy of a supercell
@@ -158,6 +168,7 @@ and the energy of the Hamiltonian is updated according to the Metropolis algorit
 The final state is saved in {\prg mcphas.sps} and averaged energy, magnetic moment are calculated and stored
 in {\prg mcphas.fum}.  
 }
+%script2html_begin{mcphasit} 
 In the mean field approximation the Hamiltonian~(\ref{hamilton}) is approximated
 by a sum over the $N_b$ sites in the magnetic supercell
 
@@ -224,6 +235,7 @@ configuration is calculated (this is why this sub is called {\prg fecalc}).
 The free energies of a lot of different stabilised configurations have to
 be compared in order to find out which configuration has lowest free energy, i.e.
 is stable in thermal  equilibrium.
+%script2html_end{mcphasit} 
 
 It may happen that this process does
 not converge due to bad choice of the initial configuration, therefore a maximum number

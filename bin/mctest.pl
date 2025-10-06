@@ -8,7 +8,7 @@ unless ($#ARGV >=0)
 {
 print STDERR << "EOF";
 
-program to test a script
+program to test a simple script (windows and linux syntax are acceptable)
  
  usage: perl test.pl [options] test.bat
 
@@ -37,6 +37,14 @@ cat > dd
  terminate by Ctrl^C, then execute these tests by
 cat dd | xargs mctest
 
+Note on limitations: mctest will not process correctly some commands such as
+ bind, bindkey, break, breaksw,  case,  complete, continue,
+  do, done,  elif, else,  endif, endsw, fc, fg,  fi, for
+foreach,  goto,  if,  local, login, logout,  nice, nohup, notify,
+onintr, popd,  pushd,  read, readonly, rehash, repeat, sched, setenv, 
+settc, setty, setvar, switch, suspend,  then,  trap, true, type, ulimit, 
+umask, unalias, uncomplete, unhash, unlimit, unset, unsetenv,
+until, where,  while
 EOF
 exit(1);
 }else{print STDERR "#* $0 *\n";}

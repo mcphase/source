@@ -22,6 +22,8 @@ displaycontour\index{displaycontour}}, {\prg displaytext\index{displaytext}} and
 display\index{display} of any xy data such as magnetisation etc.}
 \label{display}
 
+%script2html_begin{display} 
+
 \begin{description} 
 \item [display\index{display} 1 11 ./results/mcphas.fum] produces a graphical display\index{display} of the data %%@
 file
@@ -41,16 +43,17 @@ such as
 
  display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]
 
-         xcol,ycol ... column to be taken as x-, y- axis in a lineplot
+         xcol,ycol ... column to be taken as x-, y- axis in a lineplot, expressions such as 'c1xc2+1' are allowed
 	 filename ..... filename of datafile
 	 Data files may contain lines to tune the display output, such as
 	 # displaytitle=My new Graph
 	 # displayytext=intensity
 	 # displayxtext=meV 
-       if optional errorcolumns are added then instead of lines symbols and errorbars are shown
-	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to
-	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')
-	  (toggle lines also with '-' key))
+         if optional errorcolumns are added then instead of lines symbols and errorbars are shown
+	 if optional bubblecolumns are added then instead of lines bubbles with area corresponding to
+	     bubblecolumn are shown (toggle bubblesize with 's' and 'b')
+	 toggle lines / points view with '-' key
+         a file results/display.gnu or display.gnu is created for use with gnuplot
        options:  -o file.jpg  create a jpg file on exiting
                  -c file.jpg  only creates a jpg file and exit immediately
                  -logx -logy  make x(y) a logarithmic axis
@@ -64,10 +67,12 @@ such as
 
 
 \end{verbatim} 
+%script2html_end{display} \end{description}
 
 \item [displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei] works similar as display, however
 a third column is given and the radius of the symbols varied according to the data in 
 this column.
+
 
 \item [displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot] produces a graphical
 display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
@@ -81,6 +86,8 @@ on screen.
 
 \subsection{Programs {\prg display\_density}\index{display\_density} 
 - display of the charge- spin- moment- current- density of a single ion}\label{displaydensity}
+
+%script2html_begin{displaydensity} 
 
 The program {\prg display\_density}\index{display\_density} is used to display a surface of constant
 charge density for an open shell ion, which is described by a single ion property file.
@@ -120,6 +127,7 @@ densities can be displayed.
 Note: if T$<$0, then no thermal Boltzmann distribution is taken - 
 		the statistical probability of each CF state has to be 
 		entered by hand.
+%script2html_end{displaydensity} 
 
 For the calculation of the charge density the  formula are used as given in
 appendix~\ref{chargedensityoperator}. 
@@ -152,11 +160,13 @@ the view of 4 jvx files by typing: java javaview model=densplt.*.jvx Animation.L
 \subsection{Programs {\prg display\_densities}\index{display\_densities}  - display of the superstructure
 and excitations}\label{displaydensities}
 
+%script2html_begin{displaydensities} 
 
 The program {\prg display\_densities}\index{display\_densities} 
 can be used simply to popout spin/exchange field configuration 
 and also to display a 3d animation of spin/moment/densities, even including a movie of
 excitations.
+%script2html_end{displaydensities} 
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode
@@ -170,6 +180,7 @@ excitations.
 
 
 
+%script2html_begin{displaydensities} 
 
 \begin{description} 
 \item[ display\_densities -f{[c 12 0.1]} mcphas.sps T Ha Hb Hc]
@@ -230,6 +241,7 @@ ults/mcdisp.*
         display_densities  -tI 2 0 0 1 
         ... outputs a table with atomic positions and expectations values <I> 
 \end{verbatim}
+%script2html_end{displaydensities} 
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode

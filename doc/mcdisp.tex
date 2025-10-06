@@ -1,6 +1,7 @@
 
 \section{{\prg mcdisp} - the Calculation Program for Magnetic Excitations}\label{mcdisp}
 
+%script2html_begin{mcdispit} 
 For a given field $\mbf H$ and temperature $T$ the dynamics of the magnetic system
 can be calculated by the program {\prg mcdisp\index{mcdisp}}, for details
 on the theory see appendix~\ref{formalism}. {\prg mcdisp\index{mcdisp}} requires as input files
@@ -107,6 +108,7 @@ large number of interaction constants in
       \end{description}
 \item [\prg mcdispit [options]][file.mf]]  same as {\prg mcdisp}, but no graphic window
 \end{description} 
+%script2html_end{mcdispit} 
 
 \subparagraph{example of input file {\prg  mcdisp.mf}}
 this file contains temperature $T$, the external field $H$ and
@@ -341,7 +343,7 @@ Int>Iexp(i)>0.1mb/srf.u.}]^2\\
 
 
 
-
+%script2html_begin{mcdispit} 
 The output files of program {\prg McDisp} are 
 
 \begin{quote}
@@ -361,6 +363,7 @@ mcdisp.par}.
 \item [{\prg mcdisp.dsigma.tot}:] sum of intensities in interval  [emin,emax].  For option {\prg -r} : Sum of intensities calculated in {\prg %%@
 mcdisp.dsigma}.
 \end{quote}
+%script2html_end{mcdispit} 
 
 \vspace{1cm}
 {\em Exercises:}
