@@ -519,26 +519,29 @@ unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop i
   # if we have errors present we rather minimize chi2
   $sta=$chisquared;
  }
-
-# $sta= ... sum of @ssta
-# $deltastore= ... @ssta
-# $parstore= ....@par
-if($nof_calcsta_calls<$#par+3)
-{# extend storage of delta
- $deltastore=$deltastore->append($delta->dummy(0));
- $store_counter=$nof_calcsta_calls;
-}
+if($nof_calcsta_calls>1&&$#ssta+1!=$deltastore->getdim(1))
+{print STDERR "Warning: Simannfit found ".($#ssta+1)." occurences of sta= in output of calcsta which is different from previous runs of calcsta - there it found ".$deltastore->getdim(1)." occurrences. Continuing without storing this\n"; }
 else
-{#rotate
-# $deltastore=rotate $deltastore,1; this would be good but does not work pdl bug
- if ($store_counter>$#par+2){$store_counter=0;}
- for($i6=0;$i6<=$#ssta;++$i6){set $deltastore,$store_counter,$i6,$delta->at($i6);}
+{
+ # $sta= ... sum of @ssta
+ # $deltastore= ... @ssta
+ # $parstore= ....@par
+ if($nof_calcsta_calls<$#par+3)
+ {# extend storage of delta
+  $deltastore=$deltastore->append($delta->dummy(0));
+  $store_counter=$nof_calcsta_calls;
+ }
+ else
+ {#rotate
+ # $deltastore=rotate $deltastore,1; this would be good but does not work pdl bug
+  if ($store_counter>$#par+2){$store_counter=0;}
+  for($i6=0;$i6<=$#ssta;++$i6){set $deltastore,$store_counter,$i6,$delta->at($i6);}
+ }
+ # $parstore= rotate $parstore,1;  this would be good but does not work pdl bug
+  for($i6=0;$i6<=$#par;++$i6){set $parstore,$store_counter,$i6,$par[$i6];}
+  ++$nof_calcsta_calls;++$store_counter; 
+ # print $store_counter." ".$#par."\n";
 }
-# $parstore= rotate $parstore,1;  this would be good but does not work pdl bug
- for($i6=0;$i6<=$#par;++$i6){set $parstore,$store_counter,$i6,$par[$i6];}
- ++$nof_calcsta_calls;++$store_counter; 
-# print $store_counter." ".$#par."\n";
-
 if($sta<$log){system("$logbatchfile $sta ".join(" ",@par)); }
 } 
  return $sta;

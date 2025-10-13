@@ -270,7 +270,9 @@ This equation can be written for the more general case of several
 \right]
 \chi_{\delta\beta}^{s''s'}({\mbf Q},\omega),
 \end{equation}
-where $\chi^{s}_{\alpha\beta}(\omega)$ is the
+where 
+%script2html_begin{singleion}
+$\chi^{s}_{\alpha\beta}(\omega)$ is the
  subsystem susceptibility (the same for all $\Bell$), given by
 \begin{equation}
 \label{singleionsusceptibility}
@@ -279,17 +281,23 @@ where $\chi^{s}_{\alpha\beta}(\omega)$ is the
 I_{\beta}-\langle\hat \mathcal I_{\beta}\rangle|j\rangle}{\epsilon_{j'}-\epsilon_j-\hbar \omega}
 (p_j-p_{j'}).
 \end{equation}
+%script2html_end{singleion}
 where for the sake of simplicity we omit the $s$ index 
 on all quantities on the right-hand side. 
+%script2html_begin{singleion}
 Here $\epsilon_j$ and $\epsilon_{j'}$ are 
-energy levels of the subsystem $s$ as calculated 
+energy levels of the subsystem $s$ 
+%script2html_end{singleion} .
+as calculated 
 self-consistently within the mean-field theory
 using the Hamiltonian (\ref{mfhamiltonian}), 
+%script2html_begin{singleion}
 $|j\rangle$ and $|j'\rangle$ denote the corresponding 
 eigenstates and $p_j$ the corresponding population numbers:
 \begin{equation}
 p_{j} = \frac{\exp(-\epsilon_{j}/\hl{k}T)}{\sum_{j'}\exp(-\epsilon_{j'}/\hl{k}T)}.
 \end{equation}
+%script2html_end{singleion}
 
 The writing of (\ref{singleionsusceptibility}) has been simplified in two ways. The obvious
 one is that $\omega$ should read $\omega+i \varepsilon$ where
@@ -322,10 +330,13 @@ Also program {\prg singleion} can be used
 to evaluate the magnetic subsystem susceptibility according to (\ref{singleionsusceptibility}),
 see section \ref{addprog}.
 
+%script2html_begin{singleion}
  If the option {\prg -r} is not used, the
  program {\prg mcdisp\index{mcdisp}} uses only the extremely fast DMD (Dynamical Matrix Diagonalisation) %%@
-algorithm\cite{rotter06-400} to calculate excitation energies and intensities and store the result in {\prg mcdisp.qom, %%@
-mcdisp.qei, etc.}. The flowing chart of such a calculation is shown in fig.~\ref{figdmdproc}
+algorithm\cite{rotter12-213201,rotter06-400} to calculate excitation energies and intensities and store the result in {\prg mcdisp.qom, %%@
+mcdisp.qei, etc.}. 
+%script2html_end{singleion}
+The flowing chart of such a calculation is shown in fig.~\ref{figdmdproc}
 and the formalism is outlined hereafter:
 
 

@@ -1,10 +1,14 @@
 
-\section{{\prg mcdisp} - the Calculation Program for Magnetic Excitations}\label{mcdisp}
+\section{{\prg mcdisp} - the Calculation Program for Dispersive Excitations}\label{mcdisp}
 
 %script2html_begin{mcdispit} 
-For a given field $\mbf H$ and temperature $T$ the dynamics of the magnetic system
-can be calculated by the program {\prg mcdisp\index{mcdisp}}, for details
-on the theory see appendix~\ref{formalism}. {\prg mcdisp\index{mcdisp}} requires as input files
+For a given field $\mbf H$ and temperature $T$ the dynamics of the  system
+can be calculated by the program {\prg mcdisp\index{mcdisp}}, 
+%script2html_end{mcdispit} 
+for details
+on the theory see appendix~\ref{formalism}. 
+%script2html_begin{mcdispit} 
+{\prg mcdisp\index{mcdisp}} requires as input files
 the {\prg mcphas.j\index{mcphas.j}} and single ion input files. In addition, the input file
 {\prg mcdisp.par\index{mcdisp.par}} and {\prg mcdisp.mf\index{mcdisp.mf}} are needed 
 (see description below). 
@@ -36,8 +40,8 @@ If option {\prg -r 0.032} is used, the energy dependence of
 the scattering cross section is calculated within limits [emin,emax] (given in file
 {\prg mcdisp.par}).
 The number, 0.032 in our case, indicates the imaginary part of $\omega$ 
-in units of meV (see equations
-in section~\ref{formalism}). Setting it zero would lead to numerical
+in units of meV (see equation
+(\ref{singleionsusceptibility}) ). Setting it zero would lead to numerical
 divergencies, choosing it to large leads to large half widths of the calculated 
 peaks. 
  Output

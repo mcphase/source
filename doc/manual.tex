@@ -41,22 +41,31 @@
 \begin{document}
 
 
- \title{ {\Huge \bf \em McPhase} \\
+ \title{ 
+\includegraphics[bb=0 0 413 289,angle=0,height=90pt]{figsrc/headerL.jpg}
+\includegraphics[bb=0 0 389 282,angle=20,height=140pt]{figsrc/mcphase_logo.jpg}
+\includegraphics[bb=0 0 413 289,angle=0,height=90pt]{figsrc/headerR.jpg}
+
+% {\Huge \bf \em McPhase} \\
  \vspace{1cm} 
 {\bf   USERS MANUAL}\\
-  \vspace{2cm} 
- Checkout our workshops at the McPhase homepage  
+  \vspace{1cm} 
+{\em  Workshops available at the McPhase homepage }
+
 \href{https://mcphase.github.io/webpage/}{mcphase.github.io/webpage/} 
- - we offer workshops with  few participants online or in
- a relaxed atmosphere in Venice, Italy, a city without the stress of cars.
-\vspace{1cm}
-\includegraphics[bb=100 100 700 180,angle=0, width=0.9\textwidth]{figsrc/McPhaseVenice.jpg}
-\vspace{1cm}}
+
+{We offer workshops with  few participants online or in
+ a relaxed atmosphere in Venice, Italy, a city without the stress of cars.}
+
+%\vspace{1cm}
+\includegraphics[bb=0 0 700 180,angle=0, width=0.9\textwidth]{figsrc/McPhaseVenice.jpg}
+%\vspace{1cm}
+}
 
 \date {
 \vspace{1cm} 
        \input{version.tex}
-       \vspace{1cm}
+ %      \vspace{1cm}
        \today}
 %\begin{center}
 %\end{center}
@@ -72,6 +81,9 @@
 
 \maketitle
 \clearpage
+\pagestyle{myheadings}
+\markboth{\hfill \includegraphics[angle=20,height=20pt,bb=0 0  49 35]{../mcphas_logo1.jpg} }
+          {\includegraphics[angle=20,height=20pt,bb=0 0 49 35]{../mcphas_logo1.jpg} \hfill}
 
 \section*{Acknowledgements}
 
@@ -394,6 +406,7 @@ UPd$_3$ & dispersive CEF excitations, quadrupolar interactions  & {\prg so1ion}\
 \section{The Hamiltonian}
 \label{hamiltonian}
 
+%script2html_begin{mcphasit} 
 We assume a quantum mechanical system that can be described by the Hamiltonian
  \begin{equation}\label{hamilton}
  \hat \mathcal H=\sum_{n=1}^N \hat \mathcal H(n) -\frac{1}{2} \sum_{n,n',\alpha,\beta}
@@ -403,7 +416,11 @@ The first term $\hat \mathcal H(n)$ denotes the Hamiltonian of
  a subsystem $n$
 (e.g.~an ion, or cluster of ions). The second term describes a bilinear interaction 
 between different subsystems
-through the operators $\hat \mathcal I_{\alpha}^n$, with $\alpha = 1,2,...,m$. The operators $\hat \mathcal H(n)$ and $\hat \mathcal I_{\alpha}^n$  act in the subspace $n$ of the Hilbert space, i.e. $[\hat \mathcal I_{\alpha}^n,\hat \mathcal I_{\alpha}^{n'}]=0$,
+through the operators $\hat \mathcal I_{\alpha}^n$, with $\alpha = 1,2,...,m$. 
+%script2html_end{mcphasit} 
+The operators $\hat \mathcal H(n)$ 
+and $\hat \mathcal I_{\alpha}^n$  act in the subspace $n$ of the Hilbert space, 
+i.e. $[\hat \mathcal I_{\alpha}^n,\hat \mathcal I_{\alpha}^{n'}]=0$,
 $[\hat \mathcal H(n),\hat \mathcal I_{\alpha}^{n'}]=0$ and $[\hat \mathcal H(n),\hat \mathcal H(n')]=0$
 for $n \neq n'$\footnote{Note that these conditions are essential and put a  limit to the
 applicability of the theory, for example in the case of charge transfer excitations from

@@ -48,7 +48,7 @@
 #            9....|MSFdip.P|
 #            10....Re(MSFdip.P)
 #            11....Im(MSFdip.P)
-#            12....angl(Q,P)[°]
+#            12....angl(Q,P)[Â°]
 #            13....i(MSFxMSF*).P
 #            14....I+
 #            15....I-
@@ -142,4 +142,3 @@
 #{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
 {Nd3p.sipf} 0 0 0   0 0 0   0 0 0 
                   corresponding exchange fields Hxc [meV]-->          0 0 0
-

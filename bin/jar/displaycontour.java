@@ -75,6 +75,8 @@ static int noffiles;
  static String zText = "";
  static String Title = "";
  static String Vlines = "";
+ static String gVlines = "";
+ static String gHlines = "";
  static String Hlines = "";
  static LegendTitle Legendt;
  static DefaultXYZDataset dataset;
@@ -96,33 +98,27 @@ static public void windowclose(){
               } catch(Exception f) {
                 f.printStackTrace();
               }
-          }
+          
                 //dispose();
 
 try{ //Oeffnen der gnu Datei
-      System.out.println("Writing results/displaycontour.gnu");
-     GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("results/displaycontour.gnu")));
+      System.out.println("Writing "+jpgfilename+".gnu");
+     GnuOutputStream = new DataOutputStream(new FileOutputStream(new File(jpgfilename+".gnu")));
      }
    catch (FileNotFoundException e)
-    {System.out.println("Writing displaycontour.gnu");
-     try{ GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("displaycontour.gnu")));
-          }
-       catch (FileNotFoundException e1)
-       {
-      System.out.println("Error opening " + e1.getLocalizedMessage());System.exit(0);
+     {
+      System.out.println("Error opening " + e.getLocalizedMessage());System.exit(0);
        }
-    }
+    
     
    try{ int w=panel.getWidth();
         int h=panel.getHeight();
        GnuOutputStream.writeBytes("""
-set term png enhanced size """+" "+w+" , "+ h + """ 
-
+set term jpeg enhanced size """+" "+w+" , "+ h + "\n"+ """ 
+#set term png enhanced size """+" "+w+" , "+ h + "\n"+ """
 #set terminal postscript eps  enhanced color "Arial" 22
 
-#unset key
-#set yr [0.01:20]
-#set xr [0.5:1.5]
+unset key
 #set cbrange [-21:21]
 #set cbtics -20, 5, 20
 #set contours
@@ -137,17 +133,28 @@ set palette viridis positive
 set view map
 #set tics scale 0
 #set key inside samplen .1 reverse
-#set key title "&{----} z = x^2 + y^2(1-x)^3" \n """);
+#set key title "&{----} z = x^2 + y^2(1-x)^3" \n 
+#set yr [0.01:20]
+#set xr [0.5:1.5]
+
+""");
+
+GnuOutputStream.writeBytes("set xr ["+chart.getXYPlot().getDomainAxis().getRange().getLowerBound()+":"+
+         +chart.getXYPlot().getDomainAxis().getRange().getUpperBound()+"]\n");
+GnuOutputStream.writeBytes("set yr ["+chart.getXYPlot().getRangeAxis().getRange().getLowerBound()+":"+
+         +chart.getXYPlot().getRangeAxis().getRange().getUpperBound()+"]\n");
+GnuOutputStream.writeBytes(gHlines);
+GnuOutputStream.writeBytes(gVlines);
 
  GnuOutputStream.writeBytes("set xlabel '"+chart.getXYPlot().getDomainAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set ylabel '"+chart.getXYPlot().getRangeAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set title '"+chart.getTitle()+"'\n");
+ GnuOutputStream.writeBytes("set out '"+jpgfilename+"'\n");
 GnuOutputStream.writeBytes("""
-set out 'display.png'
 #set size ratio 2
 #set origin 0, 0
-#splot g(x,y) with contourfill fs solid border notitle, \
-#      g(x,y) nosurface lt black title "Contour levels Δz = 5"
+#splot g(x,y) with contourfill fs solid border notitle, \\
+#      g(x,y) nosurface lt black title "Contour levels dz = 5"
 # set dgrid3d  splines
  splot """);
  for(int i=0;i<noffiles;i+=1)
@@ -161,11 +168,22 @@ if(coly[i].contains("c")){GnuOutputStream.writeBytes("("+coly[i].replace("c","$"
 GnuOutputStream.writeBytes(":");
 if(colint[i].contains("c")){GnuOutputStream.writeBytes("("+colint[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
 }else{GnuOutputStream.writeBytes(colint[i]);}
-GnuOutputStream.writeBytes(" with points pointtype 5 pointsize 1 palette linewidth 30 ");
+GnuOutputStream.writeBytes("  with pm3d  \n");
 if(i<noffiles-1)GnuOutputStream.writeBytes(", \\\n");
        }
 // "results/001mcdisp.qei" using 7:9:(sqrt($10)*2) with points pt 4 pointsize variable , \\
 //      "results/002mcdisp.qei" using 7:9:(sqrt($10)*2) with points pt 6 pointsize variable 
+ for(int i=0;i<noffiles;i+=1)
+       {
+GnuOutputStream.writeBytes("""
+# if 'with pm3d' does not work you can try 'with points pointtype 5  palette'
+# or to insert empty lines between changes of data column use the command
+ """);
+GnuOutputStream.writeBytes("# comment -cc ");
+if(colx[i].contains("c")){GnuOutputStream.writeBytes("("+colx[i].replace("c","$").replace("$os","cos").replace("x","*").replace("e*p","exp")+")");
+}else{GnuOutputStream.writeBytes(colx[i]);}
+GnuOutputStream.writeBytes(" \" \" "+file[i]+"\n");
+   }
 GnuOutputStream.writeBytes("""
 
 replot
@@ -178,7 +196,7 @@ replot
     catch (IOException e)
     { System.out.println("File Error: " + e.getLocalizedMessage());
     }
-
+   } // fi jpgfilename
                 System.exit(0);
 }
         public void windowOpened(WindowEvent e) {}
@@ -330,9 +348,11 @@ if(!s.isEmpty()){
     String sn [] = s.split("\\|"); 
    double x =p.parseDouble(sn[0]); 
  XYLineAnnotation axy = new  XYLineAnnotation(x, ymin, x, ymax+0.01*(ymax-ymin));
+ gVlines=gVlines+"set object polygon from "+x+","+ymin+" to "+x+","+(ymax+0.01*(ymax-ymin)) +" to "+x+","+ymin+"  \n";
 plot.addAnnotation(axy);
    if(sn.length>1){
 XYTextAnnotation t = new XYTextAnnotation(sn[1],x,ymax+0.02*(ymax-ymin));
+gVlines=gVlines+"set label  \""+sn[1]+"\" at "+x+","+(ymax+0.03*(ymax-ymin))+" center\n";
 plot.addAnnotation(t);
     }
  }
@@ -342,9 +362,12 @@ for (String s : hl) {
 if(!s.isEmpty()){ String sn [] = s.split("\\|"); 
    double y =p.parseDouble(sn[0]); 
  XYLineAnnotation axy = new  XYLineAnnotation(xmin, y, xmax+0.01*(xmax-xmin), y);
+ gHlines=gHlines+"set object polygon from "+xmin+","+y+" to "+(xmax+0.01*(xmax-xmin))+","+y +" to "+xmin+","+y+" \n";
 plot.addAnnotation(axy);
  if(sn.length>1){
 XYTextAnnotation t = new XYTextAnnotation(sn[1],xmax+0.02*(xmax-xmin),y);
+gHlines=gHlines+"set label  \""+sn[1]+"\" at "+(xmax+0.02*(xmax-xmin))+","+y+"\n";
+
 plot.addAnnotation(t);
     }
  }
@@ -406,8 +429,8 @@ zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
        System.out.println("	 # displaytitle=My new Graph");
        System.out.println("	 # displayytext=intensity");
        System.out.println("	 # displayxtext=meV \n");
-       System.out.println("        options:   -o file.jpg create a jpg file on exiting");
-       System.out.println("                   -c file.jpg create a jpg file and exit immediately");
+       System.out.println("        options:   -o file.jpg create a jpg file on exiting, also create file.jpg.gnu to be used in gnuplot");
+       System.out.println("                   -c file.jpg create a jpg file and exit immediately, also create file.jpg.gnu ");
        System.out.println("                   -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
        System.out.println("                   -xmax -ymin -ymax -xtext -ytext -title  similar");
        System.out.println("                   -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
@@ -625,45 +648,40 @@ protected void reload_data(int i)
       strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
 
              if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
-             {
+             {// remove the comment
+              strLine = strLine.substring(1, strLine.length());
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
         if(detxText==true){
-            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
-              chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;
-                                                                             }
-               else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0)if(clx.contains("c")){chart.getXYPlot().getDomainAxis().setLabel(clx);}
-                         else{if(SF.NofCols(strLine)>p.valueOf(clx).intValue())chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
-              }
-                                                   }
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext="))
+              {chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;}
+                           }
         if(detyText==true){
-            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
-              chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
-                                                                             }
-               else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0)if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
-                         else{if(SF.NofCols(strLine)>p.valueOf(cly).intValue())chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
-               }
-                                                   }
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext="))
+              {chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;}
+                           }
         if(detzText==true){
-            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayztext=")){
-              zAxis.setLabel(strLine.substring(i1+13,strLine.length()));dztf=1;
-                                                                             }
-               else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dztf==0&&j==0&&SF.NofCols(strLine)>0)if(clint.contains("c")){zAxis.setLabel(clint);}
-                         else{if(SF.NofCols(strLine)>p.valueOf(clint).intValue())zAxis.setLabel(SF.NthWord(strLine,p.valueOf(clint).intValue()));
-//System.out.println(SF.NthWord(strLine,p.valueOf(clint).intValue())+"ddd"+zAxis.getLabel());
-                             }
-                                                       }
-               }
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayztext="))
+              {zAxis.setLabel(strLine.substring(i1+13,strLine.length()));dztf=1;}
+                           }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
         }
+         // if no data has yet been read  -go through string and try to find automatically column headers
+          if(detxText==true&&dxtf==0&&j==0&&SF.NofCols(strLine)>0)
+                  if(clx.contains("c")){chart.getXYPlot().getDomainAxis().setLabel(clx);}
+                  else{if(SF.NofCols(strLine)>p.valueOf(clx).intValue())chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
+          if(detyText==true&&dytf==0&&j==0&&SF.NofCols(strLine)>0)
+                 if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
+                 else{if(SF.NofCols(strLine)>p.valueOf(cly).intValue())chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
+          if(detzText==true&&dztf==0&&j==0&&SF.NofCols(strLine)>0)
+                 if(clint.contains("c")){zAxis.setLabel(clint);}
+                 else{if(SF.NofCols(strLine)>p.valueOf(clint).intValue())zAxis.setLabel(SF.NthWord(strLine,p.valueOf(clint).intValue()));}
+//System.out.println(SF.NthWord(strLine,p.valueOf(clint).intValue())+"ddd"+zAxis.getLabel());
         continue;
-             }
+             }  // fi is a comment
             
           // select colx and coly
             if(clx.contains("c")||cly.contains("c")||clint.contains("c")){     

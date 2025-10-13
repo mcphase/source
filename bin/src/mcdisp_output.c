@@ -167,16 +167,16 @@ else fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar a
 
 
 //****************************************************************************************************************************
-void writehklblocknumber(FILE * jqfile,inimcdis & ini,int & counter)
- {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
+void writehklblocknumber(FILE * jqfile,inimcdis & ini)
+ {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==ini.Qindex)
                        {fprintf(jqfile,"#!hklblock_number=%i\n",is);
                         }
  }                    
 //****************************************************************************************************************************
 void writehklblocknumber(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
                     FILE * foutqee,FILE * foutqsd,FILE * foutqod,FILE * foutqep,FILE * foutqem,FILE * foutqpe,FILE * foutqes,FILE * foutqel,
-                    inimcdis & ini,int & calc_rixs,int & calcXobs,int & do_Erefine,int & counter)
- {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
+                    inimcdis & ini,int & calc_rixs,int & calcXobs,int & do_Erefine)
+ {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==ini.Qindex)
                        {fprintf(foutqei,"#!hklblock_number=%i\n",is);fprintf(foutqom,"#!hklblock_number=%i\n",is);                                       
                         if(!calc_rixs&&!calcXobs){fprintf(foutdstot,"#!hklblock_number=%i\n",is);
                                        if (do_Erefine==1){fprintf(foutds,"#!hklblock_number=%i\n",is);}

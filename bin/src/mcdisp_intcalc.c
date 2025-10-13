@@ -6,7 +6,7 @@
 // returns 1 on success and zero on failure
 //***********************************************************************
 void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double & epsilon,int do_verbose,
-                 int do_gobeyond,int calc_rixs, int calcXobs,int do_phonon,Vector & hkl,int qcounter)
+                 int do_gobeyond,int calc_rixs, int calcXobs,int do_phonon,Vector & hkl)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
   hkl2ijk(qijk,hkl, inputpars.cs.abc);
     QQ=Norm(qijk);
@@ -47,8 +47,8 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
       for(int ll=1;ll<=ini.nofcomponents;++ll){mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} 
                                                //mf ... exchange field vector of atom s
 
-  if(do_Erefine) // clear chi0 matrices (put sign of qcounter negative
-  {int mqc=-qcounter;(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2),md.nofEstps,epsilon,
+  if(do_Erefine) // clear chi0 matrices (put sign of ini.Qindex negative
+  {int mqc=-ini.Qindex;(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2),md.nofEstps,epsilon,
                   qijk,mqc,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
 
   jmin=0;
@@ -69,7 +69,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
 
   if(do_Erefine) // fill chi0 matrices 
   {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2), md.nofEstps,epsilon,
-                  qijk,qcounter,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
+                  qijk,ini.Qindex,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
    if(calcXobs)// Xobservable
       {int check=0;
        switch(obint(calcXobs))

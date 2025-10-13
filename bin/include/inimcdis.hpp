@@ -32,6 +32,7 @@ class inimcdis
   bool include_cd; // true if the calculation of J(q) the classical dipole interaction
                    // should be included 
   int * hklfile_start_index;
+  int Qindex;
   char * info;
   char * prefix;
   double ** hkls;

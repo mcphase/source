@@ -3,19 +3,94 @@ use Cwd;
 use File::Basename;
 
 # implemented automatic creation of documentation output as (links in html, footnotes in tex)
+# implemented is a hash of program names and labels in mcphase manual.tex
 %implemented = qw(
+acoscol             acoscol
+add                 add
+addcol              addcol
+addj               addj
+anisotropy          anisotropy
+asincol             asincol
+atancol             atancol
+average             average
+cfsplit             cfsplit
+chi2                chi2
+cif2mcphas          cif2mcphas
+comment             comment
+compare             compare
+convolute           convolute
+convolute2d         convolute2d
+coscol              coscol
+cpsingleion         cpsingleion
+delcol              delcol
+delcols             delcols
+delcomments         delcomments
+delnthline         delnthline
+dif                dif
 display            display
 displaydensities   displaydensities
 displaydensity     displaydensity
+displayhtml         displayhtml
+displaytext         displaytext
+displaycontour      displaycontour
+epsdebye            epsdebye
+expcol              expcol
+extendunitcell      extendunitcell
+factcol             factcol
+fermicol            fermicol
+fform               fform
+fillcol             fillcol
+fitcol              fitcol
+fitfermi            fitfermi
+gauss               gauss
+gauss2d             gauss2d
+gausscol            gausscol
+getvalue           getvalue
+getvariable        getvariable
+histcol             histcol
+hkl                hkl
+icsdread            icsdread
+int                 int
+linreg              linreg
+lorentz             lorentz
+lorentzcol          lorentzcol
 makenn             makenn
-singleion          Smagpoly
+mctest              mctest
 mcphasit           runmcphas
+-doeps             zeroepsex
 mcdispit           mcdisp
 mcdiff             mcdiff
+newcol              newcol
+newcols              newcols
+newline             newline
+pointc              pointc
+potcol              potcol
+radwavfunc          radwavfunc
+range               range
+reduce_unitcell     reduce_unitcell
+rotate              rotate
+rotateBlm           rotateBlm
+rpvalue             rpvalue
+script2html         script2html
+setup_mcdiff_in     setup_mcdiff_in
+setup_mcdisp_mf     setup_mcdisp_mf
+setup_jqfit         setup_jqfit
+setvalue           setvalue
+setvariable        setvariable
+shiftcol            shiftcol
+sincol              sincol
+singleion          Smagpoly
+substitute          substitute
+sumcol              sumcol
+swapcol             swapcol
+tancol              tancol
+tanhcol             tanhcol
+uvw2fwhm            uvw2fwhm
+zshift              zshift
                  );
 $URL="$ENV{'MCPHASE_DIR'}/doc/manual";
-$DOC="$ENV{'MCPHASE_DIR'}/doc/";
-
+$DOC="$ENV{'MCPHASE_DIR'}/doc";
+$DIR="$ENV{'MCPHASE_DIR'}";
 require "$URL/labels.pl";
 
 unless ($#ARGV >=0)
@@ -56,6 +131,60 @@ if($l){print STDERR "#* Latex Output *\n";}else{print STDERR "#* Html Output *\n
  $date=localtime( time);$dir=getcwd;
 
 if($l){$dir=~s/_/\\_/g;@DD=@ARGV;foreach(@DD){$_=~s/_/\\_/g;}
+open (Fout, ">spverbatim.sty");
+print Fout << "EOF";
+%%
+%% This is file `spverbatim.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% spverbatim.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2009 by Scott Pakin <scott+spverb\@pakin.org>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.3c of this license
+%% or (at your option) any later version.  The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.3c or later is part of all distributions of LaTeX version
+%% 2008/05/04 or later.
+%% 
+\\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\\ProvidesPackage{spverbatim}
+    [2009/08/10 v1.0 Verbatim with breakable spaces]
+\\gdef\\spverb{%
+  \\bgroup
+  \\let\\spverb\@ve=\\verb\@egroup
+  \\def\\verb\@egroup{\\spverb\@ve\\egroup}%
+  \\def\\\@xobeysp{\\mbox{}\\space}%
+  \\verb
+}
+\\begingroup
+  \\catcode`|=0
+  \\catcode`[=1
+  \\catcode`]=2
+  \\catcode`\\{=12
+  \\catcode`\\}=12
+  \\catcode`\\\\=12
+  |gdef|spv\@xverbatim#1\\end{spverbatim}[#1|end[spverbatim]]
+|endgroup
+\\newenvironment{spverbatim}{%
+  \\def\\\@xobeysp{\\mbox{}\\space}%
+  \\let\\\@xverbatim=\\spv\@xverbatim
+  \\verbatim
+}{%
+}
+\\endinput
+%%
+%% End of file `spverbatim.sty'.
+EOF
+close Fout;
 open (Fout, ">placeins.sty");
 print Fout << "EOF";
 %  P L A C E I N S . S T Y          ver 2.2  April 18, 2005
@@ -170,6 +299,7 @@ print STDOUT << "EOF";
 \\usepackage[pdftex]{graphicx}
 % \\usepackage{makeidx}
 \\usepackage{lscape}
+\\usepackage{spverbatim}
 \\usepackage{amssymb}
 \\usepackage{amsbsy}
 \\usepackage{afterpage}
@@ -203,13 +333,27 @@ print STDOUT << "EOF";
 \\newcommand{\\Trace}[1]{\\rm Tr \\{ #1 \\} }
 
 \\begin{document}
- \\title{Output of script2html -latex @DD \\\\
-  ...in directory $dir}
+
+ \\title{
+\\includegraphics[bb=0 0 413 289,angle=0,height=90pt]{$DOC/figsrc/headerL.jpg}
+\\includegraphics[bb=0 0 389 282,angle=20,height=140pt]{$DOC/figsrc/mcphase_logo.jpg}
+\\includegraphics[bb=0 0 413 289,angle=0,height=90pt]{$DOC/figsrc/headerR.jpg}
+
+Output of \\\\
+ script2html -latex @DD \\\\
+\\vspace{0.2cm}
+{\\normalsize  ...in directory \\\\
+ $dir}}
 \\date{ $date , latex run on \\today }
 \\author{McPhase Project\\thanks{mcphase@icloud.com}}
 \\maketitle
+\\pagestyle{myheadings}
+\\markboth{\\hfill \\includegraphics[angle=20,height=20pt]{$DIR/mcphas_logo1.jpg} }
+          {\\includegraphics[angle=20,height=20pt]{$DIR/mcphas_logo1.jpg} \\hfill}
+
 \\tableofcontents
 EOF
+
 }
 else{
 
@@ -232,30 +376,40 @@ body { font-family:'Times',monospace;font-style=italic; }
         onload="renderMathInElement(document.body);"></script>
 
 </head><body>
+<img src="$DOC/figsrc/headerL.jpg">
+<img src="$DOC/figsrc/mcphase_logo.jpg">
+<img src="$DOC/figsrc/headerR.jpg">
+<center><h1> McPhase </h1></center>
  ...this document was created $date <br>
  ...in directory $dir<br>
  ...by the command: script2html @ARGV <br><br>
 
 EOF
 }
-@ARGV=map{glob($_)}@ARGV;$i=0;
+@ARGV=map{glob($_)}@ARGV;$i=0;$ii=0;
 @BB=@ARGV;while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
                      if($BB[0]=~/-toline/){shift @BB;shift @BB;}
                      if(!defined $l){print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';}
                       shift @BB;
                     } 
 if($l){print "\% ";$fignr=1;}
-print "<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->";
 $br="<br>";
 while (@ARGV)
 {$linetext="";
  $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV;$ARGV[0]=~s/x/*/g; $fromline=eval $ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
  $toline=1e10;if($ARGV[0]=~/-toline/){shift @ARGV; $ARGV[0]=~s/x/*/g;$toline=eval $ARGV[0];shift @ARGV;$linetext=$linetext." up to line $toline";}
- $file=$ARGV[0];shift @ARGV; ++$i;
+ $file=$ARGV[0];shift @ARGV; $i=$ii+1;$ii=$i;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    # get path from filename
    $dir=dirname($file);print "\n";
-  if($l){$file=~s/_/\\_/g;print "\\section{Source File ".$i.$linetext.":".$file."}\n";}
+  if($l){$file=~s/_/\\_/g; print"\\markboth{\\hfill Source File ".$i.$linetext.":".$file." \\includegraphics[angle=20,height=20pt]{$DIR/mcphas_logo1.jpg} }
+          {\\includegraphics[angle=20,height=20pt]{$DIR/mcphas_logo1.jpg} Source File ".$i.$linetext.":".$file."\\hfill}\n";
+         print "\% ";
+        }
+  print "<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->\n";
+  if($l) {   print "\\subsection*{Source File ".$i.$linetext.":".$file."}\n";
+       
+         }
   else
   {   print '<a name="'.$file.'"><hr>Source File '.$i.$linetext.':<h1>'.$file.'</h1></a>';print "\n";}
    #print '<p class="c">';
@@ -272,14 +426,29 @@ while (@ARGV)
       if($l){    
  
            #remove comment for latex
-             $line=~s/^\s*#//;$line=~s/^\s*[rR][eE][mM]//;
+           if($br){$line=~s/^\s*#//;
+                   $line=~s/^\s*[rR][eE][mM]//;
+                  }
+            
            # substitute **** with \n****\n for latex
              $line=~s/(\*\*+)/\n\1\n/;
            # substitute --- with \n---\n for latex
-             $line=~s/(\-\-+)/\n\1\n/;
-             if($verbatim==1){$verbatim=0;$line="\\end\{verbatim\}".$line;}
+             $line=~s/(\-\-\-\-\-\-+)/\n\1\n/;
+             if($verbatim==1){$verbatim=0;$line="\\end\{spverbatim\}".$line;}
             }
 # *****************************************************************************
+       # take care for verbatim \ pre commands
+       if ($line=~/.*\<pre\>/&&$line!=~/.*\<pre\>.*\<\/pre\>/){$br="";}
+       if ($line=~/.*\<\/pre\>/&&$line!=~/.*\<\/pre\>.*\<pre\>/){$br="<br>";} 
+       if($l){$line=~s/\<pre\>/\\begin{spverbatim}/g;$line=~s/\<\/pre\>/\\end{spverbatim}/g;} 
+# *****************************************************************************
+    if($br){
+         if($l){# substitute # with \# for latex
+             $line=~s/\043/\\\043/g;
+                # substitute $ with \$ for latex
+             $line=~s/\$/\\\$/g;
+
+               }
         #  brackets opern close --- look if line should be continued in next line  ( not closed \( \[  € ) then
           # load next line, check if it is a comment, remove comment sign (at least for latex) and append 
            # line 
@@ -292,14 +461,10 @@ while (@ARGV)
          $line=~s/\§\//\<\/li\>\<\/ol\>/g;
          $line=~s/\§/\<\/li\>\<li\>/g;
 # *****************************************************************************
-       # take care for verbatim \ pre commands
-       if ($line=~/.*\<pre\>/&&$line!=~/.*\<pre\>.*\<\/pre\>/){$br="";}
-       if ($line=~/.*\<\/pre\>/&&$line!=~/.*\<\/pre\>.*\<pre\>/){$br="<br>";} 
-       if($l){$line=~s/\<pre\>/\\begin{verbatim}/g;$line=~s/\<\/pre\>/\\end{verbatim}/g;} 
-# *****************************************************************************
 
       if($line=~/.*\<\s*script2html.*\>/)
-       { # look if another file should be included
+       { my ($bef)=($line=~m/(.*)\<\s*script2html.*\>/);print $bef;
+         # look if another file should be included
          # if yes run script2htlm on this file
          ($arguments)=($line=~m/.*\<\s*script2html(.*)\>/);
           @arg=split(" ",$arguments);
@@ -315,61 +480,52 @@ while (@ARGV)
                        } $arguments=join(' ',@arg);
         # print "script2html $arguments > ".$arg[$#arg].".htm\n";
          system("script2html $l $arguments > ".$arg[$#arg].".htm");
-        if(-e  $arg[$#arg].".htm") {open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
+        if(-e  $arg[$#arg].".htm") {open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;++$ii;
+                  
             until($line1=~/.*<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->/){$line1=<Fin1>;}
-            while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/){
-                                 if($l){$line1=~s/section\{Source File\s*/section{Source File $i\./; # }}
-                                        $line1=~s/\\end\{document\}//;
+            while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/||
+                                        $line1=~/[^\%]*\\bibliographystyle\{/   ||
+                                        $line1=~/[^\%]*\\bibliography/  
+                                       ){
+                                 if($l){$line1=~s/subsection\*\{Source File\s*(.*)\}/subsection\*{Source File $ii\.\1\}
+             \\markboth\{\\hfill Source File $ii\.\1 \\includegraphics\[angle=20,height=20pt\]\{$DIR\/mcphas_logo1.jpg\} \}
+            \{\\includegraphics\[angle=20,height=20pt\]\{$DIR\/mcphas_logo1.jpg\} Source File $ii\.\1 \\hfill\}\n/; # 
+                                         $line1=~s/\\end\{document\}//;
                                        }
                                  else
-                                 {$line1=~s/\<hr\>Source File\s*/\<hr\>Source File $i\./;}
+                                 {$line1=~s/\<hr\>Source File\s*/\<hr\>Source File $ii\./;}
                                  print $line1;}}
         close Fin1;unlink($arg[$#arg].".htm");
+                                 if($l){print "\\subsection*{continuing Source File $i $linetext $file}\n";}
+                                  else {print '<hr>Continuing Source File '.$i.' '.$linetext.':<h1>'.$file.'</h1>';print "\n";} 
                                     }
                        else { print stderr "Error script2html: unable to open ".$arg[$#arg].".htm\n";}
        }
 # *****************************************************************************
         else
-       {
-        # take care about <img src=""> commands and insert path
+       { # take care about <img src=""> commands and insert path
         if($l){if($line=~/\<figure\>/){$figure=1;$line=~s/\<figure\>/see fig.\\ref\{fig$fignr\}\n\\begin\{figure\}[ht]\\begin\{center\}/;}
-               if($line=~/\<figcaption\>/){$line=~s!\<figcaption\>!\\caption\{\\label\{fig$fignr\}\n!;}
+               if($line=~/\<figcaption\>/){$line=~s!\<figcaption\>!\\caption\{\\label\{fig$fignr\}\n!;++$fignr;}
                if($line=~/.*\<\/figcaption\>/){$line=~s!\<\/figcaption\>!\}\n!;}
-               if($line=~/\<img(.*)src\s*=/){
-               ($filename)=($line=~m|\<img.*src\s*=\s*"([^\s^>^<^=]+)"|);
-             if($filename=~/\.gif$/){$filen=$filename;$filen=~s/\\_/_/g;
-                                    ($heightref, $widthref) = gifdim($filen);
-                                    # convert gif files to jpg so they can be processed by pdflatex
-                                    system("giftopnm $filename | pnmtojpeg > $filename.jpg");
-                                    }
-                 
-         if($figure==1)              
-           { if($filename=~/\.gif$/){
-              $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!\\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3.jpg\}!;
-                                    }
-                                else{
-              $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!\\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3\}!;
-                                    }
-           }else
-           {if($filename=~/\.gif$/){$line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!see fig.\\ref\{fig$fignr\}
-          \\begin\{figure\}[ht]\\begin\{center\}
-           \\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3.jpg\}
+               if($line=~/\<img(.*)src\s*=/){($filename)=($line=~m|\<img.*src\s*=\s*"([^\s^>^<^=]+)"|);
+                if($filename=~/\.gif$/){# notneeded ..$filen=$filename; $filen=~s/\\_/_/g; ($heightref, $widthref) = gifdim($filen);
+                                       # convert gif files to jpg so they can be processed by pdflatex
+                                       system("giftopnm $filename | pnmtojpeg > $filename.jpg");$filename.=".jpg";
+                                      } $filename=~s/\\_/_/g;
+                if($figure==1){ 
+              $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!\\includegraphics[angle=0,width=0.6\\columnwidth]\{$filename\}!;
+                }else
+                { $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!see fig.\\ref\{fig$fignr\}
+           \\begin\{figure\}[ht]\\begin\{center\}
+           \\includegraphics[angle=0,width=0.6\\columnwidth]\{$dir/\3\}
            \\caption{\\label\{fig$fignr\}
-            $dir/\3}
+            $filename}
            \\end\{center\}
-           \\end\{figure\}!;
-                                  }
-                                else{
-          $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!see fig.\\ref\{fig$fignr\}
-          \\begin\{figure\}[ht]\\begin\{center\}
-           \\includegraphics[angle=0,width=0.7\\columnwidth]\{$dir/\3\}
-           \\caption{\\label\{fig$fignr\}
-            $dir/\3}
-           \\end\{center\}
-           \\end\{figure\}!;   }
-          }
-         ++$fignr;$line=$line."\n\\afterpage\{\\FloatBarrier\}\n";}
-          if($line=~/.*\<\/figure\>/){$figure=0;$line=~s!\<\/figure\>!\\end\{center\}\\end\{figure\}!;}
+           \\end\{figure\}
+           \\afterpage\{\\FloatBarrier\}!; ++$fignr;  
+                 }
+             }
+          if($line=~/.*\<\/figure\>/){$figure=0;$line=~s!\<\/figure\>!\\end\{center\}\\end\{figure\}\\afterpage\{\\FloatBarrier\}!;}
                
         }
         else
@@ -378,11 +534,12 @@ while (@ARGV)
 # *****************************************************************************
 # replace html commands
        if($l){# replace html commands <...> by nothing
-        $line=~s/\<h1\>/\\subsection\{/g; $line=~s/\<\/h1\>/\}/g;
-        $line=~s/\<h2\>/\\subsubsection\{/g; $line=~s/\<\/h2\>/\}/g;
-        $line=~s/\<h3\>/\\paragraphn\{/g; $line=~s/\<\/h3\>/\}/g;
-        $line=~s/\<h4\>/\\subparagraph\{/g; $line=~s/\<\/h4\>/\}/g;
-        $line=~s/\<sub\>/\$_\{/g;$line=~s/\<\/sub\>/\}\$/g;
+        $line=~s/\<h1\>/\\section\{/g; $line=~s/\<\/h1\>/\}/g;
+        $line=~s/\<h2\>/\\subsection\{/g; $line=~s/\<\/h2\>/\}/g;
+        $line=~s/\<h3\>/\\subsubsection\{/g; $line=~s/\<\/h3\>/\}/g;
+        $line=~s/\<h4\>/\\paragraph\{/g; $line=~s/\<\/h4\>/\}/g;
+        $line=~s/\<h5\>/\\subparagraph\{/g; $line=~s/\<\/h5\>/\}/g;
+        $line=~s/\<sub\>/\\(_\{/g;$line=~s/\<\/sub\>/\}\\)/g;
         $line=~s/\<ol\>/\\begin\{itemize\}/g;$line=~s/\<\/ol\>/\\end\{itemize\}/g;
         $line=~s/\<li\>/\\item /g;$line=~s/\<\/li\>//g;
         
@@ -405,7 +562,7 @@ while (@ARGV)
        if($l)
        { 
 # *****************************************************************************
- #unless we are in an equation treat _ & ^ | < > symbols
+ #unless we are in an equation treat _ & ^ | < > # $ symbols
 # ...  first remove all normal brackets except \( \) \[ \]
 $line=~s/(?<!\\)\[/myleftrectangularbracket/g;
 $line=~s/(?<!\\)\]/myrightrectangularbracket/g;
@@ -445,12 +602,17 @@ $line=~s/myrightangularbracket/\)/g;
        print  $line;
        }
 # *****************************************************************************
+    } # fi $br
+    else
+    { print  $line;  }
     }else{ 
 # line did not start with a comment - thus it is a command and should be printed as it is
-if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{verbatim\}".$line;}
+if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{spverbatim\} ".$line;}
+      my @to_delete;
       foreach(keys %implemented)
-        {my $com=$_;
-         if($line=~/ $_ /){# $_  matches a command ? --> insert a footnote with exlanation of the command
+        {my $com=$_;  
+                my  $comr=$com;$comr=~s/_/\\_/g;
+         if($line=~/.*\s$_\s/){# $_  matches a command ? --> insert a footnote with exlanation of the command
                           # and delete command from hash %implemented so footnotes do not double on next use
                    # scan doc/*.tex for %script2html_begin{singleion} some text to be processed
                    #                    %script2html_end{singleion} some text to be processed
@@ -459,28 +621,29 @@ if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{verbatim\}".$l
                     opendir my $dir, $DOC; my @files = readdir $dir;
                     foreach(@files){if($_=~/\.tex$/){$store=0;
                                       open(FH, '<',$DOC."/".$_) or die $!;while(<FH>){
-                                      if($_=~/\%script2html_begin\{$com\}/){$store=1;$_=~s/\%script2html_begin\{$com\}/$com:/;}
+                                      if($_=~/\%script2html_begin\{$com\}/){$store=1;$_=~s/\%script2html_begin\{$com\}/$comr:/;}
                                       if($_=~/\%script2html_end\{$com\}/){$store=0;$_=~s/\%script2html_end\{$com\}//;print FOUT $_;}
                                       if($store==1){ print FOUT $_;}
                                      } close FH;
                                    }
                                    }
                    close FOUT;
-                  $line=$line."\\end\{verbatim\}\\footnote\{\\input\{".$ftexfile."\}\}\\begin\{verbatim\}";                  
-                  delete($implemented{$com});
+                  $line=$line."\\end\{spverbatim\} \\dots for details on $comr see footnote \\footnote\{\\input\{".$ftexfile."\}\}\\begin\{spverbatim\}";                  
+                  push @to_delete, $com;
                    }
-         }   
-
-
+         }  
+       
+       # delete keys which occured already
+       foreach (@to_delete) {delete($implemented{$_}); }
        }else{
    
 
     # substitute all  < and > signs by the html code &gt and &lt
         $line=~s/>/&gt /g;$line=~s/</&lt /g;
-   $line='<span class="r">'.$line.'</span>'.$br; #print commands in style "r"
+   $line='<span class="r"> '.$line.' </span>'.$br; #print commands in style "r"
    foreach(keys %implemented)
    {
-    if($line=~/\s$_\s/){# $_  matches a command ? --> insert a link to the formula in 
+    if($line=~/.*\s$_\s/){# $_  matches a command ? --> insert a link to the formula in 
                     $label=$implemented{$_}; # this is the label of an equation etc
                     $link=$external_labels{$label}."#$label";  # this is the link to manual/node...html#label
                     # insert the link here
@@ -494,11 +657,16 @@ if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{verbatim\}".$l
   
    }} # print "</p>\n";
 close Fin; 
-if($verbatim==1){$verbatim=0;print "\\end\{verbatim\}";}
+if($verbatim==1){$verbatim=0;print "\\end\{spverbatim\}";}
        
 } 
 close Fout;
-if($l){print "\\end\{document\}\n";}
+if($l){
+
+print "\\bibliographystyle\{".$DOC."\/physrev\}   \% here you should update any list by\n";
+print "\\bibliography\{".$DOC."\/li120914\}   \% bibtex - ing the database\n";
+
+print "\\end\{document\}\n";}
 else{
 print "<hr>\n";
 print "</body></html>\n";

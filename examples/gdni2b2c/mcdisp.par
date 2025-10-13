@@ -1,6 +1,6 @@
 # Parameter file  mcdisp.ini - read by mcdisp version 3.0
 #<!--mcdisp.mcdisp.ini>
-#*********************************************************************
+#<pre>*********************************************************************
 # mcdisp - program to calculate the dispersion of magnetic excitations
 # reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
 #*********************************************************************
@@ -64,4 +64,4 @@ emax=0.1
 # h k l [E1(meV) E2(meV) ...]
 #0.45 1 1 0.523 0.745
 # 0.75 1 1 0.523 0.745
-#0 0.55 0 0.3
+#0 0.55 0 0.3 </pre>

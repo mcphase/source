@@ -1,10 +1,10 @@
 cd ../examples/Ru3p_create_sipf
 
 formfactor Ru3p.sipf
-getvalue.pl -c 0.900325 1 2 1.0 0 results/formfactor.out
-getvalue.pl -c 0.810585 1 3 1.0 0 results/formfactor.out
-getvalue.pl -c 0.900325 1 4 1.0 0 results/formfactor.out
-getvalue.pl -c 0.036196 1 5 1.0 0 results/formfactor.out
+getvalue.pl -c 0.90033 1 2 1.0 0 results/formfactor.out
+getvalue.pl -c 0.81059 1 3 1.0 0 results/formfactor.out
+getvalue.pl -c 0.90033 1 4 1.0 0 results/formfactor.out
+getvalue.pl -c 0.03620 1 5 1.0 0 results/formfactor.out
 
 cd ../coo
 

@@ -1,9 +1,9 @@
 #* program spins ... reading from file results/test_mcphas.mf
-#! x=1 y=81 T=1 Ha=0 Hb=0 Hc=81 n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - configuration
+#! x=1 y=81 T=1 |H|=81 Ha=0 Hb=0 Hc=81 n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - configuration
  0.0000
  0.0000
- -0.5925
+ -0.5589
  0.0000
  0.0000
- 0.2839
+ 0.2340
 

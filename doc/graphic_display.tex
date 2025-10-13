@@ -53,9 +53,9 @@ such as
 	 if optional bubblecolumns are added then instead of lines bubbles with area corresponding to
 	     bubblecolumn are shown (toggle bubblesize with 's' and 'b')
 	 toggle lines / points view with '-' key
-         a file results/display.gnu or display.gnu is created for use with gnuplot
-       options:  -o file.jpg  create a jpg file on exiting
-                 -c file.jpg  only creates a jpg file and exit immediately
+         
+       options:  -o file.jpg  create a jpg file on exiting, also create file.jpg.gnu to be used in gnuplot
+                 -c file.jpg  only creates a jpg file and exit immediately, also create file.jpg.gnu 
                  -logx -logy  make x(y) a logarithmic axis
                  -xmin 23.3 the application sets the minimum of the display xaxis to 23.3
                  -xmax -ymin -ymax -xtext -ytext -title ...similar
@@ -73,12 +73,13 @@ such as
 a third column is given and the radius of the symbols varied according to the data in 
 this column.
 
-
-\item [displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot] produces a graphical
+%script2html_begin{displaycontour} \begin{description}
+\item [displaycontour\index{displaycontour}\label{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot] produces a graphical
 display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
 denote the x,y and z column in file {\prg ./results/mcdisp.dsigma.tot}, which should
 be plotted. Figure~\ref{ho2ti2o7diffuse} shows an sample output of this program. The axes labels may be changed
 in Tree View $\rightarrow$ xaxis title, etc.
+%script2html_end{displaycontour} \end{description}
 
 \item [displaytext\index{displaytext} ./results/mcphas.hkl] monitors the file mcphas.hkl in a text window
 on screen.
@@ -329,18 +330,20 @@ programs are called:
 
 
 
-
-
-
-
 \subsection{Program {\prg hkl\index{hkl}}, {\prg hkl2d\index{hkl2d}} and {\prg mcdiff\index{mcdiff}} - graphical %%@
 display\index{display} of magnetic diffraction intensity}
 \begin{description} 
-\item [{{\prg hkl\index{hkl}} [options] [file]} ]                   produces neutron intensity graphic
- and postscript-file {\prg hkl.eps}. {\prg perl} and
-{\prg pgplot} must be installed in order to use this program.
- Options are -n (plot reflex number n)
--h (help). If no file is given the program uses file {\prg mcphas.hkl}.
+%script2html_begin{hkl} \begin{description} 
+\item [{{\prg hkl\index{hkl}\label{hkl}}  [-FT|-h][-7|-0,1,0] [file] } ]    
+\begin{verbatim}              
+ produces neutron intensity for one reflection from results/mcphas*.hkl file
+  Options: -7 .... extract reflex number 7
+           -0,1,0 .. extract (0 1 0) reflex
+           -h .... help
+           -FT ... extract value of Fourietransform from e.g. mcphasa.hkl,... file
+  If no file is given the program uses file results/mcphas.hkl. and plots the neutron intensity
+\end{verbatim}
+%script2html_end{hkl} \end{description} 
 \item [{{\prg hkl2d\index{hkl2d}} [options] [file]} ]   same as {\prg hkl\index{hkl}} but two-dimensional colour %%@
 plot of intensity.
 \end{description} 

@@ -7,24 +7,25 @@
  #get filename from command line if given
  my ($file) = @ARGV;
  if ($file&&$file=~/-.*h/) # look if user wants help message (option -h)
- {print "program hkl [-FT|-h][-7] [file] 
+ {print "program hkl [-FT|-h][-7|-0,1,0] [file] 
   produces neutron intensity for one reflection from results/mcphas*.hkl file
   Options: -7 .... extract reflex number 7
+           -0,1,0 .. extract (0 1 0) reflex
            -h .... help
            -FT ... extract value of Fourietransform from e.g. mcphasa.hkl,... file
   If no file is given the program uses file results/mcphas.hkl. and plots the neutron intensity\n";exit;
  }else{print STDERR "#* $0 *\n";}
  $xcol=0;$ycol=7;$n=0;  # set default axes
  $FT=0;
- if ($file&&$file=~/-FT/) # look if user gives reflection number (option -n)
+ if ($file&&$file=~/-FT/) # look if user gives 
  {$FT=1;shift @ARGV;($file)=@ARGV;}
  if ($file&&$file=~/-/) # look if user gives reflection number (option -n)
- {$n=-$file;shift @ARGV;($file)=@ARGV;}
+ {($n)=($file=~m/-(.*)/);shift @ARGV;($file)=@ARGV;}
   $file = "./results/mcphas.hkl"  unless $file;
  
     overview_plot("/xserv", $file); # plot on screen
  #    overview_plot("./hkl.ps/cps", $file); #then plot on psfile
-     print "Wrote output file 'results/hkl.asc'\n";
+     print "#Wrote output file 'results/hkl.asc' for reflection ".$v[$n]."\n";
  
  
  sub overview_plot {
@@ -79,7 +80,7 @@
      my ($file) = @_;
      my $h = new FileHandle;
      my $l = new FileHandle;
-     my @v=();
+     @v=();
      my @imax=();
  
 format STDOUT =
@@ -108,7 +109,11 @@ $nn,$_,$imax[$nn-1]
                    }
        }
       }
-      
+      if($n=~/,/) # check if reflection number or reflection hkl are input
+      {#($H,$K,$L)=($n=~m/([\+\-\d\.]*),([\+\-\d\.]*),([\+\-\d\.]*)/); print "$H $K $L \n";
+       $y=new PDL(split (",", $n)); $i=0;foreach(@v){++$i;if (sum(abs($y-$_)<1e-5)==3){$n=$i;}}
+       if($n=~/,/){die "Error hkl: $y reflex not found in file $file\n";}
+      }
       unless ($n) 
       {$nn=0;foreach (@v){++$nn;write STDOUT;}
       print "reflection(1-".$nn.")? ";$n=<STDIN>;

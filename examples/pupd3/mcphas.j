@@ -1,4 +1,4 @@
-#PrB6
+#PuPd3
 #<!--mcphase.mcphas.j-->
 #! a=4.135 b=4.135 c=4.135 alpha=  90 beta=  90 gamma=  90
 #! r1x= 1 r2x=   0 r3x=   0

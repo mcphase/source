@@ -1,6 +1,6 @@
 # Parameter file  mcdisp.par for Lu2MnO4
 #<!--mcdisp.mcdisp.par>
-#*********************************************************************
+#<pre>*********************************************************************
 # mcdisp - program to calculate the dispersion of magnetic excitations
 # reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
 #*********************************************************************
@@ -64,7 +64,7 @@
 #
 # or
 # (iii) a list of Q vectors with (optional) energies of observed excitations to be fitted
-# h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]
+# h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]] </pre>
 #1.3889 0.2222 0 13.89
 #1.3889 0.2222 0 20.65
 #1.4444 0.1111 0 19.75

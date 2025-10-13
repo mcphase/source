@@ -1,6 +1,6 @@
-# Parameter file  mcdisp.par - to be read by mcdisp version 5.0
+#Parameter file  mcdisp.par - to be read by mcdisp version 5.0
 #<!--mcdisp.mcdisp.par>
-#*********************************************************************
+# <pre>*********************************************************************
 # mcdisp - program to calculate the dispersion of magnetic excitations
 # reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
 #*********************************************************************
@@ -76,6 +76,6 @@
 #
 # or (if no mesh is given the program takes)
 # (ii) a list of Q vectors with (optional) energies of observed excitations to be fitted
-# h k l [E1(meV) E2(meV) ...]
+# h k l [E1(meV) E2(meV) ...]</pre>
 
 

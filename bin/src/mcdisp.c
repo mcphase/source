@@ -339,15 +339,15 @@ void sortEc(ComplexVector & d,ComplexMatrix & z)
 }
 
 // rotate chi(1..3,1..3) from xyz to uvw coordinates
-void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
+void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc)
 {Vector hkl(1,3),u(1,3),v(1,3),w(1,3),q1(1,3),q2(1,3);q1=0;q2=0;
  static Vector wold(1,3);
  ComplexMatrix M(1,3,1,3);
- hkl(1)=ini.hkls[counter][1];
- hkl(2)=ini.hkls[counter][2];
- hkl(3)=ini.hkls[counter][3];
+ hkl(1)=ini.hkls[ini.Qindex][1];
+ hkl(2)=ini.hkls[ini.Qindex][2];
+ hkl(3)=ini.hkls[ini.Qindex][3];
  hkl2ijk(u,hkl,abc);
- int i=counter-1;
+ int i=ini.Qindex-1;
  if(i==0){i++;}
  hkl(1)=ini.hkls[i][1];
  hkl(2)=ini.hkls[i][2];
@@ -359,14 +359,14 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  hkl(3)=ini.hkls[i+1][3];
  hkl2ijk(q2,hkl,abc);
      i++;}
-//printf("A:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i counter=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,counter);
+//printf("A:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i ini.Qindex=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,ini.Qindex);
  while(fabs(fabs(q1*q2)-Norm(q1)*Norm(q2))<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i>1){i--;
  hkl(1)=ini.hkls[i][1];
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
      }
-//printf("B:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i counter=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,counter);
+//printf("B:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i ini.Qindex=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,ini.Qindex);
  xproduct(w,q1,q2);
  if(Norm(w)<SMALL_XPROD_FOR_PARALLEL_VECTORS){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
  xproduct(v,w,u);
@@ -703,7 +703,7 @@ if (do_jqfile)
      thrdat.inputpars[ithread] = new par(inputpars);
    } 
 #endif
-int counter,firstcounter=1;qijk=0;double qincr=-1;
+int firstcounter=1;ini.Qindex=1;qijk=0;double qincr=-1;
 if(strcmp(filemode,"A")==0){// check if some q values have already been calculated in a previous run !
                   // ... if hkl values match do not recalculate ... set firstcounter accordingly
                   filemode="a";float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE; 
@@ -722,15 +722,15 @@ if(strcmp(filemode,"A")==0){// check if some q values have already been calculat
                                   }               
                  }
 if(firstcounter>ini.nofhkls){printf("# mcdisp: all hkl already calculated in previous run - nothing to do - exiting\n");exit(0);}
-for(counter=firstcounter;counter<=ini.nofhkls;++counter){
-		     hkl(1)=ini.hkls[counter][1];
-		     hkl(2)=ini.hkls[counter][2];
-		     hkl(3)=ini.hkls[counter][3];
+for(ini.Qindex=firstcounter;ini.Qindex<=ini.nofhkls;++ini.Qindex){
+		     hkl(1)=ini.hkls[ini.Qindex][1];
+		     hkl(2)=ini.hkls[ini.Qindex][2];
+		     hkl(3)=ini.hkls[ini.Qindex][3];
 
  // transform hkl to primitive lattice
  q=inputpars.cs.r.Transpose()*hkl;
 
-fprintf(stdout,"#q=(%g,%g,%g)",hkl(1),hkl(2),hkl(3));print_time_estimate_until_end((double)(ini.nofhkls-counter)/(counter-firstcounter+1));
+fprintf(stdout,"#q=(%g,%g,%g)",hkl(1),hkl(2),hkl(3));print_time_estimate_until_end((double)(ini.nofhkls-ini.Qindex)/(ini.Qindex-firstcounter+1));
 fprintf(stdout,"\n");
  if(do_verbose==1){fprintf(stdout,"#Setting up J(q) matrix .... \n");}
  // calculate J(q)
@@ -825,7 +825,7 @@ int num_threads_started=-1;
 
 
 if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
-              writehklblocknumber(jqfile,ini,counter);
+              writehklblocknumber(jqfile,ini);
          
                   if (do_verbose==1){printf ( "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
                                      printf("nofneighbours= %li\n",nofneighbours);
@@ -950,7 +950,7 @@ if (do_jqfile){
        if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-0.1e10;jqsta_scaled=jqsta;scalefactor=1;jqmax=jq0;hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);
                           // here the first hkl vectors eigenvalue has been determined
                           // ... look in table, if there is a value, to which is might be scaled
-                          if(ini.hkls[counter][0]>3&&jq0!=0.0){scalefactor=ini.hkls[counter][4]/jq0;}
+                          if(ini.hkls[ini.Qindex][0]>3&&jq0!=0.0){scalefactor=ini.hkls[ini.Qindex][4]/jq0;}
                          }
        // ... on subsequent runs 
        else           {if(Tn(i2)>jqmax){jqmax=Tn(i2);hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);}
@@ -963,13 +963,13 @@ if (do_jqfile){
                        
                       }
                       double test;
-                     for(int kk=NOFHKLCOLUMNS;kk<=ini.hkls[counter][0];kk+=NOFHKLCOLUMNS-3){
-                      for (j1=1;j1<=ini.hkls[counter][kk-NOFHKLCOLUMNS+7];++j1)
-	              {test=fabs(Tn(i2+1-j1)-ini.hkls[counter][kk-NOFHKLCOLUMNS+j1+3]);
+                     for(int kk=NOFHKLCOLUMNS;kk<=ini.hkls[ini.Qindex][0];kk+=NOFHKLCOLUMNS-3){
+                      for (j1=1;j1<=ini.hkls[ini.Qindex][kk-NOFHKLCOLUMNS+7];++j1)
+	              {test=fabs(Tn(i2+1-j1)-ini.hkls[ini.Qindex][kk-NOFHKLCOLUMNS+j1+3]);
                        jqsta_int+=test*test;
-                       test=fabs(Tn(i2+1-j1)*scalefactor-ini.hkls[counter][kk-NOFHKLCOLUMNS+j1+3]);
+                       test=fabs(Tn(i2+1-j1)*scalefactor-ini.hkls[ini.Qindex][kk-NOFHKLCOLUMNS+j1+3]);
                        jqsta_int_scaled+=test*test;
-                       //fprintf(stdout,"%i %g test=%g\n",counter,ini.hkls[counter][0],test);                       
+                       //fprintf(stdout,"%i %g test=%g\n",ini.Qindex,ini.hkls[ini.Qindex][0],test);                       
                       }
     	                                                                  }
  }
@@ -1106,7 +1106,7 @@ if (do_jqfile){
   double DMDtotint=0,DMDtotintbey=0;
   ComplexMatrix chitot(1,3,1,3),chitotbey(1,3,1,3); chitot=0;chitotbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
-  intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,calcXobs,do_phonon,hkl,counter);
+  intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,calcXobs,do_phonon,hkl);
   qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);QQ=Norm(qijk);
   if(qincr==-1){qincr=0;qold=qijk;
               // for the first q vector in the loop we have to initialize files ...
@@ -1161,7 +1161,7 @@ if (do_jqfile){
              }
          qincr+=Norm(qijk-qold); 
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqpe,foutqes,foutqel,
-                             ini,calc_rixs,calcXobs,do_Erefine,counter);
+                             ini,calc_rixs,calcXobs,do_Erefine);
  
 
                   ini.print_usrdefcols(foutqom,qijk,qincr,q,hkl,false);
@@ -1169,7 +1169,7 @@ if (do_jqfile){
                   fprintf (foutqom, " > ");
 
                   int dim=3;
-                  dim=(int)((ini.hkls[counter][0]-3)/4);
+                  dim=(int)((ini.hkls[ini.Qindex][0]-3)/4);
       Vector dd(1,dim);dd=0;dd+=100000.0;
       Vector dd_int(1,dim);dd_int=0;  dd_int+=100000.0;
       Vector dd1(1,dim);dd1=0;  dd1+=100000.0;
@@ -1416,8 +1416,8 @@ if (do_jqfile){
                      }else{ 
                      if(En(i)!=-DBL_MAX) {
                     double test; // add to sta distance to nearest measured peak squared
- 	              for (j1=1;4*j1<=ini.hkls[counter][0]-3;++j1)
-	              {if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1(j1)){dd1(j1)=test;double weight=ini.hkls[counter][4*j1+1];
+ 	              for (j1=1;4*j1<=ini.hkls[ini.Qindex][0]-3;++j1)
+	              {if ((test=fabs(En(i)-ini.hkls[ini.Qindex][4*j1]))<dd1(j1)){dd1(j1)=test;double weight=ini.hkls[ini.Qindex][4*j1+1];
                                                                                if(weight>0){dd(j1)=sqrt(weight)*test;  // weight>0
                                                                                             dd_without_antipeaks(j1)=sqrt(weight)*test;
                                                                                             dd_without_weights(j1)=test;
@@ -1432,9 +1432,9 @@ if (do_jqfile){
                                                                                             dd_without_weights(j1)=1/test;
                                                                                             dd_without_antipeaks_weights(j1)=0;}
                                                                                }
-                       double inten;if((inten=ini.hkls[counter][4*j1+2])==0.0)inten=SMALLINT;
-                       if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1_int(j1)&&ints(i)+intsP(i)>inten){dd1_int(j1)=test;
-                                                                               double weight=ini.hkls[counter][4*j1+1];
+                       double inten;if((inten=ini.hkls[ini.Qindex][4*j1+2])==0.0)inten=SMALLINT;
+                       if ((test=fabs(En(i)-ini.hkls[ini.Qindex][4*j1]))<dd1_int(j1)&&ints(i)+intsP(i)>inten){dd1_int(j1)=test;
+                                                                               double weight=ini.hkls[ini.Qindex][4*j1+1];
                                                                                if(weight>0){dd_int(j1)=sqrt(weight)*test;  // weight>0
                                                                                             dd_int_without_antipeaks(j1)=sqrt(weight)*test;
                                                                                             dd_int_without_weights(j1)=test;
@@ -1467,10 +1467,10 @@ if (do_jqfile){
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
-                          case 3: rottouvw(chi,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
-                          case 4: rottouvw(chibey,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
+                          case 3: rottouvw(chi,ini,inputpars.cs.abc);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 4: rottouvw(chibey,ini,inputpars.cs.abc);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
                           case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
-                          case 6: rottouvw(chi,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 6: rottouvw(chi,ini,inputpars.cs.abc);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
@@ -1552,10 +1552,10 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
-                          case 3: rottouvw(chitot,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
-                          case 4: rottouvw(chitotbey,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
+                          case 3: rottouvw(chitot,ini,inputpars.cs.abc);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 4: rottouvw(chitotbey,ini,inputpars.cs.abc);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
                           case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
-                          case 6: rottouvw(chitot,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 6: rottouvw(chitot,ini,inputpars.cs.abc);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
                          } 
                       
     sta+=dd*dd;sta_int+=dd_int*dd_int;

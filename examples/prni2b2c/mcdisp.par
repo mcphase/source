@@ -1,6 +1,6 @@
 # Parameter file  mcdisp.par - read by mcdisp version 3.2
 #<!--mcdisp.mcdisp.par>
-#*********************************************************************
+#<pre>*********************************************************************
 # mcdisp - program to calculate the dispersion of magnetic excitations
 # reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
 #*********************************************************************
@@ -45,4 +45,4 @@
 #     q-vector list) and v perpendicular to u and w, such that uvw for a righthanded system
 #
 #
-#!hklline=h1=1 k1=1 l1=1 to hN=1 kN=1 lN=1.3 Nstp=31
+#!hklline=h1=1 k1=1 l1=1 to hN=1 kN=1 lN=1.3 Nstp=31 </pre>

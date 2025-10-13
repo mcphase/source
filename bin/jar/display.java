@@ -71,6 +71,8 @@ public class display extends ApplicationFrame implements KeyListener,WindowListe
 static final int MAX_NOF_FILES = 20;
 static myStringfunc SF=new myStringfunc();
 static int xy[]={0,0,0,0};
+ static String gVlines = "";
+ static String gHlines = "";
 //static Frame frame;
 //static Frame popup;
 //static ToolTipManager ToolTipManager;
@@ -158,28 +160,24 @@ static public void windowclose(){
               } catch(Exception f) {
                 f.printStackTrace();
               }
-          }
+          
                 //dispose();
-// here we create results/display.gnu or if it fails display.gnu to be able to recreate the plot easily in gnuplot
+// here we create  gnuplot file
     try{ //Oeffnen der gnu Datei
-      System.out.println("Writing results/display.gnu");
-     GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("results/display.gnu")));
+      System.out.println("Writing "+jpgfilename+".gnu");
+     GnuOutputStream = new DataOutputStream(new FileOutputStream(new File(jpgfilename+".gnu")));
      }
    catch (FileNotFoundException e)
-    {System.out.println("Writing display.gnu");
-     try{ GnuOutputStream = new DataOutputStream(new FileOutputStream(new File("display.gnu")));
-          }
-       catch (FileNotFoundException e1)
-       {
-      System.out.println("Error opening " + e1.getLocalizedMessage());System.exit(0);
+      {
+      System.out.println("Error opening " + e.getLocalizedMessage());System.exit(0);
        }
-    }
+         
     
    try{ int w=panel.getWidth();
         int h=panel.getHeight();
        GnuOutputStream.writeBytes("""
-set term png enhanced size """+" "+w+" , "+ h + """ 
-
+set term jpeg enhanced size """+" "+w+" , "+ h + "\n"+ """ 
+#set term png enhanced size """+" "+w+" , "+ h + "\n"+ """
 #set terminal postscript eps  enhanced color "Arial" 22
 
 set style line 1 lt 1 lw 7 lc rgb "blue" ps 0.3
@@ -188,17 +186,25 @@ set style line 3 lt 1 lw 7 lc rgb "forest-green" ps 0.3
 set style line 4 lt 1 lw 7 lc rgb "black" ps 0.3
 set style line 5 lt 1 lw 7 lc rgb "magenta" ps 0.3
 set style line 6 lt 1 lw 7 lc rgb "orange" ps 0.3
-set style line 7 lt 1 lw 7 lc rgb "black" ps 0.3
-set style line 8 lt 1 lw 7 lc rgb "cyan" ps 0.3
+set style line 7 lt 1 lw 7 lc rgb "cyan" ps 0.3
+set style line 8 lt 1 lw 7 lc rgb "brown" ps 0.3
 set style line 9 lt 2 lw 7 lc rgb "blue" ps 0.3
+set key right center
 #unset key
 #set yr [0.01:20]
 #set xr [0.5:1.5]\n """);
+GnuOutputStream.writeBytes("set xr ["+chart.getXYPlot().getRangeAxis().getRange().getLowerBound()+":"+
+         +chart.getXYPlot().getRangeAxis().getRange().getUpperBound()+"]\n");
+GnuOutputStream.writeBytes("set yr ["+chart.getXYPlot().getDomainAxis().getRange().getLowerBound()+":"+
+         +chart.getXYPlot().getDomainAxis().getRange().getUpperBound()+"]\n");
+GnuOutputStream.writeBytes(gHlines);
+GnuOutputStream.writeBytes(gVlines);
+
  GnuOutputStream.writeBytes("set xlabel '"+chart.getXYPlot().getRangeAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set ylabel '"+chart.getXYPlot().getDomainAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set title '"+chart.getTitle()+"'\n");
+ GnuOutputStream.writeBytes("set out '"+jpgfilename+"'\n");
 GnuOutputStream.writeBytes("""
-set out 'display.png'
 #set size ratio 2
 #set origin 0, 0
  plot """);
@@ -228,7 +234,7 @@ replot
     { System.out.println("File Error: " + e.getLocalizedMessage());
     }
 
-
+   } // fi jpgfilename
                 System.exit(0);
 }
         public void windowOpened(WindowEvent e) {}
@@ -305,9 +311,8 @@ replot
        System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b' by factor 2)");
        System.out.println("	  (toggle lines also with '-' key))");
 //    System.out.println("	 # displaylegend=false (toggle also with 'L' key)\n");
-       System.out.println("	 a a file results/display.gnu or display.gnu is created for use with gnuplot");
-       System.out.println("       options:  -o file.jpg  create a jpg file on exiting");
-       System.out.println("                 -c file.jpg  only creates a jpg file and exit immediately");
+       System.out.println("       options:  -o file.jpg  create a jpg file on exiting, also create file.jpg.gnu to be used in gnuplot");
+       System.out.println("                 -c file.jpg  only creates a jpg file and exit immediately, also create file.jpg.gnu ");
        System.out.println("                 -logx -logy  make x(y) a logarithmic axis");
        System.out.println("                 -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
        System.out.println("                 -xmax -ymin -ymax -xtext -ytext -title ...similar");
@@ -663,9 +668,12 @@ if(!s.isEmpty()){
     String sn [] = s.split("\\|"); 
    double y =p.parseDouble(sn[0]); 
  XYLineAnnotation axy = new  XYLineAnnotation(y, xmin, y, xmax);
+ gHlines=gHlines+"set object polygon from "+xmin+","+y+" to "+xmax+","+y +" to "+xmin+","+y+ "\n";
+
 plot.addAnnotation(axy);
    if(sn.length>1){
 XYTextAnnotation t = new XYTextAnnotation(sn[1],y,xmax+0.02*(xmax-xmin));
+gHlines=gHlines+"set label  \""+sn[1]+"\" at "+(xmax+0.02*(xmax-xmin))+","+y+"\n";
 plot.addAnnotation(t);
     }
  }
@@ -675,9 +683,13 @@ for (String s : vl) {
 if(!s.isEmpty()){ String sn [] = s.split("\\|"); 
    double x =p.parseDouble(sn[0]); 
  XYLineAnnotation axy = new  XYLineAnnotation(ymin, x, ymax, x);
+ gVlines=gVlines+"set object polygon from "+x+","+ymin+" to "+x+","+ymax +" to "+x+","+ymin+" \n";
+
 plot.addAnnotation(axy);
  if(sn.length>1){
 XYTextAnnotation t = new XYTextAnnotation(sn[1],ymax+0.02*(ymax-ymin),x);
+gVlines=gVlines+"set label  \""+sn[1]+"\" at "+x+","+(ymax+0.08*(ymax-ymin))+" center\n";
+
 plot.addAnnotation(t);
     }
  }
@@ -768,34 +780,33 @@ protected static void reload_data(int i){    try{
 
 // treat comment lines and read variables which might be there to tune plotting
              if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
-             {
+             {// remove the comment
+              strLine = strLine.substring(1, strLine.length());
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
         if(detxText==true){
-            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
-              chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;
-                                                                             }
-               else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0)if(clx.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(clx);}
-                         else{chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
-               }
-                                                   }
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext="))
+              {chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;}
+                            }
         if(detyText==true){
-            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
-              chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
-                                                                             }
-               else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0)if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
-                         else{chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
-               }
-                                                   }
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext="))
+              {chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;}
+                          }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
         }
+        // if no data has yet been read  -go through string and try to find automatically column headers
+        if(detxText==true&&dxtf==0&&j==0&&SF.NofCols(strLine)>0)
+             if(clx.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(clx);}
+             else{chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
+        // if no data has yet been read  -go through string and try to find automatically column headers
+        if(detyText==true&&dytf==0&&j==0&&SF.NofCols(strLine)>0)
+              if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
+             else{chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
         continue;
-             }
+             }  // fi is a comment
                // select colx and coly
             if(clx.contains("c")||cly.contains("c")||clxerr.contains("c")||clyerr.contains("c")){     
            Variable [] c=new Variable[SF.NofCols(strLine)+1];
@@ -821,7 +832,7 @@ protected static void reload_data(int i){    try{
                  sye=SF.NthWord(strLine,Math.abs(p.valueOf(clyerr).intValue()));
                 }
 
-         //    System.out.println(sx+" "+sy+" "+sxe+" "+sye);
+         //   System.out.println(sx+" "+sy+" "+sxe+" "+sye);
 
               
    if(sx.length()!=0&&sy.length()!=0&&sxe.length()!=0&&sye.length()!=0){

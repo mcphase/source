@@ -258,7 +258,7 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
     if(J.Rhi()>oldJhi){zmt = new complexdouble[Hsz*cb];
   std::cerr << "#ic1ion truncate: Multipolar operators not precalculated. Calculating now..." << std::flush;}
    // Calculates the rotated operators for the mean field terms
-   complexdouble *zt; Vector Z(1,T.Hi());Z=0.; eb.assign(Esz,0.); U=0;
+   complexdouble *zt; Vector Z(1,T.Hi()); eb.assign(Esz,0.);for(int Ti=1;Ti<=T.Hi();++Ti){ U(Ti)=0;Z(Ti)=0.;}
    for(int iJ=(J.Rlo()-1); iJ<J.Rhi(); iJ++)
    {
       me.assign(Esz,0.);
@@ -281,7 +281,7 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
          if(iJ==(J.Rlo()-1)) { eb[ind_j] = exp(-E[ind_j]/(KB*T(Ti))); Z(Ti)+=eb[ind_j]; U(Ti)+=(E[ind_j]+VE.E(0))*eb[ind_j]; }
          J[iJ+1][Ti]+=me[ind_j]*eb[ind_j];}
       }
-      free(zt); for(int Ti=1;Ti<=T.Hi();++Ti){J[iJ+1][Ti]/=Z(Ti); if(iJ==(J.Rlo()-1)) U(Ti)/=Z; }
+      free(zt); for(int Ti=1;Ti<=T.Hi();++Ti){J[iJ+1][Ti]/=Z(Ti); if(iJ==(J.Rlo()-1)) U(Ti)/=Z(Ti); }
      }
   // if((J.Rhi()*cb*cb+Hsz*Hsz)>Pst.Rows()) 
    if(J.Rhi()>oldJhi){

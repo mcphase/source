@@ -711,6 +711,7 @@ crystal field parameters and not the strain derivatives found in literature
  \cite{palmer78-2465,jensen75-320,mcewen91-3298}. In section~\ref{determinePcmodel} a procedure
 to calculate these derivatives is described.
 
+%script2html_begin{-doeps}
 Summarizing, and remembering the dimensionless phonon displacement operators
 $\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 
@@ -737,6 +738,7 @@ In a selfconsistent solution it is possible to
 determine (i) $\epsilon$, (ii) $\langle \hat O_l^m(i) \rangle $ and (iii)
 $\langle \hat \mbf u_i \rangle$. This will produce multipolar phase diagrams including the
 magnetostrictive properties without the need of a detailed investigation of the symmetry adapted Hamiltonian.
+%script2html_end{-doeps}
 
 Setting zero the derivative of the expectation value of the Hamiltonian (\ref{Hamiltonian}) with respect to
  $\bar a$  (i.e. minimizing the energy with respect to strain and  rotation) 
@@ -760,6 +762,8 @@ can be evaluated numerically. For each mean field iteration the strain $\epsilon
 can be calculated from equation (\ref{zeroa}) and inserted into (\ref{Hamiltonian}) until
 selfconsistency is achieved.
 
+%script2html_begin{-doeps}
+
 Considering only the strain $\bar \epsilon$ we can make use of the elastic constants
 in forming the derivative of the Hamiltonian, 
 we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can be determined.
@@ -771,10 +775,11 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle \hat u_{i}^{\delta} \rangle  \\
  &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber
 \end{eqnarray}
+%script2html_end{-doeps}
 
 
 \subsection{Exchange Striction}
-
+%script2html_begin{-doeps}
 If the two ion interactions are strain dependent, an additional contribution to the
 strain tensor has to be considered in the equations (\ref{Htot}) to (\ref{zeroeps}).
 The resulting contribution is commonly called {\em exchange striction}, because
@@ -818,10 +823,10 @@ inserted in equation~(\ref{Hwithexstric}).
  \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
 \end{equation}
 }
-
+%script2html_end{-doeps}
 In section~\ref{determineExstricpar} we show, how  
 the position derivatives of the exchange parameters can be calculated.
-
+%script2html_begin{-doeps}
 Equation (\ref{zeroeps}) is extended for the case of exchange striction:
 
 {\color{blue}
@@ -836,6 +841,7 @@ Equation (\ref{zeroeps}) is extended for the case of exchange striction:
 \langle \hat \mathcal I_{\delta}^i \hat \mathcal I_{\delta'}^{i'}\rangle \nonumber
 \end{eqnarray}
 }
+%script2html_end{-doeps}
 
 
 
@@ -1125,6 +1131,7 @@ call mcphasit -doeps
 
 \begin{itemize}
 \item[{\prg -doeps}]
+%script2html_begin{-doeps}
 If the program {\em mcphas} is started with option {\prg -doeps}
 and it finds elastic constants in the input file {\em mcphas.j} (note, that the elastic constants
 in the input file are normalised to the primitive crystallographic unit cell, units are 
@@ -1156,6 +1163,7 @@ in the next iteration for the the mean field Hamiltonian
 to solve the Hamiltonian (\ref{Hwithexstric}) and (\ref{Htot})). 
 At the end of the iteration loop mean fields, moments $\langle I \rangle$ and 
 a selfconsistent strain tensor $\epsilon$ is obtained. 
+%script2html_end{-doeps}
  
 \item[{\prg -linepscf}]
 The option {\prg -linepscf} together with {\prg -doeps} will trigger 

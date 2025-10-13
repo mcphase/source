@@ -328,7 +328,7 @@ $volcalc+=$dx*$dy*$z;
 $voldata+=$dx*$dy*$zd;
 if ($ARGV[8]=~/-d/){;}else {print "echo $ds".sprintf("%+10.9e %10.9e %10.9e$ds\n",$x,$y,$z);}
 }
-# print "echo $ds#\n";
+ print "echo $ds#$ds\n";
 }
 
 if ($ARGV[8]=~/-d/)

@@ -18,7 +18,7 @@ int usrdefcols[]={8, 1,2,3,4,5,6,7,8}; // user defined output columns (first num
 int colcod[]=    {-1,5,6,7,4,12,13,14,8}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
                                            // using the out5 out6  ... commands in mcdisp.par these codes can be modified
-#define COLHEADDIM 29	
+#define COLHEADDIM 30	
 // different output data for columns 10 and 11
 const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Qx[1/A]   ",  //   1
@@ -49,7 +49,8 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                             "s3[GPa] ",  //    26      
                             "s4[GPa] ",  //    27      
                             "s5[GPa] ",  //    28      
-                            "s6[GPa] "  //    29     
+                            "s6[GPa] ",  //    29 
+                            "Qindex "  //    30    
                                };
 
 // different output data for user defined columns ...
@@ -85,6 +86,7 @@ case 26:  return Hext(9);break;
 case 27:  return Hext(10);break;
 case 28:  return Hext(11);break;
 case 29:  return Hext(12);break;
+case 30:  return (double)Qindex;break;
 default: fprintf(stderr,"Error mcdisp: unknown column code\n");exit(EXIT_FAILURE);
                     }
 
@@ -806,6 +808,7 @@ inimcdis::inimcdis(const char * file,char * pref,char * mffile,
 {hkls=NULL;hklfile_start_index=NULL;Hext=Vector(1,HEXT_DIMENSION);Habc=Vector(1,3);Eabc=Vector(1,3);
  qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);mf=mfcf(1,1,1,nofat,nofcomp);
   include_cd=inc_cd;
+  Qindex=0;
   parfile= new char [MAXNOFCHARINLINE]; 
   mf_file= new char [MAXNOFCHARINLINE]; 
   snprintf(parfile,MAXNOFCHARINLINE,"%s%s",pref,file);
@@ -843,6 +846,7 @@ inimcdis::inimcdis (const inimcdis & p)
   qmax=p.qmax;
   emin=p.emin;
   emax=p.emax;
+  Qindex=p.Qindex;
   kf=p.kf;
   ki=p.ki;
   calculate_magmoment_oscillation=p.calculate_magmoment_oscillation;
@@ -917,14 +921,14 @@ if(nofinis==0)nofinis=1;
 }
 
 
-//kopier-konstruktor  inimcdiss
+//kopier-konstruktor  inimdpars
 inimdpars::inimdpars (const inimdpars & p)
 { nofinis=p.nofinis;
   inis=new inimcdis*[MAXNOFINIS];
   for(int i=0;i<nofinis;++i)inis[i]=new inimcdis((*p.inis[i]));
 }
 
-//destruktor inimcdiss
+//destruktor inimdpars
 inimdpars::~inimdpars ()
 {//printf("hello destruktor inimcdiss %i\n",nofinis);  
  for(int i=0;i<nofinis;++i)delete  inis[i];
