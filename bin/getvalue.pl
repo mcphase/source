@@ -15,6 +15,8 @@ print STDERR << "EOF";
  note:  colx has to be sorted
         if colx=0 then the x axis is assumed to be the line number (not considering
         comment lines)
+        colx, coly  can be a number of a column, it can also be a column header name 
+        preeded by the letter H, e.g. HEnergy 
         if you do not want any integration at interval boundaries to happen, 
         remember to put dx to zero.
 
@@ -63,13 +65,13 @@ GetOptions("c=s"=>\$compare,
            "s=s"=>\$s,
            "var=s"=>\$r);
 
-$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
+if($ARGV[0]=~/H/){($cx)=($ARGV[0]=~m|H(.*)|);shift @ARGV;}else{$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;}
+if($ARGV[0]=~/H/){($cy)=($ARGV[0]=~m|H(.*)|);shift @ARGV;}else{$ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$xvalue=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$dE=eval $ARGV[0];shift @ARGV; 
 foreach(@ARGV)
 {$filename=$_;
-($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$colx,$coly,$dE,$filename);
+($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$dE,$filename);
 if (abs($yvalue)>1e-300){$yinv=1/$yvalue;}else{$yinv=" ";}
 print "echo \"#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds\"\n";
 print "echo \"#! to the yvalue=$yvalue  (1/yvalue=$yinv)";if($sta>0){print "deviations sta=$sta\"\n";}else{print"\"\n";}
@@ -135,11 +137,11 @@ exit(0);
 
 sub getvalue_by_averaging_over_intervaldE { 
 #integrates intensity between $constx+-$dE
-my ($constx,$colx,$coly,$dE,$file)=@_;
+my ($constx,$dE,$file)=@_;
   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
   $Iav=0;$j=0;$esum=0;$nofpoints=0;$order=1;
   while($line=<Fin>){
-   unless($line=~/^\s*#/||$line=~/^\s*\n/)
+   unless($line=~/^\s*#/||$line=~/^\s*\n/||!defined $colx || !defined $coly)
    {$line=~s/D/E/g;@numbers=split(" ",$line);
     unshift(@numbers,$j+1); # put into first column the line number 
     if ($j==0){@numbers1=@numbers;}else{if($order==-1&&$numbers[$colx]>$numbers1[$colx]){die "Error getvalue: column $colx not sorted\n";}
@@ -192,7 +194,14 @@ unless(0==($numbers[$colx]-$numbers1[$colx]))
                   }
                  }}
    @numbers1=@numbers;
-   }}
+   }else
+    { # try to find $colx $coly from comment - headers
+     @header=split(" ",$line);
+     if($cx){$i=1;foreach(@header){if(/$cx/){$colx=$i;}++$i;}}
+     if($cy){$i=1;foreach(@header){if(/$cy/){$coly=$i;}++$i;}}
+    } 
+   }
+
   close Fin;
   if($j==1&&$numbers[$colx]==$constx){# only one point in file and specified, special ...
             $esum=1;$Iav=$numbers[$coly];

@@ -628,7 +628,7 @@ if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{spverbatim\} "
                                    }
                                    }
                    close FOUT;
-                  $line=$line."\\end\{spverbatim\} \\dots for details on $comr see footnote \\footnote\{\\input\{".$ftexfile."\}\}\\begin\{spverbatim\}";                  
+                  $line=$line."\\end\{spverbatim\}\n \\dots for details on $comr see footnote \\footnote\{\\input\{".$ftexfile."\}\}\n\\begin\{spverbatim\}";                  
                   push @to_delete, $com;
                    }
          }  
