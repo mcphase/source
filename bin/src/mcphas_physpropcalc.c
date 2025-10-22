@@ -140,7 +140,7 @@ physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=
      // by probing the corners of a cube
   if(Norm(nnmax-nnmin)>10000){fprintf(stderr,"Warning mcphasit: calculation of hkl for %g values - might take long: a smaller maxQ in mcphas.ini or a smaller lattice constant in mcphas.j would help ....\n",Norm(nnmax-nnmin)); }  
 
- j=0;for(qh=0;qh<=mf.na();++qh){for(qk=0;qk<=mf.nb();++qk){for(ql=0;ql<=mf.nc();++ql)
+ j=0;for(qh=0;qh<mf.na();++qh){for(qk=0;qk<mf.nb();++qk){for(ql=0;ql<mf.nc();++ql)
    {
       Vector q(1,3),hkl(1,3),Q(1,3);
       // this is q- Vector

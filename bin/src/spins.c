@@ -546,13 +546,13 @@ else  //now table options
  { fprintf(fout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
  //fprintf(fout,"# 1 2  3  4  5           6     7     8     9       10      11      12   13   14                  15   16   17   18   19   20\n");
  fprintf(fout,"# external parameters {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
- if (strcmp(argv[1],"-tMSL")==0)                                    fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)]\n");
- if (strcmp(argv[1],"-tI")==0) fprintf(fout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
- if (strcmp(argv[1],"-tHex")==0) fprintf(fout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
- if (strcmp(argv[1],"-tL2")==0){ fprintf(fout,"bondlength_to_neighbour [A]  elongation^2 [A^2]\n");
+ if (strcmp(argv[1],"-tMSL")==0)  fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)]\n");
+ else if (strcmp(argv[1],"-tI")==0) fprintf(fout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
+ else if (strcmp(argv[1],"-tHex")==0) fprintf(fout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
+ else if (strcmp(argv[1],"-tL2")==0){ fprintf(fout,"bondlength_to_neighbour [A]  elongation^2 [A^2]\n");
                                 nlimits_calc(nmin,nmax, tL2,p);
-
                                }
+ else {fprintf(stderr, "Error spins: option %s not known\n",argv[1]);exit(EXIT_FAILURE);}
  }       
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)

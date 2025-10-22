@@ -33,12 +33,13 @@ int main (int argc, char **argv)
 			 removed,   for 2 5 7 all the interactions with other atoms are removed\n \
                          a +-- separator  triggers in the -delatoms mode that charges are transferred resetting\n \
                           CHARGE variablein sipf files (sipf files are rewritten with modified charge)\n   \
+                        -mcdiff   create also mcdiff.in file with reduced unit cell\n \
                         -v  verbose mode\n \
                 \n");
       exit (1);
     } else { fprintf (stderr,"#* reduce_unitcell 250123 *\n"); }
 
-int ow=1,i=0; int n=0,noindexchange=0,verbose=0;
+int ow=1,i=0; int n=0,noindexchange=0,verbose=0,mcdiff=0;
 char * token;
 char *substr[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];
 float ns[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];ns[0]=MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL;
@@ -59,6 +60,7 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
 
  if(strcmp(argv[ow],"-ni")==0){noindexchange=1;}
  if(strcmp(argv[ow],"-v")==0){verbose=1;}
+ if(strcmp(argv[ow],"-mcdiff")==0){mcdiff=1;}
  ++ow;}
 
  par a(argv[ow]);
@@ -101,9 +103,9 @@ int ian=-(int)an; a.delatom(ian,dis,verbose);}
 }
 
  a.save(stdout,noindexchange);
- a.save_mcdiff_in("reduce_unitcell");
+ if(mcdiff==1){a.save_mcdiff_in("reduce_unitcell");fprintf(stderr,"# created mcdiff.in\n");}
 
-fprintf(stderr,"# end of reduce_unitcell - created mcdiff.in and list of redundant sipf files\n");
+fprintf(stderr,"# end of reduce_unitcell - list of redundant sipf files\n");
 fprintf(stderr,"# in file reduce_unitcell_sipf.del, to delete these files use:\n");
 fprintf(stderr,"# perl -l -n -e \"unlink\" reduce_unitcell_sipf.del\n");
 }

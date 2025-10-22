@@ -835,7 +835,6 @@ if ($pointcharge) {
     while($ps[3]<0){++$ps[3];$moved=1;}
     if($moved==1){print STDERR "Warning: atom at da=$ps[1] db=$ps[2] dc=$ps[3] was not in primitive unit cell - translated\n"; 
                  }
-  # OLD limits nmin nmax
       $dabc = pdl [ ($ps[1]), ($ps[2]), ($ps[3]) ];
       $rvec = transpose( $rtoijk x transpose($dabc) ); 
       $r = sqrt( inner($rvec, $rvec)->at(0) );
@@ -846,20 +845,21 @@ if ($pointcharge) {
     
     if ($debug) { print "distmax = $distmax \n"; }
     $distmax += $pointcharge;
+  # OLD limits nmin nmax
     # Determine $nmin,$nmax by looking at a cube with side 3distmax
-    for $i1 (-1,1) {
-      for $i2 (-1,1) {
-        for $i3 (-1,1) {
-          $n = inner($invrtoijk, pdl[$i1*$distmax*1.5,$i2*$distmax*1.5,$i3*$distmax*1.5]);
-          for $im (0..2) {
-            if (($n->at($im))<$nmx[$im]) { 
-              $nmx[$im] = int($n->at($im))-1; }
-            if (($n->at($im))>$nmx[$im+3]) { 
-              $nmx[$im+3] = int($n->at($im))+1; }
-          }
-        }
-      }
-    }
+   # for $i1 (-1,1) {
+   #   for $i2 (-1,1) {
+   #     for $i3 (-1,1) {
+   #       $n = inner($invrtoijk, pdl[$i1*$distmax*1.5,$i2*$distmax*1.5,$i3*$distmax*1.5]);
+   #       for $im (0..2) {
+   #         if (($n->at($im))<$nmx[$im]) { 
+   #           $nmx[$im] = int($n->at($im))-1; }
+   #         if (($n->at($im))>$nmx[$im+3]) { 
+   #           $nmx[$im+3] = int($n->at($im))+1; }
+   #       }
+   #     }
+   #   }
+   # }
    # NEW 8.4.2024 FASTER: new tighter $nmin$nmax box using cross products
 # determine $nmin,$nmax by looking at condition that
 # plane of parallelepiped must be more distant than radius of sphere given in command line

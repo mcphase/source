@@ -816,8 +816,13 @@ will have domains with moments parallel to $a$ and $b$. The program will generat
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
 \item [\prg mcphasa.hkl]    Fourier Transform of the $a$-component of the magnetic Moments.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$. The single ion module function
-    {\prg mcalc} is used to evaluate the magnetic moment on each site.
-                            \item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments. The single ion module function
+    {\prg mcalc} is used to evaluate the magnetic moment $\mbf M_j$ on each site $j$. The Fourier transform is defined as
+\begin{equation}
+\mbf m(\mbf Q)=\frac{1}{N}\sum_{j \in {\rm supercell}} \mbf M_j \exp(-i\mbf Q \mbf r_j) 
+\end{equation}
+ where $N$ is the number of ions in the supercell.
+
+ \item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments. The single ion module function
     {\prg mcalc} is used to evaluate the magnetic moment on each site. 
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
  \item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments. The single ion module function

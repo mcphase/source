@@ -197,8 +197,8 @@ unless(0==($numbers[$colx]-$numbers1[$colx]))
    }else
     { # try to find $colx $coly from comment - headers
      @header=split(" ",$line);
-     if($cx){$i=1;foreach(@header){if(/$cx/){$colx=$i;}++$i;}}
-     if($cy){$i=1;foreach(@header){if(/$cy/){$coly=$i;}++$i;}}
+     if($cx){$i=1;foreach(@header){if(/\A$cx\z/){$colx=$i;}++$i;}}
+     if($cy){$i=1;foreach(@header){if(/\A$cy\z/){$coly=$i;}++$i;}}
     } 
    }
 

@@ -808,6 +808,7 @@ protected static void reload_data(int i){    try{
         continue;
              }  // fi is a comment
                // select colx and coly
+try{
             if(clx.contains("c")||cly.contains("c")||clxerr.contains("c")||clyerr.contains("c")){     
            Variable [] c=new Variable[SF.NofCols(strLine)+1];
                for(int ii=0;ii<=SF.NofCols(strLine);++ii){c[ii]=Variable.make("c"+ii);
@@ -832,11 +833,13 @@ protected static void reload_data(int i){    try{
                  sye=SF.NthWord(strLine,Math.abs(p.valueOf(clyerr).intValue()));
                 }
 
-         //   System.out.println(sx+" "+sy+" "+sxe+" "+sye);
+            //System.out.println(sx+" "+sy+" "+sxe+" "+sye);
 
               
-   if(sx.length()!=0&&sy.length()!=0&&sxe.length()!=0&&sye.length()!=0){
-               try{sx=sx.replace("+-"," ");sx=SF.NthWord(sx,1);
+   if(sx.length()!=0&&sy.length()!=0&&sxe.length()!=0&&sye.length()!=0
+      &&!sx.contains("Infinity")&&!sy.contains("Infinity")&&!sxe.contains("Infinity")&&!sye.contains("Infinity")
+      ){
+               sx=sx.replace("+-"," ");sx=SF.NthWord(sx,1);
                    sy=sy.replace("+-"," ");sy=SF.NthWord(sy,1);
                     sx=sx.replace('D','E');
                     sy=sy.replace('D','E');
@@ -876,9 +879,10 @@ protected static void reload_data(int i){    try{
                    }
                     ++j;
                    }
+}
                    catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);
                                                   }
-                                                          }
+                                                          
                }          //         System.out.println(ymin+" "+ymax);
 
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
