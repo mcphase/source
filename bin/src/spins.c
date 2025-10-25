@@ -24,7 +24,7 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins -tL2 4.5 [-prefix 001] T Ha Hb Hc \n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [[-prefix 020]h k l E]\n\
                     \n\
 1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
@@ -104,8 +104,30 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
  jvx files can be viewed by:\n\
  java javaview results/spins.jvx \n \
  java javaview \"model=results/spins.*.jvx\" Animation.LastKey=16 background=\"255 255 255\" \n"
-" gif images stored by javaview can be connected to movies by ImageMagick \n"
-" convert  -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif\n");
+" gif images stored by javaview can be connected to animated gif by ImageMagick \n"
+" magick -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif\n"
+" ppm images stored by javaveiw can be connected to mpeg video by ppmtompeg (part of netpbm package)\n"
+" ppmtompeg param \n param is a file with parameters - here an example:\n"
+"OUTPUT movie.mpeg\n \
+INPUT_DIR .\n \
+INPUT\n \
+*.ppm [001-021]\n \
+END_INPUT\n \
+BASE_FILE_FORMAT PNM\n \
+INPUT_CONVERT *\n \
+FRAME_RATE 25\n \
+PATTERN IBBPBBPBBPBBPBB\n \
+SLICES_PER_FRAME 16\n \
+GOP_SIZE 30\n \
+PIXEL HALF\n \
+IQSCALE 1\n \
+PQSCALE 5\n \
+BQSCALE 10\n \
+RANGE 5\n \
+PSEARCH_ALG TWOLEVEL\n \
+BSEARCH_ALG CROSS2\n \
+REFERENCE_FRAME DECODED\n"
+);
  exit (1);
     }
 
@@ -364,25 +386,31 @@ else
 
 // ------------------------load spinsconfigurations and check which one is nearest -------------------------------   
 double aa[NOF_USERDEF_MCPHAS_COLS+1];for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS;++i)aa[i]=1e100;
-
+int apf=0;
+for(i=os+1;i<argc;++i){
+if(strcmp(argv[i],"-prefix")==0){apf=2;}
+                       }
 double lnZ,U,x,y; 
 if (strncmp(argv[1],"-f",2)==0&&argc<3+os){aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[1]);}
                                             // here aa[1] becomes a number of a spinconfig in a file
-else{if(argc-1==2+os||argc-1==6+os){aa[0]=0;aa[1]=strtod(argv[1+os],NULL);aa[2]=strtod(argv[2+os],NULL);
+else{if(argc-1==2+os||argc-1==6+os+apf){aa[0]=0;aa[1]=strtod(argv[1+os],NULL);aa[2]=strtod(argv[2+os],NULL);
                }// here aa[1] and aa[2] become x and y in the phasediagram 
      else
-     if(argc-1==4+os||argc-1==8+os)
+     if(argc-1==4+os||argc-1==8+os+apf)
      {aa[0]=0;aa[3]=strtod(argv[1+os],NULL); // T   out3
               aa[5]=strtod(argv[2+os],NULL); // Ha out5
               aa[6]=strtod(argv[3+os],NULL); // Hb  out6 
               aa[7]=strtod(argv[4+os],NULL);  // Hc  out7
      }
      else
-     if(argc-1==NOF_USERDEF_MCPHAS_COLS+os||argc-1==NOF_USERDEF_MCPHAS_COLS+4+os)
+     if(argc-1==NOF_USERDEF_MCPHAS_COLS+os||argc-1==NOF_USERDEF_MCPHAS_COLS+4+os+apf)
      {aa[0]=0;for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS;++i)aa[i]=strtod(argv[i+os],NULL);
      } else
-     {fprintf(stderr,"#Error program spins - wrong number of arguments %i (optional %i)!\n",argc-1,os);exit(1);}
-     } 
+     {
+      fprintf(stderr,"#Error program spins - wrong number of arguments %i (optional %i)!\n",argc-1,os);
+      exit(1);
+     }
+    } 
 double T=0; Vector Hext(1,HEXT_DIMENSION);
 
 if(check_for_best(fin,aa,savmf,x,y,T,Hext,outstr,out,inputpars.cs.abc))
@@ -854,8 +882,14 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 // try movie - a spinwave picture  ... including phonons and spindensity changes ...
 //***************************************************************************************************************
 //***************************************************************************************************************
+// check if there is a second 
+for(i=os+1;i<argc;++i){
+if(strcmp(argv[i],"-prefix")==0){strcpy(prefix,argv[i+1]); // read alternative prefix
+                                   fprintf(stdout,"# prefix for qee qep etc input filenames: %s\n",prefix);
+ 				   os+=2;}
+                       }
 if(argc-1==NOF_USERDEF_MCPHAS_COLS+4+os)os+=NOF_USERDEF_MCPHAS_COLS-4;
-if(argc-1==6+os)os-=2;
+if(argc-1==6+os)os-=2;  // 
 //argc-1==8+os  ... ok 
 if (argc-1==8+os){
               // double E;

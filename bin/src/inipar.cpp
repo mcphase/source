@@ -89,6 +89,7 @@ printf (" 		    the x-y-T-Ha-Hb-Hc point is found and the calculation was stable
 printf ("                   (i.e. free energy in results/001mcphas.fum not zero do not \n");
 printf ("                   recalculate it but take results from this previous calculation\n");
 printf (" 		     and store those. Option to recalculate nonstable points only.\n");
+printf ("          -t  2    do not compare free energys, but instead trace teststructure number 2 from mcphas.tst \n");
 printf ("          -v     verbose mode: \n");
 printf ("                 * more information is printed to stdout, \n");
 printf (" 		  * the qvectors file mcphas.qom will contain \n");

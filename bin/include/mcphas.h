@@ -37,7 +37,7 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini);
  // returns 2 if no spinconfiguration has been found at ht point
  */
 int htcalc(Vector H,double T,inipar & ini, par & inputpars,qvectors & testqs,
-                     testspincf & testspins,physproperties & physprops);
+                     testspincf & testspins,physproperties & physprops, int tracetest);
 
 // calculate physical properties for stabilized HT point
 void physpropclc(Vector H,double T,

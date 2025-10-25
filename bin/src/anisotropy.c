@@ -23,7 +23,7 @@ float rr=fmodf(ini.repeat-0.00001,1.0);
           double maxstamf=ini.maxstamf;int rep;
           int maxnofmfloops=ini.maxnofmfloops,maxspinchange=ini.maxspinchange;
           for(rep=0;rep<=floor(ini.repeat)&&j>0;++rep)
-          {j=htcalc(H,T,ini,inputpars,testqs,testspins,physprops);
+          {j=htcalc(H,T,ini,inputpars,testqs,testspins,physprops,0);
           // returns j=0 if successfull
  //  --> if no spinconfiguration has been found at ht point
  // returns j=1 if recalculation of fe yields too different value

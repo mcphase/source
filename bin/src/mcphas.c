@@ -50,7 +50,7 @@ bool parload(par *& ip,char * iniprefix, const char * filename, int & verbose,pa
  
 // main program
 int main (int argc, char **argv)
-{ int j,l,doeps=0,linepscf=0,linepsjj=0;bool inc_cd=false;
+{ int j,l,doeps=0,linepscf=0,linepsjj=0,tracetest=0;bool inc_cd=false;
   int options=0; // this integer indicates how many command strings belong to 
                  //options 
 
@@ -79,6 +79,9 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
    if (strcmp(argv[im],"-a")==0) {filemode="a";if (options<im)options=im;} // append output files
    if (strcmp(argv[im],"-stamax")==0&&im+1<=argc-1)
                                  {stamax=strtod (argv[im+1], NULL); // read stamax
+                                  if (options<im+1)options=im+1;}
+   if (strcmp(argv[im],"-t")==0&&im+1<=argc-1)
+                                 {tracetest=atoi (argv[im+1]); // read stamax
                                   if (options<im+1)options=im+1;}
    if (strcmp(argv[im],"-prefix")==0&&im+1<=argc-1)
                                  {strcpy(prefix,argv[im+1]); // read prefix
@@ -191,6 +194,7 @@ T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
     strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.tst");
     fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.tst");else    fclose(fin);
+    if(tracetest!=0){fprintf(stderr,"# ATTENTION: option -t %i - tracing only test structure number %i from file %s\n",tracetest,tracetest,prefix); }           
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
     testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
@@ -296,7 +300,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
           int maxnofmfloops=ini.maxnofmfloops;
           double maxspinchange=ini.maxspinchange;
           for(rep=0;rep<=floor(ini.repeat)&&j>0;++rep)
-          {j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
+          {j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop,tracetest);
           // returns j=0 if successfull
  //  --> if no spinconfiguration has been found at ht point
  // returns j=1 if recalculation of fe yields too different value

@@ -23,6 +23,7 @@ import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -68,7 +69,7 @@ static int noffiles;
  static double bh;
  static double xmin,xmax,ymin,ymax,zmin,zmax;
  static Integer prefxsize,prefysize;
- static boolean detxmin,detymin,detzmin,detxmax,detymax,detzmax,detxText,detyText,detzText,detTitle,detdim,doexit,showgrid;
+ static boolean detxmin,detymin,detzmin,detxmax,detymax,detzmax,detxText,detyText,detzText,detTitle,detdim,doexit,showgrid,logx,logy,logz;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
@@ -317,9 +318,28 @@ int[] red =
      if(xmax<=xmin||ymax<=ymin||zmax<=zmin){System.out.println("No data to plot");System.exit(1);}
       xAxis.setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
       yAxis.setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
+
+  if(logy){
+     LogAxis xlogAxis = new LogAxis(xText);
+     xlogAxis.setLowerMargin(0.15);
+     xlogAxis.setUpperMargin(0.15);
+     plot.setRangeAxis(0,xlogAxis);
+     if(xmin-(xmax-xmin)*0.04>0)
+     {xlogAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);}
+           }
+if(logx){
+     LogAxis ylogAxis = new LogAxis(yText);
+     plot.setDomainAxis(0,ylogAxis);
+     if(ymin-(ymax-ymin)*0.04>0)
+     {ylogAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);}
+         }
+
+    
+
          LookupPaintScale scale = new LookupPaintScale(zmin, zmax,Color.red);
          for(int i=0;i<64;++i){double value=zmin+i*(zmax-zmin)/64;//System.out.println(value);
          scale.add(value,new Color(red[i],green[i],blue[i]));
+
                                   }
          PaintScaleLegend zscale = new PaintScaleLegend(scale,zAxis);
         zscale.setVisible(true);
@@ -432,7 +452,8 @@ zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
        System.out.println("        options:   -o file.jpg create a jpg file on exiting, also create file.jpg.gnu to be used in gnuplot");
        System.out.println("                   -c file.jpg create a jpg file and exit immediately, also create file.jpg.gnu ");
        System.out.println("                   -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
-       System.out.println("                   -xmax -ymin -ymax -xtext -ytext -title  similar");
+       System.out.println("                   -xmax -ymin -ymax -zmin -zmax -xtext -ytext -title  similar");
+       System.out.println("                   -logx -logy -logz  make x(y,z) a logarithmic axis");
        System.out.println("                   -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
        System.out.println("                          a text to be written as line label can be added by inserting | and adding the text");
        System.out.println("                   -hlines 2,3.4,12.3 shows horizontal lines at specified y values");
@@ -477,6 +498,18 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
                           ss=SF.FirstWord(s);prefysize=p.valueOf(ss).intValue();
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logx")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             logx=true;
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logy")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             logy=true;
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logz")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             logz=true;
             }
             else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-zmax")) // option "-zmax 23"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
@@ -722,7 +755,8 @@ protected void reload_data(int i)
                       if (detymin&data[1][j]<ymin){ymin=data[1][j];}
                       if (detymax&data[1][j]>ymax){ymax=data[1][j];}
                      data[2][j]=p.parseDouble(sint);
-                      if (detzmin&data[2][j]<zmin){zmin=data[2][j];}
+                      if(data[2][j]>0||!logz)
+                      {if (detzmin&data[2][j]<zmin){zmin=data[2][j];}}
                       if (detzmax&data[2][j]>zmax){zmax=data[2][j];}
                     ++j;
                    }
@@ -733,6 +767,9 @@ protected void reload_data(int i)
       // System.out.println("x:"+xmin+" "+xmax);
       // System.out.println("y:"+ymin+" "+ymax);
       // System.out.println("z:"+zmin+" "+zmax);
+          
+       
+                     
       chart.getXYPlot().getDomainAxis().setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
       chart.getXYPlot().getRangeAxis().setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
       
@@ -740,6 +777,14 @@ protected void reload_data(int i)
                  else {
                if (j>0)
                {double [][] series=new double [3][j];
+                   if(logz){for (int l=0;l<j;++l)
+                                    {if(data[2][l]>0){data[2][l]=Math.log(data[2][l]);}
+                                     else {data[2][l]=Math.log(zmin/(zmax-zmin));}
+                                    }
+               
+                      zmax=Math.log(zmax);
+                      zmin=Math.log(zmin/(zmax-zmin));
+                   }
                 // here fill the rest of the array with the same values
                 for(int jj=0;jj<j;++jj)
                   {series[0][jj]=data[0][jj];series[1][jj]=data[1][jj];series[2][jj]=data[2][jj];
@@ -768,6 +813,9 @@ protected void reload_data(int i)
       System.out.println("Dateifehler: " + e.getLocalizedMessage());
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
+
+
+
 //    repaint();
 //System.out.println("Displaycontour: Data reloaded ymax:"+ymax);
   }

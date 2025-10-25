@@ -25,7 +25,7 @@
  
     overview_plot("/xserv", $file); # plot on screen
  #    overview_plot("./hkl.ps/cps", $file); #then plot on psfile
-     print "#Wrote output file 'results/hkl.asc' for reflection ".$v[$n]."\n";
+     print "#Wrote output file 'results/hkl.asc' for reflection ".$r."\n";
  
  
  sub overview_plot {
@@ -112,27 +112,43 @@ $nn,$_,$imax[$nn-1]
       if($n=~/,/) # check if reflection number or reflection hkl are input
       {#($H,$K,$L)=($n=~m/([\+\-\d\.]*),([\+\-\d\.]*),([\+\-\d\.]*)/); print "$H $K $L \n";
        $y=new PDL(split (",", $n)); $i=0;foreach(@v){++$i;if (sum(abs($y-$_)<1e-5)==3){$n=$i;}}
-       if($n=~/,/){die "Error hkl: $y reflex not found in file $file\n";}
+       if($n=~/,/){print STDERR "#Warning hkl: $y reflex not found in file $file\n";}
       }
       unless ($n) 
       {$nn=0;foreach (@v){++$nn;write STDOUT;}
       print "reflection(1-".$nn.")? ";$n=<STDIN>;
       }
-      --$n;
+      unless($n=~/,/){--$n;}
       close $h;
       my @xlist = ();
       # input data int piddle
       open($h,$file);
       open($l,">./results/hkl.asc");
+      if($n=~/,/){print $l "#Warning hkl: $y reflex not found in file $file\n";$r=$y;}
+      else {$r=$v[$n];}
       if($FT==0)
-      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values of Intensity of ".$v[$n]."vs sqrt(int or |m(Q)|) as read from file $file\n");}
+      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values of Intensity of ".$r."vs sqrt(int or |m(Q)|) as read from file $file\n");}
       else
-      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values REAL(m(Q)) vs IMAG(m(Q)) of ".$v[$n]." as read from file $file\n");}
+      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values REAL(m(Q)) vs IMAG(m(Q)) of ".$r." as read from file $file\n");}
       while(<$h>)
       {next if /^\s*#/;  
       $x=new PDL(split " ");
+       if($n=~/,/)
+       { # if reflection has not been found
+       #add xyz to piddle
+        $y=$x->slice("0:6");
+        $z=new PDL(0,0);
+        push(@xlist,$y->append($z));
+        $out=(($y->append($z)));
+        $out=~s/\[/ /g;   
+        $out=~s/\]/ /g;   
+        print $l ($out."\n");
+       }
+       else
+       { 
        for ($k=7;$k<(($x->dims)[0]-1);$k+=4+$FT)
        {$y=$x->slice($k.":".($k+2));
+        
         if (sum(abs($y-$v[$n])<1e-5)==3){
         #add xyz to piddle
         $y=$x->slice("0:6");
@@ -150,10 +166,11 @@ $nn,$_,$imax[$nn-1]
         $out=~s/\]/ /g;   
         print $l ($out."\n");
         }
+        }
        }
       }
       close $h; close $l;
-      return ((cat @xlist),($v[$n]),1);
+      return ((cat @xlist),($r),1);
      } else {
  	print STDERR "Error program hkl: failed to read data file \"$file\"\n";
         print "\n usage:  hkl\n            or \n         hkl mcphas.hkl\n\n extracts data from reflection list mcphas.hkl";exit 1;

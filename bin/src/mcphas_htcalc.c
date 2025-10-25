@@ -446,7 +446,7 @@ int s1=1,s2=2;
 }
 
 int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
-             testspincf & testspins, physproperties & physprops)
+             testspincf & testspins, physproperties & physprops,int tracetest)
 {/* calculates magnetic structure at a given HT- point  
   on input: 
     T	Temperature[K]
@@ -454,6 +454,7 @@ int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
     inputpars	Input parameters (exchange constants etc...)
     testqs	Set of propagation vectors to be tested 
     testspins	Set of Spinconfigurations to be tested
+    tracetest   if nonzero indicate which structure of structure table should be calculated and traced
   on return:
     physprops	physical properties at (HT) point (i.e. magnetic structure
 		neutron intensities, thermal expansion ...)	
@@ -529,7 +530,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
     //constructed from q vector set testqs, j>0 means test spinconfigurations from
     //set testspins
     // 2. starting with the table loaded from mcphas.tst  into testspins
-    j=0;  //uncomment this for debugging purposes
+    j=tracetest-1;  //uncomment this for debugging purposes
     // 3. with the hkl - supercells generated from hmin hmax kmin kmax lmin lmax in mcphas.ini
     //j = -testqs.nofqs()-1;
 #ifdef _THREADS
@@ -568,7 +569,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  #endif
  bool all_threads_started = false; int ithread=0;
 #endif
- for (k= -testqs.nofqs();k<=testspins.n;++k)
+ for (k= -testqs.nofqs();(tracetest!=0 ? j<tracetest : k<=testspins.n );++k)
  {++j; if (j>testspins.n) j=-testqs.nofqs();
 #ifndef _THREADS
        htcalc_iteration(j, femin, spsmin, H, T,ini, inputpars, testqs, testspins, physprops);

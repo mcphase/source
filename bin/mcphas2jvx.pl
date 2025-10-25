@@ -256,8 +256,8 @@ for $ii (0..$#{$atoms{"da"}}) {
             $at = lc $at; $at = ucfirst $at;
             $attab = $element{$at};
             if(!$attab) {
-              print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's carbon!\n";
-              $attab = $element{"C"};
+              print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's Hydrogen!\n";
+              $attab = $element{"H"};
             }
           }
           if($debug) { print STDERR "at=$at\n"; }
@@ -279,8 +279,8 @@ for $ii (0..$#{$atoms{"da"}}) {
         $at = lc $at; $at = ucfirst $at;
         $attab = $element{$at};
         if(!$attab) {
-          print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's carbon!\n";
-          $attab = $element{"C"};
+          print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's Hydrogen!\n";
+          $attab = $element{"H"};
         }
       }
       if($debug) { print STDERR "at=$at\n"; }
