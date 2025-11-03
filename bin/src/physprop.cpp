@@ -41,7 +41,8 @@ physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,int & na,int
  Pelabc0=Vector(1,3); Pel0=Vector(1,3);
  H=Vector(1,HEXT_DIMENSION);
  totalJ=Vector(1,nofcomponents);
- 
+ cel=Matrix(1,6,1,6);
+
  jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkli+1];for(i=0;i<=maxnofhkli;++i){hkli[i]=Vector(1,10);}
@@ -64,6 +65,8 @@ physproperties::physproperties (const physproperties & p)
   Pelabc=Vector(1,3); Pel=Vector(1,3);
   Pelabc0=Vector(1,3); Pel0=Vector(1,3);
   H=Vector(1,HEXT_DIMENSION);
+  cel=Matrix(1,6,1,6);cel=p.cel;
+  cv=p.cv;
   H=p.H; 
   Pel=p.Pel;Pelabc=p.Pelabc;
   Pel0=p.Pel0;Pelabc0=p.Pelabc0;
@@ -151,6 +154,9 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                                      case 17: ptr=&m[3];snprintf(hs,40,"mk[mb/ion]");break;                                    
                                      default: ;
                                    }
+                               }
+                  if(ini.cv!=0){if(i-nofcols==1)ptr=&cv;snprintf(hs,40,"cV[meV/ionK]");
+                                nofcols+=1;
                                }
                   if(fabs(inputpars.totalcharge)<SMALLCHARGE)
                             {switch(i-nofcols) { 
@@ -347,6 +353,9 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
      }
      fclose(fout);
     }else{errno=0;}
+
+
+
 //--------------------------------------mcphas.xyt---------------------------------------------------  
   errno = 0;  
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
@@ -451,6 +460,44 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
     }else{errno=0;}
   }
   }}
+
+//-----------------------------------mcphas.cel ----------------------------------------------------  
+if(ini.cel!=0.0)
+ {errno = 0;  
+  strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas.cel");
+    if (verbose==1)printf("saving %s\n",outfilename);
+    if (htfailed!=0){cel=0;}
+  if (washere==0)
+  {
+   fout = fopen_errchk (outfilename,filemode);
+   fprintf(fout, "#output file of program %s ",MCPHASVERSION);
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+   fprintf(fout,"#!<--mcphas.mcphas.cel-->\n");
+   fprintf(fout,"#*********************************************************\n");
+   fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
+   fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
+   fprintf(fout,"#**********************************************************\n");
+   fprintf(fout,"# Elastic Constants\n");
+      str[0]='\0';
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "  C11 C22  C33 C44 C55 C66 C12 C13 C14 C15 C16 C23 C24 C25 C26 C34 C35 C36 C45 C46 C56(GPa)");
+   ini.print_usrdefcolhead(fout,str);
+   fclose(fout);
+   }
+   strcpy(outfilename+10+strlen(prefix),"mcphas.cel"); 
+   fout = fopen_errchk (outfilename,"a");
+   if (verbose==1)printf(" .... saving elastic constants in %s\n",outfilename);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   for (i=1;i<=6;++i)
+    { fprintf (fout, " %4.4g ",myround(cel(i,i)));
+    }
+   for (i=1;i<=5;++i)for(j=i+1;j<=6;++j)
+    { fprintf (fout, " %4.4g ",myround(cel(i,j)));
+    }
+ 
+    fprintf(fout,"\n");
+   fclose(fout);
+  }
 
 //-----------------------------------------mcphas*.hkl------------------------------------------------  
  errno = 0;

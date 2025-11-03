@@ -737,24 +737,57 @@ for(int j=1;j<=dj;++j){
                       }
 
 
-}else{
-  int sort=0;if (T<0) sort=1;
+}else{ 
+//static double av=0; static int nofcalls=0; clock_t start, end;  start = clock();
+   I=0;
+   int sort=0;if (T<0) sort=1;
+ /*
+    Vector En0(1,dj); Matrix zr0(1,dj,1,dj);Matrix zi0(1,dj,1,dj);
+    setup_and_solve_Hamiltonian(Hxc,Hext,En0,zr0,zi0,sort);
+   Vector wn0(1,dj); double Zs0,lnZs0;
+   calculate_Z_wn(En0,T,Zs0,lnZs0,wn0);
+   Vector I0(I.Lo(),I.Hi());I0=0;
+    for (int i=1;i<=dj;++i)
+    { if(wn0(i)>SMALL_PROBABILITY){
+     // here the expectation values of the multipolar moments are calculated
+     for(int j=1;j<=I0.Hi();++j)
+      { I0[j]+=wn0(i)*matelr(i,i,zr0,zi0,(*In[j]));
+        }
+                                 } 
+    }   
+   I=I0;lnZs=lnZs0;U=En0*wn0;
+  printf(" U=0%g lnZs0=%g\n",U,lnZs);
+myPrintVector(I0,"I0:");
+   myPrintVector(En0,"Energies0:");
+
+*/
+
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
-   setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
+   En(1)=KB*fabs(T)*10; // up to this excitation energy eigenvalues will be calculated 
+    setup_and_solve_Hamiltonian_ev_rows_of_z (Hxc,Hext,En,zr,zi,sort);
+  // myPrintVector(En,"Energies:");
    // calculate Z and wn (occupation probability)
-   Vector wn(1,dj); double Zs;
+   Vector wn(1,sort); double Zs;
    calculate_Z_wn(En,T,Zs,lnZs,wn);
    // calculate U
-   U=En*wn;
+   U=0;for(int i=1;i<=sort;++i)U+=En(i)*wn(i);
+//printf("Min=%gsort=%i   U=%g lnZs=%g T=%g mingap=%g\n",Min(En(1,sort)),sort,U,lnZs,T,KB*fabs(T)*10);
+//myPrintVector(En,"En");
    // calculate <I1>,<I2>,<I3>
-   I=0;
-    for (int i=1;i<=dj;++i)
+    for (int i=1;i<=sort;++i)
     { if(wn(i)>SMALL_PROBABILITY){
      // here the expectation values of the multipolar moments are calculated
-     for(int j=1;j<=I.Hi();++j)I[j]+=wn(i)*matelr(i,i,zr,zi,(*In[j]));
-                                   }
-    } //printf("%g %g\n",I[1],I[2]);
+     for(int j=1;j<=I.Hi();++j)
+      {  I[j]+=wn(i)*matexp ((double*) zr[i], (double*) zi[i], (*In[j]));
+      }                             
+                                 }
+    } 
 
+//myPrintVector(I,"I:");
+
+//    end = clock();double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
+//    av=(av*nofcalls+time_taken)/(nofcalls+1);++nofcalls;
+//    cout << "Time taken by program is : " << fixed          << av << setprecision(5);    cout << " sec " << endl;
  }
 }
 
@@ -893,6 +926,42 @@ if(gjmbH.Hi()>NOF_OLM_MATRICES+3)
 
 }
 
+void ionpars::setup_and_solve_Hamiltonian_ev_rows_of_z(Vector &  Hxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int & sort)
+{
+Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
+for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)=Hxc(i);
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
+
+// check dimensions of vector
+if(gjmbH.Hi()>NOF_OLM_MATRICES+3)
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > %i - check number of columns in file mcphas.j\n",gjmbH.Hi(),NOF_OLM_MATRICES+3);
+    exit(EXIT_FAILURE);}
+
+//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
+//  of a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
+//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
+//  True, otherwise  not ordered for sort = False. The real  and imaginary
+//  parts of the eigenvectors are  returned in  the columns of  zr and zi. 
+//  The storage requirement is 3*n*n + 4*n complex numbers. 
+//  All matrices and vectors have to be allocated and removed by the user.
+//  They are checked for conformance !
+// void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
+// 			   int sort, int maxiter)
+   int j,dj=Hcf.Rhi();
+   Matrix Ham(1,dj,1,dj);    
+   Ham=Hcf;for(j=1;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*In[j]);}
+   // diagonalize
+   int maxiter=1000000;
+   EigenSystemHermitean_ev_rows_of_z (Ham,En,zr,zi,sort,maxiter);
+
+}
+
+
 void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,Vector & wn)
 {double lnZs;
  calculate_Z_wn(En,T,Zs,lnZs,wn);
@@ -900,7 +969,7 @@ void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,Vector & wn)
 void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Vector & wn)
 {   // calculate Z and wn (occupation probability)
      int i,dj=wn.Hi();
-     double y,x=Min(En);
+     double y,x=Min(En(1,dj));
      if (T>0)
      { for (i=1;i<=dj;++i)
        {if ((y=(En(i)-x)/KB/T)<600) wn[i]=exp(-y); 

@@ -50,7 +50,7 @@ bool parload(par *& ip,char * iniprefix, const char * filename, int & verbose,pa
  
 // main program
 int main (int argc, char **argv)
-{ int j,l,doeps=0,linepscf=0,linepsjj=0,tracetest=0;bool inc_cd=false;
+{ int j,l,doeps=0,linepscf=0,linepsjj=0,tracetest=0;bool inc_cd=false;double cel=0.0,cv=0;
   int options=0; // this integer indicates how many command strings belong to 
                  //options 
 
@@ -76,12 +76,18 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
    if (strcmp(argv[im],"-linepsjj")==0) {linepsjj=1;if (options<im)options=im;} // do exchange strain epsilon calculation linear
+   if (strcmp(argv[im],"-cel")==0&&im+1<=argc-1)
+                                 {cel=strtod (argv[im+1], NULL);  // read stress to apply
+                                  if (options<im+1)options=im+1;}
+   if (strcmp(argv[im],"-cv")==0&&im+1<=argc-1)
+                                  {cv=strtod (argv[im+1], NULL);  // read stress to apply
+                                  if (options<im+1)options=im+1;}
    if (strcmp(argv[im],"-a")==0) {filemode="a";if (options<im)options=im;} // append output files
    if (strcmp(argv[im],"-stamax")==0&&im+1<=argc-1)
                                  {stamax=strtod (argv[im+1], NULL); // read stamax
                                   if (options<im+1)options=im+1;}
    if (strcmp(argv[im],"-t")==0&&im+1<=argc-1)
-                                 {tracetest=atoi (argv[im+1]); // read stamax
+                                 {tracetest=atoi (argv[im+1]); // read tracetest structure index
                                   if (options<im+1)options=im+1;}
    if (strcmp(argv[im],"-prefix")==0&&im+1<=argc-1)
                                  {strcpy(prefix,argv[im+1]); // read prefix
@@ -92,6 +98,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                   fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
   }	
+  if(cel!=0.0&&doeps==0){fprintf(stderr,"Error mcphas - option -cel requires option -doeps\n");exit(EXIT_FAILURE);}
     inipars inip("mcphas.ini",prefix,"mcphasit");   
    
     if(errexit==1)(*inip.inis[0]).errexit();
@@ -112,6 +119,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
    inipar ini((*inip.inis[ninis]));
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
    ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;ini.include_cd=inc_cd;
+   ini.cel=cel; ini.cv=cv;
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
@@ -165,6 +173,8 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
           } // doeps
  
  if(verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
+ if(verbose==1&&cel!=0.0){printf("option -cel %g: calculating elastic constants by applying additional stress of %g\n",ini.cel,ini.cel);}
+ if(verbose==1&&cv!=0.0){printf("option -cv %g: calculating specific heat by applying small temperature step %g\n",ini.cv,ini.cv);}
           
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
   Vector Imom(1,inputpars.cs.nofcomponents);
@@ -320,6 +330,30 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
           } if(rep>1){++nofreppoints;ini.nofreppoints=nofreppoints;
                       if(j==0){++nofconvrep;ini.nofconvrep=nofconvrep;}
                      }
+
+        // if cv!=0 attempt to calculate specific heat by applying a temperature step
+       if(cv!=0)
+         {physproperties pp(physprop);
+          double T1=T+cv;if(htcalc(pp.H,T1,ini,inputpars,testqs,testspins,pp,tracetest)!=0)
+                  physprop.cv=0;
+                else
+                  physprop.cv=(pp.u-physprop.u)/cv; // calculate specific heat 
+         }
+       // if cel!=0 attempt to calculate elastic constants by applying stress
+       if(cel!=0)
+         {physproperties pp(physprop);
+          Matrix s(1,6,1,6);//myPrintVector(pp.sps.epsilon,"Initial Strain");
+          int cel_not_stable=0;
+          for(int n=1;n<=6;++n){pp.H(6+n)+=cel;cel_not_stable+=htcalc(pp.H,T,ini,inputpars,testqs,testspins,pp,tracetest);
+                                pp.H(6+n)-=cel;//myPrintVector(pp.sps.epsilon,"Strain x=1-6");
+                                for(int m=1;m<=6;++m)s(n,m)=(pp.sps.epsilon(m)-physprop.sps.epsilon(m))/cel;
+                               }  // sigma=cel* eps    eps=s*sigma
+          // s and cel must be symmetric, thus if s is not - symmetrize it by averaging off diagonal elements
+          s=0.5*(s+s.Transpose());
+          if(cel_not_stable!=0)physprop.cel=0;
+          else                 physprop.cel=s.Inverse();     
+          //myPrintMatrix(s,"Matrix s:");
+         }
 
          ini.maxspinchange=maxspinchange;
          ini.maxnofmfloops=maxnofmfloops;

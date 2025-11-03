@@ -548,6 +548,8 @@ if (ini.displayall==1)   // display spincf if button is pressed
 // mf loop for selfconsistency **********************************************************
 // mf loop for selfconsistency **********************************************************
 // mf loop for selfconsistency **********************************************************
+//static double av=0; static int nofcalls=0; clock_t start, end;  
+//static double av2=0;  clock_t start2, end2;  
 
 for (r=1;sta>ini.maxstamf;++r)
 {if (spinchange>ini.maxspinchange)
@@ -561,6 +563,7 @@ for (r=1;sta>ini.maxstamf;++r)
      return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta) |||||||||||||||||||||||||||||||||||||||||||
+//start = clock();
  sta=0;dE=0; if(ini.doeps)mf.epsmf=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {  if(ini.doeps)mf.epsmf+=GG*sps.m(i,j,k);
@@ -590,10 +593,13 @@ for (r=1;sta>ini.maxstamf;++r)
 // ---> printing this dE  yields the result, that dE is > KB*T always when the strucuture
 // is oscillating and finally diverges because of MAXSPINCHANGE reached.
 
+ //   end = clock();double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
+ //   av=(av*nofcalls+time_taken)/(nofcalls+1);++nofcalls;
+//start2 = clock();
  if ((ini.maxnofmfloops<=1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
 else
 {mfold=mf;
-//2. calculate sps from mf --------------------------------------------------------------
+//2. calculate sps from mf||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {diff=sps.m(i,j,k);
   int im1=i-1,jm1=j-1,km1=k-1,s=sps.in(i,j,k),ss=sps.in(im1,jm1,km1);
@@ -732,7 +738,13 @@ if (r>ini.maxnofmfloops){if(ini.nofMCsteps==0)
      return 2*FEMIN_INI;}
                          else{sta=0;}} // continue with Monte Carlo
 }
+   // end2 = clock();time_taken = double(end2 - start2) / double(CLOCKS_PER_SEC);
+   // av2=(av2*nofcalls+time_taken)/(nofcalls+1);++nofcalls;
+   
 }
+// cout << "Time taken by calculate mf from sps : " << fixed   << av << setprecision(5); cout << " sec " << endl;
+// cout << "Time taken by calculate sp from mf : " << fixed   << av2 << setprecision(5); cout << " sec " << endl;
+
 // end mf loop for selfconsistency **********************************************************
 // end mf loop for selfconsistency **********************************************************
 // end mf loop for selfconsistency **********************************************************

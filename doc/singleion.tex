@@ -4,13 +4,19 @@ for Calculating Energy Levels, Transition Matrix Elements etc.}\label{cfield}
 \subsection{Doing Single Ion Calculations}
 \label{cfieldsep}
 
-The crystal field is the electrostatic field, which is produced by the
+\PP I always tell in my lectures that 
+the crystal field is the electrostatic field, which is produced by the
 charges of the crystal environment of a rare earth atom. It acts on the
-4f electrons of the rare earth and causes magnetic anisotropy. Fig.~\ref{chrgpla} and
-\ref{chrgplb} show the effect of this field on the charge distribution.
+4f electrons of the rare earth and causes magnetic anisotropy. In addition
+to the electrostatic origin of the crystal field there is also a contribution due to the 
+bonding.
+
+\EE Look, \ee, in Fig.~\ref{chrgpla} and
+\ref{chrgplb} I can show the you the effect of the crystal field on the charge distribution.
 Such plots can be made by using the programs {\prg pointc\index{pointc}} to calculate
 the crystal field parameters and
- {\prg display\_density\index{display\_density}} to plot the charge density, see section \ref{addprog}.
+ {\prg display\_density\index{display\_density}} to plot the charge density
+\footnote{ see section \ref{addprog}}.
 
 \begin{figure}[hb]
 \includegraphics[angle=0,width=0.7\columnwidth]{figsrc/crystalfieldplot.eps}
@@ -35,10 +41,13 @@ magnetic measurements in NdCu$_2$~\cite{gratz91-9297}.
 [plot created by program {\prg display\_density\index{display\_density}}]}
 \end{figure}
 
-We will describe now, how the crystal field influence can be quantitatively evaluated
-and how {\prg so1ion}\index{so1ion}  can help to do this.
-Within the $|JLSm_J \rangle$ ground state multiplet of the 4f electron wave function 
-the crystal field can be described by the following Hamiltonian:
+\OO \ee, I appreciate the effort to do such beautiful plots of the charge density, 
+but with your kind permission may I ask what relevance this has for experiments ? 
+Normally in the literature I find the following expressions for the crystal field Hamiltonian
+\footnote{\dots within the $|JLSm_J \rangle$ ground state multiplet of the 4f electron wave function.
+The first term in equ.~\ref{cfham} describes the crystal field, the second the
+effect of a magnetic field (Zeeman term). The strength of the crystal field is given by the
+crystal field parameters $B_l^m$. }
 
 \begin{equation}
 \label{cfham}
@@ -46,33 +55,42 @@ the crystal field can be described by the following Hamiltonian:
 	     - \sum_{n} g_{Jn} \mu_B {\mbf J}^n {\mbf H} 
 \end{equation}
 
-The first term in equ.~\ref{cfham} describes the crystal field, the second the
-effect of a magnetic field (Zeeman term). The strength of the crystal field is given by the
-crystal field parameters $B_l^m$. In the case of isolating materials these
-parameters can be obtained by the point charge model (point charges on the 
-neighbouring atoms, for details on these calculations see~\cite{hutchings64-227},
+\EE This is exactly what the {\prg so1ion}\index{so1ion} module  of {\prg McPhase}
+ uses to evaluate quantitatively the crystal field influence.
+
+ In the case of isolating materials the crystal field parameters $B_l^m$
+ can be obtained by the point charge model\footnote{point charges on the 
+neighbouring atoms, for details on these calculations see~\cite{hutchings64-227}},
 in the {\prg McPhase} suite use programs {\prg makenn} and {\prg pointc} to evaluate
-the pointcharge model for a given crystal structure, see section~\ref{addprog}).
+the pointcharge model for a given crystal structure\footnote{see section~\ref{addprog})}.
 For metals the conduction electrons screen the point charges and the determination
 of the crystal field is usually only possible by fits to experimental data. 
 The program package {\prg McPhase} may be used to solve such crystal field problems.
 
-A simpler way of dealing with crystal field anisotropy is to write
-instead of the first term in equ.~\ref{cfham}
+\PP In my lectures I am using a simpler way of dealing with crystal field anisotropy,
+it is to write instead of the first term in equ.~\ref{cfham}
 
 \begin{equation}
   \sum_s D_x^2 (J_x^s)^2 + D_y^2 (J_y^s)^2 +D_z^2 (J_z^s)^2 
 \end{equation}
 
-In order to implement a full diagonalisation of the single ion crystal field Hamiltonian
-the module {\prg so1ion}\index{so1ion}({\prg cfield\index{cfield}}, written by P. Fabi n\'e Hoffmann) has %%@
-been included into the program package. It  can be used  to 
+\EE Honorable \pp, indeed this is also possible - yet it is currently not possible to
+compute the parameters $D^2_{\alpha}$ from a point charge model.
+
+\OO For a diagonalisation of the single ion crystal field Hamiltonian
+the module we have always used the program {\prg so1ion}\index{so1ion}({\prg cfield\index{cfield}}, 
+written by P. Fabi n\'e Hoffmann). It can calculate also transition elements
+and  the inelastic neutron scattering cross section.
+
+\EE Exactly this program
+ has been included into {\prg McPhase}. It  can be used  to 
 calculate crystal field problems for rare earth ions. There is a program 
 {\prg so1ion}\index{so1ion}, which is self explaining, provided 
 the user has a basic knowledge of crystal field 
 theory (see e.g. the famous article by Hutchings~\cite{hutchings64-227}).
-Here we describe how to use the program {\prg singleion} to do crystal field calculation
-for rare earth ions. 
+However, I would recommend how to use the program {\prg singleion} to do crystal field calculation
+for rare earth ions, because setting up the calculation in this way it
+ can be easily extended to intermediate coupling schemes if necessary.
 
 \subsection{Example - how to evaluate the crystal field of NdCu$_2$ using
  {\prg singleion}\index{singleion}}\label{cfieldexample}
@@ -438,7 +456,7 @@ The constant coefficient $\rho_0=(3\pi N m/\hbar e^2 E_F) G^2(g-1)^2$ is set to 
 the option {\prg --rho0} or {\prg -r}. The syntax is otherwise the same as {\prg cpsingleion}. For example, to
 calculate the resistivity from 10 to 100 K in 1 K steps with $\rho_0 = 0.2$~$\Omega$.cm, the command 
 
-{\bf rhoso1ion 10 100 1 -r 0.2 -i results/Nd3p.sipf.levels.cef}
+{\bf rhoso1ion -t 10:1:100 -r 0.2 -i results/Nd3p.sipf.levels.cef}
 
  can be used. Alternatively, for comparison with data,
 
@@ -464,18 +482,30 @@ Use the parameters given in section~\ref{cf1ion}.
 \subsection{Using the {\prg so1ion\index{so1ion}}  module in {\prg McPhase} and {\prg McDisp}}
 \label{cf1ion}
 
+\PP I understand that the program {\prg singleion} can do crystal field calculations
+in a standard way such as many other programs do - so what is so special about 
+{\prg Mcphase} ?
 
-The use 
- of the {\prg so1ion\index{so1ion}} module in {\prg mcphas} is necessary in order to 
- go beyond the capabilities of {\prg singleion\index{so1ion}} (for instance the calculation
+\EE It is the possibility to couple various such calculations by interactions and
+describe ordering phenomena and dispersive excitations.
+
+\OO Indeed, the experiments I do are on ferrimagnets, so the theory has to take 
+account of magnetic order.
+
+\EE  So we have to {\prg mcphas}: the use of the {\prg so1ion\index{so1ion}} module
+ in {\prg mcphas} is necessary in order to 
+ go beyond the capabilities of {\prg singleion\index{so1ion}},for instance the calculation
  of magnetisation or specific heat or if the exchange interaction
  given in equations~(\ref{hamilton}) and (\ref{multipolehamilton})
-  shall be taken into account).  
+  shall be taken into account.  
 
 \subsubsection{Module Tasks:}
 
+\PP What do you actually mean by module ?
 
-The single ion module {\prg so1ion\index{so1ion}} provides to {\prg mcphas} the magnetic properties
+\EE A module in the sense of {\prg McPhase} is a program which is called by another program.
+In particular,
+the single ion module {\prg so1ion\index{so1ion}} provides to {\prg mcphas} the magnetic properties
 of a single rare earth ion subject to the crystal field. Its main duty is
 to calculate the magnetic moment given an external magnetic field $\mbf H$  and an exchange field $\mbf H^s$. 
 To be more explicit - given the external magnetic  and the exchange field  by {\prg mcphas}
@@ -510,7 +540,10 @@ the partition sum $z$ and the magnetic energy $u=\sum_{i=1}^{2J+1} p_{i} \epsilo
 
 \subsubsection{Module Usage:}
  
+\PP Ok, I understood what you mean by single ion moulde, but how can we do some calculation
+in {\prg McPhase} using the crystal field parameters ?
 
+\EE
 The program {\prg mcphas} (-calculation of the magnetic phase diagram) 
 requires a single ion
 property input file of the same format as given above in

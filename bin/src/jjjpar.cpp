@@ -601,6 +601,7 @@ void jjjpar::save_sipf(FILE * fout)
                       setvar(instr,"CHARGE",charge);double dmag=(double)magnetic;
                       setvar(instr,"MAGNETIC",dmag);double nofe=(double)nof_electrons;
                       setvar(instr,"nof_electrons",nofe);
+//if(strstr (instr, "CHARGE")!=NULL){printf("%s\n",instr);}
                       fprintf(fout,"%s\n",instr);
                                     }
            // rewind the stringstream ss for next use..

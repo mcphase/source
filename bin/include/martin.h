@@ -169,6 +169,13 @@ Vector crossp(Vector a,Vector b);
 
 
 //**********************************************************************************
+// calculate expectation value   <z|op|z> with eigenvector z
+// , the Hermitian operator op is described
+// by   matrix op.The real parts of the elements must be
+//  stored in the lower triangle of op,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of op[lo..hi,lo..hi].
+double matexp (double * zr, double * zi, Matrix & op);
 
 // calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
 // given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described

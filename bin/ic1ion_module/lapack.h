@@ -141,6 +141,12 @@ extern "C"
                       double *z, int *ldz, int *isuppz, double *work,
                       int *lwork, int *iwork, int *liwork, int *info);
 
+  void F77NAME(dstebz)(char *range, char * order, int *n, double *vl, double *vu, int *il, int *iu,
+                       double *abstol,double *d, double *e, // Tridiagonal RRR eigenvalues
+                        int *numfnd, int *nsplit, double *eigval,
+                            int *iblock,int * isplit, double *work,
+                        int *iwork, int *info);
+
   // Double precision complex routines.
   void F77NAME(zheev)(char *jobz, char *uplo, int *N, complexdouble *S, int *lda, 
                       double *eig, complexdouble *work, int *lwork, double *rwork, int *info);

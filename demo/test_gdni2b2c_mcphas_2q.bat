@@ -21,7 +21,7 @@ call setvariable r3c 1 mcphas*.j
    
  reduce_unitcell mcphas_magnetic_atoms.j > mcphas.j  
 copy mcphas.j mcphas_magnetic_atoms.j
- reduce_unitcell mcphas_all_atoms.j > mcphas.j  
+ reduce_unitcell -mcdiff mcphas_all_atoms.j > mcphas.j  
 copy mcphas.j mcphas_all_atoms.j 
 perl -l -n -e "unlink" reduce_unitcell_sipf.del
 
@@ -60,7 +60,9 @@ cd results
 copy makenn.djdx makenn.1.djdx
 copy makenn.djdy makenn.1.djdy
 copy makenn.djdz makenn.1.djdz
+
 cd ..
+
 
 REM and its position derivatives 
 call makenn 12 -rkky3d -116 1.162 1.162 2.912 -djdx
@@ -70,6 +72,28 @@ call makenn 12 -rkky3d -116 1.162 1.162 2.912 -djdz
 call addj -s -1.0 results/makenn.1.djdx results/makenn.djdx > mcphas.djdx
 call addj -s -1.0 results/makenn.1.djdy results/makenn.djdy > mcphas.djdy
 call addj -s -1.0 results/makenn.1.djdz results/makenn.djdz > mcphas.djdz
+
+REM and the strain dependence of Fermi wavevector
+
+REM ensure that the sequence of neighbours matches djdx ind the djdeps files by adding formally zero
+REM scaled djdx file ...
+call makenn 3.6 -rkky3d -116 1.162 1.162 2.912 -djdeps1
+call makenn 3.6 -rkky3d -116 1.162 1.162 2.912 -djdeps2
+call makenn 3.6 -rkky3d -116 1.162 1.162 2.912 -djdeps3
+
+addj -s 0.0 mcphas.djdx results/makenn.djdeps1 > makenn.1.djdeps1
+addj -s 0.0 mcphas.djdx results/makenn.djdeps2 > makenn.1.djdeps2
+addj -s 0.0 mcphas.djdx results/makenn.djdeps3 > makenn.1.djdeps3
+
+
+call makenn 12 -rkky3d -116 1.162 1.162 2.912 -djdeps1
+call makenn 12 -rkky3d -116 1.162 1.162 2.912 -djdeps2
+call makenn 12 -rkky3d -116 1.162 1.162 2.912 -djdeps3
+
+call addj -s -1.0 makenn.1.djdeps1 results/makenn.djdeps1 > mcphas.djdeps1
+call addj -s -1.0 makenn.1.djdeps2 results/makenn.djdeps2 > mcphas.djdeps2
+call addj -s -1.0 makenn.1.djdeps3 results/makenn.djdeps3 > mcphas.djdeps3
+
 
 REM compute classical dipolar interaction
 call makenn 40 

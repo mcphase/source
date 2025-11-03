@@ -20,7 +20,9 @@ class physproperties
 float x,y; // phasediagramm labels  
 int j;  // index of spinstructure
 double T; // temperature
+double cv; // specific heat
 Vector m,mabc,H,Pel,Pelabc,Pel0,Pelabc0,totalJ; 
+Matrix cel;
  // moment and H field and electrical polarisation (Pel0 refers to 
  // structural (probably not measurable) polarisation in case of lack of inversion symmetry,
  // Pel is the induced polarisation)

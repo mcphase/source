@@ -162,9 +162,13 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
   if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
    // now token is  at = 
+ // fprintf(stderr,"setvar before substitution:%s\n",instr);
   (*token)='\0';
-  te=token+1+strspn(token," \t");te+=strcspn(te," \t\n\0");
-  snprintf(token,MAXNOFCHARINLINE-(token-instr),"=%g%s",var,te);
+  te=token+1+strspn(token+1," \t");te+=strcspn(te," \t");
+ // fprintf(stderr,"setvar instr=%i token=%i te=%i\n",instr,token,te);
+  if((*te)!='\0')  snprintf(token,MAXNOFCHARINLINE-(token-instr),"=%g%s",var,te);
+  else snprintf(token,MAXNOFCHARINLINE-(token-instr),"=%g",var);
+ // fprintf(stderr,"setvar after substitution:%s\n",instr);
   return 0;
 }
 // same for int
@@ -229,6 +233,7 @@ int extract(char * instr,const char * parameter,double & var,parser & ob)
 { //const char delimiters[] = " =:\n";
   char *token,*td,*te;
   char expression[MAXNOFCHARSINLINE];
+  char ptrim[MAXNOFCHARSINLINE];
 // check if line is comment line -> if yes return 1
 if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1; //removed 26.5.02 in order to be able to place parameters in comment lines
                                  // inserted again 27.8.09 to be able to have real comment lines ignored
@@ -249,9 +254,9 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
   if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
   ++token;
-  snprintf(expression,MAXNOFCHARSINLINE,"%s",parameter);
-  rtrim(expression);
-  snprintf(expression,MAXNOFCHARSINLINE,"%s=%s",expression,token);
+  snprintf(ptrim,MAXNOFCHARSINLINE,"%s",parameter);
+  rtrim(ptrim);
+  snprintf(expression,MAXNOFCHARSINLINE,"%s=%s",ptrim,token);
 
 
 //  var = strtod (token, NULL);
@@ -678,13 +683,35 @@ Vector crossp(Vector a, Vector b)
 
 
 // ********************************************************************************************************
-
-// calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
-// given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described
+// calculate expectation value   <z|op|z> with eigenvector z
+// , the Hermitian operator op is described
 // by   matrix op.The real parts of the elements must be
-//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  stored in the lower triangle of op,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
-//  of the upper triangle of z[lo..hi,lo..hi].
+//  of the upper triangle of op[lo..hi,lo..hi].
+double matexp (double * zr, double * zi, Matrix & op)
+{double sumr=0,zri,zii,*opi;
+  int dl=op.Rlo(),dh=op.Rhi();
+ for(int i=dl;i<=dh;++i){zri=zr[i];zii=zi[i];opi=op[i];
+                         sumr+=(zri*zri+ zii*zii)*op[i][i];
+  for(int j=i+1;j<=dh;++j){if(opi[j]!=0){
+                               sumr+=2*(zri*zi[j]- zii*zr[j])*opi[j];
+                                          }
+                          if(op[j][i]!=0){
+                            sumr+=2*(zri*zr[j]+ zii*zi[j])*op[j][i];
+                                          }
+                                                         
+                         }
+        }
+ return sumr;
+}
+
+// calculate transition matrix element of eigenvectr <k|op|l> with eigenvectors
+// given as column vectors k and l of Matrix (zr + i zi), the Hermitian operator op is described
+// by   matrix op.The real parts of the elements must be
+//  stored in the lower triangle of op,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of op[lo..hi,lo..hi].
 double matelr (int & k,int & l,Matrix & zr, Matrix & zi, Matrix & op)
 {double sumr=0;//,p1r,p1i,p2r,p2i;
   //xisyj,xjsyi,im(0,1);

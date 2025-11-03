@@ -167,6 +167,7 @@ if ($#ARGV==2) {     # Three input arguments besides flags.
 }
 elsif ($#ARGV==1) { $col1=$ARGV[0]; $col2=$ARGV[1]; }
 
+
 if ($tlist) { 
      if ($tlist =~/,/) { @Temp = split(/,/,$tlist); }
   elsif ($tlist =~/:/) { @_ = split(/:/,$tlist); $Tmin=$_[0]; $deltaT=$_[1]; $Tmax=$_[2]; }
@@ -177,11 +178,12 @@ if ($tfile) { if (-e $tfile) { open(INFILE,$tfile); @Temp=(); $fflag=1; }
 elsif ($datfile) { if (-e $datfile) { open(INFILE,$datfile); @Temp=(); $fflag=1; $dflag=1; }
   else { warn "$0: File $datfile does not exist. Ignoring."; } }
 
+
 if($fflag) {
   while(<INFILE>) { 
     push(@INLines,$_);
     if ($_!~/^\s*#/) { 
-      split; push(@Temp,$_[$col1-1]); if($col2 && $dflag) { push(@resexp,$_[$col2-1]); }
+     @a=split; push(@Temp,$a[$col1-1]); if($col2 && $dflag) { push(@resexp,$a[$col2-1]); }
     } 
   }
   close(INFILE);

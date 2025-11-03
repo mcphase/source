@@ -4,7 +4,9 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 use PDL;
 use Cwd;
 use Fcntl qw(:flock);
-
+# not available on windows:
+#use File::Copy::Recursive qw(fcopy rcopy dircopy fmove rmove dirmove pathrm pathempty);
+#use IO::Select; 
 # use PDL::Slatec;
 
 unless ($#ARGV >0) 
@@ -53,6 +55,11 @@ unless ($#ARGV >0)
     -s0 filename ... instead of results/simannfit.n use filename to store/read 
     -s1 filename ... instead of results/simannfit.p use filename to store/read 
     -i 23 ... for storing in results/simannfit.* use index .23 instead of .0 as suffix 
+    -pt 3 ... use 3 parallel threads: create directories sim1 sim2 sim3 and
+            copy calcsta and input files to these and run in parallel in these
+            directories 3 instances of calcsta, collect results and use that with
+            the smallest sta to proceed with the algorithm. Delete directories 
+            sim1 ... sim3 at the end of simannfit (-pt not available on windows)
 
  ... LOGGING 
      -n 50  ... specifies that every 50 steps the parameters should be
@@ -106,7 +113,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
   $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;$limsta=-1e100;$tableoffset=0;
-  $options=1;$probe=0;$stepfact=1;$cont=0;$jpglog=0;$index=0;$log=0;$hist=0;$dist=0;
+  $options=1;$probe=0;$stepfact=1;$cont=0;$jpglog=0;$index=0;$log=0;$hist=0;$dist=0;$pt=0;
   $s0file="results/simannfit.n";
   $s1file="results/simannfit.p";
   while($options==1)
@@ -120,6 +127,8 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   if ($ARGV[0] eq '-r') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$rangfact=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-f') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepset=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-i') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$index=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0] eq '-pt') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$pt=eval $ARGV[0]; shift @ARGV;
+                         if ($^O=~/MSWin/){die "Error simannfit: option -pt not available on Windows";}}
   if ($ARGV[0] eq '-s0') {$options=1;shift @ARGV;$s0file=$ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-s1') {$options=1;shift @ARGV;$s1file=$ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-jpglog') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$jpglog=eval $ARGV[0]; shift @ARGV;$jpgimagefile=$ARGV[0]; shift @ARGV;}
@@ -127,6 +136,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   if ($ARGV[0] eq '-c') {$options=1;shift @ARGV; $cont=1;}
   if ($ARGV[0] eq '-h') {$options=1;shift @ARGV; $hist=1;}
   if ($ARGV[0] eq '-d') {$options=1;shift @ARGV; $dist=1;}
+
   }
 
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
@@ -134,7 +144,9 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
   foreach (@ARGV)
  {$file=$_; if(mycopy ($file,$file.".bak")){print "\n warning copying $file not possible - press enter to continue\n";<stdin>;}
-   unless (open (Fin, $file.".forfit")){die "\n error:unable to open $file.forfit\n";}   
+   unless (open (Fin, $file.".forfit")){if($pt==0){die "\n error:unable to open $file.forfit\n";}
+                                       } 
+   else{  
     while($line=<Fin>)
  {while ($line=~/^(#!|[^#])*?\bpar\w+\s*\Q[\E/) {++$#par;#load another parameter
 				 ($parname)=($line=~m/(?:#!|[^#])*?\b(par\w+)\s*\Q[\E/);
@@ -171,6 +183,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				   
                                  }
      } close Fin;
+   }
  }  
     if ($#par<0) {print "Error simannfit: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
    close Fout;
@@ -187,7 +200,10 @@ $nof_calcsta_calls=0;
 # fitting loop
  print ($#par+1);print " parameters found - testing calculation of sta\n";
 $rnd=1;$stasave=1e20;
- ($sta)=sta();$stps=1;$noofupdates=0;$stepnumber=0;$stastart=$sta;
+ write_modified_par_to_files();
+ $staboundary=$stasave;
+  sta_calc();
+ ($sta)=sta_read();$stps=1;$noofupdates=0;$stepnumber=0;$stastart=$sta;
   if($maxstep==1){open(Fout,">results/simannfit.status");
                   print Fout " maxstep=1 ... simannfit stopped after initial run of calcsta\n";
                   print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
@@ -199,14 +215,29 @@ $rnd=1;$stasave=1e20;
                  exit 0;}
 if($tablestep!=0){ write_set(">>$s0file");}
 if($sta>0)
-{print "starting fit\n";
+{print "initial sta=$sta ... starting fit\n";
  $SIG{INT} = \&catch_zap;
+    if($pt>0){for($i=1;$i<=$pt;++$i){$sdir="./sim".$i;mkdir $sdir;
+                  if ($^O=~/MSWin/){mycopy("./calcsta.bat",$sdir."/calcsta.bat");}
+                               else{mycopy("./calcsta",$sdir."/calcsta");}
+                  push @sdirs, $sdir;
+                  mkdir $sdir."/results";
+                 foreach(@ARGV){mycopy($_,$sdir."/");# my @stats = stat($_);
+                               # my $mode = $stats[2];  # Get the mode (permissions)
+                               # chmod $mode,$sdir."/calcsta.bat"
+                                }
+                 }}
  while($sta>0)
  {  $stasave=$sta;
  # modify parameters
  print "\n..next fitting loop..";
- @parsav=@par;$dmin=0;
  if($probe>0&&$stps>3){$stps/=2;} # if probing is desired reduce step to 2 and make it larger if no set is found ...
+ @parsav=@par;
+
+ # HERE WE SHOULD GENERATE $pt sets of new parameters and start sta_calc() in the corresponding 
+ # directories ...
+ for($pti=0;$pti<$pt||$pti==0;++$pti)
+ {@par=@parsav;$dmin=0;
  while($dmin<$#par+1&&$stps<11.0)
  {$i=0;
   foreach(@par){$rnd=rand;$thisparstp[$i]=($rnd-0.5)*$parstp[$i]*$stps;$par[$i]+=$thisparstp[$i];
@@ -240,18 +271,65 @@ if($sta>0)
                }
    if($dmin<$#par+1){$stps*=1.00001;if($stps<1.01){@par=@parsav;}}
   }
+  if($stps<11){
+  if($pt==0){write_modified_par_to_files();}
+        else{write_modified_par_to_files($sdirs[$pti]);$ptpar[$pti]=[@par];}
+  }
+ }
 if($stps<11){
  print " .. calculating sta ..\n";
 
  $rnd=rand;
-   ($sta)=sta(); # CALCULATE sta !!!!
+    $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
+    if($pt==0){    sta_calc();($sta)=sta_read();$stacurr=$sta; }# CALCULATE sta  !!!!
+    else {
+
+
+       #   foreach(@sdirs){sta_calc($_);} # CALCULATE sta  - in parallel 
+
+
+my @children;
+# my %pipes;
+
+foreach my $sdir (@sdirs) {
+    my $pid = fork();
+     if (!defined $pid) {
+    warn "failed to fork: $!";
+    kill 'TERM', @children;
+    exit;
+     }
+    if ($pid) {
+        # Parent process
+        push @children, $pid;
+    } elsif (defined $pid) {
+        # Child process
+        sta_calc($sdir);
+        exit;   
+    }
+}
+
+# Wait for all children to finish
+while (scalar @children) {
+    my $pid = $children[0];
+    my $kid = waitpid $pid, 0;
+#    warn "Reaped $pid ($kid)\n";
+    shift @children;
+  }
+
+         # evaluate sta from parallel calculations and take minimum value
+       $sta=1e100;$pti=0;$stacurr="(";
+       foreach(@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;
+                       if($s<$sta){$sta=$s;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
+                       ++$pti;
+                      }$stacurr.=")min-> ".$sta;
+         }
    ++$stepnumber;
    
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set(">>$s0file");}
    if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in $s1file - $probe other sets to be found, continuing ...\n";write_set(">>$s1file");                      
                 last if ($probe==0);
                                 }
-   print " ...  current sta=$sta, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
+   print " ...  current sta=$stacurr, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
    open(Fin,"./results/simannfit.status");$line=<Fin>;
     if($sta==0){@parsav=@par;} # if sta really got zero... store parameters as parsav 
     if ($line=~/exiting simannfit/){$sta=0;close Fin;}
@@ -260,6 +338,8 @@ if($stps<11){
      read_write_statusfile();
     }
           } else {$sta=0;print "\n stepsize = $stps > 11.0 - stopping fit\n";}
+ 
+
  if (time-$starttime>$maxtim){$sta=0;print "\n maximum time for fitting reached - stopping fit\n";}
  if ($stepnumber>$maxstep){$sta=0;print "\n maximum step number for fitting reached - stopping fit\n";}
  if ($sta==0) {#recover old pars
@@ -308,7 +388,14 @@ if($stps<11){
 
    print "best fit:\n";
    $i=0;foreach(@par){write STDOUT;++$i;}
-   ($sta)=sta(); # CALCULATE sta !!!!
+   write_modified_par_to_files();
+   $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
+    sta_calc();
+   ($sta)=sta_read(); # CALCULATE sta !!!!
+    if($pt>0){foreach (@sdirs){print "removing ".$_."\n";
+                                    system ("rm -r ".$_."*");}
+                 }
+
 }
 else
 {print "sta=0 already - not fit required !?\n";exit;}
@@ -411,10 +498,11 @@ sub catch_zap {
 #****************************************************************************** 
 
 
-sub sta {#local $SIG{INT}='IGNORE';
+sub write_modified_par_to_files {
+ my ($sdir)=@_;
  #print "#write modified parameterset to files *\n";
  foreach (@ARGV)
- {$file=$_; open (Fin, $file.".forfit");open (Fout1, ">".$file);open (Fout2,">./results/simannfit.par");
+ {$file=$_; if(open (Fin, $file.".forfit")) {open (Fout1, ">./".$sdir."/".$file);open (Fout2,">./".$sdir."/results/simannfit.par");
    while($line=<Fin>)
      {$modline=$line;
       if ($line=~/^(#!|[^#])*?\bpar/) {#here write modified parameter set to line
@@ -469,23 +557,33 @@ sub sta {#local $SIG{INT}='IGNORE';
 
                             } print Fout1 $line;print Fout2 $modline;
      } close Fin;close Fout1;close Fout2;
-     if (mycopy("./results/simannfit.par",$file.".forfit"))
-     {die "\n error copying results/simannfit.par to  $file.forfit\n";}
+     if (mycopy("./".$sdir."/results/simannfit.par","./".$sdir."/".$file.".forfit"))
+     {die "\n error copying ./".$sdir."/results/simannfit.par to  ./".$sdir."/$file.forfit\n";}
+  }
  }
+}
 
+sub sta_calc {#local $SIG{INT}='IGNORE';
+ my ($sdir)=@_;
+
+ if(defined $sdir){chdir $sdir;}
 # print "#call routine calcsta.bat to calculate standard deviation\n";
-$staboundary=$stasave-log($rnd+1e-10)*$stattemp;
  if ($^O=~/MSWin/){
                    if(system ("calcsta.bat $staboundary > results\\simannfit.sta")){die "\n error executing calcsta.bat\n";}
                   }
  else
                   {
                    if(system ("./calcsta $staboundary > ./results/simannfit.sta")){die "\n error executing calcsta\n";}
-                  }	
+                  }
+if(defined $sdir){chdir "..";}
+             }	
 
-unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop if simannfit.sta is not existing ... 
+sub sta_read {#local $SIG{INT}='IGNORE';
+ my ($sdir)=@_;
+my $sta;
+unless(open (Fin,"./".$sdir."/results/simannfit.sta")){ # this "unless" is to avoid stop if simannfit.sta is not existing ... 
                                               # if it does not exist, just take old values and continue ...
-  print STDERR "simannfit filesystem problem accessing simannfit.sta (output from calcsta command) - continugin with next parameter set\n";
+  print STDERR "simannfit filesystem problem accessing simannfit.sta (output from calcsta command) - continuing with next parameter set\n";
  }else{
  $i6=0;$errc=1;
  while($line=<Fin>){
@@ -497,7 +595,7 @@ unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop i
                                               }
                    }
  close Fin;
- mydel ("./results/simannfit.sta"); 
+# mydel ("./".$sdir."/results/simannfit.sta"); 
 # print @ssta;
  $delta= PDL->new(@ssta);
  $c=PDL->new(@par);
@@ -519,7 +617,7 @@ unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop i
   # if we have errors present we rather minimize chi2
   $sta=$chisquared;
  }
-if($nof_calcsta_calls>1&&$#ssta+1!=$deltastore->getdim(1))
+if($nof_calcsta_calls>0&&$#ssta+1!=$deltastore->getdim(1))
 {print STDERR "Warning: Simannfit found ".($#ssta+1)." occurences of sta= in output of calcsta which is different from previous runs of calcsta - there it found ".$deltastore->getdim(1)." occurrences. Continuing without storing this\n"; }
 else
 {
@@ -554,7 +652,7 @@ sub mycopy { my ($file1,$file2)=@_;
                                return system("copy ".$file1." ".$file2);
                               }
                  else
-                              {return system("cp -f ".$file1." ".$file2);
+                              {return system("cp -pf ".$file1." ".$file2);
                               }
 
            }
@@ -573,8 +671,8 @@ sub mydel  { my ($file1)=@_;
 sub read_write_statusfile {
      open(Fout,">./results/simannfit.status");$i=0;
      print Fout "#! working directory: ".cwd()."\n#! NS=".($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-     if($chisquared){print Fout "#! Current sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
-              else {print Fout "#! Current     sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")  \n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
+     if($chisquared){print Fout "#! Current sta=chi2=$stacurr (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
+              else {print Fout "#! Current     sta=variance=s2=$stacurr (=sum deviations^2/".($#ssta+1).")  \n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
      print Fout "#----------------------------------------------------------------------------------------\n";
      print Fout "#! Statistical_Temperature=$stattemp      Step_Ratio=$stps\n";
      print Fout "#----------------------------------------------------------------------------------------\n";

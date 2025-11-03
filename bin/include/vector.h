@@ -1179,7 +1179,9 @@ void    EigenValuesSymmetric (Matrix&,Vector&,int=true,int=30);
 // complex hermitean (source/Vector/cheigen.cc)
 void	Chtred		(Matrix&,Vector&,Vector&,Vector&,Vector&);
 void	Chtrbk		(Matrix&,Vector&,Vector&,Matrix&,Matrix&);
+void	Chtrbk_ev_rows_of_z(Matrix&,Vector&,Vector&,Matrix&,Matrix&,int);
 void	EigenSystemHermitean (Matrix&,Vector&,Matrix&,Matrix&,int=true,int=30);
+void	EigenSystemHermitean_ev_rows_of_z  (Matrix&,Vector&,Matrix&,Matrix&,int & sort,int=30);
 void    EigenValuesHermitean (Matrix&,Vector&,int=true,int=30);
 
 // generalized complex hermitean (source/Vector/chgeigen.cc)

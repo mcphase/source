@@ -1,10 +1,36 @@
 \section{Including Phonons, Electrical Polarisation and Crystal-Field Phonon interactions}\label{phonons}
 
-In this section we discuss, how lattice dynamics may be considered in the framework of
+\EE I think you are now ready for the really interesting subjects - I mean phonons and their
+interactions.
+
+\PP \ee, you know, in the past 40 years there always was money for electronic studies and practically
+no money for phonons and lattice dynamics. So why should we suddenly go back and study
+phonons. You can predict phonon dynamics with DFT methods nowadays - even in exotic matter.
+Are you serious about studying phonons ?
+
+\EE I know, the mainstream of solid state research is based on the Born-Oppenheimer adiabatic
+approximation and thus phonons are considered of minor importance. However,
+BCS theory on superconductivity is a good example on how phonon may enter suddenly into
+the theory with unexpected effects. Similar, in magnetism we usually neglect phonons. 
+However, there are some examples which demonstrate, that for example for the
+interpretation of crystal field spectra it may be necessary to take into
+account compound modes having both phononic and magnetic character and correspondingly
+can be observed in magnetic and nuclear scattering of neutrons.
+
+\OO According to my simple view of this subject, aren't we talking about the origin
+of magnetostriction ?
+
+\EE Yes indeed, I did not think  this way. You are right, magnetostriction would
+be zero if there was not some couling between the electronic and lattice degrees of 
+freedom.
+
+\PP So how can phonons be handled ?
+
+\EE Let me first show you, how lattice dynamics may be considered in the framework of
 the Hamiltonian (\ref{fullhamiltonian}). We will see that this corresponds 
 to a system of coupled Einstein oscillators. One such oscillator can be modelled 
 by setting up a {\prg sipf} file with the module {\prg phonon}. Coupling has
-to be done in {\prg mcdisp.j}. Rephrasing lattice dynamics in this way allows 
+to be done in {\prg mcdisp.j}. Rephrasing lattice dynamics in this way allows then
 to couple phonons to the crystal field.
 
 A three dimensional Einstein oscillator (for atom $i$) in a solid can be described by 

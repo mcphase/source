@@ -78,6 +78,8 @@ printf ("          -doeps refine strain epsilon selfconsistently using elastic,m
 printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz and optional djdeps1-6\n");
 printf ("          -linepscf with -doeps use zero strain single ion Hamiltonian for every mean field iteration\n");
 printf ("          -linepsjj with -doeps use zero strain two ion interaction Hamiltonian for every mean field iteration\n");
+printf ("          -cel  0.0001  ... compute elastic constants by applying stress of 0.0001 GPa (needs more computation time)\n");
+printf ("          -cv  0.01  ... compute specific heat by applying temperature step of 0.01K and computing derivative of energy u\n");
 printf ("          -prefix 001    try to read files starting with 001, e.g.\n");
 printf (" 		    001mcphas.ini, if these exist, otherwise take\n"); 
 printf (" 		    standard input files, check if in mcphas.ini there are\n");
@@ -1031,6 +1033,8 @@ inipar::inipar (const inipar & p)
   prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,p.prefix);
   doeps=p.doeps;outcolset=p.outcolset;include_cd=p.include_cd;
+  cel=p.cel;
+  cv=p.cv;
   linepscf=p.linepscf;
   linepsjj=p.linepsjj;
   ipx=p.ipx;

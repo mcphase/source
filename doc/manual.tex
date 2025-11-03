@@ -37,7 +37,13 @@
 \newcommand{\Bell}{\ensuremath{\boldsymbol\ell}}
 \newcommand{\bm}[1]{\boldsymbol #1}
 \newcommand{\Trace}[1]{\rm Tr \{ #1 \} }
-
+\newcommand{\oo}{Orlando}
+\newcommand{\OO}{\hspace*{-1cm} ORLANDO: }
+\newcommand{\ee}{Ewald}
+\newcommand{\EE}{\hspace*{-1cm} EWALD: }
+\newcommand{\pp}{Simplicius}
+\newcommand{\PP}{\hspace*{-1cm} SIMPLICIUS: }
+\setlength{\parindent}{0em}
 \begin{document}
 
 
@@ -85,7 +91,47 @@
 \markboth{\hfill \includegraphics[angle=20,height=20pt,bb=0 0  49 35]{../mcphas_logo1.jpg} }
           {\includegraphics[angle=20,height=20pt,bb=0 0 49 35]{../mcphas_logo1.jpg} \hfill}
 
-\section*{Acknowledgements}
+\subsection*{To the discreet Reader}
+
+400 years ago it was in the peaceful lagoon of Venice, where Galileo Galilei found bamboo
+ and the first man to fabricate transparent glass so he could build a telescope.  
+His telescope soon provided evidence for new models of the solar system in contrast
+to the AI, the Aristotelian Intelligence. In his words "In questions of science, 
+the authority of a thousand is not worth the humble reasoning of a single individual."
+
+Today it is in the peaceful lagoon of Venice, where at the beginning of the year gathers a small
+group of scientists. Circumvented by the floating water of the lagoon they
+ build a new kind of simulation suite for models of the solid state.
+The concept is in contrast to the wide spread focus on purely electronic properties
+promoted by many cardinals of science. 
+
+In this manual, frequently there appear three characters in conversations. The 
+first one is \oo, who is appassionate about creating high magnetic fields.
+He is of hot temperament and loves basic science which can be applied to 
+technical devices. \oo hates formulas.
+The second character is \ee - he is, in contrast to \oo in love with
+formulas and mathematical treatises. He is extremely accurate and 
+if we let him alone write this book, we will
+end up with a large pile of paper and it will be hard to find out where to
+look up what. The third person the reader will meet is \pp, though
+ he is simple minded he is a 
+strong personality and will not tolerate any other opinion. He tries to
+control the direction of activities such as to promote his interest. His 
+interest is mainly that of controlling the activities by evaluating the work
+which is done by others. 
+
+By means of their lively discussions we hope to immerse
+ the appreciated reader into the lagoon of ideas which penetrates
+ the models of solid matter.
+
+
+
+
+
+
+
+
+\subsection*{Acknowledgements}
 
 We would like to thank colleagues who generously agreed to read sections of the draft version
 of the text; their comments helped to improve the text substantially. We are particularly indebted to
@@ -205,27 +251,40 @@ u= umax * tanh (u/umax) ... this avoids uniform shifts of the crystal
 \clearpage
 \section{Introduction}
 
-{\prg McPhase} is a program package designed to calculate 
+\OO How nice to meet you here in Venice, \ee - 
+I have some exciting new magnetostriction data in ultrahigh fields which we
+are trying to understand !
+
+\EE The pleasure is on my side - I am always impressed, how much effort you
+make to do such experiments. Maybe looking into 
+{\prg McPhase} can help to unterstand your data - {\prg McPhase}
+  is a program package designed to calculate 
 properties of a magnetic system with localised magnetic moments
 given the crystal field and/or the
 exchange interaction constants.
-For rare earth ions it is based on the standard model
+
+\PP Hi, do tell me, what can you do with that program ?
+
+\EE For rare earth ions {\prg McPhase} is based on the Hamiltonian of the standard model
 of rare earth magnetism~\cite{jensen91-1}.
-The Hamiltonian of the standard model of rare earth magnetism 
-is described in section~\ref{hamiltonian}.
+\footnote{The Hamiltonian of the standard model of rare earth magnetism 
+is described in section~\ref{hamiltonian}.}
 Alternatively, a more complex Hamiltonian can be used which includes
 all terms in intermediate coupling - this is important for transition metal
-and actinide ions. By means of magnetoelastic interactions 
+and actinide ions.
+
+\PP I hope you know, that actinides are forbidden in my institute ! 
+I am interested in exotic matter, this is important - so what can you study ?
+
+\EE By means of magnetoelastic interactions 
 the interplay of lattice and magnetism can be studied. Properties 
 to be calculated are magnetic moments, electric polarisation, strain  and
 excitations under magnetic and electic fields and stress/pressure.
 
- 
-
-For each of the many tasks of the program package separate programs have been written.
-Fig.~\ref{modules} gives an overview of the 
-tasks of these different modules of the program package.
-
+\OO Indeed ? So can we do a quick calculation to understand better my
+new experimental high field data of magnetisation and magnetostriction. My
+student is trying really hard to set up something for pressure experiments too, it
+would be nice to have some prediction from theory !
 
 \begin{figure}[hb]\begin{center}
 \includegraphics[angle=0,width=0.7\columnwidth]{figsrc/mcphas_modules.eps}
@@ -234,6 +293,9 @@ Structure of the program package showing the tasks of the different modules.}
 \end{center}
 \end{figure}
 
+\EE  For each of the many tasks of the program package separate programs have been written.
+Fig.~\ref{modules} gives an overview of the 
+tasks of these different modules of the program package. Have a look:
 \begin{description}
 \item[singleion:]
 The best way to start with the program package is probably to get
@@ -321,7 +383,8 @@ Using {\prg McPhase} for the first time, the reader should
 \item
 rush into the program and test that it functions correctly on his system
 by starting the demos ( type {\prg cd demo} and then run {\prg 01\_demo\_crystal\_fields.bat},{\prg %%@
-02\_demo\_mcphas\_I\_NdCu2.bat}, etc.).  
+02\_demo\_mcphas\_I\_NdCu2.bat}, etc.).  In addition a complete test of
+functionality can be done by typing {\prg mctest test*.bat}
 \item 
 learn about some special features and basic functions of the program package by
 doing the tutorial in directory {\prg tutorial}
@@ -405,7 +468,7 @@ UPd$_3$ & dispersive CEF excitations, quadrupolar interactions  & {\prg so1ion}\
 \clearpage
 \section{The Hamiltonian}
 \label{hamiltonian}
-
+\EE
 %script2html_begin{mcphasit} 
 We assume a quantum mechanical system that can be described by the Hamiltonian
  \begin{equation}\label{hamilton}
@@ -429,8 +492,12 @@ For example, in the case of a Heisenberg
  exchange between magnetic ions we would identify the set of operators with
  $\alpha=1,2,3$ with the three components of the  spin: $\hat \mathcal I_1 \leftrightarrow \hat S_x, \hat \mathcal I_2 %%@
 \leftrightarrow \hat S_y, \hat \mathcal I_3 \leftrightarrow \hat S_z$.
-The beauty of the analysis which follows is that it can be applied to
-almost any Hamiltonian of the form (\ref{hamilton}). The analysis
+
+\OO Do we really need so many symbols - is there no simpler theory ? 
+ 
+\EE Well, the beauty of the analysis which follows is that it can be applied to
+almost any Hamiltonian of the form (\ref{hamilton}). And there are a lot ! 
+ The analysis
 of complex magnetic systems can thus be attempted by starting from a simple
 form such as the Heisenberg model and by introducing, step-by-step, more
 complexity into the model. For example, anisotropy and interactions with extended range can be introduced by modifying ${\mathcal J}_{\alpha\beta}(\mbf R_n - \mbf R_{n'})$, higher order operators can be 
@@ -447,7 +514,10 @@ will be part of the single ion term $ \hat \mathcal H(n)$. Allowing more complex
 both the spin and lattice degrees of freedom can be introduced and spin-phonon interactions can be
 handled by the theory.
 
-The main limitation of the approach is that it neglects fluctuations associated with phase 
+\PP For the exotic matter which is todays main scientific interest because everything else is
+pretty well studied, there are important limits to your approach - I guess you are aware !
+
+\EE The main limitation of the approach is that it neglects fluctuations associated with phase 
 transitions and quantum disorder. We are primarily concerned, therefore, with excitations 
 associated with a  well-ordered ground state.
 
@@ -458,7 +528,10 @@ a single ion module the user may treat any type single ion Hamiltonian $\hat \ma
 
 \subsection{Rare Earth Ions}
 
-A more specific example of is the following magnetic  Hamiltonian $\mathcal H$ for rare earth ions,
+\OO My sample contains rare earth - so we need to do simulations for rare earth materials.
+
+\EE Yes, we can -
+a specific example of (\ref{hamilton}) is the following magnetic  Hamiltonian $\mathcal H$ for rare earth ions,
  which may be treated with the program package:
 
 \begin{equation}
@@ -477,8 +550,15 @@ $\mbf H= \mbf H_{\rm applied} - n_{\rm demag} \mbf M$, e.g. for a spherical samp
 The unit of $\mbf H$ is usually chosen to be Tesla, which actually refers to the quantity 
 $\mu_0 \mbf H$ (in SI units). 
 
-Instead (or rather in addition) to this it is also possible to treat the 
-more general two ion exchange coupling
+\OO I know about the demagnetisation factor, in our pulsed field experiments we sometimes
+have extremely large moments and for a small sample the corrections can be quite large.
+
+\PP I have done a lot of experiments on exotic matter, we need some other concepts than
+your theory. Can you do orbital excitations ? 
+
+\EE Instead (or rather in addition) to this it is also possible to treat the 
+more general two ion exchange coupling\footnote{For further information on the notation and symmetry restrictions to the
+parameters in the Hamiltonian refer to~\cite{jensen91-1}.}
 
 \begin{equation}
 \label{multipolehamilton}
@@ -487,21 +567,22 @@ more general two ion exchange coupling
 	     {\mathcal K}_{ll'}^{mm'}(nn') O_{lm}({\mbf J}^n) O_{l'm'}({\mbf J}^{n'})
 \end{equation}
 
-For further information on the notation and symmetry restrictions to the
-parameters in the Hamiltonian refer to~\cite{jensen91-1}.
+\OO Well - I have magnetostriction data, we need some theoretical explanation for the strain. 
+ Can you enter some magnetoelastic terms in the Hamiltonian ? I know a theoretician in Spain who has
+done so and has written two huge volumes about magnetostriction. 
 
-In addition to the above terms in the Hamiltonian the coupling of magnetic and lattice properties
+\EE  Indeed, in  addition to the above terms in the Hamiltonian the coupling of magnetic and lattice properties
 is possible by introducing magnetoelastic interactions:
-In order to calculate magnetoelastic effects the parameters $B_l^m$, ${\mathcal J}(ij)$ (or more general
+In order to calculate magnetoelastic effects the parameters 
+$B_l^m$, ${\mathcal J}(ij)$ (or more general
 the ${\mathcal K}_{ll'}^{mm'}(ij)$) are expanded in a Taylor expansion in the strain tensor
 $\epsilon$ resulting in the magnetoelastic interaction (i.e. keeping only the terms linear
 in $\epsilon$). The equilibrium strain can be 
 calculated by considering in addition the elastic energy and minimising the total free energy.
-The procedure is described in detail in~\cite{rotter02-8885}.
-
-
+\footnote{The procedure is described in detail in~\cite{rotter02-8885}.}
  
-
+\PP If I give you a student of mine and he starts doing McPhase, are there
+some exercises so he can learn how to use the program ?
 
 \vspace{1cm}
 

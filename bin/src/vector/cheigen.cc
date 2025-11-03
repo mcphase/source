@@ -101,6 +101,99 @@ void EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi,
 }
 
 //----------------------------------------------------------------------------//
+void EigenSystemHermitean_ev_rows_of_z (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
+			   int & sort, int maxiter)
+//
+//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
+//  of a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
+//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
+//  True, otherwise  not ordered for sort = False. The real  and imaginary
+//  parts of the eigenvectors are  returned in  the ROWS of  zr and zi. 
+//  The storage requirement is 3*n*n + 4*n complex numbers. 
+//  All matrices and vectors have to be allocated and removed by the user.
+//  They are checked for conformance !
+// 
+//  References:
+//
+//  B.T.Smith et al: Matrix Eigensystem Routines
+//  EISPACK Guide,Springer,Heidelberg,New York 1976.
+//
+{
+    int i;double maxExcE=d[1];
+
+    // get the dimension information
+    int lo = z.Clo(),	
+        hi = z.Chi();
+    
+    // columns and rows must have the same range
+    if (z.Rlo() != lo || z.Rhi() != hi) 
+	Matpack.Error(Mat::UnspecifiedError,"EigenSystemHermitean: matrix must be square"); 
+
+    // the matrices and vectors must be conformant 
+    if ( d.Lo() != lo || d.Hi() != hi
+      || zr.Clo() != lo || zr.Chi() != hi || zr.Rlo() != lo || zr.Rhi() != hi
+      || zi.Clo() != lo || zi.Chi() != hi || zi.Rlo() != lo || zi.Rhi() != hi)
+	Matpack.Error(Mat::UnspecifiedError,"EigenSystemHermitean: vectors and matrices are not conformant");
+
+    // allocate auxilliary vectors e,t1,t2
+    Vector e(lo,hi);
+    Vector t1(lo,hi);
+    Vector t2(lo,hi);
+
+    // zr must be initialized to the identity 
+    zr = 0.0;
+    for (i = lo; i <= hi; i++) zr[i][i] = 1.0;
+
+    // transform z to tridiagonal form. 
+    Chtred(z,d,e,t1,t2);
+
+    // If the matrix dimension is small, use the implicit QL algorithm from MatPack, else use LAPACK
+    // This avoids the overhead of defining extra arrays, copying the subdiagonal and transposing the eigenvectors
+//  if(hi<20)
+
+    // calculate eigensystem of the tridiagonal matrix 
+//  Imtql(zr,d,e,sort,maxiter);
+
+    // Use equivalent LAPACK routine with Relatively Robust Representations instead of EISPACK routine in MatPack.
+//  else
+    {
+       int  info = 0; //lda = hi,
+       char jobz = 'V';
+       int lwork = 18*hi;
+       double *work=0;
+       char range = 'I'; double vl,vu; int il=1,numfnd,nsplit,ldz=hi,iu=1;
+       double abstol = 0.00001; int *isuppz = new int[2*hi];
+       work = new double[lwork];
+       int liwork=10*hi;
+       int *iwork = new int[liwork];
+       double *eigval = new double[hi+1];
+       double *ee = new double[hi+1]; memcpy(ee,&e[2],(hi-1)*sizeof(double));
+
+        int* isplit=isuppz+hi;
+       // find lowest eigenvalue
+       char order = 'E' ; // entire matrix
+      
+       F77NAME(dstebz)( &range, &order, &hi,  &vl, &vu, &il, &iu, &abstol,(double*)&d[1], ee,
+              &numfnd, &nsplit, eigval,isuppz,isplit,work,iwork,&info);
+
+       range='V';iu=hi; // only calculate eigenvectors up to d(1) input 
+       vl=eigval[0]-0.1;vu=eigval[0]+maxExcE;
+//printf("lowest ev: %g info: %i vu:%g\n",eigval[0],info,vu);
+       
+       F77NAME(dstegr)(&jobz, &range, &hi, (double*)&d[1], ee, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval,
+               (double*)&zr[1][1], &ldz, isuppz, work, &lwork, iwork, &liwork, &info);
+       memcpy(&d[1],eigval,numfnd*sizeof(double)); sort=numfnd;
+       delete []isuppz; delete []iwork; delete []work; delete []eigval; delete[]ee;
+       // Fortran uses a column-major notation. MatPack uses row-major, so we need to transpose the eigenvector matrix
+      // double tm; for(int i=1; i<hi; i++) for(int j=i+1; j<=hi; j++) { tm=zr[i][j]; zr[i][j]=zr[j][i]; zr[j][i]=tm; }
+    }
+// backtransform eigensystem 
+    Chtrbk_ev_rows_of_z(z,t1,t2,zr,zi,sort);
+}
+
+//----------------------------------------------------------------------------//
 
 void EigenValuesHermitean (Matrix& z, Vector& d, int sort, int maxiter)
 //
@@ -441,6 +534,90 @@ void Chtrbk (Matrix& a, Vector& t1, Vector& t2, Matrix& zr, Matrix& zi)
 		for (j = lo; j <= hi; j++) {
                     zrk[j] -= sv[j]  * f + siv[j] * g;
                     zik[j] -= siv[j] * f - sv[j]  * g;
+                }
+            }
+        }
+
+    }
+    delete[]sv; delete[]siv;
+}
+
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+
+void Chtrbk_ev_rows_of_z (Matrix& a, Vector& t1, Vector& t2, Matrix& zr, Matrix& zi, int n)
+//
+//  Chtrbk() does the backtransformation of the eigenvectors 1 to n
+//  of a  tridiagonal  matrix  using the  unitary transform-
+//  ation given by a call to Chtred(),stored in a and t1,t2.
+//  The real and  imaginary parts  of the transformed eigen-
+//  vectors are returned as ROWS in zr and zi. 
+// 
+//  References:
+//
+//  B.T.Smith et al: Matrix Eigensystem Routines
+//  EISPACK Guide,Springer,Heidelberg,New York 1976.
+//  c.f. algorithm HTRIB3
+//  note: array TAU is replaced by two vectors t1 and t2.
+//
+{
+    int i,j,k,l;
+    double f,g,h; // ,s,si;
+    double *ai,*zij,*zrj;
+    double *sv, *siv;
+    //double t1k, t2k;
+
+    // lowest and highest column index of the matrix
+    int lo = a.Clo();
+    int hi = a.Chi();
+
+    sv = new double[hi+1];
+    siv = new double[hi+1];
+
+  for (j = lo; j <= n; j++) {
+  	zij = zi[j]; //t1k = t1[k];
+	zrj = zr[j]; //t2k = t2[k];
+     for (k = lo; k <= hi; k++) { 
+	    zij[k] = -zrj[k] * t2[k];
+	    zrj[k] *= t1[k];
+	}
+    }
+
+    // recover and apply the Householder matrices 
+    for (i = lo+1; i <= hi; i++) {
+
+	l = i - 1;
+	ai = a[i];
+	h = ai[i];
+
+	if (h != 0.0)
+        {
+	    for (j = lo; j <= hi; j++) {
+                sv[j]  = 0.;
+                siv[j] = 0.;
+            }
+            for (j = lo; j <= n; j++) {
+                 zrj = zr[j];
+                 zij = zi[j]; 
+            //    f = ai[k]; 
+            //    g = a[k][i];
+	        for (k = lo; k <= l; k++) {
+                    sv[j]  += ai[k] * zrj[k] - a[k][i] * zij[k];
+                    siv[j] += ai[k] * zij[k] + a[k][i] * zrj[k];
+                }
+            }
+	    for (j = lo; j <= hi; j++) {
+                sv[j]  /= (h*h);
+                siv[j] /= (h*h);
+            }
+	    for (j = lo; j <= n; j++) {
+                zrj = zr[j];
+                zij = zi[j]; 
+                f = sv[j]; 
+                g = siv[j];
+              for (k = lo; k <= l; k++) {
+                    zrj[k] -= f  * ai[k] + g * a[k][i];
+                    zij[k] -= g * ai[k]  - f  * a[k][i];
                 }
             }
         }

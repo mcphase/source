@@ -12,6 +12,9 @@ getvalue.pl -c 4.47757  0 7 2    0 results/Pr3p.sipf.trs
 getvalue.pl -c 0.138796 0 8 2    0 results/Pr3p.sipf.trs
 getvariable.pl -c -253.893 Eigenvalues results/Pr3p.sipf.levels.cef
 
+rhoso1ion -t 10:1:100 -r 0.2 -i results/Pr3p.sipf.levels.cef > dd
+getvalue.pl -c 0.0144 1 2 100 0 dd
+
 
 singleion -XM 0 1 -nt 100 -Esteps 300 200 -r Pr3p.sipf 5 1000 0 0  0 0 0 > dd
 

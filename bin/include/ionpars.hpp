@@ -28,6 +28,8 @@ class ionpars
    // calculates scattering operator 
    void MQM(ComplexMatrix & MQXM,ComplexMatrix & MQYM,ComplexMatrix & MQZM, double th, double ph,double J0,double J2,double J4,double J6, Vector & Zc);
    void setup_and_solve_Hamiltonian(Vector &  gjmbHxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int & sort);
+   void setup_and_solve_Hamiltonian_ev_rows_of_z(Vector &  gjmbHxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int & sort);
+
    void calculate_Z_wn(Vector & En,double & T,double & Z,Vector & wn);
    void calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Vector & wn);
    int noft(ComplexMatrix & est,double & T,double & pinit,double & ninit);

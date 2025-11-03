@@ -1298,7 +1298,7 @@ print FOUT << "EOF";
 #
 # %SECTION 1%  OVERALL PARAMETERS
 #
-#! lambda   = 2.4  wavelength (A)
+#! lambda   = 2.3587   wavelength (A)
 #
 #! thetamax = 60   maximum bragg angle (deg)
 #
@@ -1323,7 +1323,7 @@ print FOUT << "EOF";
 # choose out* to set type of desired output in column 1 to 12
 # (default is h k l d Q 2theta Inuc Imag Itot)
 #
-#!out1=31 out2=32 out3=33 out4=37 out5=38 out6=39 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 
+#!out1=31 out2=32 out3=33 out4=34 out5=35 out6=36 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 
 #
 #     ... in out*=n the numbers n have the following meaning:
 #            0....LF #

@@ -29,6 +29,8 @@ class inipar
   double sta;
   int doeps,linepscf,linepsjj;
   bool include_cd;
+  double cel; // if not zero do elastic constants calculation
+  double cv; // if not zero do specific heat calculation
   par * ipx;par * ipy;par * ipz; // storage for two ion interaction parameter derivatives (djdx djdy djdz files)
   par * ipeps1;par * ipeps2;par * ipeps3; // storage for two ion interaction parameter derivatives (djdeps1-6 files)
   par * ipeps4;par * ipeps5;par * ipeps6;
