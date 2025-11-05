@@ -143,10 +143,10 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
    print Fout "simannfit running in ".cwd()."\n";
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
   foreach (@ARGV)
- {$file=$_; if(mycopy ($file,$file.".bak")){print "\n warning copying $file not possible - press enter to continue\n";<stdin>;}
+ {$file=$_; if(mycopy ($file,$file.".bak")){print "\n warning copying $file to $file.bak not possible - press enter to continue\n";<stdin>;}
    unless (open (Fin, $file.".forfit")){if($pt==0){die "\n error:unable to open $file.forfit\n";}
-                                       } 
-   else{  
+       } 
+   else{ if(mycopy ($file.".forfit",$file.".forfit.bak")){print "\n warning copying $file.forfit to $file.forfit.bak not possible - press enter to continue\n";<stdin>;}
     while($line=<Fin>)
  {while ($line=~/^(#!|[^#])*?\bpar\w+\s*\Q[\E/) {++$#par;#load another parameter
 				 ($parname)=($line=~m/(?:#!|[^#])*?\b(par\w+)\s*\Q[\E/);

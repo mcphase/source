@@ -15,7 +15,7 @@
 # make looks in the following directories for files
 vpath %.c  ./
 vpath %.cpp ./
-vpath %.h  ../include ../ic1ion_module
+vpath %.h  ../include ../ic1ion_module 
 vpath %.hpp ../include ../ic1ion_module
 vpath %.o  ./ ./vector ../cf1ion_module ./functions
 
@@ -53,7 +53,7 @@ INCLDIRS =      -I. \
 		-I../ic1ion_module \
 #		-I/usr/include/readline \
 		-I/local/lib  \
-		-I/usr/X11R6/include
+		-I/usr/X11R6/include 
 
 ifdef CYGWIN
 CYGFLAGS = -DCYGWIN

@@ -10,12 +10,17 @@
 #include "martin.h"
 #include "../../version"
 
+// #include<BLAS.h>
+
 // routines for mcphas for calculation of magnetic phases
 //htcalc.h
 #include <cerrno>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <vector.h>
+
+#include <maths.hpp>
+
      //calculation of physical properties at given HT point
 
 /*check if parameter file mcphas.ini has been changed*/

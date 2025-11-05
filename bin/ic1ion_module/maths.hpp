@@ -125,6 +125,11 @@ template <class T> class sMat {
      // Function required by ARPACK++
      void MultMv(T *v, T *w);                                           // Calculates the matrix-vector product w = M*v
 
+     void matrix_vector_product_dense(T *v, T *w,double fact=1);                      // Multiplies the dense std::vector v by 
+                                                                        // the sparse matrix and adds the result to the dense vector w,
+
+
+
 };  // End of template <class T> class sMat
 
 /* --------------------------------------------------------------------------------------------------------------- //
@@ -947,6 +952,18 @@ template <class T> void sMat<T>::MultMv(T *v, T *w)                     // Calcu
          w[i] += (it->second * v[it->first.c]);
    }
 }
+
+template <class T> void sMat<T>::matrix_vector_product_dense(T *v, T *w,double fact)                       // Multiplies the dense std::vector v by 
+                                                                        // the sparse matrix and adds the result to the dense vector w,
+{  typename std::map<_ind,T>::iterator i;
+   // We have to assume that the size of the vector v is equal to _c
+    for (i=_ls.begin(); i!=_ls.end(); i++)
+     {//int r=i->first.r; // row r
+      //int c=i->first.c; // column c
+         w[i->first.r]+=fact*i->second*v[i->first.c];
+     }
+}
+
 template <class T> std::vector<T> operator * (const sMat<T> & m1, const std::vector<T> & v)
 {
    std::vector<T> tmp;                                                  // Binary matrix.vector multiplication

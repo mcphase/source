@@ -315,7 +315,7 @@ int s1=1,s2=2;
              //printout fe
             #ifdef _THREADS
 	    if (tryrandom==ini.nofrndtries)if(verbose==1) {
-               if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id+1,fe,physprops.j,j); 
+               if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id+1,femin,physprops.j,j); 
 	       if(j>0) printf ( ">[%i]str %i(%ix%ix%i)done "  ,thread_id+1,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">[%i](%g %g %g)(%ix%ix%i)done ",thread_id+1,hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }

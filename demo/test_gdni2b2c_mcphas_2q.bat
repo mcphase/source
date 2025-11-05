@@ -119,10 +119,10 @@ call mcdiff -prefix test_
 rem select (0.571 0 0)  and (0 0.571 0) 
 range -d 6 2.1737E+01 2.1739E+01  results/test_mcdiff.out
 sortf 8  results/test_mcdiff.out
-getvalue.pl -c 7.477E-03 0 8 1 0  results/test_mcdiff.out
-getvalue.pl -c 7.477E-03 0 8 2 0  results/test_mcdiff.out
-getvalue.pl -c 3.768E-02 0 8 3 0  results/test_mcdiff.out
-getvalue.pl -c 3.768E-02 0 8 4 0  results/test_mcdiff.out
+getvalue.pl -c 7.48E-03 0 8 1 0  results/test_mcdiff.out
+getvalue.pl -c 7.48E-03 0 8 2 0  results/test_mcdiff.out
+getvalue.pl -c 3.77E-02 0 8 3 0  results/test_mcdiff.out
+getvalue.pl -c 3.77E-02 0 8 4 0  results/test_mcdiff.out
 
 cd ../../demo
 
