@@ -180,6 +180,7 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
                      Vector & Hext,ComplexMatrix & est,float & d,double  minE,double  maxE, ob observable, Vector & Q)    
     {ComplexVector u1(1,mf.Hi());double gamma;int n=0,nd=0;
          if(jjj.transitionnumber>=nt&&nt>0){return 1;}
+
      ++jjj.transitionnumber;nt=jjj.du1calc(T,mf,Hext,u1,d,n,nd,est);
     while (minE>=d||d>=maxE) //only consider transition if it is in interval minE/maxE
      {//first and following  transitions out of energy range ... do not consider them
@@ -189,7 +190,7 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
      if(jjj.transitionnumber>nt){return 1;}
      jjj.du1calc(T,mf,Hext,u1,d,n,nd,est);
      }
-//   fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
+//  fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
     gamma=Norm2(u1);ComplexVector dm1(1,3);double intensityp=0, intensitym=0; dm1=0;
 ComplexVector m1(1,SPINDENS_EV_DIM); m1=0;int ch=0;
     switch(observable)

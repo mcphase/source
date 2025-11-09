@@ -17,6 +17,8 @@
 #ifndef MATHS_H
 #define MATHS_H
 
+#include<common.h>
+
 #include<cstdlib>
 #include<cmath>
 #include<vector>
@@ -26,7 +28,6 @@
 #include<string>
 #include<map>
 #include<cfloat>       // For definition of EPSILON etc.
-#include "lapack.h"
 
 #define PI 3.1415926535897932384626433832795
 
@@ -125,7 +126,7 @@ template <class T> class sMat {
      // Function required by ARPACK++
      void MultMv(T *v, T *w);                                           // Calculates the matrix-vector product w = M*v
 
-     void matrix_vector_product_dense(T *v, T *w,double fact=1);                      // Multiplies the dense std::vector v by 
+     void matrix_vector_product_dense(T *v, T *w,T fact=1);                      // Multiplies the dense std::vector v by 
                                                                         // the sparse matrix and adds the result to the dense vector w,
 
 
@@ -953,7 +954,7 @@ template <class T> void sMat<T>::MultMv(T *v, T *w)                     // Calcu
    }
 }
 
-template <class T> void sMat<T>::matrix_vector_product_dense(T *v, T *w,double fact)                       // Multiplies the dense std::vector v by 
+template <class T> void sMat<T>::matrix_vector_product_dense(T *v, T *w,T fact)                       // Multiplies the dense std::vector v by 
                                                                         // the sparse matrix and adds the result to the dense vector w,
 {  typename std::map<_ind,T>::iterator i;
    // We have to assume that the size of the vector v is equal to _c

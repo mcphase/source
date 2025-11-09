@@ -39,12 +39,18 @@ else
 ifeq ($(shell uname),Linux)
 LINUX = LINUX
 LIBFORTRAN=-lgfortran
+else 
+ifeq ($(shell uname),Darwin)
+LINUX = LINUX
+LIBFORTRAN=-lgfortran
+DARWIN = darwin
 else
 ifneq (,$(findstring CYGWIN,$(OSTYPE)))
 CYGWIN=1
 WINDOWS=1
 EXE=.exe
 endif                # if CYGWIN
+endif                # if DARWIN
 endif                # if LINUX
 endif                # if MSYS
 
@@ -91,6 +97,11 @@ endif
 endif
 
 CFLAGS+= -fpermissive -std=c++11
+
+INCLUDE= -I../include -I.
+ifdef DARWIN
+INCLUDE+= -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/Sparse/ 
+endif
 ##################################################################################
 #                              Declarations                                      #
 ##################################################################################
@@ -220,32 +231,32 @@ endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp icmf.hpp ../../version
 ifdef integral
-	$(CC) $(CFLAGS) -I../include -I. -D_INTEGRAL -c $<
+	$(CC) $(CFLAGS) $(INCLUDE) -D_INTEGRAL -c $<
 else
-	$(CC) $(CFLAGS) -I../include -I. -c $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
 endif
 
 states.o: states.cpp states.hpp ../include/constants.h lapack.h ../../version
-	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -I. -c $<
+	$(CC) $(patsubst -O3,   ,${CFLAGS}) $(INCLUDE) -c $<
 
 
 ic1ion_module.o: ic1ion_module.cpp truncate.cpp ic1ion_module.hpp icmf.hpp ../include/singleion_module.hpp ../../version
 ifdef integral
-	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
+	$(CC) $(CFLAGS) -D_INTEGRAL $(INCLUDE) -c $<
 else
 ifdef WINDOWS
-	$(CC) $(CFLAGS) -I../include -I. -DBUILD_DLL -c $<
+	$(CC) $(CFLAGS) $(INCLUDE) -DBUILD_DLL -c $<
 else
-	$(CC) $(CFLAGS) -I../include -I. -c $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
 endif
 endif
 
 
 icf1ion_module.o: icf1ion_module.cpp icf1ion_module.hpp icpars.hpp ../include/sparsecomplex.hpp ../../version
 ifdef integral
-	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
+	$(CC) $(CFLAGS) -D_INTEGRAL $(INCLUDE) -c $<
 else
-	$(CC) $(CFLAGS) -I../include -I. -c $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
 endif
 
 ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o ic1ion_module.o   ../../version
@@ -279,7 +290,7 @@ endif
 #	...
 
 $(OBJ): %.o: %.cpp $(HPP) 
-	$(CC) $(CFLAGS) -I../include -I. -c $<
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
 
 # Implicit rules (suffix rules)
 # NB. $@ = current target, $< = implied source, $* = filename without suffix.

@@ -1238,7 +1238,7 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int & ia, int & ib  // tran
     for(int b=1;b<=M.Rhi();++b) if(fabs(M(a,b))>1e-3) printf("(%i,%i)=%f\n",a,b,M(a,b));
   printf("---\n");*/
 
-//atrix Ma(1,6,1,M.Rhi()); // Matrix rows are: R[M]*R[a], R[M]*I[A], L[M]*R[a], U[M]*R[a], L[M]*I[a], U[M]*I[a]
+//Matrix Ma(1,6,1,M.Rhi()); // Matrix rows are: R[M]*R[a], R[M]*I[A], L[M]*R[a], U[M]*R[a], L[M]*I[a], U[M]*I[a]
  Matrix *Ma; if(V==0) Ma = new Matrix(1,6,1,M.Rhi()); else Ma = V;
  char up = 'U', lo = 'L', tr = 'T', nt = 'N'; int n=M.Rhi(), inc=1; double alpha=1., beta=0.;//, r2=0., valr=real;
  // DTRMV does the operation: x=M*x not y=M*x+y so we need to copy the elements of <a| into new vectors
@@ -1246,7 +1246,7 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int & ia, int & ib  // tran
 //or(int i=1; i<=M.Rhi(); i++) { Ma[3][i]=zr[i][ia]; Ma[4][i]=zr[i][ia]; Ma[5][i]=zc[i][ia]; Ma[6][i]=zc[i][ia]; } 
  for(int i=1; i<=M.Rhi(); i++) { (*Ma)(3,i)=zr(i,ia);   (*Ma)(5,i)=zc(i,ia); } 
  for(int i=1; i<=M.Rhi(); i++) { (*Ma)(4,i)=(*Ma)(3,i); (*Ma)(6,i)=(*Ma)(5,i); } 
-//emcpy(&M[4][1],&M[3][1],n*sizeof(double)); memcpy(&M[6][1],&M[5][1],n*sizeof(double));
+//memcpy(&M[4][1],&M[3][1],n*sizeof(double)); memcpy(&M[6][1],&M[5][1],n*sizeof(double));
  F77NAME(dsymv)(&up, &n, &alpha, (double*)&M[1][1], &n, (double*)&zr[1][ia], &n, &beta, (double*)&(*Ma)[1][1], &inc);
  F77NAME(dsymv)(&up, &n, &alpha, (double*)&M[1][1], &n, (double*)&zc[1][ia], &n, &beta, (double*)&(*Ma)[2][1], &inc);
  Vector di(1,M.Rhi()); for(int i=1; i<=M.Rhi(); i++) { di[i]=M(i,i); M(i,i)=0.; }
@@ -1391,7 +1391,7 @@ complex<double> aMb_complex(zsMat<double> & M, Matrix & zr,Matrix & zc, int & ia
 // printf("Zr=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",zM[(i-1)*n+j-1].r); printf(";\n"); } printf("];");
 // printf("Zi=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",zM[(i-1)*n+j-1].i); printf(";\n"); } printf("];");
  F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
- #ifdef _G77 
+ #if defined _G77 || defined __APPLE_ACCELERATE__
  F77NAME(zdotc)(&val, &n, za, &inc, zV, &inc);
  #else
  val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
@@ -1419,7 +1419,7 @@ double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int & ia, int & ib) 
     za[i-1].r = zr(i,ia); za[i-1].i = zc(i,ia); zb[i-1].r = zr(i,ib); zb[i-1].i = zc(i,ib);
  }
  F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
- #ifdef _G77 
+ #if defined _G77 || defined __APPLE_ACCELERATE__
  F77NAME(zdotc)(&val, &n, za, &inc, zV, &inc);
  #else
  val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
@@ -1475,7 +1475,7 @@ double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int & ia, int & ib) // tr
  complex<double> *zM = M.f_array();
  for(int i=1; i<=n; i++) { za[i-1].r = real(zc(i,ia)); zb[i-1].r = real(zc(i,ib)); za[i-1].i = imag(zc(i,ia)); zb[i-1].i = imag(zc(i,ib)); }
  F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
- #ifdef _G77 
+ #if defined _G77 || defined __APPLE_ACCELERATE__
  F77NAME(zdotc)(&val, &n, za, &inc, zV, &inc);
  #else
  val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
@@ -1490,7 +1490,7 @@ complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int & ia, int
  complex<double> *zM = M.f_array();
  for(int i=1; i<=n; i++) { za[i-1].r = real(zc(i,ia)); zb[i-1].r = real(zc(i,ib)); za[i-1].i = imag(zc(i,ia)); zb[i-1].i = imag(zc(i,ib)); }
  F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
- #ifdef _G77 
+ #if defined _G77 || defined __APPLE_ACCELERATE__
  F77NAME(zdotc)(&val, &n, za, &inc, zV, &inc);
  #else
  val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);

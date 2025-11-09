@@ -42,15 +42,18 @@ MATPACK = ..
 
 include ${MATPACK}/Makefile.common
 
-INCLUDE= ../../include
+INCLUDE= -I../../include
+INCLUDE+= -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/Sparse/		
+INCLUDE+=  -I../../ic1ion_module
+
 
 .SUFFIXES: .cc .o
 
 .c.o: 
-	${CC} -c ${COPTS} -I ${INCLUDE} ${BLAS} -I../../ic1ion_module $<
+	${CC} -c ${COPTS}  ${INCLUDE} ${BLAS} $<
 
 .cc.o: 
-	${CCC} -c ${CCOPTS} -I ${INCLUDE} ${BLAS} -I../../ic1ion_module $<
+	${CCC} -c ${CCOPTS}  ${INCLUDE} ${BLAS}  $<
 
 
 ###########################################################################

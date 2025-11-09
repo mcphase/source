@@ -356,6 +356,7 @@ Matrix JM(1,Jret.Hi(),1,1);
  Vector TT(1,1);TT(1)=T;
  Vector lnZZ(1,1);lnZZ(1)=lnZ;
  Vector UU(1,1);UU(1)=U;
+
  cluster_Icalc_mcalc_Micalc(code,JM,TT,Hxc,Hext,lnZZ,UU);
  U=UU(1);lnZ=lnZZ(1);T=TT(1);
  for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
@@ -667,7 +668,6 @@ void jjjpar::cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector 
     (*clusterH).zero(); (*clusterH).to_tri();
     Vector ZeroHxc(1,1);ZeroHxc=0;
 // fill H matrix with sum over Hi of individual spins
-
 for (int i=1;i<=(*clusterpars).cs.nofatoms;++i)
 {Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,ZeroHxc,Hext)); // here we need ZeroHxc because
                                                             // exchange operators are set by user (Ia)
@@ -787,7 +787,11 @@ if (truncate>1e-6 && truncate<1)
       printf("Truncate cluster: full dimension=%d\ttruncated dimension=%d\n",fdim,dim); fflush(stdout);
       (*clusterH).h_array((std::complex<double>*)zm);
       if(fdim>200) { printf("Diagonalising Full Hamiltonian..."); fflush(stdout); }
+#ifdef __APPLE_ACCELERATE__
+      F77NAME(zheev)(&jobz, &uplo, &n,(__CLPK_doublecomplex*)zm, &lda, eigv, (__CLPK_doublecomplex*)zwork, &lwork, rwork, &info);
+#else
       F77NAME(zheev)(&jobz, &uplo, &n, zm, &lda, eigv, zwork, &lwork, rwork, &info);
+#endif
       if(info!=0) { 
          fprintf(stderr,"cluster_module:zheev return error %d\n",info); exit(-1); }
     //memset(zm,0,fdim*dim*sizeof(complexdouble)); arpackeig(*clusterH,En,zm,dim,*workspace); if(workspace->dsize!=dsz) { rwork=&workspace->dwork[0]; }
@@ -874,8 +878,13 @@ else
    double *rwork = &workspace->dwork[0];
    int *isuppz = &workspace->iwork[0], *iwork = &workspace->iwork[2*n];  
    for(int i =1;i<=Hxc.Hi();++i){H-=Hxc(i)*(*Ia[i]);} H.h_array((std::complex<double>*)zmt);
+#ifdef __APPLE_ACCELERATE__
+   F77NAME(zheevr)(&jobz, &range, &uplo, &n, (__CLPK_doublecomplex*)zmt, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &En[1],
+          (__CLPK_doublecomplex*)zmo, &ldz, isuppz,(__CLPK_doublecomplex*) zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#else
    F77NAME(zheevr)(&jobz, &range, &uplo, &n, zmt, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &En[1],
           zmo, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#endif
    for (int i=0; i<dim; i++) for (int j=0; j<dim; j++) { 
       zc(i+1,j+1)=std::complex<double>(zmo[dim*j+i].r,zmo[dim*j+i].i); }
    if(info!=0) { 

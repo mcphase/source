@@ -218,8 +218,6 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          jsss[jsi+m][jsj+n] += complex<double>(jjval*REexpqd, jjval*IMexpqd);
 //         jsss(jsi+m,jsj+n) += complex<double>(jjval*REexpqd, jjval*IMexpqd);
                                               }       // but orbitons should be treated correctly by extending 3 to n !!
-// here we  optionally insert classical dipolar interaction by Ewald Method bowden 81 !!!
-// for m,n components 1-3 (so1ion) or 1-6 (ic1ion, icf1ion)
 
 	                                         }} 
 //#ifdef _THREADS_JSSS
@@ -233,6 +231,8 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
           ++nofneighbours; // count neighbours summed up
 	 }}}
    }
+// here we  optionally insert classical dipolar interaction by Ewald Method bowden 81 !!!
+// for m,n components 1-3 (so1ion) or 1-6 (ic1ion, icf1ion)
   if(ini.include_cd&&(*inputpars.jjj[ll]).gJ!=0)
  {ComplexMatrix cd(1,3,1,3); int cddim=3; if(inputpars.cs.nofcomponents<3)cddim=inputpars.cs.nofcomponents;
  Vector dA(1,3),dAB(1,3),dll(1,3),dl(1,3),xyz(1,3);bool deltaAB;

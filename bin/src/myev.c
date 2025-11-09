@@ -195,8 +195,13 @@ void myEigenValuesHermitean (ComplexMatrix & M,Vector & lambda,int & sort,int & 
   complexdouble *zwork=0, *zm; zwork = new complexdouble[lwork];
   zm = new complexdouble[n*n]; memcpy(zm,&M[1][1],n*n*sizeof(complexdouble));
   double vl, vu, abstol = 0.00001, *rwork = new double[lrwork];
+#ifdef __APPLE_ACCELERATE__
+  F77NAME(zheevr)(&jobz, &range, &uplo, &n,(__CLPK_doublecomplex*) zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &lambda[1],
+          (__CLPK_doublecomplex*)zm, &ldz, isuppz,(__CLPK_doublecomplex*) zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#else
   F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &lambda[1],
           zm, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#endif
   delete []isuppz; delete []rwork; delete []iwork; delete []zwork; delete []zm;
 }
 
@@ -330,8 +335,13 @@ EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
   memcpy(&T[1][1],&a[1][1],n*n*sizeof(complexdouble));
   zb = new complexdouble[n*n]; memcpy(zb,&b[1][1],n*n*sizeof(complexdouble));
   double *rwork = new double[lrwork];
+#ifdef __APPLE_ACCELERATE__
+  F77NAME(zhegvd)(&itype, &jobz, &uplo, &n, (__CLPK_doublecomplex*)&T[1][1], &lda,(__CLPK_doublecomplex*) zb, &ldb, &e[1], (__CLPK_doublecomplex*)zwork, &lwork, rwork, &lrwork, 
+                  iwork, &liwork, &retval);
+#else
   F77NAME(zhegvd)(&itype, &jobz, &uplo, &n, (complexdouble*)&T[1][1], &lda, zb, &ldb, &e[1], zwork, &lwork, rwork, &lrwork, 
                   iwork, &liwork, &retval);
+#endif
   T=T.Hermitean();
   delete []rwork; delete []iwork; delete []zwork; delete []zb;
   if(retval<0) { 
@@ -363,10 +373,18 @@ int myEigenSystemGeneral (ComplexMatrix& a, ComplexMatrix& b, ComplexVector & e,
     el=imag(b(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) zb[ii*n+jj].i = el;
   }
   lwork = -1; // Workspace query
+#ifdef __APPLE_ACCELERATE__
+  F77NAME(zggev)(&jobn, &jobz, &n, (__CLPK_doublecomplex*)za, &lda,(__CLPK_doublecomplex*) zb, &ldb, (__CLPK_doublecomplex*)alpha, (__CLPK_doublecomplex*)beta, NULL, &n, (__CLPK_doublecomplex*)zv, &n, (__CLPK_doublecomplex*)zv, &lwork, rwork, &retval);
+#else
   F77NAME(zggev)(&jobn, &jobz, &n, za, &lda, zb, &ldb, alpha, beta, NULL, &n, zv, &n, zv, &lwork, rwork, &retval);
+#endif
   lwork = (int)zv[0].r; zwork = new complexdouble[lwork];
   // Use non-symmetric generalised eigensolver instead, and check which (if any) eigenvalues are complex/imaginary. Then ignore these...
+#ifdef __APPLE_ACCELERATE__
+  F77NAME(zggev)(&jobn, &jobz, &n, (__CLPK_doublecomplex*)za, &lda,(__CLPK_doublecomplex*) zb, &ldb,(__CLPK_doublecomplex*) alpha,(__CLPK_doublecomplex*) beta, NULL, &n, (__CLPK_doublecomplex*)zv, &n, (__CLPK_doublecomplex*)zwork, &lwork, rwork, &retval);
+#else
   F77NAME(zggev)(&jobn, &jobz, &n, za, &lda, zb, &ldb, alpha, beta, NULL, &n, zv, &n, zwork, &lwork, rwork, &retval);
+#endif
   delete[]zwork; delete[]rwork; delete[]za;
   if(retval<0) { 
     fprintf(stderr,"myEigenSystemGeneral: Input %d to ZGGEV is incorrect in myev.c - This should not happen! Please file a bug report.\n",-retval); exit(0); }
@@ -401,7 +419,7 @@ int myEigenSystemGeneral (ComplexMatrix& a, ComplexMatrix& b, ComplexVector & e,
       // The normalisation requires scaling each column by the factor x^2=V(:,ii)'*B*V(:,ii), so that that W(:,ii)'*B*W(:,ii)=1, where W(:,ii)=V(:,ii)/x
       int id=ii*n; memset(zt,0,n*sizeof(complexdouble));
       F77NAME(zhemv)(&uplo, &n, &zalpha, zb, &n, &zv[id], &incx, &zbeta, zt, &incx);
-      #ifdef _G77 
+      #if defined _G77 || defined __APPLE_ACCELERATE__
       F77NAME(zdotc)(&zme, &n, &zv[id], &incx, zt, &incx);
       #else
       zme = F77NAME(zdotc)(&n, &zv[id], &incx, zt, &incx);

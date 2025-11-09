@@ -3,9 +3,10 @@
                    HOW TO... 	                  HOW TO...
                                   HOW TO...
 *************************************************************************************
-HOW TO CREATE ....
--------------------------------------------------------------------------------------
-.... INPUT FILES FOR A NEW COMPOUND ?  - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
+HOW TO CHANGE FONT SIZE IN McPhaseExplorer  ...  edit bin/mpe and mpe.bat
+*************************************************************************************
+HOW TO CREATE INPUT FILES FOR A NEW COMPOUND ?  
+                                       - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
                                                   00howto_quickly_create_input_files
                                        - programs cif2mcphas, makenn
                                                   setup_jqfit, setup_mcphasjforfit
@@ -21,8 +22,7 @@ HOW TO CALCULATE ...
 .... CRYSTAL FIELD SPECTRA ?           - tutorial 03crystal_fields_singleion
                                        - examples PrNi2B2C, TmCu2_cfphonon, TmNiC2, NdCu2
                                        - manual   chapters singleion,Cf-Phonon-Int.
-                                       - programs single1ion, convolute, gauss,ic1ion, 
-                                                  display, pointc
+                                       - programs singleion, convolute, gauss,ic1ion
 -------------------------------------------------------------------------------------
 .... NEUTRON DIFFRACTION PATTERN ?     - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
                                                   04magnetic_phases_mcphas
@@ -47,7 +47,6 @@ HOW TO CALCULATE ...
                                        - examples PrNi2B2C, NdCu2
                                        - manual   chapter mcphas
                                        - programs cpsingleion, mcphas, dif
--------------------------------------------------------------------------------------
 *************************************************************************************
 HOW TO DISPLAY ....
 -------------------------------------------------------------------------------------
@@ -97,8 +96,7 @@ HOW TO FIT ...
 .... SPIN WAVE DISPERSION ?            - tutorial 02fitting
                                        - examples CeCu2a
                                        - manual   chapter mcphas, mcdiff,fitting
-                                       - programs simannfit, searchspace, 
-                                                  mcphas, mcdisp, 
+                                       - programs simannfit,searchspace,mcphas,mcdisp, 
 *************************************************************************************
 HOW TO TREAT/INCLUDE ...
 -------------------------------------------------------------------------------------

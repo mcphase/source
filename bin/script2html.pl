@@ -100,14 +100,7 @@ unless ($#ARGV >=0)
  usage: script2html [-latex][options] calc1.bat [options] calc2.bat ...
 
  This program creates a html file from scripts containing just the text
- in the scripts. Many html commands such as <h1> HEADER </h1> can be used in
- script commments to structure the text. Latex formulas are accepted by enclosing it 
- in brackets  \\( \\) for inline or \\[ \\] for equations  , e.g.  \\(e^{i\pi}+1=0\\) 
- Some abbreviations are acceptable: 
-  \\( ... \\)      --> € ... €
-  <ol><li>         --> /§
-  </li><li>        --> §
-  <li></ol>        --> §/
+ in the scripts. 
 
  input: calc1.bat, calc2.bat ...    scripts (bat files)
                                    (must be located in the current directory)
@@ -118,11 +111,29 @@ unless ($#ARGV >=0)
 
  options: -fromline 3 ..........  only part of the file is html coded starting at line 3
           -toline   10 .........  only part of the file is html coded (until line 10)
+
+ Many html commands such as <h1> HEADER </h1> can be used in
+ script commments to structure the text. Latex formulas are accepted by enclosing it 
+ in brackets  \\( \\) for inline or \\[ \\] for equations  , e.g.  \\(e^{i\pi}+1=0\\) 
+ Some abbreviations are acceptable: 
+  \\( ... \\)      --> € ... €
+  <ol><li>         --> /§
+  </li><li>        --> §
+  <li></ol>        --> §/
+
+ Other useful html commands are:
+ REM <h1> A Header </h1>
+ REM <h2> A smaller header </2>
+ REM <img src="figure.jpg">
+ REM <figure> <figcaption> This graph shows ... 
+ REM </figcaption> <img src="figure.jpg"> </figure>
+ 
+
  example:
 
- script2html calc.bat notes.txt > report.html
+ script2html calc.bat notes.txt > calc.bat.html
 
- [creates the html file report.html from files calc.bat and notes.txt]
+ [creates the html file calc.bat.html from files calc.bat and notes.txt]
 
 EOF
 exit 0;}else{print STDERR "#* $0 *\n";}

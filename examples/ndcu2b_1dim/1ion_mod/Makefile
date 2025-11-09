@@ -10,6 +10,7 @@ INCLDIRS =      -I. \
 		-I../../../bin/include \
 		-I../../../bin/ic1ion_module \
 		-I/usr/include/readline \
+                -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/Sparse/ \
 		-I/local/lib  \
 		-I/usr/X11R6/include
 

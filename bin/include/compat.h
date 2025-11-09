@@ -33,6 +33,61 @@ or consent of the author.			|
 // for all machines
 //-----------------------------------------------------------------------------//
 
+//----------------------------------------------------------------------------//
+// Declarations for Fortran LAPACK/BLAS routines
+//----------------------------------------------------------------------------//
+
+// to use Apples XCode based BLAS and LAPACK uncomment (cluster module zdot crashes)
+//#define __APPLE_ACCELERATE__ 
+// for modern Apple systems uncomment (still buggy)
+//#define ACCELERATE_NEW_LAPACK
+
+#if defined (__APPLE_ACCELERATE__)
+#include <Accelerate/Accelerate.h>
+#include<BLAS.h>
+#include<Sparse.h>
+//typedef struct { double r,i; } complexdouble;
+struct complexdouble {
+   double r, i;
+   complexdouble operator=(const double v);
+};
+# define F77NAME(x) x##_
+
+extern "C"
+{
+#ifndef NO_ARPACK
+  // Double precision real ARPACK routines.
+  void F77NAME(dnaupd)(int *ido, char *bmat, int *Hsz, char *whichp, int *nev, double *tol,
+                      double *resid, int *ncv, double *v, int *ldv, int *iparam, int *ipntr,
+                      double *workd, double *workl, int *lworkl, int *info);
+  void F77NAME(dneupd)(int *rvec, char *howmny, int *select, double *dr, double *di, double *z, int *ldz, 
+                      double *sigmar, double *sigmai, double *workev, char *bmat, int *n, char *whichp,
+                      int *nev, double *tol, double *resid, int *ncv, double *v, int *ldv, int *iparam,
+                      int *ipntr, double *workd, double *workl, int *lworkl, int *info);
+  void F77NAME(dsaupd)(int *ido, char *bmat, int *Hsz, char *whichp, int *nev, double *tol,
+                      double *resid, int *ncv, double *v, int *ldv, int *iparam, int *ipntr,
+                      double *workd, double *workl, int *lworkl, int *info);
+  void F77NAME(dseupd)(int *rvec, char *howmny, int *select, double *d, double *z, int *ldz, 
+                      double *sigma, char *bmat, int *n, char *whichp, int *nev, double *tol,
+                      double *resid, int *ncv, double *v, int *ldv, int *iparam, int *ipntr,
+                      double *workd, double *workl, int *lworkl, int *info);
+
+  // Complex ARPACK routines
+  void F77NAME(znaupd)(int *ido, char *bmat, int *n, char *whichp, int *nev, double *tol, complexdouble *resid, 
+                      int *ncv, complexdouble *v, int *ldv, int *iparam, int *ipntr, complexdouble *workd, 
+                      complexdouble *workl, int *lworkl, double *rwork, int *info);
+  void F77NAME(zneupd)(int *rvec, char *howmny, int *select, complexdouble *d, complexdouble *z, int *ldz,
+                      complexdouble *sigma, complexdouble *workev, char *bmat, int *n, char *whichp, int *nev,
+                      double *tol, complexdouble *resid, int *ncv, complexdouble *v, int *ldv, int *iparam,
+                      int *ipntr, complexdouble *workd, complexdouble *workl, int *lworkl, double *rwork, int *info);
+  void F77NAME(zsortc)(char *which, int *apply, int *n, complexdouble *x, complexdouble *y);
+#endif
+
+}
+
+#else  // use McPhase included lapack (better)
+#include "lapack.h"
+#endif
 
 //-----------------------------------------------------------------------------//
 // gcc version egcs-2.91.66 19990314 (egcs-1.1.2 release)

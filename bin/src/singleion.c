@@ -344,9 +344,12 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
                    for(int Ei=0;Ei<Esteps;++Ei){Xcf[Ei]=new  ComplexMatrix(1,3,1,3);
                                                 if(Xcf[Ei]==NULL)exit(EXIT_FAILURE);}
                   }
+
    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
    if(nmax==0)jjj.eigenstates(Hxc,Hext,Tstart);
-   if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i,HEnofcomp); // write transition trs files
+ 
+    if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i,HEnofcomp); // write transition trs files
+
      for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
      char trsstring[MAXNOFCHARINLINE];trsstring[0]='\0';
       switch(observable)
@@ -372,6 +375,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
        case lz: jjj.orbmomdensity_coeff (I,-3,T,Hxc,Hext, jjj.Icalc_parstorage);break;
        default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parstorage);
       }  
+
      if(Hi==0){ // create levels.cef file   ******************************************
       snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")

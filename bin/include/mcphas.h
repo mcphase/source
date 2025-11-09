@@ -10,7 +10,15 @@
 #include "martin.h"
 #include "../../version"
 
-// #include<BLAS.h>
+#if defined (__APPLE_ACCELERATE__)
+#include <Accelerate/Accelerate.h>
+#include<BLAS.h>
+#include<Sparse.h>
+#include <maths.hpp>
+#else
+#include <maths.hpp>
+#endif
+
 
 // routines for mcphas for calculation of magnetic phases
 //htcalc.h
@@ -19,7 +27,6 @@
 #include <sys/stat.h>
 #include <vector.h>
 
-#include <maths.hpp>
 
      //calculation of physical properties at given HT point
 

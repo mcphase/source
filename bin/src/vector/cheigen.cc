@@ -177,7 +177,6 @@ void EigenSystemHermitean_ev_rows_of_z (Matrix& z, Vector& d, Matrix& zr, Matrix
       
        F77NAME(dstebz)( &range, &order, &hi,  &vl, &vu, &il, &iu, &abstol,(double*)&d[1], ee,
               &numfnd, &nsplit, eigval,isuppz,isplit,work,iwork,&info);
-
        range='V';iu=hi; // only calculate eigenvectors up to d(1) input 
        vl=eigval[0]-0.1;vu=eigval[0]+maxExcE;
 //printf("lowest ev: %g info: %i vu:%g\n",eigval[0],info,vu);
@@ -253,7 +252,7 @@ void EigenValuesHermitean (Matrix& z, Vector& d, int sort, int maxiter)
        double *eigval = new double[hi+1], z;
        // EISPACK uses elements 2:N, LAPACK uses elements 1:N-1, but expects an N-element array. So we copy...
        double *ee = new double[hi+1]; memcpy(ee,&e[2],(hi-1)*sizeof(double));
-       F77NAME(dstegr)(&jobz, &range, &hi, (double*)&d[1], ee, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval,
+ F77NAME(dstegr)(&jobz, &range, &hi, (double*)&d[1], ee, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval,
                &z, &ldz, isuppz, work, &lwork, iwork, &liwork, &info);
        memcpy(&d[1],eigval,hi*sizeof(double));
        delete []isuppz; delete []iwork; delete []work; delete []eigval;

@@ -1488,18 +1488,43 @@ commands (e.g. copy or cp) and accepts both.
 \item [\prg plotbook *.ps:]\addcontentsline{toc}{subsubsection}{\prg plotbook} program plotbook to arrange many (single side) ps-images to one %%@
 booklet (needs: latex, pstops,ghostscript, perl)
 %script2html_begin{script2html} \begin{description}
-\item [\prg script2html\index{script2html}\label{script2html} calc1.bat calc2.bat ...]\addcontentsline{toc}{subsubsection}{\prg script2html} This program creates a html file from scripts containing just the text
+\item [\prg script2html\index{script2html}\label{script2html} [-latex][options]  calc1.bat calc2.bat ...]
+\addcontentsline{toc}{subsubsection}{\prg script2html} 
+This program creates a html file from scripts containing 
+just the text
  in the scripts.
 \begin{verbatim}
  input: calc1.bat, calc2.bat ...    scripts (bat files)
                                    (must be located in the current directory)
  output: stdout      ...........   html file created from the scripts
                                    (use ">" to pipe into file)
- example:
 
- script2html calc.bat notes.txt > report.html
+In order to create a latex output use script2html -latex.
 
- [creates the html file report.html from files calc.bat and notes.txt]
+ options: -fromline 3 ..........  only part of the file is html coded starting at line 3
+          -toline   10 .........  only part of the file is html coded (until line 10)
+
+ Many html commands such as <h1> HEADER </h1> can be used in
+ script commments to structure the text. Latex formulas are accepted by enclosing it 
+ in brackets  \( \) for inline or \[ \] for equations  , e.g.  \(e^{ipi}+1=0\) 
+ Some abbreviations are acceptable: 
+  \( ... \)      --> € ... €
+  <ol><li>         --> /§
+  </li><li>        --> §
+  <li></ol>        --> §/
+
+ Other useful html commands are:
+ REM <h1> A Header </h1>
+ REM <h2> A smaller header </2>
+ REM <img src="figure.jpg">
+ REM <figure> <figcaption> This graph shows ... 
+ REM </figcaption> <img src="figure.jpg"> </figure>
+
+  example:
+
+ script2html calc.bat notes.txt > calc.bat.html
+
+ [creates the html file calc.bat.html from files calc.bat and notes.txt]
 \end{verbatim}
 %script2html_end{script2html} \end{description}
 %script2html_begin{setvariable} \begin{description}

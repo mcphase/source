@@ -9,7 +9,7 @@
 #include "cryststruct.hpp"
 
 #define MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL 4000
-#define SMALLCHARGE 1e-4  // for checking if totalcharge is small and output polarisation P
+#define SMALLCHARGE 1e-2  // |e| for checking if totalcharge is small and output polarisation P
 
 class par
 { 

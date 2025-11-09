@@ -33,20 +33,27 @@ endif
 ifneq ($(shell gcc --version|grep " 5."),)
 GCC42=1
 GCC5=1
+endif
+
+ifndef cross64   # no cross compile desired .... determine operating system
 OSTYPE=$(shell uname)
-#  (linux windows)
+#  (linux windows,Darwin)
 ifneq (,$(findstring $(OSTYPE),Linux))
  LINUX = linux
+ $(info LINUX is $(LINUX))
 else
 ifneq (,$(findstring $(OSTYPE),Darwin))
  LINUX = linux
+ DARWIN = darwin
+ $(info DARWIN is $(DARWIN))
 else
 # for windows  it turned out -static switch is necessary for linking
  WINDOWS = windows
+ $(info WINDOWS is $(windows))
 LFLAGS=-static -static-libgcc -static-libgfortran 
 endif
 endif
-endif
+endif  # <--- cross64
 
 ifdef LINUX
 DLLOADER_SRC=../include/DLLoader_Linux/DLLoader.h
@@ -190,7 +197,7 @@ else
 ifdef cross64
 LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas  -lgfortran -lquadmath
 else
-LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib $(GFORTRANLIB) -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas  $(GFORTRANLIB) -lgfortran
 endif
 #LFLAGS+= -llapack -lf77blas -latlas
 ifdef GCC5
@@ -200,7 +207,7 @@ endif
 endif
 
 ifneq ($(shell uname),Darwin)
-LFLAGS+=-static-libgcc
+LFLAGS+=-static-libgcc  
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium

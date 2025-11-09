@@ -50,8 +50,13 @@ int ic_diag(sMat<double> &Hic, sMat<double> &iHic, complexdouble *z, double *eig
       int lrwork = 24*n,liwork=10*n;
       double *rwork = new double[lrwork];
       int *iwork = new int[liwork];
+#ifdef __APPLE_ACCELERATE__
+      F77NAME(zheevr)(&jobz, &range, &uplo, &n, (__CLPK_doublecomplex *)zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
+              (__CLPK_doublecomplex *)z, &ldz, isuppz,(__CLPK_doublecomplex *) zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#else
       F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
               z, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#endif
       delete []isuppz; delete []rwork; delete []iwork; free(zm); delete []zwork;
    }
    return info;
@@ -70,8 +75,14 @@ int ic_diag(int n, complexdouble *zm, complexdouble *z, double *eigval)
       int lrwork = 24*n,liwork=10*n;
       double *rwork = new double[lrwork];
       int *iwork = new int[liwork];
+
+#ifdef __APPLE_ACCELERATE__
+      F77NAME(zheevr)(&jobz, &range, &uplo, &n,(__CLPK_doublecomplex *) zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
+              (__CLPK_doublecomplex *)z, &ldz, isuppz,(__CLPK_doublecomplex *) zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#else
       F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
               z, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#endif
       delete []isuppz; delete []rwork; delete []iwork; delete []zwork;
    }
    return info;
@@ -131,8 +142,13 @@ int ic_leig(sMat<double> &Hic, sMat<double> &iHic, complexdouble *z, double *eig
       int lrwork = 24*n,liwork=10*n;
       double *rwork = new double[lrwork];
       int *iwork = new int[liwork];
+#ifdef __APPLE_ACCELERATE__
+      F77NAME(zheevr)(&jobz, &range, &uplo, &n, (__CLPK_doublecomplex *)zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
+              (__CLPK_doublecomplex *)z, &ldz, isuppz,(__CLPK_doublecomplex *) zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#else
       F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
               z, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#endif
       delete []isuppz; delete []rwork; delete []iwork; free(zm); delete []zwork;
    }
    return info;
@@ -151,8 +167,13 @@ int ic_leig(int n, complexdouble *zm, complexdouble *z, double *eigval, int iu)
       int lrwork = 24*n,liwork=10*n;
       double *rwork = new double[lrwork];
       int *iwork = new int[liwork];
+#ifdef __APPLE_ACCELERATE__
+      F77NAME(zheevr)(&jobz, &range, &uplo, &n, (__CLPK_doublecomplex *)zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
+              (__CLPK_doublecomplex *)z, &ldz, isuppz, (__CLPK_doublecomplex *)zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#else
       F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, 
               z, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+#endif
       delete []isuppz; delete []rwork; delete []iwork; delete []zwork;
    }
    return info;

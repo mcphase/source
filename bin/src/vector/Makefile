@@ -37,16 +37,17 @@
 MATPACK=..
 include $(MATPACK)/Makefile.common
 
-INCLUDE= ../../include
-
+INCLUDE= -I../../include
+INCLUDE+= -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/Sparse/		
+INCLUDE+=  -I../../ic1ion_module
 
 .SUFFIXES: .cc .o
 
 .c.o: 
-	${CC} -c ${COPTS} -I ${INCLUDE} -I../../ic1ion_module $<
+	${CC} -c ${COPTS}  ${INCLUDE}  $<
 
 .cc.o: 
-	${CCC} -c ${CCOPTS} -I ${INCLUDE} -I../../ic1ion_module $<
+	${CCC} -c ${CCOPTS} ${INCLUDE}  $<
 
 
 
@@ -54,7 +55,7 @@ INCLUDE= ../../include
 ### make all objects
 ###########################################################################
 
-VECINC=	${INCLUDE}/vector.h
+VECINC=	../../include/vector.h
 
 VECOBJ= matpack.o sortdbl.o sort2dbl.o sort3dbl.o\
 	ivector.o imatrix.o \

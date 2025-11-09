@@ -50,10 +50,12 @@ endif
 
 INCLDIRS =      -I. \
 		-I../include \
-		-I../ic1ion_module \
-#		-I/usr/include/readline \
+		-I/usr/include/readline \
 		-I/local/lib  \
-		-I/usr/X11R6/include 
+		-I/usr/X11R6/include \
+                -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/Sparse/ \
+		-I../ic1ion_module 
+
 
 ifdef CYGWIN
 CYGFLAGS = -DCYGWIN

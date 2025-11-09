@@ -1,5 +1,7 @@
+#if defined (__MOREAPPLE__)
+#else
 // --------------------------------------------------------------------------------------------------------------- //
-// Converts a Matrix into a sparse Matris
+// Converts a Matrix into a sparse Matrix
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> M2mat(Matrix & M)
 {int  m=M.Rhi()-M.Rlo()+1;
@@ -11,7 +13,7 @@ sMat<double> M2mat(Matrix & M)
          if(fabs(M(i+M.Rlo(),j+M.Clo()))>DBL_EPSILON*1000) retval(i,j) = M(i+M.Rlo(),j+M.Clo());
    return retval;
 }
-
+#endif
 /*****************************************************************************/
 // here the free energy is calculated for a given (initial) spinconfiguration
 // using the meanfield algorithm / Monte Carlo 
@@ -116,9 +118,13 @@ jj/=sps.n();
 
 
 
-
+#if defined (__MOREAPPLE__)
+void calc_mfijk(Vector & m,spincf & sps,int & i,int & j,int& k,int & exstr,inipar & ini,int & sdim,Matrix & GG, sparse_matrix_double ** JS,
+         par & inputpars,int & diagonalexchange,int ll=0)
+#else
 void calc_mfijk(Vector & m,spincf & sps,int & i,int & j,int& k,int & exstr,inipar & ini,int & sdim,Matrix & GG, sMat<double> ** JS,
          par & inputpars,int & diagonalexchange,int ll=0)
+#endif
 // calculates mean fields m for crystal unit cell ijk in supercell from spins (and strains) in sps
 // input: ijk  indices of primitive unit cell in supercell
 //        extstr ... 0,1 indicating if exchange striction is to be calculated
@@ -149,8 +155,8 @@ if(ll>0){int lm1m3=inputpars.cs.nofcomponents*(ll-1);
     // here the contribution of the crystal unit cell i1 j1 k1 (i1,j1,k1 indicate the
      // position of the crystal unit cell in the magnetic supercell) to the mean field
      // of the crystal unit cell i j k is calculated by one matrix multiplication
-        JS[l][ll-1].matrix_vector_product_dense(&sps.m(i1,j1,k1)[1],&m[1+lm1m3]);// Multiplies the dense std::vector v by 
-                                    // the sparse matrix and adds the result to the dense vector w,
+        JS[l][ll-1].matrix_vector_product_dense(&sps.m(i1,j1,k1)[1],&m[1+lm1m3]);// Multiplies the dense std::vector sps.m by 
+                                    // the sparse matrix and adds the result to the dense vector m,
      if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
             JS[l+(sdim+2)*bb][ll-1].matrix_vector_product_dense(&sps.m(i1,j1,k1)[1],&m[1+lm1m3],sps.epsilon(bb));
             }     
@@ -993,8 +999,8 @@ for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
   {double d=0,dd=0,ddd,dds; for(int m2=1;m2<=inputpars.cs.nofcomponents;++m2){
                //d+=JS[0][l-1](m1,lm1m3+m2)*(sps.m(i,j,k)(lm1m3+m2)-0.5*Imom(m2));
                //dd+=JS[0][l-1](m1,lm1m3+m2)*(sps.m(i,j,k)(lm1m3+m2)-0.5*sps.m(i,j,k)(lm1m3+m2));
-               ddd=JS[0][l-1](m1-1,lm1m3+m2-1)*sps.m(i,j,k)(lm1m3+m2);
-               dds=JS[0][l-1](m1-1,lm1m3+m2-1)*Imom(m2);
+               ddd=JS[0][l-1](m1-1,lm1m3+m2-1)*sps.m(i,j,k)(lm1m3+m2); // I think this cannot be speeded up 
+               dds=JS[0][l-1](m1-1,lm1m3+m2-1)*Imom(m2);               // using JS.matrix_vector_product_dense, because lm1m3+m2-1 does not run over the whole range of indices ...
                d+=ddd-0.5*dds;
               // ds+=ddd-dds;
                dd+=0.5*ddd;
@@ -1004,9 +1010,6 @@ for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    selfenergycorrection_ui+=sps.m(i,j,k)(lm1m3+m1)*dd;
 
 }
-
-
-
 
     dE=En(l)+selfenergycorrection_En-ui[s][l]-selfenergycorrection_ui;
 // En(l)=En(l)+Encorr; // Encorr not necessary, because new ui[s][l] should refer to the old mf !

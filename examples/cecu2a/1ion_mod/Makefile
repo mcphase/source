@@ -1,8 +1,8 @@
 #makefile for dynamically loaded module
+#for single ion properties of Ce in CeCu2
 vpath %.h  ../../../bin/include
 vpath %.hpp ../../../bin/include
 vpath %.o  ../../../bin/src/vector
-vpath %.o  ../../../bin/src
 
 include ../../../bin/src/Makefile.common
 
@@ -14,25 +14,29 @@ INCLDIRS =      -I. \
 		-I/local/lib  \
 		-I/usr/X11R6/include
 
-VECOBJS= martin.o mathparser.o matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
+
+all : kramer.so fit
+
+VECOBJS= matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o \
 		cmatrix.o cmatmul.o dludcomp.o dsvdcomp.o dortho.o \
 		cludcomp.o tred.o imtql.o imtql2.o rseigen.o cheigen.o \
 		chgeigen.o matlapl.o moment.o matexph.o matsqth.o magicsquare.o
 
-all : quartett.so
-
-quartett.so: quartett.o   $(VECOBJS)
-	$(CCC)  -Wall -o quartett.so $^  -shared -L../../../bin/ic1ion_module/libs $(LFLAGS)
+kramer.so: kramer.o  $(VECOBJS)
+	$(CCC)  -Wall -o kramer.so $^ -shared -L../../../bin/ic1ion_module/libs $(LFLAGS)
 #-larpack -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
-# -static-libgcc -static-libgfortran  -L../../../bin/ic1ion_module/libs -llapack -lblas -lgfortran
+# -static-libgcc -static-libgfortran -L../../../bin/ic1ion_module/libs -llapack -lblas -lgfortran
+#--out-implib 
 
-quartett.o: quartett.c
-	$(CCC)  -Wall  -c  -fPIC -std=c++0x -o quartett.o quartett.c  $(INCLDIRS)
+kramer.o: kramer.c 
+	$(CCC) -Wall -fPIC -c  -o kramer.o kramer.c  $(INCLDIRS)
+
+fit:
+	cp -f ../fit/mcphas.jjj.sav ../fit/mcphas.jjj
 
 clean:
-	rm -vf quartett.o 
-	
-
-
+	rm -vf kramer.o 
+	rm -vf ../results/*
+	rm -vf ../fit/mcphas.jjj.fit
 

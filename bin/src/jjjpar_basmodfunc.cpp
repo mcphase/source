@@ -557,7 +557,8 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
  Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage,state);}
 
 void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double & lnZ,double & U,ComplexMatrix & parstorage,ComplexVector *& state)
-{switch (module_type)
+{
+ switch (module_type)
   {case kramer: kramer_Icalc(mom,T,Hxc,Hext,lnZ,U,state,false);break;
    case cfield:
    case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage,state);  break;

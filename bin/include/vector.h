@@ -46,10 +46,6 @@
 #include <complex>	// uses Complex number class
 #include <iomanip>	// uses I/O manipulators
 
-//----------------------------------------------------------------------------//
-// Declarations for Fortran LAPACK/BLAS routines
-//----------------------------------------------------------------------------//
-#include "lapack.h"
 
 using namespace std;
 
