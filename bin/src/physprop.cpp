@@ -158,6 +158,18 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                   if(ini.cv!=0){if(i-nofcols==1)ptr=&cv;snprintf(hs,40,"cV[meV/ionK]");
                                 nofcols+=1;
                                }
+                  if(ini.doeps){switch(i-nofcols) {
+                                     case 1: ptr=&Eelastic;snprintf(hs,40,"Eelastic[meV/ion]");break;
+                                     case 2: ptr=&sps.epsilon[1];snprintf(hs,40,"eps1=epsii");break;
+                                     case 3: ptr=&sps.epsilon[2];snprintf(hs,40,"eps2=epsjj");break;
+                                     case 4: ptr=&sps.epsilon[3];snprintf(hs,40,"eps3=epskk");break;
+                                     case 5: ptr=&sps.epsilon[4];snprintf(hs,40,"eps4=2epsjk");break;
+                                     case 6: ptr=&sps.epsilon[5];snprintf(hs,40,"eps5=2epsik");break;
+                                     case 7: ptr=&sps.epsilon[6];snprintf(hs,40,"eps6=2epsij");break;
+                                     default: ;
+                                           }
+                               nofcols+=7;
+                               }
                   if(fabs(inputpars.totalcharge)<SMALLCHARGE)
                             {switch(i-nofcols) { 
                                      case 1: ptr=&Pelabc[1];snprintf(hs,40,"Pela[C/m^2]");break;
@@ -175,18 +187,7 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                                  } 
                              nofcols+=3;
                             }
-                  if(ini.doeps){switch(i-nofcols) {
-                                     case 1: ptr=&Eelastic;snprintf(hs,40,"Eelastic[meV/ion]");break;
-                                     case 2: ptr=&sps.epsilon[1];snprintf(hs,40,"eps1=epsii");break;
-                                     case 3: ptr=&sps.epsilon[2];snprintf(hs,40,"eps2=epsjj");break;
-                                     case 4: ptr=&sps.epsilon[3];snprintf(hs,40,"eps3=epskk");break;
-                                     case 5: ptr=&sps.epsilon[4];snprintf(hs,40,"eps4=2epsjk");break;
-                                     case 6: ptr=&sps.epsilon[5];snprintf(hs,40,"eps5=2epsik");break;
-                                     case 7: ptr=&sps.epsilon[6];snprintf(hs,40,"eps6=2epsij");break;
-                                     default: ;
-                                           }
-                               nofcols+=7;
-                               }
+                  
            
                  }
     if(ptr==NULL)

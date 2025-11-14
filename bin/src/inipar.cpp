@@ -120,8 +120,8 @@ printf("RESULTS saved in directory ./results/  - files:\n");
    printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",prefix,nofspincf);
    printf("#  _%smcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n",prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
-   double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
-   std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+   double cpu_duration = (double)(std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+   std::cout << "#! Total cputime=" << cpu_duration << " seconds [CPU Clock], " << calcmf_duration << " s for mean fields, "  << calcsps_duration << "s for <I>" << std::endl;
    std::cout << "#!nofHTpoints=" << nofstapoints << " H-T points in phasediagram successfully calculated" << std::endl;
    std::cout << "#!nofreppoints="<< nofreppoints << " points repeated ( nofconvrep=" << nofconvrep << " of which converged after repetition)" << std::endl;
    std::cout << "#!noffailedpoints=" << noffailedpoints << " H-T points in phasediagram failed to converge " << std::endl;
@@ -1019,6 +1019,9 @@ nofthreads=0;getnofthread(nofthreads);
    "chic_ystep=0.5\n"
 );
   fclose(fout);
+  calcmf_duration=0;
+  calcsps_duration=0;
+
 
                               }
                 }
@@ -1059,7 +1062,9 @@ inipar::inipar (const inipar & p)
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
   displayall=p.displayall;logfevsQ=p.logfevsQ;
   
-  
+  calcmf_duration=p.calcmf_duration;
+  calcsps_duration=p.calcsps_duration;
+
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   xv=p.xv;xmin=p.xmin;xmax=p.xmax;xstep=p.xstep;

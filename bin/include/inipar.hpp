@@ -24,7 +24,9 @@ class inipar
   public:
   bool defaultcolcode(int  col,int  colcode); // resets default columns if not set by user (outcolset==true)
                                              // returns true if reset has been successful
-   char * savfilename;
+  double  calcmf_duration; // time for mean fields calculation
+  double  calcsps_duration; // time for <I> calculations
+ char * savfilename;
    char * program;
   double sta;
   int doeps,linepscf,linepsjj;

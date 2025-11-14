@@ -318,7 +318,7 @@ while (scalar @children) {
 
          # evaluate sta from parallel calculations and take minimum value
        $sta=1e100;$pti=0;$stacurr="(";
-       foreach(@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;
+       foreach(@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;if(($pti+1)%3==0){$stacurr.="\n";}
                        if($s<$sta){$sta=$s;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
                        ++$pti;
                       }$stacurr.=")min-> ".$sta;

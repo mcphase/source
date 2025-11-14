@@ -71,6 +71,13 @@ htcalc_input *tin[256];  // Max number of threads - hard coded because global va
 MUTEX_TYPE mutex_loop;
 MUTEX_TYPE mutex_tests;
 MUTEX_TYPE mutex_min;
+MUTEX_TYPE mutex_ini_nofcalls;
+MUTEX_TYPE mutex_ini_nofmaxspinchangeDIV;
+MUTEX_TYPE mutex_ini_nofmaxloopDIV;
+MUTEX_TYPE mutex_ini_successrate;
+MUTEX_TYPE mutex_ini_calcmf_duration;
+MUTEX_TYPE mutex_ini_calcsps_duration;
+
 EVENT_TYPE checkfinish;
 THRLC_TYPE threadSpecificKey;
 
@@ -556,6 +563,12 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
  MUTEX_INIT(mutex_min);
+ MUTEX_INIT(mutex_ini_nofcalls);
+ MUTEX_INIT(mutex_ini_nofmaxspinchangeDIV);
+ MUTEX_INIT(mutex_ini_nofmaxloopDIV);
+ MUTEX_INIT(mutex_ini_successrate);
+ MUTEX_INIT(mutex_ini_calcmf_duration);
+ MUTEX_INIT(mutex_ini_calcsps_duration);
  EVENT_INIT(checkfinish);
  THRLC_INIT(threadSpecificKey);
  #if defined  (__linux__) || defined (__APPLE__)
@@ -631,6 +644,13 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  pthread_mutex_destroy(&mutex_loop);
  pthread_mutex_destroy(&mutex_tests);
  pthread_mutex_destroy(&mutex_min);
+ pthread_mutex_destroy(&mutex_ini_nofcalls);
+ pthread_mutex_destroy(&mutex_ini_nofmaxspinchangeDIV);
+ pthread_mutex_destroy(&mutex_ini_nofmaxloopDIV);
+ pthread_mutex_destroy(&mutex_ini_successrate);
+ pthread_mutex_destroy(&mutex_ini_calcmf_duration);
+ pthread_mutex_destroy(&mutex_ini_calcsps_duration);
+
  #endif
  THRLC_FREE(threadSpecificKey);
 #endif

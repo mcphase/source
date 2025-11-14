@@ -127,6 +127,7 @@ unless ($#ARGV >=0)
  REM <img src="figure.jpg">
  REM <figure> <figcaption> This graph shows ... 
  REM </figcaption> <img src="figure.jpg"> </figure>
+ REM <pre> Text to be formatted exactly as written,  verbatim in latex</pre>
  
 
  example:
