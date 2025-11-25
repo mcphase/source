@@ -73,7 +73,7 @@ corresponding eigenvector) or option
 \item [ {\prg -jqe} ](outputs all eigenvalues). 
  If energies are given for hkls in mcdisp.par, output file mcdisp\_scaled.jq contains scaled parameters
  such that energy of first hkl set corresponds to highest eigenvalue of ${\mathcal J}({\mbf Q})$.
-\item[\prg mcphas\index{mcphas} -cd] treat classical dipole interaction internally (for the the first three 
+\item[{\prg  -cd}] treat classical dipole interaction internally (for the the first three 
    the interaction operators $I_1,I_2,I_3$, which must correspond to angular momentum $J$, such as in the so1ion module)
              and it
                  is assumed that $(g_J.I_1,g_J.I_2,g_J.I_3)$ are 
@@ -84,7 +84,15 @@ phonon degrees of freedom in such a calculation),
 the classical dipolar expansion 
    given by Bowden\cite{bowden81-827}. Using this option permits to avoid a 
 large number of interaction constants in
-{\prg mcphas.j}
+{\prg mcphas.j}. If the dipolar interaction in equation (26) of\cite{bowden81-827} 
+has to be evaluated for $\mbf q=0$ or for a reciprocal lattice vector 
+$\mbf q=\mbf q_L$, it is ambigous due to a factor $q_{\alpha}q_{\beta}/q^2$ which appears
+in the first term ''I'' and in the second term ''II' in equation (26) 
+of\cite{bowden81-827}. This ambigousity reflects the shape
+of the sample. The factor $q_{\alpha}q_{\beta}/q^2$ is 
+approximated  by it's average
+with respect to spherical angle,
+ i.e. $q_{\alpha}q_{\beta}/q^2 \sim \delta_{\alpha}q_{\beta}/3$.
 				\item [{\prg -v}] option is to display\index{display} more information.
                                 
 				\item [{\prg -a}] can be used to avoid overwriting output files in results, new results

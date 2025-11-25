@@ -28,28 +28,27 @@ void   sort(float * v,int jmin,int & jmax,int * jnew) // sorting function
 }
  
 //constructor
-physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,int & na,int & nm)
+physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,cryststruct & csin)
 {washere=0;
  int i;
  nofspincorr=nofspincorrs;
- nofatoms=na;
- nofcomponents=nm;
- 
+ cs=cryststruct(csin);
+
  m=Vector(1,3); 
  mabc=Vector(1,3); 
  Pelabc=Vector(1,3); Pel=Vector(1,3);
  Pelabc0=Vector(1,3); Pel0=Vector(1,3);
  H=Vector(1,HEXT_DIMENSION);
- totalJ=Vector(1,nofcomponents);
+ totalJ=Vector(1,cs.nofcomponents);
  cel=Matrix(1,6,1,6);
 
- jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
+ jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,cs.nofcomponents*cs.nofcomponents*cs.nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkli+1];for(i=0;i<=maxnofhkli;++i){hkli[i]=Vector(1,10);}
    if (hkli == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  nofhkls=0;
- sps=spincf(1,1,1,nofatoms,nofcomponents);
- mf=mfcf(1,1,1,nofatoms,nofcomponents);
+ sps=spincf(1,1,1,cs.nofatoms,cs.nofcomponents);
+ mf=mfcf(1,1,1,cs.nofatoms,cs.nofcomponents);
  fe=0;u=0;
 }
 
@@ -76,16 +75,16 @@ physproperties::physproperties (const physproperties & p)
   washere=p.washere;
  maxnofhkls=p.maxnofhkls;
  nofspincorr=p.nofspincorr;
- nofatoms=p.nofatoms;
- nofcomponents=p.nofcomponents;
-  sps=spincf(1,1,1,nofatoms,nofcomponents);
-  mf=mfcf(1,1,1,nofatoms,nofcomponents);
+ cs=cryststruct(p.cs);
+
+  sps=spincf(1,1,1,cs.nofatoms,cs.nofcomponents);
+  mf=mfcf(1,1,1,cs.nofatoms,cs.nofcomponents);
   sps=p.sps;
   mf=p.mf;
- totalJ=Vector(1,nofcomponents);
+ totalJ=Vector(1,cs.nofcomponents);
  totalJ=p.totalJ;
 
- jj= new Vector [nofspincorr+1];for(i=0;i<=nofspincorr;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
+ jj= new Vector [nofspincorr+1];for(i=0;i<=nofspincorr;++i){jj[i]=Vector(1,cs.nofcomponents*cs.nofcomponents*cs.nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkls+1];for(i=0;i<=maxnofhkls;++i){hkli[i]=Vector(1,10);}
    if (hkli == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
@@ -231,7 +230,7 @@ double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setn
  {double sta=0;double * ptr;int * iptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';int nofa=sps.na(),nofb=sps.nb(),nofc=sps.nc();
     int nofcolsin=0;if(!setnn){nofcolsin=nofcols;j=0;nofa=0;nofb=0;nofc=0;totalJ=0;}
-    nofcols=12+nofcomponents;for(int i=8;i<=nofcolsin||i<=nofcols;++i)
+    nofcols=12+nofcomponents();for(int i=8;i<=nofcolsin||i<=nofcols;++i)
     {ptr=NULL;iptr=NULL;
        switch(i) {       case 8: iptr=&j;snprintf(hs,40,"phasnumber-j");break;
                          case 9: iptr=&sps.wasstable;snprintf(hs,40,"period-key");break;
@@ -266,6 +265,26 @@ if(setnn){if(nnerr[i]>0&&i<=nofcolsin)
 return sta;
 }
 
+Vector physproperties::mu0M()// magnetisation mu0*M(Tesla) 
+{Vector M(1,3);
+  // M=sum m/V_unitcell
+  // inputpars.cs.pVol() // V_unitcell in Aengstroem^3
+  M=9.274010*1.25663706127*nofatoms()*m/cs.pVol(); // total moment per unit cell (muB)
+           // muB=9.274010e-24 J/Tesla
+           // mu0=1.25663706127(20)×10−6 N⋅A−2
+ return M;
+}
+Vector physproperties::Pdiveps0()
+{Vector P(1,3);
+   // Pel in C/m2
+    P=Pel/8.8541878188e-12; 
+   // epsilon0 = 8.8541878188(14)×10−12 C2⋅kg−1⋅m−3⋅s2
+ return P;
+}
+int physproperties::nofatoms()//
+{return cs.nofatoms;}
+int physproperties::nofcomponents()//
+{return cs.nofcomponents;}
 
 //*********************************************************************************************************
 // methode save
@@ -275,9 +294,10 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
   time_t curtime;
   struct tm *loctime;  
   int i,j2,l,i1,j1,nmax;
-  Vector null(1,nofcomponents*nofatoms);null=0;
+  Vector null(1,nofcomponents()*nofatoms());null=0;
   Vector null1(1,3);null1=0;
   double sta=0;
+
   float nn[200];nn[0]=199;
   float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
   int ortho=1;
@@ -289,7 +309,10 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
    ijk2dadbdc(Pelabc,Pel,abc);
    ijk2dadbdc(Pelabc0,Pel0,abc);
 
-  printf("saving properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);
+  Vector M(1,3); M=mu0M();// magnetisation mu0*M(Tesla) 
+  Vector P(1,3); P=Pdiveps0(); //  Polarisation/epsilon0 (V/m)
+
+  printf("saving properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,M,P,true);
   if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g ",H(1),H(2),H(3));}
   ini.time_estimate_until_end(x,y);
   printf("\n");
@@ -334,11 +357,11 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
   fclose(fout);
   }
 
-   fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
          fprintf(fout,"%s\n",outstr); fclose(fout);
 
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix); strcpy(outfilename+11+strlen(prefix),"mcphas.fum");
-   fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    fprintf(fout,"%s\n",outstr); fclose(fout);
 
    if((fout=fopen("./fit/mcphas.fum","rb"))!=NULL)
@@ -379,7 +402,7 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
      }
   fout = fopen_errchk (outfilename,"a");
    if(j<0){sps.wasstable=j;}// if qvector generated structure is stable, then take period key = number of qvector
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
     fprintf(fout,"%s\n",outstr);fclose(fout);
     if((fout=fopen("./fit/mcphas.xyt","rb"))!=NULL)
     {// some measured data should be fitted
@@ -412,7 +435,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
        
 
   // only output nmax correlation functions ...
- for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms;++l){
+ for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms();++l){
   errno = 0;
   if (verbose==1)printf("saving mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
@@ -447,9 +470,9 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
  if(ini.nofrndtries>=0)
  {
   fout = fopen_errchk (filename,"a");
-    ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
-        for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
-            {fprintf (fout, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
+    ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
+        for(j2=1;j2<=nofcomponents()*nofcomponents();++j2)               
+            {fprintf (fout, "%4.4g ",myround(jj[i](j2+nofcomponents()*nofcomponents()*(l-1))));
 	    }
    fprintf (fout,"\n");
    fclose(fout);
@@ -488,7 +511,7 @@ if(ini.cel!=0.0)
    strcpy(outfilename+10+strlen(prefix),"mcphas.cel"); 
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving elastic constants in %s\n",outfilename);
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    for (i=1;i<=6;++i)
     { fprintf (fout, " %4.4g ",myround(cel(i,i)));
     }
@@ -608,7 +631,7 @@ if(ini.cel!=0.0)
    strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); 
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
     fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
@@ -619,7 +642,7 @@ if(ini.cel!=0.0)
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
     } fprintf(fout,"\n");
@@ -629,7 +652,7 @@ if(ini.cel!=0.0)
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
     } fprintf(fout,"\n");
@@ -639,7 +662,7 @@ if(ini.cel!=0.0)
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
     } fprintf(fout,"\n");
@@ -687,7 +710,7 @@ else
     fclose(fout);
    }  
   fout = fopen_errchk (outfilename,"a");
-   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
    fprintf (fout, " %i %i %i ",
             sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
    if (htfailed!=0){fprintf(fout,"1 ");int d1=1;sps.spinfromq(d1,d1,d1,null1,null,null,null);} // failed
@@ -738,7 +761,7 @@ else
     fclose(fout);
    }  
 if(ini.nofrndtries>=0){
-     fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
+     fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,M,P,false);
 fprintf (fout, " %i %i %i ",
             mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
    if (htfailed!=0){fprintf(fout,"1 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
@@ -769,8 +792,8 @@ int physproperties::read(int & verbose, par & inputpars,char * readprefix,inipar
   float nn[200];nn[0]=199;
   int ortho=1; bool found=0;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
-    
- if(verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);}
+   Vector M(1,3),P(1,3); M=0;P=0; 
+ if(verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,M,P,true);}
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
 // here read free energy etc if possible ... otherwise return 1
@@ -812,7 +835,7 @@ found=0;
    //fprintf (fin, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip      ",
      //       myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable);
         // then read totalJ ... not necessary if sps is read !!
-//   for(i1=1;i1<=nofcomponents;++i1)
+//   for(i1=1;i1<=nofcomponents();++i1)
 //	      {fprintf(fin,"%4.4g ",myround(totalJ(i1)));}
 //	      fprintf(fin,"\n");
 found=0;while(found==0){ 
@@ -833,7 +856,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
        }
       }
      // only read nmax correlation functions ...
- for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms;++l){
+ for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms();++l){
   errno = 0;
   if (verbose==1)printf("reading mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
@@ -844,8 +867,8 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
 //then read jj[] 
 
  // fprintf (fin, "%4.4g %4.4g   %4.4g %4.4g   %4.4g %4.4g %4.4g     ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
-  //      for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
-   //         {fprintf (fin, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
+  //      for(j2=1;j2<=nofcomponents()*nofcomponents();++j2)               
+   //         {fprintf (fin, "%4.4g ",myround(jj[i](j2+nofcomponents()*nofcomponents()*(l-1))));
 //	    }
  //  fprintf (fin,"\n");
   found=0;while(found==0){ 
@@ -854,7 +877,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    found=ini.checkTH(nn,T,H,inputpars.cs.abc);
                } 
  fclose(fin);
- for(j2=1;j2<=nofcomponents*nofcomponents;++j2)jj[i](j2+nofcomponents*nofcomponents*(l-1))=nn[j2+7];
+ for(j2=1;j2<=nofcomponents()*nofcomponents();++j2)jj[i](j2+nofcomponents()*nofcomponents()*(l-1))=nn[j2+7];
 }}
 
 //-----------------------------------------------------------------------------------------  
@@ -881,16 +904,18 @@ found=0;while(found==0){ i=0;
    found=ini.checkTH(nn,T,H,inputpars.cs.abc);nofhkls=(i-7)/4;
                        } 
    fclose(fin);
-   for (i=nofhkls;i>=1;--i){hkli[i](1)=nn[7+(i-1)*4+1];
+update_maxnofhkls(nofhkls);
+   for (i=nofhkls;i>=1;--i){
+                            hkli[i](1)=nn[7+(i-1)*4+1];
                             hkli[i](2)=nn[7+(i-1)*4+2];
                             hkli[i](3)=nn[7+(i-1)*4+3];
                             hkli[i](4)=nn[7+(i-1)*4+4];}
- 
   //xray a component
   if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphasi.hkl");
                 } else {strcpy(infilename+10+strlen(readprefix),"mcphasa.hkl");  }
    fin = fopen_errchk (infilename,"r");
    if (verbose==1)printf(" .... reading %s\n",infilename);
+
    // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
 //then read hkli[5,6]
 //    for (i=nofhkls;i>=1;--i)
@@ -902,7 +927,8 @@ found=0;while(found==0){
      found=ini.checkTH(nn,T,H,inputpars.cs.abc);
                } 
    fclose(fin);
-  for (i=nofhkls;i>=1;--i){hkli[i](5)=nn[7+(i-1)*4+4];
+  for (i=nofhkls;i>=1;--i){
+                           hkli[i](5)=nn[7+(i-1)*4+4];
                            hkli[i](6)=nn[7+(i-1)*4+5];
                             }
 //xray b component

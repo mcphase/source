@@ -7,7 +7,7 @@ getvalue.pl -c 1.081    2 10 3.0 0 results/mcphas.fum
 getvalue.pl -c 2.073    2 10 3.2 0 results/mcphas.fum
 setup_mcdiff_in 1 0 0 0 
 mcdiff
-getvalue.pl -c 1.9671E-02 4 8 2.1922E+01 0 results/mcdiff.out
+getvalue.pl -c 1.967E-02 4 8 2.1922E+01 0 results/mcdiff.out
 formfactor Nd3p.sipf
 getvalue.pl -c 0.9205278 1 2 2.4 0 results/formfactor.out
 radwavfunc Nd3p.sipf

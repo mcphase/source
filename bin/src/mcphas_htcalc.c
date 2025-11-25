@@ -516,8 +516,9 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    fprintf(fout,"%i 0 0 0 0 0 0 0\n",(int)time(0));
    fprintf(fout,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
-   fclose(fout);	      
-   printf("\n starting  "); ini.print_usrdefcols(stdout,physprops.x,physprops.y,T,H,inputpars.cs.abc,true);printf("\n");
+   fclose(fout);
+   Vector P(1,3);Vector M(1,3);P=0;M=0;      
+   printf("\n starting  "); ini.print_usrdefcols(stdout,physprops.x,physprops.y,T,H,inputpars.cs.abc,M,P,true);printf("\n");
    printf("with %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",testspins.n,testqs.nofqs());
    printf("Notation: < >            ...begin / end of mean field loop\n");
    printf("          ->             ...reduction of stabilised structure possible into ...\n");
@@ -777,6 +778,8 @@ else physprops.sps=sps;
 
 //    printf("H"); fflush(stdout); delete mf;
  }
+ 
+
 
 return 0; // ok we are done with this (HT) point- return ok
 // #if defined __linux__ && defined _THREADS

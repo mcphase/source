@@ -218,7 +218,7 @@ if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Car
    testspins.save("./results/_mcphas.tst","w");
    qvectors testqs (ini,inputpars,Imax,"./results/mcphas.qvc",verbose);
  // declare variable physprop (typa class physproperties)
-   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs);
 	    int s=0;
 
 if(poly==0){

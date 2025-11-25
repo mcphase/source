@@ -15,7 +15,7 @@ class physproperties
 {
   private:
  int washere,nofspincorr;
- 
+ cryststruct cs;
   public:
 float x,y; // phasediagramm labels  
 int j;  // index of spinstructure
@@ -29,15 +29,15 @@ Matrix cel;
 double fe;
 double u; // free energy and mag energy per ion
 double Eelastic; // elastic energy per ion
-int nofatoms;
-int nofcomponents;
+int nofatoms();
+int nofcomponents();
 
 Vector *jj,*hkli; // spin spin correlation functions
 int maxnofhkls,nofhkls;
 spincf  sps;
 mfcf mf;
    
-physproperties (int & nofspincorrs,int & maxnofhkls,int & na, int & nm);	//konstruktor
+physproperties (int & nofspincorrs,int & maxnofhkls,cryststruct & csin);	//konstruktor
 //na number of atoms in basis,nm number of spin components
 physproperties (const physproperties & props);	// kopier-konstruktor
 
@@ -62,6 +62,9 @@ double save(int & verbose,const char * filemode, int & j,inipar & ini,par & inpu
 // on success return 0, otherwise
 // returns 1
 int read(int & verbose, par & inputpars,char * readprefix,inipar & ini);
+
+Vector Pdiveps0(); // electric Polarisation in V/m
+Vector mu0M();// magnetisation mu0*M(Tesla) 
 };
 
 

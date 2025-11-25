@@ -37,7 +37,7 @@ complex<double> crnd(double & r);
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
 
 // parse a #! line for variables (a-z)
-extern void parseline(char * instr, parser & ob);
+extern void parseline(char * instr, parser & ob,int verbose=0);
 
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
 // output: var ... value of parameter

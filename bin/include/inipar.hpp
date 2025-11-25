@@ -54,6 +54,7 @@ class inipar
                      // s1 s2 s3 s4 s5 s6 Voigt components of stress tensor
   float  xmin,  xmax,  xstep;
   float  ymin,  ymax,  ystep;
+  Matrix N;
   
   // GENERATION OF SPINCONFIGURATIONS
   
@@ -107,14 +108,14 @@ class inipar
 // ***************** intelligent functions **********************
  // set external field and Temperature given x and y
  void calcTHfromxy(double & T,Vector & Hext,double x, double y,cryststruct & cs);
-
+private:
 // calculate the value of different output data for user defined column with colcod i...
- double   calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
+ double   calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc,Vector & M, Vector & P);
 
 // return pointer to value of user defined column with colcod i
 double * colvaluepointer(int & i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
                  Vector & Eabc,double & NormH, double & NormE);
-
+public:
  // set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
  // returns true if successful  (NormH NormE x y are not used)
 bool calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs);
@@ -136,7 +137,7 @@ bool checkpr(FILE* fout,const char * var,double val,double masterval);
 
 
 // output the values into columns with external parameters to file fout
- void print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext);
+ void print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,Vector & M, Vector & P,bool withtext);
 
 // print user defined column codes variables out1 -- out7 to fout
  void print_usrdefcolcodes(FILE *fout);

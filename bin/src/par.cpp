@@ -37,7 +37,7 @@ par::par (const char *filejjj,int  verbose)
   fin_coq = fopen_errchk (filejjj, "rb");
   parser ob;
  // input file header ------------------------------------------------------------------
-  fgets (instr, MAXNOFCHARINLINE, fin_coq);parseline(instr,ob);
+  fgets (instr, MAXNOFCHARINLINE, fin_coq);parseline(instr,ob,verbose);
   instr[0]='#';
    // inserted 12.11.07 in order to format output correctly (characterstring 13 spoiled output string)
    for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
@@ -46,7 +46,7 @@ par::par (const char *filejjj,int  verbose)
   cs.nofatoms=0;
   instr[0]='#';
  while (cs.nofatoms==0||(strstr(instr,"*******")==NULL&&instr[strspn(instr," \t")]=='#')) 
-  {fgets(instr,MAXNOFCHARINLINE,fin_coq);parseline(instr,ob);
+  {fgets(instr,MAXNOFCHARINLINE,fin_coq);parseline(instr,ob,verbose);
    cs.cextract(instr,ob);
     // read optional elastic constants        
   char Celstr[6];

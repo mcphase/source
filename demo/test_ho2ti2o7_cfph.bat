@@ -57,9 +57,9 @@ REM try stress along 111 direction ...
 call mcphasit -v -doeps -prefix test_ 
 getvalue.pl -c 30.977 2 8 0.5 0 results/test_mcphas.fum
 getvalue.pl -c 0.8688 2 10 0.5 0 results/test_mcphas.fum
-getvalue.pl -c 0.0036 2 22 0.5 0 results/test_mcphas.fum
-getvalue.pl -c 0.0036 2 23 0.5 0 results/test_mcphas.fum
-getvalue.pl -c 0.0036 2 24 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.0036 2 19 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.0036 2 20 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.0036 2 21 0.5 0 results/test_mcphas.fum
 
 setup_mcdisp_mf -prefix test_   1    1    1    0 0.5774 0.5774 0.5774 
 mcdispit -prefix test_ -pinit 0.1 -maxE 50

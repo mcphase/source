@@ -13,6 +13,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // moments <I>
        physprops.totalJ=sps.totalJ();
 
+
  if(ini.maxnofmfloops>0){ // only do something if in MF-mode
  // calculate nettomoment from spinstructure
     Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);physprops.m=0;
@@ -24,7 +25,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
      physprops.m+=mom;
     }}}}
     physprops.m/=(double)sps.n()*(double)sps.nofatoms;
-
+ 
 
 // electrical polarisation P (makes only sense if total charge is zero)
 // in units C/m^2...

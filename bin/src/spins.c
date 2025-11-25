@@ -391,16 +391,32 @@ for(i=os+1;i<argc;++i){
 if(strcmp(argv[i],"-prefix")==0){apf=2;}
                        }
 double lnZ,U,x,y; 
-if (strncmp(argv[1],"-f",2)==0&&argc<3+os){aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[1]);}
-                                            // here aa[1] becomes a number of a spinconfig in a file
-else{if(argc-1==2+os||argc-1==6+os+apf){aa[0]=0;aa[1]=strtod(argv[1+os],NULL);aa[2]=strtod(argv[2+os],NULL);
-               }// here aa[1] and aa[2] become x and y in the phasediagram 
+if (strncmp(argv[1],"-f",2)==0&&argc<3+os){
+                 // in this case we have exactly one argument left,
+                 // i.e.  aa[1] becomes a number of a spinconfig in a file
+                 aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[1]);
+                 }
+                           
+else{if(argc-1==2+os||argc-1==6+os+apf){
+               // in this case  x and y in the phasediagram are given in the command line
+               // arguments. We have to find out, which columns ix and iy
+               //  correspond to x and y and put into corresponding aa[ix] and aa[iy] the
+               // remaining arguments
+                aa[0]=0;
+                i=find_usrdef_out("x",out);if(i>0)aa[i]=strtod(argv[1+os],NULL);
+                i=find_usrdef_out("y",out);if(i>0)aa[i]=strtod(argv[2+os],NULL);
+               }
      else
      if(argc-1==4+os||argc-1==8+os+apf)
-     {aa[0]=0;aa[3]=strtod(argv[1+os],NULL); // T   out3
-              aa[5]=strtod(argv[2+os],NULL); // Ha out5
-              aa[6]=strtod(argv[3+os],NULL); // Hb  out6 
-              aa[7]=strtod(argv[4+os],NULL);  // Hc  out7
+     {// in this case  T, Ha, Hb, Hc in the phasediagram are given in the command line
+               // arguments. We have to find out, which columns iT iHa iHb  and iHc
+               //  correspond to T Ha Hb and Hc and put into corresponding aa[iT],... and aa[iHc] the
+               // remaining arguments
+              aa[0]=0;
+             i=find_usrdef_out("T",out);if(i>0)aa[i]=strtod(argv[1+os],NULL);
+             i=find_usrdef_out("Ha",out);if(i>0)aa[i]=strtod(argv[2+os],NULL);
+             i=find_usrdef_out("Hb",out);if(i>0)aa[i]=strtod(argv[3+os],NULL);
+             i=find_usrdef_out("Hc",out);if(i>0)aa[i]=strtod(argv[4+os],NULL);
      }
      else
      if(argc-1==NOF_USERDEF_MCPHAS_COLS+os||argc-1==NOF_USERDEF_MCPHAS_COLS+4+os+apf)
@@ -893,16 +909,13 @@ if(argc-1==6+os)os-=2;  //
 //argc-1==8+os  ... ok 
 if (argc-1==8+os){
               // double E;
-             long int pos=0;
-             int extended_eigenvector_dimension;
-              char instr[MAXNOFCHARINLINE],dumstr[MAXNOFCHARINLINE],outhklstr[MAXNOFCHARINLINE];
-          
+              char outhklstr[MAXNOFCHARINLINE];
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
              gp.phonon_wave_amplitude=1.0;gp.phonon_scale_static_displacements=1.0;
 //----------------------------------------------------------------------------------------------------------
-           double delta,dd,tcdd;Vector thkl(1,3);
+           Vector thkl(1,3);
                 
-           if(arrow>0){double checkdd=1e7;
+           if(arrow>0){
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
              switch(arrow)
              {case 1: strcpy(infilename+10+strlen(prefix),"mcdisp.qes");fin = fopen(infilename, "rb");
@@ -922,101 +935,24 @@ if (argc-1==8+os){
                       if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qpe", "rb");
                       break;                   
              }
-             // input file header ------------------------------------------------------------------
-             instr[0]='#';
-              while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
-              { pos=ftell(fin); 
-                if (pos==-1) 
-                {fprintf(stderr,"Error: wrong qev file format\n");exit (EXIT_FAILURE);}
-                fgets(instr,MAXNOFCHARINLINE,fin); 
-                // inserted 4.4.08 in order to format output correctly (characterstring 13 spoiled output string)
-                for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
-               // load evs and check which one is nearest -------------------------------   
-               extract(instr,"spins_wave_amplitude",gp.spins_wave_amplitude);
-               extract(instr,"spins_show_ellipses",gp.spins_show_ellipses);
-               extract(instr,"spins_show_oscillation",gp.spins_show_oscillation);
-              }
-              j=fseek(fin,pos,SEEK_SET);if (j!=0){fprintf(stderr,"Error: wrong qev file format\n");exit (EXIT_FAILURE);}
-   
-               for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
-               { if(fgets(dumstr,MAXNOFCHARINLINE,fin)!=NULL) 
-                 {spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
-                  spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
-                 ev_real.load(fin);ev_imag.load(fin);
-                 dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
-                        strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
-                        strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),inputpars.cs.abc);
-                 if (dd<delta)
-                 {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
-                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
-                  spinconfev_real=ev_real;
-                  spinconfev_imag=ev_imag;                  
-                 }
-                 pos=ftell(fin); 
-                 fgets(instr,MAXNOFCHARINLINE,fin); 
-                 while (instr[strspn(instr," \t")]=='#'&&feof(fin)==0) // pointer to 'ltrimstring' 
-                  {pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
-                 j=fseek(fin,pos,SEEK_SET);
-               }}
-              fclose (fin);
-              check_dd(checkdd,outhklstr,outstr); // check if .mf and .qev agree
-                fprintf(stdout,"#%s - moment oscillation - eigenvector\n",outstr);
-              fprintf(stdout,"#real\n");
-              spinconfev_real.print(stdout);
-              fprintf(stdout,"#imag\n");
-              spinconfev_imag.print(stdout);
+             check_for_best_excitation_and_close(fin,gp,"qev",spinconf,spinconfev_real,spinconfev_imag,
+                          x,y,T,Hext,outstr,outhklstr,"moment oscillation",thkl,hkl,argv,os,
+                          inputpars.cs.abc,inputpars.cs.nofatoms,doijk, xx,yy,zz,dim);
+
              }//arrow
      
 //----------------------------------------------------------------------------------------------------------
-            if(phonon>0){double checkdd=1e7;
+            if(phonon>0){
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
              strcpy(infilename+10+strlen(prefix),"mcdisp.qep");fin = fopen(infilename, "rb");
                       if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qep", "rb");
-             // input file header ------------------------------------------------------------------
-             instr[0]='#';
-              while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
-              { pos=ftell(fin); 
-                if (pos==-1) 
-                {fprintf(stderr,"Error: wrong qev file format\n");exit (EXIT_FAILURE);}
-                fgets(instr,MAXNOFCHARINLINE,fin); 
-                // inserted 4.4.08 in order to format output correctly (characterstring 13 spoiled output string)
-                for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
-               // load evs and check which one is nearest -------------------------------   
-               extract(instr,"phonon_wave_amplitude",gp.phonon_wave_amplitude);
-               extract(instr,"phonon_scale_static_displacements",gp.phonon_scale_static_displacements);
-              }
-               j=fseek(fin,pos,SEEK_SET); if (j!=0){fprintf(stderr,"Error: wrong qep file format\n");exit (EXIT_FAILURE);}
-   
-               for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
-               { if(fgets(dumstr,MAXNOFCHARINLINE,fin)!=NULL) 
-                {spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
-                 spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
-                 ev_real.load(fin);ev_imag.load(fin);
-                 dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
-                        strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
-                        strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),inputpars.cs.abc);
-                 if (dd<delta)
-                 {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
-                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
-                  spinconfpev_real=ev_real;
-                  spinconfpev_imag=ev_imag;                  
-                 }
-                 pos=ftell(fin); 
-                 fgets(instr,MAXNOFCHARINLINE,fin); 
-                 while (instr[strspn(instr," \t")]=='#'&&feof(fin)==0) // pointer to 'ltrimstring' 
-                  {pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
-                 j=fseek(fin,pos,SEEK_SET);
-               }}
-              fclose (fin);
-             check_dd(checkdd,outhklstr,outstr); // check if .mf and .qev agree
-              fprintf(stdout,"#%s - phonon oscillation - eigenvector\n",outstr);
-              fprintf(stdout,"#real\n");
-              spinconfpev_real.print(stdout);
-              fprintf(stdout,"#imag\n");
-              spinconfpev_imag.print(stdout);
+             check_for_best_excitation_and_close(fin,gp,"qep",spinconf,spinconfpev_real,spinconfpev_imag,
+                          x,y,T,Hext,outstr,outhklstr,"phonon oscillation",thkl,hkl,argv,os,
+                          inputpars.cs.abc,inputpars.cs.nofatoms,doijk, xx,yy,zz,dim);
+
              }//phonon
 //----------------------------------------------------------------------------------------------------------
-            if(density){double checkdd=1e7;
+            if(density){
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
              switch(argv[1][1]) // dimension definition from jjjpar.hpp
                 {case 'c': strcpy(infilename+10+strlen(prefix),"mcdisp.qee");fin = fopen(infilename, "rb");
@@ -1034,64 +970,10 @@ if (argc-1==8+os){
                            if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qod", "rb");
                            break;
                 }
-             // input file header ------------------------------------------------------------------
-             instr[0]='#';
-              while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
-              { pos=ftell(fin); 
-                if (pos==-1) 
-                {fprintf(stderr,"Error: wrong qev file format\n");exit (EXIT_FAILURE);}
-                fgets(instr,MAXNOFCHARINLINE,fin); 
-                // inserted 4.4.08 in order to format output correctly (characterstring 13 spoiled output string)
-                for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
-               // load evs and check which one is nearest -------------------------------   
-               extract(instr,"spins_wave_amplitude",gp.spins_wave_amplitude);
-               extract(instr,"spins_show_ellipses",gp.spins_show_ellipses);
-               extract(instr,"spins_show_oscillation",gp.spins_show_oscillation);
-               extract(instr,"extended_eigenvector_dimension",extended_eigenvector_dimension);
-              }
-               j=fseek(fin,pos,SEEK_SET); if (j!=0){fprintf(stderr,"Error: wrong qee/qsd/qod file format\n");exit (EXIT_FAILURE);}
-          
-               for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
-               { if(fgets(dumstr,MAXNOFCHARINLINE,fin)!=NULL) 
-                 {spincf ev_real(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
-                  spincf ev_imag(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
-                 ev_real.load(fin);ev_imag.load(fin);
-                 dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
-                        strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
-                        strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),inputpars.cs.abc);
-                 if (dd<delta)
-                 {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
-                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
-                 
-            switch(argv[1][1]) // dimension definition from jjjpar.hpp
-            {case 's': 
-             case 'o': 
-                      if(doijk==3){// moments=xx*momentsx+yy*momentsy+zz*momentsz;
-                   for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
-                   for (i=1;i<=savmf.na();++i)for(j=1;j<=savmf.nb();++j)for(k=1;k<=savmf.nc();++k)
-                  for(nt=1;nt<=dim;++nt){densityev_real.m(i,j,k)(nt+dim*(ii-1))=xx*ev_real.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_real.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_real.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
-                                         densityev_imag.m(i,j,k)(nt+dim*(ii-1))=xx*ev_imag.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_imag.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_imag.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
-                                        }
-                      }
-                      else{densityev_real=ev_real;
-                           densityev_imag=ev_imag;
-                     }
-                       break;
-            case 'c': 
-            case 'j': densityev_real=ev_real;
-                      densityev_imag=ev_imag;
-                     break;
-            default: help_and_exit();
-                     }
-                    }
-               }}
-              fclose (fin);
-              check_dd(checkdd,outhklstr,outstr); // check if .mf and .qev agree
-              fprintf(stdout,"#%s - density oscillation - eigenvector\n",outstr);
-              fprintf(stdout,"#real\n");
-              densityev_real.print(stdout);
-              fprintf(stdout,"#imag\n");
-              densityev_imag.print(stdout);
+             check_for_best_excitation_and_close(fin,gp,"qee/qsd/qod",densitycf,densityev_real,densityev_imag,
+          x,y,T,Hext,outstr,outhklstr,"density oscillation",thkl,hkl,argv,os,
+          inputpars.cs.abc,inputpars.cs.nofatoms,doijk, xx,yy,zz,dim);
+
              }//gp.show_density
 //----------------------------------------------------------------------------------------------------------           
               gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set

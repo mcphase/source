@@ -12,6 +12,15 @@ dd=0.000001;for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS&&i<numbers[0];++i)
 return dd;
 }
 
+int find_usrdef_out(const char * var,char **out)
+// looks in the set of user defined variables for a specific variable and returns it's index
+// if not found returns 0
+{int i=0;
+ for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){
+ if(strcmp(var,out[col])==0)i=col;
+ }
+ return i;
+}
 
 void extract_xyTHext(char * outstr,double & x,double & y,double & T,Vector & Hext,Vector & abc)
 {  Vector Habc(1,3),Eabc(1,3);Hext=0;Habc=0;Eabc=0;
@@ -73,6 +82,11 @@ double distance_of_str_to_xyTHext_hklE(char * str,double & tcdd,double & x,doubl
 int check_for_best(FILE *fin_coq,double * aa, spincf & savmf,double & x, double & y, double & T,Vector & Hext,char*outstr,char **out,Vector & abc)
 {// load mfconfigurations and check which one is nearest -------------------------------
 // returns 0 if ok, 1 if no stable configuration was found
+// spinconfigurations are (loaded from File handle fin_coq
+// aa[0]==0: "nearest" means take the list of doubles stored in field aa and
+// look in the first line of a mf configuration and compare numbers in this line
+// and remembers in savmf and outstr the best match
+// aa[0]>0: "nearest" means load exactly a[0] configurations and return the last in savmf and outstr
 int n,j;
    double dd,delta;
  float numbers[21];numbers[9]=1;numbers[10]=3;
@@ -198,4 +212,79 @@ char *token;cs.abc=0;
     j=fseek(fin_coq,pos,SEEK_SET);
     if (j!=0){fprintf(stderr,"Error: wrong mf file format\n");exit (EXIT_FAILURE);}
 return n;
+}
+
+
+void check_for_best_excitation_and_close(FILE *fin,graphic_parameters & gp,const char * ext,
+ spincf & spinconf,spincf & spinconfev_real,spincf & spinconfev_imag,
+double & x, double & y, double & T,
+Vector & Hext,char*outstr,char*outhklstr,const char * oscill_type,Vector & thkl,Vector & hkl,
+char **argv, int & os, Vector & abc, int nofatoms, int doijk,double xx, double yy, double zz,int dim
+)
+{// loads eigenvectors from handle fin and check which one is nearest -------------------------------
+ // to x y T Hext, store in spinconfev_real/spinconfev_imag
+ //  and then closes file handle fin
+// input file header ------------------------------------------------------------------
+char instr[MAXNOFCHARINLINE],dumstr[MAXNOFCHARINLINE];long int pos=0,jj;int i,j,k;
+double delta,tcdd,checkdd=1e7,dd;             int extended_eigenvector_dimension;
+             instr[0]='#';
+              while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
+              { pos=ftell(fin); 
+                if (pos==-1) 
+                {fprintf(stderr,"Error: wrong %s file format\n",ext);exit (EXIT_FAILURE);}
+                fgets(instr,MAXNOFCHARINLINE,fin); 
+                // inserted 4.4.08 in order to format output correctly (characterstring 13 spoiled output string)
+                for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
+               // load evs and check which one is nearest -------------------------------   
+               extract(instr,"spins_wave_amplitude",gp.spins_wave_amplitude);
+               extract(instr,"spins_show_ellipses",gp.spins_show_ellipses);
+               extract(instr,"spins_show_oscillation",gp.spins_show_oscillation);
+               extract(instr,"phonon_wave_amplitude",gp.phonon_wave_amplitude);
+               extract(instr,"phonon_scale_static_displacements",gp.phonon_scale_static_displacements);
+               extract(instr,"extended_eigenvector_dimension",extended_eigenvector_dimension);
+              }
+             if(strcmp("qee/qsd/qod",ext)!=0)extended_eigenvector_dimension=3; // set this to 3 if not density plot
+              jj=fseek(fin,pos,SEEK_SET);if (jj!=0){fprintf(stderr,"Error: wrong %s file format\n",ext);exit (EXIT_FAILURE);}
+   
+               for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
+               { if(fgets(dumstr,MAXNOFCHARINLINE,fin)!=NULL) 
+                 {spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,extended_eigenvector_dimension);
+                  spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,extended_eigenvector_dimension);
+                 ev_real.load(fin);ev_imag.load(fin);
+                 dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
+                        strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
+                        strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),abc);
+                 if (dd<delta)
+                 {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
+                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
+          
+          if(doijk==3&&strcmp("qee/qsd/qod",ext)==0
+             && (argv[1][1]=='s'||argv[1][1]=='o')
+             ){
+               // moments=xx*momentsx+yy*momentsy+zz*momentsz;
+                         for(int ii=1;ii<=nofatoms;++ii)
+                   for (i=1;i<=spinconf.na();++i)for(j=1;j<=spinconf.nb();++j)for(k=1;k<=spinconf.nc();++k)
+                  for(int nt=1;nt<=dim;++nt){spinconfev_real.m(i,j,k)(nt+dim*(ii-1))=xx*ev_real.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_real.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_real.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
+                                             spinconfev_imag.m(i,j,k)(nt+dim*(ii-1))=xx*ev_imag.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_imag.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_imag.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
+                                        }
+               } else
+               {
+                  spinconfev_real=ev_real;
+                  spinconfev_imag=ev_imag; 
+               }                 
+                 }
+                 pos=ftell(fin); 
+                 fgets(instr,MAXNOFCHARINLINE,fin); 
+                 while (instr[strspn(instr," \t")]=='#'&&feof(fin)==0) // pointer to 'ltrimstring' 
+                  {pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
+                 jj=fseek(fin,pos,SEEK_SET);
+               }}
+              fclose (fin);
+              check_dd(checkdd,outhklstr,outstr); // check if .mf and .ext agree
+                fprintf(stdout,"#%s - %s - eigenvector\n",outstr,oscill_type);
+              fprintf(stdout,"#real\n");
+              spinconfev_real.print(stdout);
+              fprintf(stdout,"#imag\n");
+              spinconfev_imag.print(stdout);
+
 }

@@ -14,7 +14,7 @@ int nofatoms,nofcomponents,maxnofatoms;
    Matrix r;
    Vector abc;
 
-cryststruct()
+cryststruct() // constructor
 {nofatoms=0;nofcomponents=3,maxnofatoms=MAXNOFATOMS;
  r=Matrix(1,3,1,3);
  abc=Vector(1,6);abc=0;
@@ -22,6 +22,14 @@ cryststruct()
  abc(5)=90;
  abc(6)=90;
 
+}
+
+cryststruct(const cryststruct & p) // copy constructor
+{nofatoms=p.nofatoms;nofcomponents=p.nofcomponents,maxnofatoms=p.maxnofatoms;
+ r=Matrix(1,3,1,3);r=p.r;int i;
+ abc=Vector(1,6);abc=p.abc;
+ for(i=1;i<=nofatoms&&i<MAXNOFATOMS;++i){x[i]=p.x[i];y[i]=p.y[i];z[i]=p.z[i];
+ sipffilenames[i]=p.sipffilenames[i];}
 }
 
 double a(){return abc(1);}

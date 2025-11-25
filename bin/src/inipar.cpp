@@ -100,8 +100,10 @@ printf (" 		  * ./results/.sps.eps will be updated not only \n");
 printf (" 		    when a H-T point has been finished but always \n");
 printf (" 		    when a structure with smaller free energy \n");
 printf (" 		    has been stabilized\n");
-printf (" Note: files which must be in current directory -\n");
-printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
+printf (" Note: - files which must be in current directory -\n");
+printf ("         ./mcphas.ini, ./mcphas.j, directory ./results\n");
+printf (" 	- parallel processing: the number of threads can be set by the environment variable\n");
+printf (" 		   MCPHASE_NOFTHREADS or by the variable nofthreads in mpchas.ini\n");
       exit (EXIT_FAILURE);
 } 
 
@@ -154,7 +156,7 @@ int colcod[]=    {-1,19,20,0,21,1,2,3}; // field to store code for assigning typ
                                            // set default values here (see list below for different types)
                                            // using the out5 out6  ... commands in mcdisp.par these codes can be modified
 
-#define COLHEADDIM 22	
+#define COLHEADDIM 36	
 // different output data for columns 1-7
 const char * colhead []= {  "T [K]", //      0                                                 
                             "Ha [T]", //      1                                                  
@@ -178,7 +180,21 @@ const char * colhead []= {  "T [K]", //      0
                             "x",  //    19 
                             "y", //     20 
                             "|H| [T]",   //    21
-                            "|E| [T]"   //    22
+                            "|E| [T]",   //    22
+                  "|Hext|[T]", //    23
+                  "|Eext|[T]",//    24
+                  "Hexta[T]",//    25
+                  "Hextb[T]",//    26
+                  "Hextc[T]",//    27
+                  "Hexti[T]",//    28
+                  "Hextj[T]",//    29
+                  "Hextk[T]",//    30
+                  "Eexta[kV/mm]",//    31
+                  "Eextb[kV/mm]",//    32
+                  "Eextc[kV/mm]",//    33
+                  "Eexti[kV/mm]",//    34
+                  "Eextj[kV/mm]",//    35
+                  "Eextk[kV/mm]"//    36
                                };
  bool inipar::defaultcolcode(int col,int  colcode) // resets default columns if not set by user (outcolset==true)
 { bool ret=false;                                            // returns true if reset has been successful
@@ -187,7 +203,7 @@ const char * colhead []= {  "T [K]", //      0
 return ret;
 }
 // calculate the value of different output data for user defined columns ...
-double inipar::calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
+double inipar::calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc,Vector & M, Vector & P)
 {double xx=x,yy=y;
  Vector Habc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hext(1,3);
           ijk2dadbdc(Habc,v,abcu);
@@ -196,6 +212,37 @@ double inipar::calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext
 Vector Hijk(1,3);Hijk=Hext(1,3);double NormH=Norm(Hijk);
 Vector Eijk(1,3);Eijk=Hext(4,6,-3);double NormE=Norm(Eijk);
 double ret=(*colvaluepointer(i,xx,yy,T,Hext,Habc,Eabc,NormH,NormE));
+// use demagnetisating factor to compute external fields if M / P nonzero
+if(Norm(M)>1e-20)
+ {Vector Hdemag(1,3); // mu0 Hdemagnetizing in Tesla
+   Hdemag=N*M; // demagnetizing field in ijk coordinates
+  ijk2dadbdc(v,Hdemag,abcu);
+  switch (i) {
+              case 25: ret+=v(1);break;
+              case 26: ret+=v(2);break;
+              case 27: ret+=v(3);break;
+              case 28: ret+=Hdemag(1);break;
+              case 29: ret+=Hdemag(2);break;
+              case 30: ret+=Hdemag(3);break;
+              case 23: ret=Norm(Hijk+Hdemag); break;
+              default: break;
+             }  
+ }
+if(Norm(P)>1e-20)
+ {Vector Edepol(1,3);Edepol=N*P; // demagnetizing field in ijk coordinates
+  ijk2dadbdc(v,Edepol,abcu);
+  switch (i) {
+              case 25: ret+=v(1);break;
+              case 26: ret+=v(2);break;
+              case 27: ret+=v(3);break;
+              case 28: ret+=Edepol(1);break;
+              case 29: ret+=Edepol(2);break;
+              case 30: ret+=Edepol(3);break;
+              case 23: ret=Norm(Eijk+Edepol); break;
+              default: break;
+             }  
+ 
+ }
 return ret;
 }
 
@@ -203,20 +250,18 @@ double * inipar::colvaluepointer(int & i,double & x, double & y,double& T,Vector
                  Vector & Eabc,double & NormH, double & NormE)
 {      switch (i) {
 case 0:  return &T;break;
-case 1:  
-case 2:  
-case 3:  return &Habc(i);
-         break;
-case 4:  return &Hext(1);break;
-case 5:  return &Hext(2);break;
-case 6:  return &Hext(3);break;
-case 7:  
-case 8:  
-case 9:  return &Eabc(i-6);
-         break;
-case 10:  return &Hext(4);break;
-case 11:  return &Hext(5);break;
-case 12:  return &Hext(6);break;
+case 1:  case 25: return &Habc(1);break;
+case 2:  case 26: return &Habc(2);break;
+case 3:  case 27: return &Habc(3);break;
+case 4:  case 28: return &Hext(1);break;
+case 5:  case 29: return &Hext(2);break;
+case 6:  case 30: return &Hext(3);break;
+case 7:  case 31: return &Eabc(1);break;
+case 8:  case 32: return &Eabc(2);break;
+case 9:  case 33: return &Eabc(3);break;
+case 10: case 34: return &Hext(4);break;
+case 11: case 35: return &Hext(5);break;
+case 12: case 36: return &Hext(6);break;
 case 13:  return &Hext(7);break;
 case 14:  return &Hext(8);break;
 case 15:  return &Hext(9);break;
@@ -225,8 +270,8 @@ case 17:  return &Hext(11);break;
 case 18:  return &Hext(12);break;
 case 19:  return &x;break;
 case 20:  return &y;break;
-case 21:  return &NormH ;break;
-case 22:  return &NormE;break;
+case 21: case 23: return &NormH ;break;
+case 22: case 24: return &NormE;break;
 default: fprintf(stderr,"Error mcphas: unknown column code %i\n",i);exit(EXIT_FAILURE);
                     }
 
@@ -345,16 +390,18 @@ Hext(6)+=v(3);
 }
 
  // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
+ // mind: check done assuming zero magnetisation M and zero polarisation P
  // if yes, returns true ... 
 bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc)
 {int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
  if(nn[0]<maxcol)return false; // array too small
  double d;float x=0,y=0; // do not use x and y
+ Vector M(1,3),P(1,3); M=0;P=0;
  for(int i=1;i<=usrdefcols[0];++i)
  { // different output data for user defined columns ...
   switch(colcod[i])
   {case 19: case 20:  d=0; break; // do not use x,y
-   default: d=calccolvalue(colcod[i],x,y, T,Hext, abc)-nn[i];
+   default: d=calccolvalue(colcod[i],x,y, T,Hext, abc,M,P)-nn[i];
   }
 //  printf("d=%g i=%i nn=%g |",d,i,nn[i]);
   if(fabs(d)>SMALL_FIELD)return false;
@@ -369,10 +416,10 @@ void inipar::print_usrdefcolcodes(FILE *fout)
  fprintf(fout,"out%i=%s ",usrdefcols[i],colhead[colcod[i]]);
 }
 // print user defined columns
-void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext)
+void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,Vector & M, Vector & P,bool withtext)
 {bool c[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i)c[i]=false;
  for(int i=1;i<=usrdefcols[0];++i)
- { double val=calccolvalue(colcod[i],x,y,T,Hext,abc);
+ { double val=calccolvalue(colcod[i],x,y,T,Hext,abc,M,P);
    if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[i]],myround(val));
    else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? 0 :strlen(colhead[colcod[i]])-8 ),"",myround(val));
    c[colcod[i]]=true;
@@ -481,7 +528,7 @@ int inipar::load (int & nofinis,char**lofpref)
   errno = 0;startcputime= std::clock();
   fin = fopen(savfilename, "rb");
   if (fin==NULL) return 1;
-  xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;zero=0;
+  xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;zero=0;N=0;
   qmin(1)=1;qmin(2)=1;qmin(3)=1;qmax=0;deltaq=0;maxqperiod=0;maxnofspins=0;nofrndtries=0;nofMCsteps=0;
   minnr1=0;
   minnr2=0;
@@ -564,6 +611,13 @@ int inipar::load (int & nofinis,char**lofpref)
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s50",zero[17]);    
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s60",zero[18]);
 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Nii",N[1][1]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Nij",N[1][2]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Nik",N[1][3]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Njj",N[2][2]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Njk",N[2][3]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Nkk",N[3][3]);
+
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1]); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2]); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3]); 
@@ -602,6 +656,7 @@ int inipar::load (int & nofinis,char**lofpref)
     }
    }
   fclose (fin);
+ N(2,1)=N(1,2);N(3,1)=N(1,3);N(3,2)=N(2,3);
  for(int i=1;i<=usrdefcols[0];++i){if(colcod[i]>COLHEADDIM)
  {fprintf(stderr,"Error reading mcphas.ini - out%i = %i > %i not possible !\n",i,colcod[i],COLHEADDIM);exit(EXIT_FAILURE);}
  }
@@ -744,6 +799,13 @@ if(zero(16)!=0)checkpr(fout, "s40",zero(16),p.zero(16));
 if(zero(17)!=0)checkpr(fout, "s50",zero(17),p.zero(17));
 if(zero(18)!=0)checkpr(fout, "s60",zero(18),p.zero(18));
 
+checkpr(fout,"Nii",N(1,1),p.N(1,1));
+checkpr(fout,"Nij",N(1,2),p.N(1,2));
+checkpr(fout,"Nik",N(1,3),p.N(1,3));
+checkpr(fout,"Njj",N(2,2),p.N(2,2));
+checkpr(fout,"Njk",N(2,3),p.N(2,3));
+checkpr(fout,"Nkk",N(3,3),p.N(3,3));
+
 checkpr(fout, "hmin",qmin(1),p.qmin(1));
 checkpr(fout, "hmax",qmax(1),p.qmax(1));
 checkpr(fout, "deltah",deltaq(1),p.deltaq(1));
@@ -861,11 +923,20 @@ void inipar::print (FILE * fout)
     if(zero(17)!=0)fprintf(fout,"s50=%g\n",zero(17));
     if(zero(18)!=0)fprintf(fout,"s60=%g\n",zero(18));
 
+    fprintf(fout,"#!Nii=%g\n",N(1,1));
+    fprintf(fout,"#!Nij=%g\n",N(1,2));
+    fprintf(fout,"#!Nik=%g\n",N(1,3));
+    fprintf(fout,"#!Njj=%g\n",N(2,2));
+    fprintf(fout,"#!Njk=%g\n",N(2,3));
+    fprintf(fout,"#!Nkk=%g\n",N(3,3));
+
     fprintf(fout,"#input (xHa xHb xHc) (yHa yHb yHc) and (Ha0 Hb0 Hc0) are vectors\n");
     fprintf(fout,"#given in terms of components with respect to unit vectors along the\n");
     fprintf(fout,"#Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
     fprintf(fout,"#For the external magnetic field unit is Tesla.\n");
     fprintf(fout,"#For the external electric field unit is kV/mm.\n");
+    fprintf(fout,"#For the external stress tensor the unit is GPa.\n\n");
+
     fprintf(fout,"#For the external stress tensor the unit is GPa.\n\n");
 
     fprintf(fout,"# out variables to control first columns of output files results/mcphas.*:\n");
@@ -874,7 +945,7 @@ void inipar::print (FILE * fout)
     for(int i=0;i<=COLHEADDIM;++i){
     fprintf(fout,"#            %i....%s\n",i,colhead[i]);
                    }
- 
+
     fprintf(fout,"\n[GENERATION OF SPIN CONFIGURATIONS]\n");
     fprintf(fout,"# test q vector (qmin qmax deltaq)\n");
     fprintf(fout,"hmin=%g\nhmax=%g\ndeltah=%g\n",qmin(1),qmax(1),deltaq(1));
@@ -946,6 +1017,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   nofthreads=0; // set nof threads zero so initially load() will load them, on following call to load
                 // from checkini it will then not load nofthreads to ensure the program is stable.
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
+  N=Matrix(1,3,1,3);N=0;
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;include_cd=false;
   ipeps1=NULL;ipeps2=NULL;ipeps3=NULL;ipeps4=NULL;ipeps5=NULL;ipeps6=NULL;
@@ -1066,6 +1138,7 @@ inipar::inipar (const inipar & p)
   calcsps_duration=p.calcsps_duration;
 
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
+  N=Matrix(1,3,1,3); N=p.N;
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   xv=p.xv;xmin=p.xmin;xmax=p.xmax;xstep=p.xstep;
   yv=p.yv;ymin=p.ymin;ymax=p.ymax;ystep=p.ystep;

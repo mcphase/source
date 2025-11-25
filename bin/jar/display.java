@@ -299,7 +299,7 @@ replot
       {System.out.println("- too few arguments...");
        System.out.println("  program display - show and watch data file by viewing a xy graphic on screen\n");
        System.out.println("use as:  display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]\n");
-       System.out.println("         xcol,ycol ... column to be taken as x-, y- axis in a lineplot, expressions such as 'c1xc2+1' are allowed\n");
+       System.out.println("         xcol,ycol ... column to be taken as x-, y- axis in a lineplot, expressions such as 'c1xc2+1*(c3==2)*(c5<7)' are allowed\n");
        System.out.println("         to plot sum/ productof columns");
        System.out.println("	 filename ..... filename of datafile");
        System.out.println("	 Data files may contain lines to tune the display output, such as");
@@ -392,12 +392,12 @@ replot
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ytext")) // option "-ytext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detyText=false;ss=SF.FirstWord(s);xText=ss;
+             detyText=false;ss=SF.FirstWord(s);yText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detxText=false;ss=SF.FirstWord(s);yText=ss;
+             detxText=false;ss=SF.FirstWord(s);xText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title meV"
@@ -471,8 +471,8 @@ replot
  static Integer prefxsize,prefysize;
  static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit,showgrid,logx,logy;
  static String [] legend; 
- static String xText = "";
  static String yText = "";
+ static String xText = "";
  static String Title = "";
  static String Vlines = "";
  static String Hlines = "";
@@ -564,7 +564,7 @@ replot
      */
     private static JFreeChart createChart(IntervalXYDataset dataset) {
         chart = ChartFactory.createScatterPlot(
-                Title, xText, yText, dataset,
+                Title, yText, xText, dataset,
                 PlotOrientation.HORIZONTAL, true, true, false);
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
@@ -645,17 +645,17 @@ plot.setDomainGridlinePaint(Color.BLACK);
      yAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
   if(logy){
      LogAxis ylogAxis = new LogAxis(yText);
-     plot.setDomainAxis(0,ylogAxis);
-     if(ymin-(ymax-ymin)*0.04>0)
+      if(ymin-(ymax-ymin)*0.04>0)
      {ylogAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);}
-         }
+     plot.setDomainAxis(0,ylogAxis);
+        }
   if(logx){
      LogAxis xlogAxis = new LogAxis(xText);
      xlogAxis.setLowerMargin(0.15);
      xlogAxis.setUpperMargin(0.15);
-     plot.setRangeAxis(0,xlogAxis);
      if(xmin-(xmax-xmin)*0.04>0)
      {xlogAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);}
+     plot.setRangeAxis(0,xlogAxis);
            }
 // this is for plotting a line 
 //     XYLineAnnotation axy = new  XYLineAnnotation(0.0, 0.0, 1.0, 0.0);
@@ -789,7 +789,7 @@ protected static void reload_data(int i){    try{
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext="))
               {chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;}
                             }
-        if(detyText==true){
+        if(detxText==true){
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext="))
               {chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;}
                           }
@@ -803,7 +803,7 @@ protected static void reload_data(int i){    try{
              else{chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,p.valueOf(clx).intValue()));}
         // if no data has yet been read  -go through string and try to find automatically column headers
         if(detyText==true&&dytf==0&&j==0&&SF.NofCols(strLine)>0)
-              if(cly.contains("c")){chart.getXYPlot().getRangeAxis().setLabel(cly);}
+              if(cly.contains("c")){chart.getXYPlot().getDomainAxis().setLabel(cly);}
              else{chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,p.valueOf(cly).intValue()));}
         continue;
              }  // fi is a comment
@@ -880,7 +880,7 @@ try{
                     ++j;
                    }
 }
-                   catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);
+                   catch(NumberFormatException e){if(j>0){--j;}System.exit(1);
                                                   }
                                                           
                }          //         System.out.println(ymin+" "+ymax);

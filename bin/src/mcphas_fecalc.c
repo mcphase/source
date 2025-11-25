@@ -232,7 +232,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
     u		magnetic energy[meV]
 
  */
-
+if (verbose==1){printf("f");fflush(stdout);}
  double fe,dE; // free energy
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector sigma(1,6); // external stress tensor in Voigt notation and units meV/pVol
@@ -317,6 +317,8 @@ if(ini.doeps){ // set coupling matrix
 // --------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
 // for (r=0;r<=sdim;++r)
+if (verbose==1){printf("c");fflush(stdout);}
+
 int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
             
  Matrix ** JJ; JJ= new Matrix *[(sdim+2)*(1+exstr)];   if (JJ == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
@@ -577,6 +579,7 @@ if(exstr>0){int iparanz;
 // exstrictexstrictexstrict EXCHANGE STRICTION exstrictexstrictexstrictexstrictexstrict
 
    } // for m loop nofatoms
+if (verbose==1){printf("s");fflush(stdout);}
 
 // Transform Coupling Coefficients into sparse matrix sMat:
 sMat<double> ** JS; JS= new sMat <double> *[(sdim+2)*(1+exstr)];   if (JS == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
@@ -589,6 +592,7 @@ JS[i][ln]=M2mat(JJ[i][ln]);
 //cout << JS[i][ln].display_full() << endl;
  } delete []JJ[i];
 }
+if (verbose==1){printf("t");fflush(stdout);}
  delete []JJ;
 
 //printf("coupling coefficients JS ready\n");
@@ -617,8 +621,8 @@ if (ini.displayall==1)   // display spincf if button is pressed
 // mf loop for selfconsistency **********************************************************
 // mf loop for selfconsistency **********************************************************
 // mf loop for selfconsistency **********************************************************
- clock_t start, start2;  
-
+time_t start, start2;  
+if (verbose==1){printf("l");fflush(stdout);}
 for (r=1;sta>ini.maxstamf;++r)
 {if (spinchange>ini.maxspinchange)
     {for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
@@ -638,7 +642,7 @@ MUTEX_UNLOCK (&mutex_ini_nofmaxspinchangeDIV);
      return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta) |||||||||||||||||||||||||||||||||||||||||||
-start = clock();
+start = time(0);
  sta=0;dE=0; if(ini.doeps)mf.epsmf=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {  if(ini.doeps)mf.epsmf+=GG*sps.m(i,j,k);
@@ -670,14 +674,16 @@ start = clock();
 #ifdef _THREADS
 MUTEX_LOCK (&mutex_ini_calcmf_duration);
 #endif
- ini.calcmf_duration+= (double)(clock() - start) / double(CLOCKS_PER_SEC);
+ ini.calcmf_duration+= (double)(time(0) - start);
+// if(ini.calcmf_duration>100000){fprintf("#Error ini.calcmf_duration=%g \n",ini.calcmf_duration);exit(1);}
 #ifdef _THREADS
 MUTEX_UNLOCK (&mutex_ini_calcmf_duration);
 #endif
-start2 = clock();
+start2 = time(0);
  if ((ini.maxnofmfloops<=1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
 else
 {mfold=mf;
+ if (r==1&&verbose==1){printf("m");fflush(stdout);}
 //2. calculate sps from mf||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {diff=sps.m(i,j,k);
@@ -827,7 +833,8 @@ MUTEX_UNLOCK (&mutex_ini_nofmaxloopDIV);
 #ifdef _THREADS
 MUTEX_LOCK (&mutex_ini_calcsps_duration);
 #endif
-   ini.calcsps_duration += (double)(clock() - start2) / double(CLOCKS_PER_SEC);
+   ini.calcsps_duration += (double)(time(0) - start2);
+// if(ini.calcsps_duration>100000){fprintf("#Error ini.calcsps_duration=%g \n",ini.calcsps_duration);exit(1);}
 #ifdef _THREADS
 MUTEX_UNLOCK (&mutex_ini_calcsps_duration);
 #endif   

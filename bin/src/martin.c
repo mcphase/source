@@ -177,9 +177,9 @@ int setvar(char * instr,const char * parameter,int &  var)
 }
 
 // parse a #! line for variables (a-z)
-void parseline(char * instr, parser & ob)
+void parseline(char * instr, parser & ob,int verbose)
 {char *token;
- token=instr;
+ token=instr;double result;
   
 // check if line is comment line -> if yes return 1
 if (instr[strspn(instr," \t")]=='#') 
@@ -188,26 +188,37 @@ if (instr[strspn(instr," \t")]=='#')
                                  // by mcphase - however "#!" will be treated as comment with variable to be read
  }
 if(strstr (token, "="))
-{while(strstr (token, "=")>strstr(token," ")&&strstr(token," "))++token;// advance to last space before = sign
+{while(strstr (token, "=")>strstr(token," ")&&strstr(token," ")){
+    if(verbose)printf("%c",*token);
+     ++token;}// advance to last space before = sign
    // #! or no comment line - treat first variable setting if present
  while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token))
-  {++token; 
-   if(*token=='#'){++token;if(*token!='!')return;}
+  {if(verbose)printf("%c",*token);
+   ++token; 
+   if(*token=='#'){if(verbose)printf("%c",*token);
+                  ++token;if(*token!='!')return;}
   } // advance while nonalphabet character
-  ob.eval_exp(token); 
+  // if verbose print everything until "=" sign
+  if(verbose){char *p;p=token;while(*p!='='){printf("%c",*p);++p;}printf("=");}
+  result=ob.eval_exp(token);  if(verbose)printf("%g ",result);
   token=strstr (token, "=");
   ++token;while(isspace(*token))++token;
 }
 while(strstr (token, "=")>strstr(token," ")&&strstr(token," ")) // treat other variables if present
 {//printf("%s\n",token);
  token=strstr(token," "); // advance to next space
- while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token)){++token; 
-   if(*token=='#'){++token;if(*token!='!')return;}
+ while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token)){
+   if(verbose)printf("%c",*token);
+   ++token; 
+   if(*token=='#'){if(verbose)printf("%c",*token);
+                   ++token;if(*token!='!')return;}
   } // advance while nonalphabet character
-  ob.eval_exp(token); 
+  // if verbose print everything until "=" sign
+  if(verbose){char *p;p=token;while(*p!='='){printf("%c",*p);++p;}printf("=");} 
+ result=ob.eval_exp(token); if(verbose)printf("%g ",result);
  token=strstr (token, "=");++token;while(isspace(*token))++token;
 }
-
+if(verbose)printf("\n");
 }
 
 // ********************************************************************************************************
@@ -1588,7 +1599,11 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double 
  
  double f2=-4*PI/v;
   // TERM I
-  for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be) =f2*q(al)*q(be)*exp(-qq/4/RR)/qq;
+  if(qn<1e-99){// we are at q=0 - take I=f2*N with N demagnetisation factor for sphere =1/3
+               for(int be=1;be<=3;++be)D(be,be)=f2*1/3; }   
+  else
+  { for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be) =f2*q(al)*q(be)*exp(-qq/4/RR)/qq;}
+
   // TERM II
   for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
   {
@@ -1599,9 +1614,17 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double 
    double Qn=Norm(Q);
    double QQ=Qn*Qn;
    double qLtAB=2*PI*((tauAB(1))*i+(tauAB(2))*j+(tauAB(3))*k);
-   double f0=f2*exp(-QQ/4/RR)/QQ;
+  if(Qn<1e-99){// we are at q=rez lattice vector - take I2=f2 N*expitau with N demagnetisation factor for sphere =1/3
+          double f0=f2*1/3;
    complex <double>expitau(f0*cos(qLtAB),-f0*sin(qLtAB));
+        for(int be=1;be<=3;++be)D(be,be)+=expitau;
+  
+     } else {
+          double f0=f2*exp(-QQ/4/RR)/QQ;
+   complex <double>expitau(f0*cos(qLtAB),-f0*sin(qLtAB));
+       
    for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be)+=expitau*Q(al)*Q(be) ;
+      }
   }
   
   // TERM IV
@@ -1663,9 +1686,10 @@ Matrix DAB0( Matrix & lattice, double & v,Matrix & rez,double & gJA, Vector & ta
  double R=2/cbrt(v);
  double RR=R*R;
  int L=2;
-  // TERM I =0
-  // TERM II
   double f2=-4*PI/v;
+  // TERM I for q=0 I estimate f2*N with N demagnetization factor for a sphere
+  for(int be=1;be<=3;++be)D(be,be)=f2*1/3;
+  // TERM II
   for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
   {
    Vector Q(1,3); 

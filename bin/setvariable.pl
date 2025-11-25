@@ -28,9 +28,9 @@ EOF
 }
  
 
-$varnam=$ARGV[0];shift @ARGV;
+$varnam=$ARGV[0];shift @ARGV;$original=$ARGV[0];
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$value=eval $ARGV[0];
-unless(looks_like_number($value)){$value=$ARGV[0];}
+unless(looks_like_number($value)){$value=$original;}
 shift @ARGV;
 
   foreach (@ARGV)

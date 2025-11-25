@@ -866,7 +866,7 @@ if(do_verbose==1){fprintf(stdout,"#Transform J(q) matrix  with U...\n");}
 
 
 // calculate Ac
-if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
+if(do_verbose==1){fprintf(stdout,"#calculating matrix A and J(Q) \n");}
 // Ac  is the matrix A which is given in manual chapter 9.2.1 (eq (30) ff) 
 // -- diagonalization gives omega_r and Tau
    ComplexMatrix Ac(1,dimA,1,dimA);
@@ -916,10 +916,10 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
 if (do_jqfile){
        if (do_verbose==1)
        {//fprintf (jqfile, "#spin (%i*r1 %i*r2 %i*r3) - spin (%i*r1 %i*r2 %i*r3)\n",i1,j1,k1,i2,j2,k2);
-         myPrintMatrix(stdout,J_Q); 
+         myPrintMatrix(stdout,J_Q,"J(Q)"); 
        }
 
-	// diagonalize JQ to get eigenvalues (biggest corresponds to Tn) !!!
+	if (do_verbose==1)printf("# diagonalizing JQ to get eigenvalues (biggest corresponds to Tn)\n");
          Vector Tn(1,ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms);
          ComplexMatrix eigenvectors(1,ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms,1,ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms);
          myEigenSystemHermitean (J_Q,Tn,eigenvectors,sort=1,maxiter);

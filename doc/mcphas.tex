@@ -637,19 +637,23 @@ input files {\prg mcphas.ini, mcphas.j, etc. } and type
 \begin{description}
 \item[\prg mcphas] to run the program generating stepwise $H-T$ values 
               in a loop given by {\prg mcphas.ini\index{mcphas.ini}} (you can also press the
-              symbol in the {\prg McPhase - Explorer} window).
-\item[\prg mcphas\index{mcphas} [file]]  to run the program with an input file --   
+              symbol in the {\prg McPhase - Explorer} window). The complete syntax of the command is actually
+\item[\prg mcphas\index{mcphas}[options] [file]] Adding the name of a file will run the program with an input file --   
              {\prg file} contains T(K) Hi(T) Hj(T) Hk(T) values to be calculated  in columns 
              3, 5, 6, 7, respectively (ijk coordinates defined by  $j||b$, $k||(a \times b)$ and $i$ normal to $k$ and $j$ )
              if [file] is not given, xmin xmax xstep (xT xHa xHb xHc)
              ymin ymax ystep (yT yHa yHb yHc) is read from file {\prg mcphas.ini\index{mcphas.ini}}
 	     and phase diagram is calculated
-\item[\prg mcphas\index{mcphas} -h]  to  print help and version of {\prg McPhas}.
-\item[\prg mcphas\index{mcphas} -stamax 14]  end mcphas\index{mcphas} if standard deviation exceeds 14.
-\item[\prg mcphas\index{mcphas} -a] avoid overwriting output files in results, append new results to existing files
-\item[\prg mcphas\index{mcphas} -doeps] refine strain epsilon using elastic and magnetoelastic constants 
+\end{description}
+
+Options are
+\begin{description}
+\item[\prg   -h]  to  print help and version of {\prg McPhas}.
+\item[\prg   -stamax 14]  end mcphas\index{mcphas} if standard deviation exceeds 14.
+\item[\prg   -a] avoid overwriting output files in results, append new results to existing files
+\item[\prg   -doeps] refine strain epsilon using elastic and magnetoelastic constants 
 see also section \ref{phonons} for how to enter these constants into {\prg mcphas.j}
-\item[\prg mcphas\index{mcphas} -cd] treat classical dipole interaction internally  (for the the first three 
+\item[\prg   -cd] treat classical dipole interaction internally  (for the the first three 
 the interaction operators $I_1,I_2,I_3$, which must correspond to angular momentum $J$, such as in the so1ion module)
             and it
                  is assumed that $(g_J.I_1,g_J.I_2,g_J.I_3)$ are the components of the magnetic
@@ -658,8 +662,12 @@ corresponding ion from the dipolar interaction calculation - this is the way for
 phonon degrees of freedom in such a calculation),
   the classical dipole interaction is calculated using the series expansion for the classical dipolar expansion 
 given by Bowden\cite{bowden81-827}. Using this option permits to avoid a large number of interaction constants in
-{\prg mcphas.j}
-\item[\prg mcphas\index{mcphas} -v]  to  enable verbose mode with lots of messages of {\prg McPhas}. Specifically
+{\prg mcphas.j}. For the mean field loop the dipolar interaction in equation (26) of\cite{bowden81-827} 
+has to be evaluated for $q=0$, which is ambigous due to a factor $q_{\alpha}q_{\beta}/q^2$ which appears
+in the first term ''I'' in equation (26) of\cite{bowden81-827}. This ambigousity reflects the shape
+of the sample. The factor $q_{\alpha}q_{\beta}/q^2$ is approximated in {\prg mcphas} by it's average
+with respect to spherical angle, i.e. $q_{\alpha}q_{\beta}/q^2 \sim \delta_{\alpha}q_{\beta}/3$.
+\item[\prg   -v]  to  enable verbose mode with lots of messages of {\prg McPhas}. Specifically
 the verbose mode enables the following features:
   \begin{itemize}
 			          \item more information is printed out, 
@@ -671,7 +679,7 @@ the verbose mode enables the following features:
 				    when a structure with smaller free energy 
 				    has been stabilised
   \end{itemize}
- \item[\prg mcphas\index{mcphas}  -prefix 001  ]  try to read files starting with 001, e.g.
+ \item[\prg    -prefix 001  ]  try to read files starting with 001, e.g.
  		    001mcphas.ini, if these exist, otherwise take
  		    standard input files, check if in mcphas.ini there are
                    parameters such as 001xmin and use those, if these are given AFTER the 
@@ -680,13 +688,13 @@ the verbose mode enables the following features:
  		    results/001mcphas*.* (option ideal for parallel processes).
                    Wildcard * may be used in the prefix option, e.g.  -prefix 00* will run
                    {\prg mcphas} with all prefixes in the mcphas.ini file starting with 00.
- \item[\prg mcphas\index{mcphas}         -read  001 ]   try to read output files of previous calculation starting
+ \item[\prg           -read  001 ]   try to read output files of previous calculation starting
  		     with 001, e.g. results/001mcphas.fum, if these exist, and if 
  		    the x-y-T-Ha-Hb-Hc point is found and the calculation was stable 
                    (i.e. free energy in results/001mcphas.fum not zero do not 
                    recalculate it but take results from this previous calculation
  		     and store those. Option to recalculate nonstable points only.
-\item[\prg mcphas\index{mcphas} -t 3]  Takes structure number 3 in {\prg mcphas.tst } and no other structures
+\item[\prg   -t 3]  Takes structure number 3 in {\prg mcphas.tst } and no other structures
                    and traces this solution, i.e. no other structures are calculated and no comparison of
                    free energies is done.
 \item[\prg mcphasit\index{mcphas}] to start mcphase in commandline mode without opening any window

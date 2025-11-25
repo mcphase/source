@@ -23,11 +23,20 @@ $PI=3.14159265358979323846;
  $Cel= zeroes (7,7); # for storage of elastic constants if needed
   # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
 exit usage() if ($#ARGV<0);
- 
+
+$shape=$ARGV[0];
+
+if($shape=~/-cylinder/){shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
+($cyl_diameter) = eval $ARGV[0];
+shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
+($cyl_length) = eval $ARGV[0];shift @ARGV;
+}
+
+
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
-$rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 shift @ARGV; 
+$rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 @storeargv=@ARGV;
 foreach(@ARGV){$_=~s/\A-(\d)/m$1/g;} # getoption hangs up if there is a negative number as parameter: substitute -0.213 with m0.213
 # Parses command line options
@@ -546,7 +555,18 @@ print_time_estimate_until_end(0.0);
    $xx=$aabbcc->at(0);
    $yy=$aabbcc->at(1);
    $zz=$aabbcc->at(2);
+   $save=0;
    if ($r<=$rmax && $r>0){#save neighbour j format
+    if($shape=~/-cylinder/){
+      $cyl_r=sqrt($rvec->at(0)*$rvec->at(0)+$rvec->at(1)*$rvec->at(1));
+      $cyl_d=$rvec->at(2);
+      if($cyl_r<0.5*$cyl_diameter&&$cyl_d<0.5*$cyl_length){$save=1;}
+                      }
+    else{$save=1;}
+  
+
+                         }
+   if($save==1){
    if($tabout){
 # check if neighbour is already in table
 $ff=0;
@@ -1722,10 +1742,12 @@ sub usage ()
 {
 print STDOUT << "EOF";
 
- usage: makenn 23.3 [options] 
+ usage: makenn [-cylinder 6 20] 23.3 [options] 
 
  meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
  and put them into makenn.j,the output values are sorted by ascending distance
+ (in case of -cylinder 6 20 only take the neighbour if within a cylinder of diameter 6
+  and lenght 20=+-10A)
 
  in interaction columns put by default the classical dipole interaction (meV): this is 
  done assuming the operator sequence 

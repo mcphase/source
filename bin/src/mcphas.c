@@ -117,15 +117,16 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   
 
    inipar ini((*inip.inis[ninis]));
+
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
    ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;ini.include_cd=inc_cd;
    ini.cel=cel; ini.cv=cv;
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
-  if(strcmp(ini.prefix,readprefix)==0&&prefix[0]!='\0')filemode="a";
-   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini"); 
-   ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
+ if(strcmp(ini.prefix,readprefix)==0&&prefix[0]!='\0')filemode="a";
+    strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini");  
+  ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
 
 
 // as class par load  parameters from file
@@ -212,9 +213,10 @@ T=0.0;h=0;
     testspins.save(prefix,"w");
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.qvc");
     qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
-// declare variable physprop (typa class physproperties)
-   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
 
+// declare variable physprop (typa class physproperties)
+
+   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs);
 // *** calculate electrical polarisation (static, from ionic charges and positions, electret matter)               
   if(fabs(inputpars.totalcharge)<SMALLCHARGE)
 {Vector rijk(1,3);
@@ -359,6 +361,8 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          ini.maxnofmfloops=maxnofmfloops;
          ini.maxstamf=maxstamf;
          }
+       Vector M(1,3);Vector P(1,3);M=0;P=0;
+
        switch (j)
        {case 0:
             //save physical properties of HT-point
@@ -367,7 +371,10 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
           if(strcmp(ini.prefix,readprefix)!=0||prefix[0]=='\0'||parsread!=0)
            {sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);ini.sta=sta;}
           else
-           {ini.print_usrdefcols(stdout,x,y,T,physprop.H,inputpars.cs.abc,true);printf("\n");}
+           {   M=physprop.mu0M();// magnetisation mu0*M(Tesla) 
+               P=physprop.Pdiveps0(); //  Polarisation/epsilon0 (V/m)
+
+            ini.print_usrdefcols(stdout,x,y,T,physprop.H,inputpars.cs.abc,M,P,true);printf("\n");}
    	    ++ini.nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
@@ -375,7 +382,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          case 2:
          case 3: //ht calculation leads to no results- save dummy line
                 fprintf(stderr,"Warning mcphas: no stable structure found at ");
-                ini.print_usrdefcols(stderr,x,y,T,physprop.H,inputpars.cs.abc,true);fprintf(stderr,"\n");
+                ini.print_usrdefcols(stderr,x,y,T,physprop.H,inputpars.cs.abc,M,P,true);fprintf(stderr,"\n");
 // T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
 //                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));
  	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
