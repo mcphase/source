@@ -21,8 +21,10 @@ float x,y; // phasediagramm labels
 int j;  // index of spinstructure
 double T; // temperature
 double cv; // specific heat
-Vector m,mabc,H,Pel,Pelabc,Pel0,Pelabc0,totalJ; 
+Vector m,mabc,Pel,Pelabc,Pel0,Pelabc0,totalJ; 
 Matrix cel;
+Vector Hint; // the vector Hint stored in physprop refers always to the 
+             // internal field in the sample 
  // moment and H field and electrical polarisation (Pel0 refers to 
  // structural (probably not measurable) polarisation in case of lack of inversion symmetry,
  // Pel is the induced polarisation)

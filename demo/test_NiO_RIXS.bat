@@ -55,7 +55,7 @@ call setup_mcdisp_mf 2 0 0 1
 echo "calculate the spinwaves and compare to literature"
 call mcdispit -max 3 -prefix 001
 range 9 23 23.6 results/001mcdisp.qei
-getvalue.pl -c 23.4588  1 9 1.376 0 results/001mcdisp.qei
+getvalue.pl -c 23.459 1 9 1.376 0 results/001mcdisp.qei
 getvalue.pl -c 0.6807  1 10 1.376 0 results/001mcdisp.qei
 getvalue.pl -c 0.4784   1 13 1.376 0 results/001mcdisp.qei
 getvalue.pl -c -0.01514 1 17 1.376 0 results/001mcdisp.qei

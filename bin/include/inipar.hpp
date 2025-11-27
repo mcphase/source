@@ -45,7 +45,7 @@ class inipar
   int nofcalls; // number of calls to fecalc
 
   //MCPHASE RUNTIME CONTROL
-  int exit_mcphas,pause_mcphas,displayall,logfevsQ;
+  int exit_mcphas,pause_mcphas,displayall,logfevsQ,demag;
   
   // XY PHASEDIAGRAM PARAMETERS
   Vector xv,yv,zero; // xT xHa xHb xHc ,  yT yHa yHb yHc, T0 Ha0 Hb0 Hc0
@@ -123,6 +123,9 @@ bool calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs);
  // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
  // if yes, returns true ... 
 bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc);
+ // the same with nonzero polarisation to account for demagnetisation effects when
+ // comparing for example Hexta and Ha 
+bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc, Vector & M, Vector & P );
 
   // printout initial parameters to file   
    void print();

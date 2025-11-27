@@ -6,7 +6,7 @@
  
  #get filename from command line if given
  my ($file) = @ARGV;
- if ($file&&$file=~/-.*h/) # look if user wants help message (option -h)
+ if ($file&&$file=~/-h/) # look if user wants help message (option -h)
  {print "program hkl [-FT|-h][-7|-0,1,0] [file] 
   produces neutron intensity for one reflection from results/mcphas*.hkl file
   Options: -7 .... extract reflex number 7

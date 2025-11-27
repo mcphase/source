@@ -15,7 +15,7 @@ int verbose=0;
 #include "mcphas_fecalc.c"
 #include "mcphas_physpropcalc.c"
 
-int rephtcalc(Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
+int rephtcalc(Vector Happ,double T,inipar & ini,par & inputpars,qvectors & testqs,
              testspincf & testspins, physproperties & physprops)
 {int j=1;
 
@@ -23,7 +23,7 @@ float rr=fmodf(ini.repeat-0.00001,1.0);
           double maxstamf=ini.maxstamf;int rep;
           int maxnofmfloops=ini.maxnofmfloops,maxspinchange=ini.maxspinchange;
           for(rep=0;rep<=floor(ini.repeat)&&j>0;++rep)
-          {j=htcalc(H,T,ini,inputpars,testqs,testspins,physprops,0);
+          {j=htcalc(Happ,T,ini,inputpars,testqs,testspins,physprops,0);
           // returns j=0 if successfull
  //  --> if no spinconfiguration has been found at ht point
  // returns j=1 if recalculation of fe yields too different value
@@ -232,16 +232,16 @@ if(poly==0){
   double theta=acos(h(3)/H);
    // set field        
       physprop.T=T(1);
-      physprop.H(1)=h(1);
-      physprop.H(2)=h(2);
-      physprop.H(3)=h(3);
+      physprop.Hint(1)=h(1);
+      physprop.Hint(2)=h(2);
+      physprop.Hint(3)=h(3);
    print_time_estimate_until_end((2*PI-az)/(az+2*PI/nofsteps));//ratio = nofpointstodo / nofpointsdone
  //calculate physical properties at HT- point
-   s=rephtcalc(physprop.H,T(1),ini,inputpars,testqs,testspins,physprop);
+   s=rephtcalc(physprop.Hint,T(1),ini,inputpars,testqs,testspins,physprop);
    //save physical properties of HT-point
    if(s==0)++ini.nofstapoints;
    else {++ini.noffailedpoints;fprintf(stderr,"# Warning anisotropyit: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
-                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));}
+                 physprop.T,h(1),h(2),h(3));}
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T(1),H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
   } // H/T loop 
@@ -256,15 +256,15 @@ else
  h(3)=H*cos(theta);
 for(int Ti=1;Ti<=Tsteps;++Ti){ // set field        
       physprop.T=T(Ti);
-      physprop.H(1)=h(1);
-      physprop.H(2)=h(2);
-      physprop.H(3)=h(3);
+      physprop.Hint(1)=h(1);
+      physprop.Hint(2)=h(2);
+      physprop.Hint(3)=h(3);
    //calculate physical properties at HT- point
-   s=rephtcalc(physprop.H,T(Ti),ini,inputpars,testqs,testspins,physprop);
+   s=rephtcalc(physprop.Hint,T(Ti),ini,inputpars,testqs,testspins,physprop);
    //save physical properties of HT-point
    if(s==0)++ini.nofstapoints;
    else {++ini.noffailedpoints;fprintf(stderr,"# Warning anisotropyit: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
-                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));}
+                 physprop.T,h(1),h(2),h(3));}
 if(Ti==1)fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T(Ti),H,h(1),h(2),h(3),theta*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
    ++ct;mpoly(Ti)+=physprop.m*h/Norm(h);

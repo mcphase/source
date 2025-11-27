@@ -203,15 +203,15 @@ const char * colhead []= {  "T [K]", //      0
 return ret;
 }
 // calculate the value of different output data for user defined columns ...
-double inipar::calccolvalue(int & i,float & x, float & y,double& T,Vector & Hext,Vector & abc,Vector & M, Vector & P)
+double inipar::calccolvalue(int & i,float & x, float & y,double& T,Vector & Hint,Vector & abc,Vector & M, Vector & P)
 {double xx=x,yy=y;
- Vector Habc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hext(1,3);
+ Vector Habc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hint(1,3);
           ijk2dadbdc(Habc,v,abcu);
- Vector Eabc(1,3);v=Hext(4,6,-3);
+ Vector Eabc(1,3);v=Hint(4,6,-3);
           ijk2dadbdc(Eabc,v,abcu);
-Vector Hijk(1,3);Hijk=Hext(1,3);double NormH=Norm(Hijk);
-Vector Eijk(1,3);Eijk=Hext(4,6,-3);double NormE=Norm(Eijk);
-double ret=(*colvaluepointer(i,xx,yy,T,Hext,Habc,Eabc,NormH,NormE));
+Vector Hijk(1,3);Hijk=Hint(1,3);double NormH=Norm(Hijk);
+Vector Eijk(1,3);Eijk=Hint(4,6,-3);double NormE=Norm(Eijk);
+double ret=(*colvaluepointer(i,xx,yy,T,Hint,Habc,Eabc,NormH,NormE));
 // use demagnetisating factor to compute external fields if M / P nonzero
 if(Norm(M)>1e-20)
  {Vector Hdemag(1,3); // mu0 Hdemagnetizing in Tesla
@@ -246,28 +246,28 @@ if(Norm(P)>1e-20)
 return ret;
 }
 
-double * inipar::colvaluepointer(int & i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
+double * inipar::colvaluepointer(int & i,double & x, double & y,double& T,Vector & Hint,Vector & Habc,
                  Vector & Eabc,double & NormH, double & NormE)
 {      switch (i) {
 case 0:  return &T;break;
 case 1:  case 25: return &Habc(1);break;
 case 2:  case 26: return &Habc(2);break;
 case 3:  case 27: return &Habc(3);break;
-case 4:  case 28: return &Hext(1);break;
-case 5:  case 29: return &Hext(2);break;
-case 6:  case 30: return &Hext(3);break;
+case 4:  case 28: return &Hint(1);break;
+case 5:  case 29: return &Hint(2);break;
+case 6:  case 30: return &Hint(3);break;
 case 7:  case 31: return &Eabc(1);break;
 case 8:  case 32: return &Eabc(2);break;
 case 9:  case 33: return &Eabc(3);break;
-case 10: case 34: return &Hext(4);break;
-case 11: case 35: return &Hext(5);break;
-case 12: case 36: return &Hext(6);break;
-case 13:  return &Hext(7);break;
-case 14:  return &Hext(8);break;
-case 15:  return &Hext(9);break;
-case 16:  return &Hext(10);break;
-case 17:  return &Hext(11);break;
-case 18:  return &Hext(12);break;
+case 10: case 34: return &Hint(4);break;
+case 11: case 35: return &Hint(5);break;
+case 12: case 36: return &Hint(6);break;
+case 13:  return &Hint(7);break;
+case 14:  return &Hint(8);break;
+case 15:  return &Hint(9);break;
+case 16:  return &Hint(10);break;
+case 17:  return &Hint(11);break;
+case 18:  return &Hint(12);break;
 case 19:  return &x;break;
 case 20:  return &y;break;
 case 21: case 23: return &NormH ;break;
@@ -366,45 +366,58 @@ void inipar::calcTHfromxy(double & T,Vector & h,double x, double y,cryststruct &
 
 // set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
  // returns true if successful (NormH NormE x y are not used)
-bool inipar::calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs)
+bool inipar::calcTHfromnn(double & T,Vector & Hint,float * nn,cryststruct &cs)
 {int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
  if(nn[0]<maxcol)return false; // array too small, not enough parameters in line
- double xx=0,yy=0,NormH,NormE;T=0;Hext=0;
+ double xx=0,yy=0,NormH,NormE;T=0;Hint=0;
  Vector Habc(1,3),Eabc(1,3);Habc=0;Eabc=0;
 for(int i=1;i<=usrdefcols[0];++i)
-{ (*colvaluepointer(colcod[usrdefcols[i]],xx,yy,T,Hext,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
+{ (*colvaluepointer(colcod[usrdefcols[i]],xx,yy,T,Hint,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
 }
-// if Habc or Eabc are given - add these to Hext
+// if Habc or Eabc are given - add these to Hint
 Vector abc(1,6),v(1,3); abc(1)=1; abc(2)=1; abc(3)=1; 
                   abc(4)=cs.alpha(); abc(5)=cs.beta(); abc(6)=cs.gamma();
 dadbdc2ijk(v,Habc,abc); 
-Hext(1)+=v(1);
-Hext(2)+=v(2);
-Hext(3)+=v(3);
+Hint(1)+=v(1);
+Hint(2)+=v(2);
+Hint(3)+=v(3);
 dadbdc2ijk(v,Eabc,abc); 
-Hext(4)+=v(1);
-Hext(5)+=v(2);
-Hext(6)+=v(3);
+Hint(4)+=v(1);
+Hint(5)+=v(2);
+Hint(6)+=v(3);
 
  return true;
 }
 
- // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
+ // given T and Hint check if in array nn[0-7] the values are in accordance with T and Hext
  // mind: check done assuming zero magnetisation M and zero polarisation P
  // if yes, returns true ... 
 bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc)
+{Vector M(1,3),P(1,3); M=0;P=0;
+return checkTH(nn,T,Hext,abc,M,P);
+}
+
+ // given T and Hint check if in array nn[0-7] the values are in accordance with T and Hext
+ // if yes, returns true ... 
+bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc,Vector & M, Vector & P)
 {int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
  if(nn[0]<maxcol)return false; // array too small
  double d;float x=0,y=0; // do not use x and y
- Vector M(1,3),P(1,3); M=0;P=0;
+ // transform Hext into Hint using M and P
+ Vector Hint(1,Hext.Hi()),v(1,3);Hint=Hext;
+ v=N*M; for(int i=1;i<=3;++i)Hint(i)-=v(i);
+ v=N*P; for(int i=1;i<=3;++i)Hint(i+3)-=v(i);
  for(int i=1;i<=usrdefcols[0];++i)
  { // different output data for user defined columns ...
   switch(colcod[i])
   {case 19: case 20:  d=0; break; // do not use x,y
-   default: d=calccolvalue(colcod[i],x,y, T,Hext, abc,M,P)-nn[i];
+   default: d=calccolvalue(colcod[i],x,y, T,Hint, abc,M,P)-nn[i];
   }
-//  printf("d=%g i=%i nn=%g |",d,i,nn[i]);
-  if(fabs(d)>SMALL_FIELD)return false;
+ 
+  if(fabs(d)>0.001){//printf("%s %i %i d=%g  nn=%g |",colhead[colcod[i]],colcod[i],i,d,nn[i]);
+                    //      myPrintVector(M,"M");
+                    //      myPrintVector(P,"Pel");
+                          return false;}
  }
  return true;
 }
@@ -542,6 +555,7 @@ int inipar::load (int & nofinis,char**lofpref)
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"pause",pause_mcphas);
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"displayall",displayall);
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"logfevsQ",logfevsQ); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"demag",demag); 
      
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xT",xv[0]);      
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHa",xv[1]);
@@ -732,6 +746,7 @@ void inipar::print_with_prefix(FILE * fout, inipar p)
  checkpr(fout, "pause",pause_mcphas,p.pause_mcphas);
 checkpr(fout, "displayall",displayall,p.displayall);
 checkpr(fout, "logfevsQ",logfevsQ,p.logfevsQ);
+checkpr(fout, "demag",demag,p.demag);
 checkpr(fout, "xT",xv(0),p.xv(0));
 checkpr(fout, "xHa",xv(1),p.xv(1));
 checkpr(fout, "xHb",xv(2),p.xv(2));
@@ -923,13 +938,7 @@ void inipar::print (FILE * fout)
     if(zero(17)!=0)fprintf(fout,"s50=%g\n",zero(17));
     if(zero(18)!=0)fprintf(fout,"s60=%g\n",zero(18));
 
-    fprintf(fout,"#!Nii=%g\n",N(1,1));
-    fprintf(fout,"#!Nij=%g\n",N(1,2));
-    fprintf(fout,"#!Nik=%g\n",N(1,3));
-    fprintf(fout,"#!Njj=%g\n",N(2,2));
-    fprintf(fout,"#!Njk=%g\n",N(2,3));
-    fprintf(fout,"#!Nkk=%g\n",N(3,3));
-
+    
     fprintf(fout,"#input (xHa xHb xHc) (yHa yHb yHc) and (Ha0 Hb0 Hc0) are vectors\n");
     fprintf(fout,"#given in terms of components with respect to unit vectors along the\n");
     fprintf(fout,"#Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
@@ -937,7 +946,23 @@ void inipar::print (FILE * fout)
     fprintf(fout,"#For the external electric field unit is kV/mm.\n");
     fprintf(fout,"#For the external stress tensor the unit is GPa.\n\n");
 
-    fprintf(fout,"#For the external stress tensor the unit is GPa.\n\n");
+    fprintf(fout,"# Components of the Demagnetisation Tensor in SI Units\n");
+    fprintf(fout,"# refering to ijk coordinate system\n");
+    fprintf(fout,"# defined by  j||b, k||(a x b) and i normal to k and j\n");
+
+    fprintf(fout,"Nii=%g\n",N(1,1));
+    fprintf(fout,"Nij=%g\n",N(1,2));
+    fprintf(fout,"Nik=%g\n",N(1,3));
+    fprintf(fout,"Njj=%g\n",N(2,2));
+    fprintf(fout,"Njk=%g\n",N(2,3));
+    fprintf(fout,"Nkk=%g\n\n",N(3,3));
+
+    fprintf(fout,"# if demag=1 the magnetic and electric fields are treated\n");
+    fprintf(fout,"# as external applied fields and corrected using the demagnetization\n");
+    fprintf(fout,"# tensor to obtain the internal applied field within the sample\n");
+
+    fprintf(fout,"demag=%i\n\n",demag);
+
 
     fprintf(fout,"# out variables to control first columns of output files results/mcphas.*:\n");
     for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],colcod[i]);
@@ -1132,7 +1157,7 @@ inipar::inipar (const inipar & p)
   nofcalls=p.nofcalls;
   noffailedpoints=p.noffailedpoints;
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
-  displayall=p.displayall;logfevsQ=p.logfevsQ;
+  displayall=p.displayall;logfevsQ=p.logfevsQ;demag=p.demag;
   
   calcmf_duration=p.calcmf_duration;
   calcsps_duration=p.calcsps_duration;

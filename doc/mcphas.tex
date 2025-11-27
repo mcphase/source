@@ -115,6 +115,15 @@ the orthogonal coordinate system
 defined with respect to the nonorthogonal lattice $\mbf a,\mbf b,\mbf c$ as
 $Hj||\mbf b$, $Hk||(\mbf a \times \mbf b)$ and $Hi$ perpendicular to $Hj$ and $Hk$.
 
+In this coordinate system also the demagnetization factor may be entered which
+is used to establish a relation between the external applied magnetic and electric
+field and the internal field in the sample using calculated magnetisation and
+electric polarisation. By default the input electric and magnetic fields
+refer to the internal field in the sample. However, by putting the switch
+ {\prg demag=1} it is possible to tell the program, that the input field specified
+by x and y is actually the external applied field and a demagnetisation correction
+should be made for every mean field loop iteration / Monte Carlo step
+in order to obtain the internal magnetic field in the sample.
 \item [GENERATION OF SPINCONFIGURATIONS:] at the beginning of the program
 some initial values of spin configurations are generated from a set of 
 propagation vectors. This section defines the range of propagation vectors

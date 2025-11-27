@@ -42,7 +42,7 @@ void dataDestructor(void *data) { }
 // Declares a struct to store all the information needed for each htcalc iteration
 // ----------------------------------------------------------------------------------- //
 typedef struct{
-   Vector H;
+   Vector Happ;
    double T;
    qvectors * testqs;  
    testspincf * testspins;
@@ -148,11 +148,11 @@ void *htcalc_iteration(void *input)
 DWORD WINAPI htcalc_iteration(void *input)
 #endif
 #else
-int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector H, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
+int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector Happ, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
 #endif
 {
  #ifdef _THREADS
- htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector H(1,HEXT_DIMENSION); H = thrdat.H;
+ htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector Happ(1,HEXT_DIMENSION); Happ = thrdat.Happ;
  THRLC_SET(threadSpecificKey, myinput); int tlsfemin=0;  // Thread local variable to judge whether to print output
  #else
  int thread_id=1;
@@ -163,8 +163,8 @@ int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector H, double T,
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
  Vector mmom(1,inputpars.cs.nofcomponents);
- Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,H.Hi()),hkl(1,3);
- h1ext=0;
+ Vector h1(1,inputpars.cs.nofcomponents),Happzero(1,Happ.Hi()),hkl(1,3);
+ Happzero=0;
  char text[MAXNOFCHARINLINE];
  char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
@@ -192,7 +192,7 @@ int s1=1,s2=2;
 	     {for(i=1;i<=inputpars.cs.nofatoms;++i)
 	      {for(ii=1;ii<=inputpars.cs.nofcomponents;++ii)
 	        {iii=inputpars.cs.nofcomponents*(i-1)+ii;h1=0;h1(ii)=10*MU_B;
-                 (*inputpars.jjj[i]).Icalc(mmom,T,h1,h1ext,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
+                 (*inputpars.jjj[i]).Icalc(mmom,T,h1,Happzero,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
 		 nettom(iii)=mmom(ii)*rnd(1);
 	         momentq0(iii)=rnd(1)*mmom(ii);
 	         phi(iii)=rnd(1)*3.1415;
@@ -225,7 +225,7 @@ int s1=1,s2=2;
  
       //!!!calculate free energy - this is the heart of this loop !!!!
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-      fe=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps,mf,testspins,testqs);
+      fe=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,testspins,testqs);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( ">for_str_%i(%ix%ix%i) "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">for(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
@@ -247,7 +247,7 @@ int s1=1,s2=2;
                // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mfcf mf1(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-               if ((fered=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps1,mf1,testspins,testqs))<=fe*(1.0000000000001)){mf=mf1;
+               if ((fered=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps1,mf1,testspins,testqs))<=fe*(1.0000000000001)){mf=mf1;
                                  if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
@@ -263,7 +263,7 @@ int s1=1,s2=2;
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
                    for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}
-                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,Happ,(*inputpars.jjj[l1]).Icalc_parstorage);
                    for(m1=1;m1<=3;++m1){magmom.m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}} 
                   
@@ -276,7 +276,7 @@ int s1=1,s2=2;
                     x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     snprintf(text,MAXNOFCHARINLINE,"fe=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"fe=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,femin,T,Norm(Happ),Happ(1),Happ(2),Happ(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fout = fopen_errchk (outfilename, "w");
@@ -452,12 +452,15 @@ int s1=1,s2=2;
       #endif // def _THREADS
 }
 
-int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
+int  htcalc (Vector Happ,double T,inipar & ini,par & inputpars,qvectors & testqs,
              testspincf & testspins, physproperties & physprops,int tracetest)
 {/* calculates magnetic structure at a given HT- point  
   on input: 
     T	Temperature[K]
-    H		Vector of External Magnetic Field [T] in ijk coordinates
+    Happ        Vector of Applied Magnetic Field [T] in ijk coordinates
+                which if demag=1 corresponds to external applied field
+                and if demag=0 corresponds to internal applied field (=field in the sample)
+                which is desired for the calculation
     inputpars	Input parameters (exchange constants etc...)
     testqs	Set of propagation vectors to be tested 
     testspins	Set of Spinconfigurations to be tested
@@ -492,7 +495,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
-               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Hi=%g Hj=%g Hk=%g\n",T,H(1),H(2),H(3));
+               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Hi=%g Hj=%g Hk=%g\n",T,Happ(1),Happ(2),Happ(3));
                fclose(felog);
 	      }
  if (verbose==1)
@@ -518,7 +521,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    #endif
    fclose(fout);
    Vector P(1,3);Vector M(1,3);P=0;M=0;      
-   printf("\n starting  "); ini.print_usrdefcols(stdout,physprops.x,physprops.y,T,H,inputpars.cs.abc,M,P,true);printf("\n");
+   printf("\n starting  "); ini.print_usrdefcols(stdout,physprops.x,physprops.y,T,Happ,inputpars.cs.abc,M,P,true);printf("\n");
    printf("with %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",testspins.n,testqs.nofqs());
    printf("Notation: < >            ...begin / end of mean field loop\n");
    printf("          ->             ...reduction of stabilised structure possible into ...\n");
@@ -545,7 +548,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 // ----------------------------------------------------------------------------------- //
 // Populates the thread data structure
 // ----------------------------------------------------------------------------------- //
-   thrdat.H = H;
+   thrdat.Happ = Happ;
    thrdat.T = T;
    thrdat.ini=&ini;
    thrdat.testqs = &testqs; 
@@ -700,7 +703,7 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
-      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,mf,testspins,testqs,&physprops); 
+      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,testspins,testqs,&physprops); 
 
       spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
@@ -708,7 +711,7 @@ else // if yes ... then
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
                   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}                  
-                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,Happ,(*inputpars.jjj[l1]).Icalc_parstorage);
                     for(m1=1;m1<=3;++m1){magmom.m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
              // display spinstructure
@@ -719,7 +722,7 @@ else // if yes ... then
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     snprintf(text,MAXNOFCHARINLINE,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(Happ),Happ(1),Happ(2),Happ(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fout = fopen_errchk (outfilename, "w");
@@ -750,14 +753,14 @@ else // if yes ... then
      #endif
    
    if(verbose){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
-                            T,Norm(H),femin,physprops.j,physprops.fe);
+                            T,Norm(Happ),femin,physprops.j,physprops.fe);
    fprintf(stderr,"recalculation converged after %i loops and initial and final spin structures are ",r);
    if(eq==1){fprintf(stderr,"equal\n");}else{fprintf(stderr,"not equal\n");}}
 if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
                fprintf(felog,"#Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n# but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
-                T,Norm(H),femin,physprops.j,physprops.fe);fprintf(felog,"#recalculation converged after %i loops and initial and final spin structures are ",r);
+                T,Norm(Happ),femin,physprops.j,physprops.fe);fprintf(felog,"#recalculation converged after %i loops and initial and final spin structures are ",r);
    if(eq==1){fprintf(felog,"equal\n");}else{fprintf(stderr,"not equal\n#initial values as converged from femin=%4.9g meV calculation:\n",femin);
 #ifndef _THREADS
      spsmin.print(felog);//take spinconfiguration which gave minimum free energy as starting value
@@ -773,7 +776,7 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                               return 1;
                              }
  //if(verbose==1){printf(".\n");}
-if(ini.nofMCsteps==0) physpropclc(H,T,sps,mf,physprops,ini,inputpars);
+if(ini.nofMCsteps==0) physpropclc(Happ,T,sps,mf,physprops,ini,inputpars);
 else physprops.sps=sps;
 
 //    printf("H"); fflush(stdout); delete mf;

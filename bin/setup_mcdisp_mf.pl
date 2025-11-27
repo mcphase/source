@@ -13,7 +13,7 @@ $_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;
 
 print STDOUT << "EOF";
 #******************************************************************
-#* setup_mcdisp_mf 221011 setting up mcdisp.mf to be used by mcdisp
+#* setup_mcdisp_mf 251127 setting up mcdisp.mf to be used by mcdisp
 EOF
 print STDOUT "# reading results/".$prefix."mcphas.mf\n";
 print STDOUT "# writing ".$prefix."mcdisp.mf\n";
@@ -21,7 +21,7 @@ if ($#ARGV>4) {
 print STDOUT "out1=$ARGV[0]  out2=$ARGV[1]  out3=$ARGV[2] out4=$ARGV[3] out5=$ARGV[4] out6=$ARGV[5] out7=$ARGV[6]   ... starting spins\n";
 $args="$ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] $ARGV[4] $ARGV[5] $ARGV[6]";
              }
-if ($#ARGV>2) { 
+elsif ($#ARGV>2) { 
 print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T  ... starting spins\n";
 $args="$ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]";
              }
@@ -31,7 +31,7 @@ print STDOUT "x=$ARGV[0]  y=$ARGV[1] ... starting spins\n";
 $args="$ARGV[0] $ARGV[1]";
              }
 $err=system ("spins -f results/".$prefix."mcphas.mf ".$args."  > ".$prefix."mcdisp.mf");
-if($err){unlink "mcdisp.mf";exit(1);}
+if($err){unlink $prefix."mcdisp.mf";exit(1);}
 
 
 if($prefix){

@@ -195,7 +195,7 @@ if(ll>0){int lm1m3=inputpars.cs.nofcomponents*(ll-1);
 
 }
 
-void calc_spsijk(Vector & m,mfcf & mf,int & i,int & j,int & k,par & inputpars,double & T,Vector & Hex,
+void calc_spsijk(Vector & m,mfcf & mf,int & i,int & j,int & k,par & inputpars,double & T,Vector & Hint,
  Vector * lnzi,Vector * ui,int &  s,int &  ss,ComplexMatrix **Icalcpars,ComplexVector **stat=NULL)
 {  Vector d1(1,inputpars.cs.nofcomponents);
     Vector moment(1,inputpars.cs.nofcomponents);
@@ -204,10 +204,10 @@ void calc_spsijk(Vector & m,mfcf & mf,int & i,int & j,int & k,par & inputpars,do
    lm1m3=inputpars.cs.nofcomponents*(l-1);
    for(int m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    {d1[m1]=mf.mf(i,j,k)[lm1m3+m1];}
-if(stat==0)
- (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]));
+if(stat==NULL)
+ (*inputpars.jjj[l]).Icalc(moment,T,d1,Hint,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]));
 else
- (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]),stat[l]);
+ (*inputpars.jjj[l]).Icalc(moment,T,d1,Hint,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]),stat[l]);
 
    if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    if(isnan(lnzi[s][l])){fprintf (stderr, "calc_spsijk: Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
@@ -217,11 +217,15 @@ else
 }
 
 
-double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector Hex,double T,inipar & ini,par & inputpars,
+double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector Happ,double T,inipar & ini,par & inputpars,
              spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs,physproperties * physprops)
 {/*on input:
     T		Temperature[K]
-    Hex		Vector of external magnetic field [T] in ijk coordinates
+    Happ	Vector of applied magnetic field [T] in ijk coordinates
+                if ini.demag=0 applied field is internal field in the sample
+                if ini.demag=1 applied field is external field and internal field
+                               will be refined according to calculated magnetization
+                               (and stored in physprops if present)
     inputpars	exchange and other parameters
     sps		initial spinconfiguration
     testspins	all other testspinconfigurations
@@ -232,6 +236,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
     u		magnetic energy[meV]
 
  */
+Vector Hint(1,Happ.Hi());Hint=Happ;
 if (verbose==1){printf("f");fflush(stdout);}
  double fe,dE; // free energy
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
@@ -307,7 +312,7 @@ if(ini.doeps){ // set coupling matrix
              // 1meV= 1.60218e-22 J
              // 1 A= 1e-10 m
              // 1meV/pVol=1.60218e-22 J/A^3 x  A^3/pVol = 1.60218e+8  J/m^3 x  A^3/pVol = 1.60218e-1 GPa x  A^3/pVol
-             for(i=1;i<=6;++i)sigma(i)=Hex(6+i);
+             for(i=1;i<=6;++i)sigma(i)=Happ(6+i);
              sigma*=inputpars.cs.pVol()/1.60218e-1;
 
              }
@@ -601,6 +606,17 @@ if (verbose==1){printf("t");fflush(stdout);}
 // coupling coefficients JS[](a-c) ready  --------------------------------------------
 // --------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
+double Mfact=9.274010*1.25663706127/inputpars.cs.pVol(); // total moment per unit cell (muB)
+           // muB=9.274010e-24 J/Tesla
+           // mu0=1.25663706127(20)×10−6 N⋅A−2
+
+// divide by number of primitive cells in supercelland Vol of prim unitcell
+// thus we have not Pel in units of |e|A/A^3=|e|/A^2. For SI we need it in C/m^2
+// |e|=1.602189e-19 Coulomb
+// A=1e-10 m
+// i.e. |e|/A^2=1.602189e+1=16.02189 C/m^2
+double Pfact=0.01*16.02189/inputpars.cs.pVol()/8.8541878188e-12;  // factor 0.01 to transform from |e|pm to |e|A 
+   // epsilon0 = 8.8541878188(14)×10−12 C2⋅kg−1⋅m−3⋅s2
 
 if (ini.displayall==1)   // display spincf if button is pressed
  {   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
@@ -684,11 +700,42 @@ start2 = time(0);
 else
 {mfold=mf;
  if (r==1&&verbose==1){printf("m");fflush(stdout);}
+
+// - if ini.demag ==1 : calculate magnetisation and polarisation in order to
+// be able to correct applied field with demagnetisating / depolarising field
+if(ini.demag==1)
+{
+Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
+Vector M(1,3);M=0;
+Vector Pel(1,3);Pel=0;
+    for (l=1;l<=inputpars.cs.nofatoms;++l){
+    // go through magnetic unit cell and sum up the contribution of every atom
+    for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
+      for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
+     (*inputpars.jjj[l]).mcalc(mom,T, d1,Hint,(*inputpars.jjj[l]).Icalc_parstorage);
+     M+=mom;
+     if(fabs(inputpars.totalcharge)<SMALLCHARGE)(*inputpars.jjj[l]).pelcalc(mom,T, d1,Hint,(*inputpars.jjj[l]).Icalc_parstorage);
+     Pel+=mom; // sum dipolar moments
+                  
+    }}}}
+    M=(Mfact/(double)sps.n())*ini.N*M;
+    
+    // calculate internal H-field by considering demagnetising field
+  for(i=1;i<=3;++i)Hint(i)=Happ(i)-M(i);
+  if(fabs(inputpars.totalcharge)<SMALLCHARGE)
+  {Pel*=Pfact/(double)sps.n();//calculate internal E-field by considering depolarisation field
+      for(i=4;i<=6;++i)Hint(i)=Happ(i)-Pel(i-3);
+   }
+
+}
+
+
+
 //2. calculate sps from mf||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {diff=sps.m(i,j,k);
   int im1=i-1,jm1=j-1,km1=k-1,s=sps.in(i,j,k),ss=sps.in(im1,jm1,km1);
-   calc_spsijk(sps.m(i,j,k),mf,i,j,k,inputpars,T,Hex,lnzi,ui,s,ss,Icalcpars);
+   calc_spsijk(sps.m(i,j,k),mf,i,j,k,inputpars,T,Hint,lnzi,ui,s,ss,Icalcpars);
 
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
@@ -855,14 +902,14 @@ MUTEX_UNLOCK (&mutex_ini_calcsps_duration);
 // initialize ui[s][l] for maxnofmfloops==1  (without changing sps)
 if(ini.maxnofmfloops==1)for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
   {int im1=i-1,jm1=j-1,km1=k-1,s=sps.in(i,j,k),ss=sps.in(im1,jm1,km1);
-  calc_spsijk(diff,mf,i,j,k,inputpars,T,Hex,lnzi,ui,s,ss,Icalcpars);}
+  calc_spsijk(diff,mf,i,j,k,inputpars,T,Hint,lnzi,ui,s,ss,Icalcpars);}
 
 
 // ***************************************************************************
 // do real Monte Carlo simulation - only for positive ini.nofMCsteps !!!
 // ***************************************************************************
 if(ini.nofMCsteps>0)
-{ 
+{ if(ini.demag!=0){fprintf(stderr,"Error mcphasit: for Monte Carlo simulations the demagnetisation correction in the Monte Carlo loop can currently not be applied - exiting\n"); exit(EXIT_FAILURE);}
 // Real Monte Carlo Remarks
 // - one has to take energy eigenstates and not arbitrary states of the subsystems(ions),
 //   if one takes arbitrary randum quantum states, then a schottky crystal field 
@@ -895,7 +942,7 @@ for(i=0;i<=sdim+1;++i){states[i]=new ComplexVector * [inputpars.cs.nofatoms+1];
                       }
 for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
  { int im1=i-1,jm1=j-1,km1=k-1;int s=sps.in(i,j,k),ss=sps.in(im1,jm1,km1);
-  calc_spsijk(sps.m(i,j,k),mf,i,j,k,inputpars,TT,Hex,lnzi,ui,s,ss,Icalcpars,states[sps.in(i,j,k)]);
+  calc_spsijk(sps.m(i,j,k),mf,i,j,k,inputpars,TT,Hint,lnzi,ui,s,ss,Icalcpars,states[sps.in(i,j,k)]);
   // subtract from ui the exchange energy term, because it refers to old exchange fields
   for(l=1;l<=inputpars.cs.nofatoms;++l){
       int lm1m3=inputpars.cs.nofcomponents*(l-1);
@@ -951,7 +998,7 @@ if(physprops!=NULL){(*physprops).totalJ=0; // total operator moment <I>
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
      int im1=i-1,jm1=j-1,km1=k-1;
-      (*inputpars.jjj[l]).mcalc(dmagmom,TT, d1,Hex,(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[sps.in(i,j,k)][l]);
+      (*inputpars.jjj[l]).mcalc(dmagmom,TT, d1,Hint,(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[sps.in(i,j,k)][l]);
      magmom+=dmagmom;
     }}}}
     magmom/=(double)sps.n()*(double)sps.nofatoms;
@@ -990,14 +1037,14 @@ for(r=1;r<nofMC;++r)
                                                 ui[s][l]-=d1(m1)*sps.m(i,j,k)(lm1m3+m1);}
 
  if(physprops!=NULL){int im1=i-1,jm1=j-1,km1=k-1;
- (*inputpars.jjj[l]).mcalc(mom,TT, d1,Hex,(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[s][l]);
+ (*inputpars.jjj[l]).mcalc(mom,TT, d1,Hint,(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[s][l]);
  }
 
  // now create randomly a new moment Imom and En(l) to be taken as new energy ui[s][l]
   mn=sps.m(i,j,k); // initialize mn to set all nofatoms spins
  ComplexVector savs(1, (*states[s][l]).Hi());savs=(*states[s][l]);
  int im1=i-1,jm1=j-1,km1=k-1;
- (*inputpars.jjj[l]).Icalc(Imom,TT,d1,Hex,lnzi[s][l],En(l),(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[s][l]);
+ (*inputpars.jjj[l]).Icalc(Imom,TT,d1,Hint,lnzi[s][l],En(l),(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[s][l]);
   // returns the moment Imom and the energy En(l) of a random chosen Energy eigenstate, 
   // which is returned in states[s][l] (to be used for physical property calculations)
    if(isnan(En(l))){fprintf (stderr, "MC_loop: Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
@@ -1007,7 +1054,7 @@ for(r=1;r<nofMC;++r)
      if(physprops!=NULL){dtotalJ(m1)=(Imom[m1]-sps.m(i,j,k)(lm1m3+m1))/(sps.n()*sps.nofatoms);}
         }
 if(physprops!=NULL){ dmagmom=-mom;int im1=i-1,jm1=j-1,km1=k-1;
-                        (*inputpars.jjj[l]).mcalc(mom,TT, d1,Hex,(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[s][l]);
+                        (*inputpars.jjj[l]).mcalc(mom,TT, d1,Hint,(*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]),states[s][l]);
                          dmagmom+=mom;dmagmom*=1.0/(sps.n()*sps.nofatoms);
                         }
    
@@ -1206,6 +1253,8 @@ else
 {// calculate free energy 
 fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
 }
+if(physprops!=NULL)(*physprops).Hint=Hint; // if physprops are given set (in case of dmag=1 refined)
+                                           // internal field Hint
 
 if (ini.displayall==1)
  {

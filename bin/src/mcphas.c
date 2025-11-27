@@ -125,8 +125,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
  if(strcmp(ini.prefix,readprefix)==0&&prefix[0]!='\0')filemode="a";
-    strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini");  
-  ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
+
 
 
 // as class par load  parameters from file
@@ -136,12 +135,16 @@ fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.j"); else fclose(fin);
  par inputpars(prefix,verbose); 
 // here save single ion property files to results
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
-// here save input two ion interaction paraeters to results/_mcphas.j
+// here save input two ion interaction parameters to results/_mcphas.j
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
 
-if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
-   {ini.defaultcolcode(5,4);ini.defaultcolcode(6,5);ini.defaultcolcode(7,6);} // reset default colcode in ini
-  
+//if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
+//   {ini.defaultcolcode(5,4);ini.defaultcolcode(6,5);ini.defaultcolcode(7,6);} 
+//     // reset default colcode in ini for low symmetry by default case Hi Hj Hk should be stored
+//     // and not Ha Hb Hc ??? removed 26.11.25
+      strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini");  
+  ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
+
 if(doeps) {
 if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
 if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
@@ -282,7 +285,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
     // --> replaced  above by      -------------^
    // ini.calcTHfromnn(T,h,nn,inputpars.cs): set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
    // returns true if successful  (NormH NormE x y are not used)
-
+    
    }
    else
    {
@@ -292,27 +295,26 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
     ini.calcTHfromxy(T,h,x,y,inputpars.cs);
   } 
           
-      physprop.x=x;physprop.y=y;
-      physprop.T=T;
-      physprop.H=h;
 
 if(verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to the Bravais lattice unit vectors ^a=a/|a|  ^b=b/|b| ^c=c/|c|\n");
  if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
               {printf("Hi Hj Hk refer to components of magnetic field with respect to Euclidean Coordinates ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
 }
-
-// check if calculation results should and can be read (returns j=0)
+      physprop.x=x;physprop.y=y;
+      physprop.T=T;
+      physprop.Hint=h; // initialise Hint with H in order to work the
+   // check if calculation results should and can be read (returns j=0)
 int parsread=1;
 j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix,ini);parsread=j;}
-                              // on successful read return j=0, otherwise
-                              // return j=1
-// if not (j=1) then calculate physical properties at HT- point
+                 // on successful read return j=0, otherwise
+                 // return j=1
+// if read is not successful (j=1) then calculate physical properties at HT- point
 if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
           double maxstamf=ini.maxstamf;int rep;
           int maxnofmfloops=ini.maxnofmfloops;
           double maxspinchange=ini.maxspinchange;
           for(rep=0;rep<=floor(ini.repeat)&&j>0;++rep)
-          {j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop,tracetest);
+          {j=htcalc(h,T,ini,inputpars,testqs,testspins,physprop,tracetest);
           // returns j=0 if successfull
  //  --> if no spinconfiguration has been found at ht point
  // returns j=1 if recalculation of fe yields too different value
@@ -336,7 +338,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
         // if cv!=0 attempt to calculate specific heat by applying a temperature step
        if(cv!=0)
          {physproperties pp(physprop);
-          double T1=T+cv;if(htcalc(pp.H,T1,ini,inputpars,testqs,testspins,pp,tracetest)!=0)
+          double T1=T+cv;if(htcalc(h,T1,ini,inputpars,testqs,testspins,pp,tracetest)!=0)
                   physprop.cv=0;
                 else
                   physprop.cv=(pp.u-physprop.u)/cv; // calculate specific heat 
@@ -346,8 +348,8 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          {physproperties pp(physprop);
           Matrix s(1,6,1,6);//myPrintVector(pp.sps.epsilon,"Initial Strain");
           int cel_not_stable=0;
-          for(int n=1;n<=6;++n){pp.H(6+n)+=cel;cel_not_stable+=htcalc(pp.H,T,ini,inputpars,testqs,testspins,pp,tracetest);
-                                pp.H(6+n)-=cel;//myPrintVector(pp.sps.epsilon,"Strain x=1-6");
+          for(int n=1;n<=6;++n){h(6+n)+=cel;cel_not_stable+=htcalc(h,T,ini,inputpars,testqs,testspins,pp,tracetest);
+                                h(6+n)-=cel;//myPrintVector(pp.sps.epsilon,"Strain x=1-6");
                                 for(int m=1;m<=6;++m)s(n,m)=(pp.sps.epsilon(m)-physprop.sps.epsilon(m))/cel;
                                }  // sigma=cel* eps    eps=s*sigma
           // s and cel must be symmetric, thus if s is not - symmetrize it by averaging off diagonal elements
@@ -365,7 +367,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
 
        switch (j)
        {case 0:
-            //save physical properties of HT-point
+            //good results -> save physical properties of HT-point
 	    //sta=(sta*ini.nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(ini.nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
           if(strcmp(ini.prefix,readprefix)!=0||prefix[0]=='\0'||parsread!=0)
@@ -374,7 +376,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
            {   M=physprop.mu0M();// magnetisation mu0*M(Tesla) 
                P=physprop.Pdiveps0(); //  Polarisation/epsilon0 (V/m)
 
-            ini.print_usrdefcols(stdout,x,y,T,physprop.H,inputpars.cs.abc,M,P,true);printf("\n");}
+            ini.print_usrdefcols(stdout,x,y,T,physprop.Hint,inputpars.cs.abc,M,P,true);printf("\n");}
    	    ++ini.nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
@@ -382,9 +384,9 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          case 2:
          case 3: //ht calculation leads to no results- save dummy line
                 fprintf(stderr,"Warning mcphas: no stable structure found at ");
-                ini.print_usrdefcols(stderr,x,y,T,physprop.H,inputpars.cs.abc,M,P,true);fprintf(stderr,"\n");
+                ini.print_usrdefcols(stderr,x,y,T,physprop.Hint,inputpars.cs.abc,M,P,true);fprintf(stderr,"\n");
 // T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
-//                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));
+//                 physprop.T,physprop.Hint(1),physprop.Hint(2),physprop.Hint(3));
  	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
 		 //sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
      	      ++ini.noffailedpoints;
