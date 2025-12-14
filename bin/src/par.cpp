@@ -172,7 +172,7 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
 return cs.nofatoms;                 
 }
 
-int par::delatom(int & nn, Matrix & distribute,int & verbose) // removes atom number n 
+int par::delatom(int  nn, Matrix & distribute,int  verbose) // removes atom number n 
 // 1)if nn<0 then atom number |nn| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
 // In case the atoms to be removed have the phonon module, 
@@ -190,7 +190,7 @@ int par::delatom(int & nn, Matrix & distribute,int & verbose) // removes atom nu
  FILE * out;
  if(n<1||n>cs.nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,cs.nofatoms);exit(EXIT_FAILURE);}
   --cs.nofatoms; // the number of atoms has to be decreased
- if(nn>0)if(fabs(Sum(distribute.Column(2)))-1>SMALL)
+ if(nn>0)if(fabs(fabs(Sum(distribute.Column(2)))-1)>SMALL)
   {fprintf(stderr,"ERROR par.cpp:delatom %i - sum of coefficients is %g (and not 1.00) -coefficient list:\n",n,fabs(Sum(distribute.Column(2))));
    myPrintMatrix(stderr,distribute);exit(EXIT_FAILURE);}
 
@@ -258,7 +258,7 @@ if(nn<0){totalcharge-=(*jjj[n]).charge;// recalculate charge in case the ion is 
 Vector u0(1,3),Hxc(1,3),Hext(1,6);double T=1;
 
 if((*jjj[n]).module_type==external_class&&(*jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage))
-    { if(verbose)fprintf(stderr,"%s is phonon module - creating effective multipolar interactions\n",(*jjj[n]).sipffilename);
+    { if(verbose)fprintf(stderr,"%s is phonon module - creating effective multipolar interactions and renormalising elastic constants\n",(*jjj[n]).sipffilename);
 Matrix K(1,3,1,3);K=0;
  Vector Omega(1,3);
  K(1,1)=(*jjj[n]).MODPARS[2];
@@ -286,10 +286,19 @@ K*=factor;
 // 
  EigenSystemSymmetric (K,Omega,sort,maxiter); // K is destroyed by this and will contain eigenvectors S
 Omega/=factor; 
+       // renormalise elastic constants equ 158 in manual
+       for(int a=1;a<=6;++a)for(int g=1;g<=6;++g)
+ // add to Cel the term G^aad_mix(i) S_adbd S_bbd  G^gb_mix(i)/Omeaga_bdbd
+          for(int ad=1;ad<=3;++ad) 
+           for(int b=1;b<=3;++b)
+            for(int bd=1;bd<=3;++bd){
+            Cel(a,g)+=K(ad,bd)*K(b,bd)*(*(*jjj[n]).G)(a,ad)*(*(*jjj[n]).G)(g,b)/Omega(bd);
+          }
+
        for(s=1;s<=(*jjj[n]).paranz;++s){int j=(*jjj[n]).sublattice[s];// loop all neighbours in list
         if(!(*jjj[j]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage)) // if neighbour is no phonon
          {Vector dabc(1,3),drijk(1,3);
-          // here treat magnetoelastic term (second term in eq 145 in manual on reduce_unitcell)
+          // here treat magnetoelastic term (second term in eq 157 in manual on reduce_unitcell)
           // of neighbour s  which is on sublattice j -------------------
           for(int ad=1;ad<=3;++ad) // for to be deleted atom nn loop all components a=1,2,3 (eigenvalues of K)
            for(int b=1;b<=3;++b)
@@ -300,7 +309,7 @@ Omega/=factor;
               { (*(*jjj[j]).G)(a,g)-=K(b,ad)*K(bd,ad)*(*jjj[n]).jij[s](b,g)*(*(*jjj[n]).G)(a,bd)/Omega(ad);
               }
           // ------------------------
-          // now treat multipolar interaction term (first term in in eq 145 in manual on reduce_unitcell)
+          // now treat multipolar interaction term (first term in in eq 157 in manual on reduce_unitcell)
           for(int sd=1;sd<=(*jjj[n]).paranz;++sd) // loop all neighbours in list
           {// identify which magnetic ion adresses the neighbour s and sd
             int jd=(*jjj[n]).sublattice[sd];
@@ -444,7 +453,7 @@ void par::scale(double scalefactor) // scale all interaction parameters by scale
  }
 }
 
-void par::set_nofcomponents (int & n)
+void par::set_nofcomponents (int  n)
 {// sets the numberofcomponents to n
  if(n<cs.nofcomponents){int dd= cs.nofcomponents-n;decrease_nofcomponents(dd);}
  if(n>cs.nofcomponents){int dd=n-cs.nofcomponents;increase_nofcomponents(dd);}

@@ -309,23 +309,35 @@ void inimcdis::save(const char * filename)
   fclose (fout);
 
   fout=fopen(mf_file,"w");
-  fprintf(fout,"# Parameter file  mcdisp.mf - read by %s\n",MCDISPVERSION);
+   save_mf(fout);
+  fclose (fout);
+
+}
+
+void inimcdis::save_mf(FILE * fout)
+{fprintf(fout,"# Parameter file  mcdisp.mf - read by %s\n",MCDISPVERSION);
   fprintf(fout,"#<!--mcdisp.mcdisp.mf>\n");
   fprintf(fout,"#*********************************************************************\n");
   fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
   fprintf(fout,"#*********************************************************************\n");
   fprintf(fout,"#'T'             temperature T(K)\n");
-  fprintf(fout,"#'Ha' 'Hb' 'Hc'  magnetic field(T)\n");
+  fprintf(fout,"#'Ha' 'Hb' 'Hc'  internal applied magnetic field(T)\n");
+  fprintf(fout,"#'Hi' 'Hj' 'Hk'  internal applied magnetic field(T) in ijk coordinate system  \n");
+  fprintf(fout,"#                defined by  j||b, k||(a x b) and i normal to k and j\n");
+  fprintf(fout,"#'Ea' 'Eb' 'Ec'  internal applied electric field(T)\n");
+  fprintf(fout,"#'Ei' 'Ej' 'Ek'  internal applied electric field(T) in ijk coordinate system  \n");
+  fprintf(fout,"#'s1' 's2' .. 's6'  stress tensor in GPa in Voigt notation refering to ijk coordinate system  \n");
+  fprintf(fout,"#'Nii' 'Nij' ...  components of the demagnetisation tensor in SI units refering to ijk coordinate system\n");
   fprintf(fout,"#'n'             number of atoms in magnetic unit cell\n");
   fprintf(fout,"#'nofatoms'      number of atoms in primitive crystal unit cell\n");
   fprintf(fout,"#'nofcomponents' dimension of moment vector of a magnetic atoms\n");
-  fprintf(fout,"#! T=%g  Ha=%g  Hb=%g Hc=%g  n=%i nofatoms=%i nofcomponents=%i\n",T,Hext(1),Hext(2),Hext(3),mf.n(),nofatoms,nofcomponents);
+  fprintf(fout,"#! T=%g  Ha=%g  Hb=%g Hc=%g  Ea=%g  Eb=%g Ec=%g  n=%i nofatoms=%i nofcomponents=%i\n",T,Habc(1),Habc(2),Habc(3),Eabc(1),Eabc(2),Eabc(3),mf.n(),nofatoms,nofcomponents);
+  fprintf(fout,"#! Hi=%g  Hj=%g Hk=%g  Ei=%g  Ej=%g Ek=%g s1=%g s2=%g s3=%g s4=%g s5=%g s6=%g\n",Hext(1),Hext(2),Hext(3),Hext(4),Hext(5),Hext(6),Hext(7),Hext(8),Hext(9),Hext(10),Hext(11),Hext(12));
+  fprintf(fout,"#! Nii=%g Njj=%g Nkk=%g Nij=%g Nik=%g Njk=%g \n",N(1,1),N(2,2),N(3,3),N(1,2),N(1,3),N(2,3));
   mf.print(fout);
-  fclose (fout);
 
 }
-
 
 void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int & do_jqfile,Vector & abc)
 {int i,j;
@@ -440,7 +452,7 @@ int inimcdis::load (int & nofinis,char**lofpref,char * mffile,char * pref,int & 
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
   int nofhkllists=1; parser ob;
   Hext=0; Habc=0;Eabc=0;
-  FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
+  FILE *fin,*finhkl;float NN,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
    strcpy(prefix,pref); // set prefix
  // ****************************** read mf configuration from mffile *****************************************  
  fin=fopen(mffile,"rb");
@@ -452,8 +464,10 @@ int inimcdis::load (int & nofinis,char**lofpref,char * mffile,char * pref,int & 
  snprintf(mf_file,MAXNOFCHARINLINE,"results/_%s",mffile); // store filename of mffile used
  if(fin==NULL){snprintf(instr,MAXNOFCHARINLINE,"#!T=300 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=1 in primitive basis nofcomponents=%i - configuration",nofcomponents);
  T=300; Hext=0;nofatoms=nofat;nofcomponents=nofcomp;
-}else {instr[0]='#';  instr[1]='\0';
-  while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
+}else {instr[0]='#';  instr[1]='\0';long int pos;
+  while(instr[strspn(instr," \t")]=='#'){pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);
+  while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){ pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
+  if(instr[strspn(instr," \t#")]=='!'){
   parseline(instr,ob);
   extract(instr,"T",T,ob); 
   extract(instr,"Ha",Habc[1],ob); 
@@ -474,17 +488,25 @@ int inimcdis::load (int & nofinis,char**lofpref,char * mffile,char * pref,int & 
   extract(instr,"s4",Hext[10],ob); 
   extract(instr,"s5",Hext[11],ob);
   extract(instr,"s6",Hext[12],ob); 
-  
+  extract(instr,"Nii",N[1][1],ob);
+  extract(instr,"Nij",N[1][2],ob);
+  extract(instr,"Nik",N[1][3],ob);
+  extract(instr,"Njj",N[2][2],ob);
+  extract(instr,"Njk",N[2][3],ob);
+  extract(instr,"Nkk",N[3][3],ob);
+
+    
+  extract(instr,"nofatoms",nofatoms,ob); 
+  extract(instr,"nofcomponents",nofcomponents,ob);
+   }
+  }
   crosscheck_H_E(Hext,Habc,Eabc,abc); 
+  N(2,1)=N(1,2);N(3,1)=N(1,3);N(3,2)=N(2,3);
 
   if(verbose!=0)printf("# reading mean field configuration from file %s mf=gj muB heff [meV]\n#%s \n",mffile,instr);
-  
-  
-  
-  extract(instr,"nofatoms",nofatoms,ob); 
-  extract(instr,"nofcomponents",nofcomponents,ob); 
   if(nofcomponents!=nofcomp){fprintf(stderr,"ERROR loading mean field configuration nofcomponents from mcphas.j (%i) different from file %s (%i)\n",nofcomp,mffile,nofcomponents);exit(EXIT_FAILURE);}
   if(nofatoms!=nofat){fprintf(stderr,"ERROR loading mean field configuration nofatoms from mcphas.j (%i) different from file %s (%i)\n",nofat,mffile,nofatoms);exit(EXIT_FAILURE);}
+  fseek(fin,pos,SEEK_SET);
   if(mf.load(fin)==0)
    {fprintf(stderr,"ERROR loading mean field configuration\n");exit(EXIT_FAILURE);}
   fclose(fin);
@@ -567,16 +589,16 @@ if (fin==NULL) { return 1;
                   fclose(finhkl);++nofhkllists;
                  }
      if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
-                 {if(!extract(instr,"Nstp",N))i+=N;++nofhkllists;
+                 {if(!extract(instr,"Nstp",NN))i+=NN;++nofhkllists;
                  }
      if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
-                 {if(!extract(instr,"Nstp",N))i+=N;++nofhkllists;
+                 {if(!extract(instr,"Nstp",NN))i+=NN;++nofhkllists;
                  }
      if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1))  
-                 {if(!extract(instr,"Nstp",N)&&!extract(instr,"Mstp",M))i+=N*M;++nofhkllists;
+                 {if(!extract(instr,"Nstp",NN)&&!extract(instr,"Mstp",M))i+=NN*M;++nofhkllists;
                  }
      if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1))  
-                 {if(!extract(instr,"Nstp",N)&&!extract(instr,"Mstp",M))i+=N*M;++nofhkllists;
+                 {if(!extract(instr,"Nstp",NN)&&!extract(instr,"Mstp",M))i+=NN*M;++nofhkllists;
                  }
   }
   fclose (fin);
@@ -683,15 +705,15 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"hM",hM)){printf("error mcdisp reading %s: in hklplane - hM not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"kM",kM)){printf("error mcdisp reading %s: in hklplane - kM not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"lM",lM)){printf("error mcdisp reading %s: in hklplane - lM not found",parfile);exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklplane - Nstp  not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",NN)){printf("error mcdisp reading %s: in hklplane - Nstp  not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"Mstp",M)){printf("error mcdisp reading %s: in hklplane - Mstp  not found",parfile);exit (EXIT_FAILURE);}
-                   printf("# ... hklplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,N,hM,kM,lM,M);
+                   printf("# ... hklplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,NN,hM,kM,lM,M);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(int ii=1;ii<=N;++ii)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=NN;++ii)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     hkls[nofhkls][1]=h0+(hN-h0)*(ii-1)/(N-1)+(hM-h0)*(j-1)/(M-1);
-                                     hkls[nofhkls][2]=k0+(kN-k0)*(ii-1)/(N-1)+(kM-k0)*(j-1)/(M-1);
-                                     hkls[nofhkls][3]=l0+(lN-l0)*(ii-1)/(N-1)+(lM-l0)*(j-1)/(M-1);
+                                     hkls[nofhkls][1]=h0+(hN-h0)*(ii-1)/(NN-1)+(hM-h0)*(j-1)/(M-1);
+                                     hkls[nofhkls][2]=k0+(kN-k0)*(ii-1)/(NN-1)+(kM-k0)*(j-1)/(M-1);
+                                     hkls[nofhkls][3]=l0+(lN-l0)*(ii-1)/(NN-1)+(lM-l0)*(j-1)/(M-1);
                                     }
                  }
 
@@ -706,15 +728,15 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"QxM",hM)){printf("error mcdisp reading %s: in QxyQzplane - QxM not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"QyM",kM)){printf("error mcdisp reading %s: in QxyQzplane - QyM not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"QzM",lM)){printf("error mcdisp reading %s: in QxyQzplane - QzM not found",parfile);exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in QxyQzplane - Nstp  not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",NN)){printf("error mcdisp reading %s: in QxyQzplane - Nstp  not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"Mstp",M)){printf("error mcdisp reading %s: in QxyQzplane - Mstp  not found",parfile);exit (EXIT_FAILURE);}
-                   printf("# ... QxyQzplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,N,hM,kM,lM,M);
+                   printf("# ... QxyQzplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,NN,hM,kM,lM,M);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(int ii=1;ii<=N;++ii)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=NN;++ii)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     qijk(1)=h0+(hN-h0)*(ii-1)/(N-1)+(hM-h0)*(j-1)/(M-1);
-                                     qijk(2)=k0+(kN-k0)*(ii-1)/(N-1)+(kM-k0)*(j-1)/(M-1);
-                                     qijk(3)=l0+(lN-l0)*(ii-1)/(N-1)+(lM-l0)*(j-1)/(M-1);
+                                     qijk(1)=h0+(hN-h0)*(ii-1)/(NN-1)+(hM-h0)*(j-1)/(M-1);
+                                     qijk(2)=k0+(kN-k0)*(ii-1)/(NN-1)+(kM-k0)*(j-1)/(M-1);
+                                     qijk(3)=l0+(lN-l0)*(ii-1)/(NN-1)+(lM-l0)*(j-1)/(M-1);
                                      ijk2hkl(hkl, qijk,abc);
                                      hkls[nofhkls][1]=hkl(1);
                                      hkls[nofhkls][2]=hkl(2);
@@ -731,14 +753,14 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"hN",hN)){printf("error mcdisp reading %s: in hklline - hN not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"kN",kN)){printf("error mcdisp reading %s: in hklline - kN not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"lN",lN)){printf("error mcdisp reading %s: in hklline - lN not found",parfile);exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklline - Nstp  not found",parfile);exit (EXIT_FAILURE);}
-                    printf("# ... hklline (%g %g %g) to (%g %g %g) with %g points\n",h1,k1,l1,hN,kN,lN,N);
+                   if(extract(instr,"Nstp",NN)){printf("error mcdisp reading %s: in hklline - Nstp  not found",parfile);exit (EXIT_FAILURE);}
+                    printf("# ... hklline (%g %g %g) to (%g %g %g) with %g points\n",h1,k1,l1,hN,kN,lN,NN);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(int ii=1;ii<=N;++ii){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=NN;++ii){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     hkls[nofhkls][1]=h1+(hN-h1)*(ii-1)/(N-1);
-                                     hkls[nofhkls][2]=k1+(kN-k1)*(ii-1)/(N-1);
-                                     hkls[nofhkls][3]=l1+(lN-l1)*(ii-1)/(N-1);
+                                     hkls[nofhkls][1]=h1+(hN-h1)*(ii-1)/(NN-1);
+                                     hkls[nofhkls][2]=k1+(kN-k1)*(ii-1)/(NN-1);
+                                     hkls[nofhkls][3]=l1+(lN-l1)*(ii-1)/(NN-1);
                                     }
                  }
                 // treat QxQyQzline statements
@@ -749,14 +771,14 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"QxN",hN)){printf("error mcdisp reading %s: in hklline - hN not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"QyN",kN)){printf("error mcdisp reading %s: in hklline - kN not found",parfile);exit (EXIT_FAILURE);}
                    if(extract(instr,"QzN",lN)){printf("error mcdisp reading %s: in hklline - lN not found",parfile);exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklline - N  not found",parfile);exit (EXIT_FAILURE);}
-                    printf("# ... QxQyQzline (%g %g %g)/A to (%g %g %g)/A with %g points\n",h1,k1,l1,hN,kN,lN,N);
+                   if(extract(instr,"Nstp",NN)){printf("error mcdisp reading %s: in hklline - N  not found",parfile);exit (EXIT_FAILURE);}
+                    printf("# ... QxQyQzline (%g %g %g)/A to (%g %g %g)/A with %g points\n",h1,k1,l1,hN,kN,lN,NN);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(int ii=1;ii<=N;++ii){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=NN;++ii){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     qijk(1)=h1+(hN-h1)*(ii-1)/(N-1);
-                                     qijk(2)=k1+(kN-k1)*(ii-1)/(N-1);
-                                     qijk(3)=l1+(lN-l1)*(ii-1)/(N-1);
+                                     qijk(1)=h1+(hN-h1)*(ii-1)/(NN-1);
+                                     qijk(2)=k1+(kN-k1)*(ii-1)/(NN-1);
+                                     qijk(3)=l1+(lN-l1)*(ii-1)/(NN-1);
                                      ijk2hkl(hkl, qijk,abc);
                                      hkls[nofhkls][1]=hkl(1);
                                      hkls[nofhkls][2]=hkl(2);
@@ -807,7 +829,7 @@ inimcdis::inimcdis(const char * file,char * pref,char * mffile,
                    int & nofcomp,int & nofat)
 {hkls=NULL;hklfile_start_index=NULL;Hext=Vector(1,HEXT_DIMENSION);Habc=Vector(1,3);Eabc=Vector(1,3);
  qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);mf=mfcf(1,1,1,nofat,nofcomp);
-  include_cd=inc_cd;
+  include_cd=inc_cd;N=Matrix(1,3,1,3); for(int i=1;i<=3;++i)N(i,i)=1/3;  // initialize demagnetisation tensor with sphere
   Qindex=0;
   parfile= new char [MAXNOFCHARINLINE]; 
   mf_file= new char [MAXNOFCHARINLINE]; 
@@ -840,6 +862,7 @@ inimcdis::inimcdis (const inimcdis & p)
  prefix= new char [MAXNOFCHARINLINE]; strcpy(prefix,p.prefix);  
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   Eabc=Vector(1,3);Habc=Vector(1,3);
+  N=Matrix(1,3,1,3); N=p.N;
   Hext=Vector(1,HEXT_DIMENSION); Hext=p.Hext;
   Eabc=p.Eabc;Habc=p.Habc;
   qmin=p.qmin;

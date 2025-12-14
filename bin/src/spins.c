@@ -217,13 +217,13 @@ fprintf(stderr,"# ***********************************************************\n"
  FILE * fin, * fout;
  int i,minl=1,maxl=1,eps=0,fst=0;
  cryststruct cs,cs4;
-
+ 
  char outstr[MAXNOFCHARINLINE];
  char tstr[MAXNOFCHARINLINE];
  char infilename[MAXNOFCHARINLINE];
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
  Vector nmin(1,3),nmax(1,3);
-
+ Matrix N(1,3,1,3); // demagnetisation factor
   int dim=28,nofcomp=1000000000;
  int os=0,maxn=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
  double xx=0,yy=0,zz=0,limit=0,tL2=0;
@@ -373,11 +373,11 @@ fprintf(fout,"\
 # -----------------------------------------------------------------------------\n");
 
 // input file header and conf------------------------------------------------------------------
-   headerinput(fin,fout,gp,cs,out);}
+   headerinput(fin,fout,gp,cs,out,N);}
 else
   {
 // input file header and conf------------------------------------------------------------------
-   headerinput(fin,stderr,gp,cs,out);
+   headerinput(fin,stderr,gp,cs,out,N);
   }
    if(cs.nofatoms<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofatoms=%i - must be >0 !!!\n",cs.nofatoms);exit(1);}
    if(cs.nofcomponents<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofcomponents=%i - must be >0 !!!\n",cs.nofcomponents);exit(1);}
@@ -436,6 +436,13 @@ fclose (fin);
 for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){delete []out[col];}
 
   printf("#! %s - configuration\n",outstr);
+  fprintf(stdout,"# Components of the Demagnetisation Tensor in SI Units\n");
+    fprintf(stdout,"# refering to ijk coordinate system\n");
+    fprintf(stdout,"# defined by  j||b, k||(a x b) and i normal to k and j\n");
+
+    fprintf(stdout,"#!Nii=%g Nij=%g Nik=%g\n",N(1,1),N(1,2),N(1,3));
+    fprintf(stdout,"#!Njj=%g Njk=%g\n",N(2,2),N(2,3));
+    fprintf(stdout,"#!Nkk=%g\n",N(3,3));
 if(nofcomp>savmf.nofcomponents){nofcomp=savmf.nofcomponents;}
 if(nofcomp<savmf.nofcomponents){printf("#! printing only nofcomponents=%i components\n",nofcomp);}
   if (strncmp(argv[1],"-t",2)!=0){

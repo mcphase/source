@@ -503,7 +503,7 @@ if(ini.cel!=0.0)
    fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
-   fprintf(fout,"# Elastic Constants\n");
+   fprintf(fout,"# Elastic Constants computed by applying stress of %g GPa and calculating strain\n",ini.cel);
       str[0]='\0';
    snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "  C11 C22  C33 C44 C55 C66 C12 C13 C14 C15 C16 C23 C24 C25 C26 C34 C35 C36 C45 C46 C56(GPa)");
    ini.print_usrdefcolhead(fout,str);
@@ -741,6 +741,7 @@ else
    // printout the lattice and atomic positions
    strcpy(inputpars.rems[2],"#\n");
    inputpars.savelattice(fout);inputpars.saveatoms(fout);
+   ini.savedemagtensor(fout);
    fprintf (fout, "#!show_abc_unitcell=1.0\n");
    fprintf (fout, "#!show_primitive_crystal_unitcell=1.0\n");
    fprintf (fout, "#!show_magnetic_unitcell=1.0\n");

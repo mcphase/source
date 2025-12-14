@@ -439,7 +439,11 @@ a_{\gamma\delta} \delta_{\delta\alpha}
 
 
 
-An we make also use of the definition of elastic constants:
+An we make also use of the definition of elastic constants {\em (important note: these
+are not the effective elastic constants, which can be determined experimentally, because
+they do not take into account, that the atomic positions relax when the crystal is 
+strained. To relax atomic positions and compute effective elastic constants use
+option -cel of program {\prg mcphasit})}:
 
 \begin{eqnarray}\label{elconst}
 c^{\alpha\beta\gamma\delta} &= &
@@ -593,7 +597,7 @@ the expectation values $\langle \hat \mbf P_i \rangle$ are zero in this case. Th
 the fact, that the energy is not invariant under rotations in case of transversal springs.
 
 In (\ref{Hmix}) we made use of the phonon-strain interaction constants $G_{mix}^{\alpha\gamma}(i)$
-defined writing explicitly the Voigt notation $\alpha=(\alpha\beta)$ by
+defined writing explicitly the Voigt notation $\alpha \leftrightarrow (\alpha\beta)$ by
 
 \begin{eqnarray}\label{Gmix}
 G_{mix}^{(\alpha\beta)\gamma}(i)&=&
@@ -603,6 +607,8 @@ R_{ij}^{\alpha} R_{ij}^{\beta} R_{ij}^{\gamma} -   \nonumber \\
 R_{ij}^{\alpha}  \delta_{\beta\gamma}) 
 \end{eqnarray}
 
+Similar to the elastic constants the Voigt notation is
+ e.g. $G_{mix}^{(23)\gamma}(i)=G_{mix}^{4\gamma}(i)$.
 Note a symmetry property: 
  in case of inversion symmetry at the position of an ion, the 
 phonon-strain interaction constants $G_{mix}^{\alpha\gamma}(i)$ will be zero.

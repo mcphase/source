@@ -107,7 +107,7 @@ printf (" 		   MCPHASE_NOFTHREADS or by the variable nofthreads in mpchas.ini\n"
       exit (EXIT_FAILURE);
 } 
 
-void inipar::finish_mcphas(int  nofqs,int nofspincf)
+void inipar::finish_mcphas()
 {
 printf("RESULTS saved in directory ./results/  - files:\n");
    printf("#RESULTS saved in directory ./results/  - files:\n");
@@ -118,8 +118,8 @@ printf("RESULTS saved in directory ./results/  - files:\n");
    printf("#  %smcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n",prefix);
    printf("#  %smcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n",prefix);
    printf("#  %smcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n",prefix);
-   printf("#!  %smcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",prefix,nofqs);
-   printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",prefix,nofspincf);
+   if(testqs!=NULL)printf("#!  %smcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",prefix,(*testqs).nofqs());
+   if(testspins!=NULL)printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",prefix,(*testspins).n);
    printf("#  _%smcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n",prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
    double cpu_duration = (double)(std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
@@ -437,21 +437,22 @@ void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector &
    else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? 0 :strlen(colhead[colcod[i]])-8 ),"",myround(val));
    c[colcod[i]]=true;
  }
-if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
-for(int i=1;i<=HEXT_DIMENSION;++i)
-{if(fabs(Hext(i))>SMALL_FIELD)
- {switch(i)
-  {case 1: case 2: case 3:{ bool cc=c[1]|c[2]|c[3]|c[4]|c[5]|c[6]|c[21];
-   if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
-                           } break;
-   case 4: case 5: case 6: { bool cc=c[7]|c[8]|c[9]|c[10]|c[11]|c[12]|c[22];
-   if(!cc){fprintf(stderr,"#Warning: External Electric Field E nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
-                           }break;
-   default: if(!c[i+6]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n",i-6);exit(EXIT_FAILURE); }
+if(!withtext) // check output only in case withtext - in order to accommodate -cel option of mpchase where output of nonzero stress is not necessary
+{if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
+ for(int i=1;i<=HEXT_DIMENSION;++i)
+ {if(fabs(Hext(i))>SMALL_FIELD)
+  {switch(i)
+   {case 1: case 2: case 3:{ bool cc=c[1]|c[2]|c[3]|c[4]|c[5]|c[6]|c[21];
+    if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini and restart\n");exit(EXIT_FAILURE); }
+                            } break;
+    case 4: case 5: case 6: { bool cc=c[7]|c[8]|c[9]|c[10]|c[11]|c[12]|c[22];
+    if(!cc){fprintf(stderr,"#Warning: External Electric Field E nonzero but not stored in output files  - please change settings out out* in mcphas.ini a nd restart\n");exit(EXIT_FAILURE); }
+                            }break;
+    default: if(!c[i+6]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini and restart\n",i-6);exit(EXIT_FAILURE); }
+   }
   }
  }
 }
-
 }
  
 
@@ -850,7 +851,18 @@ checkpr(fout, "maxQ",maxQ,p.maxQ);
 
 }
 
+void inipar::savedemagtensor (FILE * fout)
+{fprintf(fout,"# Components of the Demagnetisation Tensor in SI Units\n");
+    fprintf(fout,"# refering to ijk coordinate system\n");
+    fprintf(fout,"# defined by  j||b, k||(a x b) and i normal to k and j\n");
 
+    fprintf(fout,"#!Nii=%g\n",N(1,1));
+    fprintf(fout,"#!Nij=%g\n",N(1,2));
+    fprintf(fout,"#!Nik=%g\n",N(1,3));
+    fprintf(fout,"#!Njj=%g\n",N(2,2));
+    fprintf(fout,"#!Njk=%g\n",N(2,3));
+    fprintf(fout,"#!Nkk=%g\n",N(3,3));
+}
 
 void inipar::print (FILE * fout)
 {
@@ -946,17 +958,7 @@ void inipar::print (FILE * fout)
     fprintf(fout,"#For the external electric field unit is kV/mm.\n");
     fprintf(fout,"#For the external stress tensor the unit is GPa.\n\n");
 
-    fprintf(fout,"# Components of the Demagnetisation Tensor in SI Units\n");
-    fprintf(fout,"# refering to ijk coordinate system\n");
-    fprintf(fout,"# defined by  j||b, k||(a x b) and i normal to k and j\n");
-
-    fprintf(fout,"Nii=%g\n",N(1,1));
-    fprintf(fout,"Nij=%g\n",N(1,2));
-    fprintf(fout,"Nik=%g\n",N(1,3));
-    fprintf(fout,"Njj=%g\n",N(2,2));
-    fprintf(fout,"Njk=%g\n",N(2,3));
-    fprintf(fout,"Nkk=%g\n\n",N(3,3));
-
+     savedemagtensor (fout);
     fprintf(fout,"# if demag=1 the magnetic and electric fields are treated\n");
     fprintf(fout,"# as external applied fields and corrected using the demagnetization\n");
     fprintf(fout,"# tensor to obtain the internal applied field within the sample\n");
@@ -1046,6 +1048,8 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;include_cd=false;
   ipeps1=NULL;ipeps2=NULL;ipeps3=NULL;ipeps4=NULL;ipeps5=NULL;ipeps6=NULL;
+  testqs=NULL;
+  testspins=NULL;
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
@@ -1146,6 +1150,8 @@ inipar::inipar (const inipar & p)
   ipeps4=p.ipeps4;
   ipeps5=p.ipeps5;
   ipeps6=p.ipeps6;
+  testspins=p.testspins;
+  testqs=p.testqs;
   sta=p.sta;
   startcputime=p.startcputime;
   nofstapoints=p.nofstapoints;

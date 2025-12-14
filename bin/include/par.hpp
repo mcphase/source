@@ -43,7 +43,7 @@ class par
 ~par ();		//destruktor
 
 int newatom(jjjpar * p); //creates new atom from an existing and returns its index
-int delatom(int & n, Matrix & distribute,int & verbose); //removes atom n and returns new nofatoms
+int delatom(int  n, Matrix & distribute,int verbose=0); //removes atom n and returns new nofatoms
 // if n<0 then atom number |n| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
 // if n>0 interactions with the other atoms are kept and transferred to 
@@ -68,7 +68,7 @@ void savelattice(FILE *fout);// save lattice to file
 void saveatoms(FILE *fout);// save atom positions and properties  to file
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
 void save_mcdiff_in (const char * program); // save structure in mcdiff.in program is program name calling this
-void set_nofcomponents (int & n); //sets the number of components in the interaction vector to n
+void set_nofcomponents (int  n); //sets the number of components in the interaction vector to n
 void increase_nofcomponents (int & n); //increases the number of components in the interaction vector
 void decrease_nofcomponents (int & n); //decreases the number of components in the interaction vector
 void remove_components(int & rml,int & rmh,int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh

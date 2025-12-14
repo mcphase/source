@@ -14,11 +14,63 @@ sMat<double> M2mat(Matrix & M)
    return retval;
 }
 #endif
+
+void checkini(inipar & ini)
+{struct stat filestatus;
+ static time_t last_modify_time;
+ static int washere=0;
+ int loaderr;
+  errno = 0;
+
+  if (stat(ini.savfilename,&filestatus)!=0)
+    {fprintf (stderr, "Error checking mcphas.ini: Couldn't read status of file %s: %s\n",
+              ini.savfilename, strerror (errno));exit (EXIT_FAILURE);
+     }
+
+  if(washere==0){washere=1;last_modify_time=filestatus.st_mtime;}
+  
+   
+    if (filestatus.st_mtime!=last_modify_time) //check if file has been modified
+    {again:
+     last_modify_time=filestatus.st_mtime;
+     fprintf(stdout,"mcphas.ini has been modified - reading new mcphas.ini\n");
+      sleep(1000);
+      loaderr=ini.load();
+      if(ini.exit_mcphas==1)
+        {if(ini.testspins!=NULL)(*ini.testspins).save(filemode);  //exit normally
+         if(ini.testqs!=NULL)(*ini.testqs).save(filemode);
+         ini.finish_mcphas();
+#ifdef _THREADS
+ for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
+#endif
+   fprintf(stderr,"**********************************************\n");
+   fprintf(stderr,"          End of Program %s\n",ini.program);
+   fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
+   fprintf(stderr,"**********************************************\n");
+         exit(0);
+      }
+
+      while(ini.pause_mcphas==1||loaderr==1) // wait until pause button is released and no loaderror occurs
+       {fprintf(stdout,"Pausing ...\n");
+        while(filestatus.st_mtime==last_modify_time)  //wait until filestatus changes again
+          {sleep(1);
+            if (stat(ini.savfilename,&filestatus)!=0)
+               {fprintf (stderr, "Error checking file mcphas.ini: Couldn't read status of file %s: %s\n",
+                ini.savfilename, strerror (errno));exit (EXIT_FAILURE);
+               }
+          }
+	goto again;  
+       }
+       
+
+    }
+}
+
 /*****************************************************************************/
 // here the free energy is calculated for a given (initial) spinconfiguration
 // using the meanfield algorithm / Monte Carlo 
 
-double evalfe(double & U,double & Eelastic,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
+double evalfe(double & U,double & Eelastic,Vector & sigma,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
 // calculate free energy fe and energy u
 { Vector d1(1,inputpars.cs.nofcomponents),meanfield(1,inputpars.cs.nofcomponents);
 int i,j,k,l,m1,s;double fe;
@@ -28,7 +80,7 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
  for(l=1;l<=inputpars.cs.nofatoms;++l)
  {fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
   if(T==0)fe+=lnzi[s][l]; // for MC just sum lnzi
-  U+=ui[s][l];//fprintf(stdout,"ui(%i,%i)=%g ",s,l,ui[s][l]);
+  U+=ui[s][l];
 // correction term
   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    {d1[m1]=sps.m(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];
@@ -37,18 +89,19 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
 // add correction term
   fe+=0.5*(meanfield*d1);
   U+=0.5*(meanfield*d1);
-
+//if(l==6)fprintf(stdout,"ui(%i,%i)=%12.12g + corr= %12.12g \n",s,l,ui[s][l],ui[s][l]+0.5*(meanfield*d1));
  // printf ("Hi=%g Hj=%g Hk=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
  }
 }}}
 fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
 U/=(double)sps.n();//fprintf(stdout,"fe=%g\n",fe);
-
-if(ini.doeps){Eelastic=sps.epsilon*inputpars.Cel*sps.epsilon;
-              fe+=Eelastic;U+=Eelastic;              
-              fe-=sps.epsilon*mf.epsmf;
-              U-=sps.epsilon*mf.epsmf;
-} // add elastic energy and magnetoelastic energy
+if(ini.doeps){Eelastic=0.5*sps.epsilon*inputpars.Cel*sps.epsilon;
+              fe+=Eelastic;U+=Eelastic; // add elastic energy 
+              fe-=0.5*sps.epsilon*mf.epsmf;
+              U-=0.5*sps.epsilon*mf.epsmf; // re-correct magnetoelastic energy
+                //  (was included in correction term above but should be fully considered)
+              fe-=sps.epsilon*sigma;
+              U-=sps.epsilon*sigma;}  //add strain energy 
 
 fe/=sps.nofatoms; //normalise to meV/ion (ion=subsystem)
 U/=sps.nofatoms;
@@ -208,7 +261,6 @@ if(stat==NULL)
  (*inputpars.jjj[l]).Icalc(moment,T,d1,Hint,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]));
 else
  (*inputpars.jjj[l]).Icalc(moment,T,d1,Hint,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]),stat[l]);
-
    if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    if(isnan(lnzi[s][l])){fprintf (stderr, "calc_spsijk: Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    for(int m1=1;m1<=inputpars.cs.nofcomponents;++m1)
@@ -218,7 +270,7 @@ else
 
 
 double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector Happ,double T,inipar & ini,par & inputpars,
-             spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs,physproperties * physprops)
+             spincf & sps,mfcf & mf,physproperties * physprops)
 {/*on input:
     T		Temperature[K]
     Happ	Vector of applied magnetic field [T] in ijk coordinates
@@ -270,7 +322,6 @@ if (verbose==1){printf("f");fflush(stdout);}
  Vector  * ui; ui=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){ui[i]=Vector(1,inputpars.cs.nofatoms);ui[i]=0;} // magnetic energy for every atom
  ComplexMatrix ** Icalcpars;Icalcpars=new ComplexMatrix*[inputpars.cs.nofatoms*sdim+2];
 
-
 // for each ion in the supercell make a copy of the parstorage matrix 
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {for (l=1;l<=inputpars.cs.nofatoms;++l){int im1=i-1,jm1=j-1,km1=k-1;
@@ -285,6 +336,7 @@ if (verbose==1){printf("f");fflush(stdout);}
 // {printf("error in matrix copy\n");exit(1);}
 
   }}}}
+
  int diagonalexchange=1;
  FILE * fout;
  time_t time_of_last_output=0;
@@ -740,7 +792,9 @@ Vector Pel(1,3);Pel=0;
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
   }}}
-  if(ini.doeps){// here should come the exchange striction: calculate correlation function
+  if(ini.doeps){// if doeps<0 we do not want to set sps.epsilon but fix it
+
+                 // here should come the exchange striction: calculate correlation function
                 // and multiply with  corresponding derivative of two ion interaction
                 // --> and add to mf.epsmf
                 // corrfunc(Matrix & jj,int & n, int & l,par & inputpars,spincf & sps)
@@ -808,15 +862,14 @@ mf.epsmf(6)+=0.5*dldlssumeps6;
 
                  
                }}}
-
-                sps.epsilon=inputpars.CelInv*(mf.epsmf+sigma);
+                 if(ini.doeps>0)sps.epsilon=inputpars.CelInv*(mf.epsmf+sigma);
                }
 
   //treat program interrupts
   #ifdef _THREADS
   MUTEX_LOCK (&mutex_tests);
   #endif
-  checkini(testspins,testqs,ini);
+  checkini(ini);
   #ifdef _THREADS
   MUTEX_UNLOCK (&mutex_tests);
   #endif
@@ -844,7 +897,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
      fout = fopen_errchk (outfilename, "a");
-     fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
+     fe=evalfe(U,Eelastic,sigma,sps,mf,ini,inputpars, T,lnzi,ui);
 
   #ifndef _THREADS
    fprintf(fout,"%i %g %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)ini.successrate/ini.nofcalls,fe);
@@ -964,7 +1017,7 @@ for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
 
 // now call evalfe to get E0 correctly ..
 double E0;
-evalfe(E0,Eelastic,sps,mf,ini,inputpars, TT,lnzi,ui);
+evalfe(E0,Eelastic,sigma,sps,mf,ini,inputpars, TT,lnzi,ui);
 
 
 
@@ -1134,7 +1187,7 @@ for (int i=1;i<=sps.na();++i)for(int j=1;j<=sps.nb();++j)for(int k=1;k<=sps.nc()
  }
  ui[s][l]=En(l);
 
-double EE;evalfe(EE,Eelastic,sps,mf,ini,inputpars, TT,lnzi,ui);
+double EE;evalfe(EE,Eelastic,sigma,sps,mf,ini,inputpars, TT,lnzi,ui);
 double dEE=(EE-E0)*sps.n()*sps.nofatoms-E;
 if(fabs(dEE-dE)>0.01){printf("r=%i dE=%g dEE=%g\n",r,dE,dEE);exit(0);}
     
@@ -1172,7 +1225,7 @@ if(physprops!=NULL)if(r>nofMC*WARMUP){
   #ifdef _THREADS
   MUTEX_LOCK (&mutex_tests);
   #endif
-  checkini(testspins,testqs,ini);
+  checkini(ini);
   #ifdef _THREADS
   MUTEX_UNLOCK (&mutex_tests);
   #endif
@@ -1251,7 +1304,7 @@ delete [] states;
 // ***************************************************************************
 else
 {// calculate free energy 
-fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
+fe=evalfe(U,Eelastic,sigma,sps,mf,ini,inputpars, T,lnzi,ui);
 }
 if(physprops!=NULL)(*physprops).Hint=Hint; // if physprops are given set (in case of dmag=1 refined)
                                            // internal field Hint

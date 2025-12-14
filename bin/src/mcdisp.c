@@ -256,7 +256,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
                            else deltaAB=false;
  // in contrast to mcphasit it is not necessary to divide here DAB by ini.mf.n() to get
 // consistent results for a supercell. Tested 20.9.2025 MR on HoVO4 with Gd3+ -cd 
-  cd=DAB(maghkl, maglat,maglattvol,magrez,(*inputpars.jjj[ll]).gJ, dAB, (*inputpars.jjj[l]).gJ, deltaAB);
+  cd=DAB(maghkl, maglat,maglattvol,magrez,(*inputpars.jjj[ll]).gJ, dAB, (*inputpars.jjj[l]).gJ, deltaAB,ini.N);
    for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,l);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,l,tll)-1);
 	  for(m=1;m<=cddim;++m)for(n=1;n<=cddim;++n)jsss[jsi+m][jsj+n] +=cd(m,n);

@@ -14,7 +14,6 @@
 #include<martin.h>
 #include<spincf.hpp>
 #include<vector.h>
-#include<inipar.hpp>
 #include<par.hpp>
 
 class qvectors
@@ -62,7 +61,8 @@ class qvectors
     
     //constructor - generate set of qvectors
     /* input 
-	ini		set of initial parameters of mcphase - such as Vectors defining a cube 
+	qmin qmax deltaq maxqperiod maxnofspins		set of initial parameters of mcphase 
+                        - such as Vectors defining a cube 
 	                in qspace which is to be covered,Vector defining a increment in qspace
 	filename	file to save q vector values on
         rz              reciproval lattice
@@ -72,7 +72,7 @@ class qvectors
 			magnetic structures corresponding to qvector)
     */
    
- qvectors (inipar & ini,par & inputpars,
+ qvectors (Vector & qmin,Vector & qmax,Vector &deltaq,int maxqperiod,int maxnofspins ,par & inputpars,
               Vector & mmax,const char * filename,int & v);	//konstruktor
 
     qvectors (const qvectors & qs);	// kopier-konstruktor

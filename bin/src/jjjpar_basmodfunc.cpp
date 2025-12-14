@@ -568,6 +568,7 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
                          if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename,lnZ,U))
                         {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);};
                   break;
+   case fixmom: mom=MF; lnZ=MF*Hxc/(KB*T);U=-MF*Hxc;break; // we need Zeeman term for reduce_unitcell energy estimations
    default: if(T==0){fprintf(stderr,"Error - T=0 in external module - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
              (*I)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&lnZ,&U,&parstorage);
   }

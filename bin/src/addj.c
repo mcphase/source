@@ -19,6 +19,7 @@ int main (int argc, char **argv)
                 Options: -nofcomponents 23  ...fixes the nofcomponents to 23 by \n \
                         reducing (removing entries) or increasing (by filling with zeroes) \n \
                         the exchange parameter tables\n \
+                        -i                  ... forces output with indexchange \n \
                         -ni                 ... forces output without indexchange \n \
                         -s  0.2             ... scales all interactions (including \n \
                                                 magnetoelastic G) in file1 by 0.2 before adding \n \
@@ -45,6 +46,7 @@ int main (int argc, char **argv)
                                    ow+=1;rmh=(int)strtol(argv[ow], (char **)NULL, 10);
                              }
  if(strcmp(argv[ow],"-ni")==0){noindexchange=1;}
+ if(strcmp(argv[ow],"-i")==0){noindexchange=-1;}
  if(strcmp(argv[ow],"-v")==0){verbose=1;}
  if(strcmp(argv[ow],"-pd")==0){pd=true;}
  if(strcmp(argv[ow],"-ps")==0){ps=true;}

@@ -132,7 +132,7 @@ int n,j;
 }
 
 // inputs file header and returns number of atoms 
-int headerinput(FILE * fin_coq,FILE* fout,graphic_parameters & gp,cryststruct & cs,char **out)
+int headerinput(FILE * fin_coq,FILE* fout,graphic_parameters & gp,cryststruct & cs,char **out,Matrix & N)
 { char instr[MAXNOFCHARINLINE];
  // default out values
 strcpy(out[1],"x");
@@ -173,12 +173,20 @@ char *token;cs.abc=0;
    extract(instr,"out5",out[5], 20 ,1);
    extract(instr,"out6",out[6], 20 ,1);
    extract(instr,"out7",out[7], 20 ,1);
+  extract(instr,"Nii",N[1][1]);
+  extract(instr,"Nij",N[1][2]);
+  extract(instr,"Nik",N[1][3]);
+  extract(instr,"Njj",N[2][2]);
+  extract(instr,"Njk",N[2][3]);
+  extract(instr,"Nkk",N[3][3]);
+
    
    extract(instr,"scale_view_1",gp.scale_view_1);
    extract(instr,"scale_view_2",gp.scale_view_2);
    extract(instr,"scale_view_3",gp.scale_view_3);
    cs.cextract(instr);
-   extract(instr,"nofatoms",cs.nofatoms);    extract(instr,"nofcomponents",cs.nofcomponents);
+   extract(instr,"nofatoms",cs.nofatoms);
+   extract(instr,"nofcomponents",cs.nofcomponents);
    if ((cs.nofatoms>0)&&((extract(instr,"x",cs.x[n+1])+
                     extract(instr,"y",cs.y[n+1])+
   		       extract(instr,"z",cs.z[n+1])==0)||
@@ -211,6 +219,7 @@ char *token;cs.abc=0;
   }
     j=fseek(fin_coq,pos,SEEK_SET);
     if (j!=0){fprintf(stderr,"Error: wrong mf file format\n");exit (EXIT_FAILURE);}
+N(2,1)=N(1,2);N(3,1)=N(1,3);N(3,2)=N(2,3);
 return n;
 }
 

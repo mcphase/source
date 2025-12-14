@@ -261,7 +261,7 @@ radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp ../../vers
 addj.o: addj.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
-reduce_unitcell.o: reduce_unitcell.c par.hpp  martin.h vector.h
+reduce_unitcell.o: reduce_unitcell.c par.hpp  martin.h vector.h mcphas.h mcphas_fecalc.c
 	$(CCC) $(CFLAGS) $<
 
 mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c inimcdiff.hpp spincf.hpp mfcf.hpp ../../version
@@ -364,10 +364,9 @@ ip.o: ionpars.cpp
 	@echo Linking ../addj
 	@$(LINKER)  -Wall  -o ../addj $^  $(LFLAGS)
 
-../reduce_unitcell$(EXE): reduce_unitcell.o par.o martin.o myev.o jjjpar.o mathparser.o perlparse.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
+../reduce_unitcell$(EXE): reduce_unitcell.o $(OBJS)    $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  density.o
 	@echo Linking ../reduce_unitcell
 	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)
-
 
 ../fediff$(EXE): fediff.o martin.o jjjpar.o mathparser.o inipar.o par.o ionpars.o density.o spincf.o mfcf.o testspin.o myev.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)
 	@echo Linking ../fediff

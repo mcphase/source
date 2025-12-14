@@ -1,7 +1,6 @@
 // routines for mcphas for calculation of magnetic phases
 // htcalc.c
 
-#define FEMIN_INI     1e6
 
 #ifdef _THREADS
 #if defined  (__linux__) || defined (__APPLE__)
@@ -83,56 +82,7 @@ THRLC_TYPE threadSpecificKey;
 
 #endif // def _THREADS
 
-void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
-{struct stat filestatus;
- static time_t last_modify_time;
- static int washere=0;
- int loaderr;
-  errno = 0;
 
-  if (stat(ini.savfilename,&filestatus)!=0)
-    {fprintf (stderr, "Error checking mcphas.ini: Couldn't read status of file %s: %s\n",
-              ini.savfilename, strerror (errno));exit (EXIT_FAILURE);
-     }
-
-  if(washere==0){washere=1;last_modify_time=filestatus.st_mtime;}
-  
-   
-    if (filestatus.st_mtime!=last_modify_time) //check if file has been modified
-    {again:
-     last_modify_time=filestatus.st_mtime;
-     fprintf(stdout,"mcphas.ini has been modified - reading new mcphas.ini\n");
-      sleep(1000);
-      loaderr=ini.load();
-      if(ini.exit_mcphas==1)
-        {testspins.save(filemode);  //exit normally
-         testqs.save(filemode);
-         ini.finish_mcphas(testqs.nofqs (),testspins.n);
-#ifdef _THREADS
- for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
-#endif
-   fprintf(stderr,"**********************************************\n");
-   fprintf(stderr,"          End of Program %s\n",ini.program);
-   fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
-   fprintf(stderr,"**********************************************\n");
-         exit(0);
-      }
-
-      while(ini.pause_mcphas==1||loaderr==1) // wait until pause button is released and no loaderror occurs
-       {fprintf(stdout,"Pausing ...\n");
-        while(filestatus.st_mtime==last_modify_time)  //wait until filestatus changes again
-          {sleep(1);
-            if (stat(ini.savfilename,&filestatus)!=0)
-               {fprintf (stderr, "Error checking file mcphas.ini: Couldn't read status of file %s: %s\n",
-                ini.savfilename, strerror (errno));exit (EXIT_FAILURE);
-               }
-          }
-	goto again;  
-       }
-       
-
-    }
-}
 
 #ifdef _THREADS
 #define ini (*thrdat.ini)
@@ -225,7 +175,7 @@ int s1=1,s2=2;
  
       //!!!calculate free energy - this is the heart of this loop !!!!
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-      fe=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,testspins,testqs);
+      fe=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( ">for_str_%i(%ix%ix%i) "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">for(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
@@ -247,7 +197,7 @@ int s1=1,s2=2;
                // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mfcf mf1(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-               if ((fered=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps1,mf1,testspins,testqs))<=fe*(1.0000000000001)){mf=mf1;
+               if ((fered=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps1,mf1))<=fe*(1.0000000000001)){mf=mf1;
                                  if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
@@ -491,7 +441,7 @@ int  htcalc (Vector Happ,double T,inipar & ini,par & inputpars,qvectors & testqs
 if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check mcphas.ini !");exit(EXIT_FAILURE);}
 
  srand(time(0)); // initialize random number generator
- checkini(testspins,testqs,ini); // check if user pressed a button
+ checkini(ini); // check if user pressed a button
  if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
@@ -703,7 +653,7 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
-      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,testspins,testqs,&physprops); 
+      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,&physprops); 
 
       spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);

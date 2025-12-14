@@ -1555,7 +1555,7 @@ void myPVector(Vector & M,const char * s=NULL){myPVector(stdout,M,s);}
 
 // calculates classical dipole interaction Fourier transform with Ewald Method accorind 
 // to bowden 1981 p 827 - to be use in line 216 of mcdisp.c and for q=0 in mcphas 
-ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB)
+ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB,Matrix & N)
 // input: hkl ... q-vector in Miller indices with respect to reciprocal lattice
 //        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
 //         v ........ volume of unit cell in A^3
@@ -1564,6 +1564,7 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double 
 //        gJA .. Lande factor of atom A
 //        gJB .. Lande factor of atom B
 //        deltaAB ... 1 if dA=dB and zero otherwise
+//        N ...  demagnetisation tensor in SI units (for sphere N=1/3)
 // ouput DAB(q) according to equation (26) including a prefactor to obtain units of meV 
 //         DAB(q)=(gJA*gJB*muB)^2)(mu0/4pi) sum_j(neq i) Dij exp(-iqrij) 
 //         with rij=rj-ri, ri=rA and rj runs over rB+all lattice vectors
@@ -1599,8 +1600,15 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double 
  
  double f2=-4*PI/v;
   // TERM I
-  if(qn<1e-99){// we are at q=0 - take I=f2*N with N demagnetisation factor for sphere =1/3
-               for(int be=1;be<=3;++be)D(be,be)=f2*1/3; }   
+  if(qn<1e-99){// we are at q=0 (relevant for ferromagnetic resonance experiments !)
+               // according to Jensen 1991 REM equ 5.5.11a we have to use for dynamic
+               // dispersive properties in RPA not Deff for J(q=0) (Deff has only to
+               // be used for static properties, calculating the mean field single ion
+               // energies)
+               // but D(q=0) accoridng to (5.5.6), this corresponds to 
+               // taking I=f2*N with N demagnetisation tensor 
+                for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be)=f2*N(al,be);
+              }   
   else
   { for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be) =f2*q(al)*q(be)*exp(-qq/4/RR)/qq;}
 
@@ -1614,11 +1622,10 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double 
    double Qn=Norm(Q);
    double QQ=Qn*Qn;
    double qLtAB=2*PI*((tauAB(1))*i+(tauAB(2))*j+(tauAB(3))*k);
-  if(Qn<1e-99){// we are at q=rez lattice vector - take I2=f2 N*expitau with N demagnetisation factor for sphere =1/3
-          double f0=f2*1/3;
-   complex <double>expitau(f0*cos(qLtAB),-f0*sin(qLtAB));
-        for(int be=1;be<=3;++be)D(be,be)+=expitau;
-  
+  if(Qn<1e-99){
+    // we are at q=rez lattice vector - take I2=f2 N*expitau with N demagnetisation factor (for sphere =1/3)
+   complex <double>expitau(f2*cos(qLtAB),-f2*sin(qLtAB));
+   for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be)+=expitau*N(al,be);  
      } else {
           double f0=f2*exp(-QQ/4/RR)/QQ;
    complex <double>expitau(f0*cos(qLtAB),-f0*sin(qLtAB));
@@ -1687,8 +1694,12 @@ Matrix DAB0( Matrix & lattice, double & v,Matrix & rez,double & gJA, Vector & ta
  double RR=R*R;
  int L=2;
   double f2=-4*PI/v;
-  // TERM I for q=0 I estimate f2*N with N demagnetization factor for a sphere
-  for(int be=1;be<=3;++be)D(be,be)=f2*1/3;
+  // TERM I for q=0 I 
+ // estimate f2*N with N demagnetization factor for a sphere
+ // uncomment next line to remove Lorentz factor ---> probably wrong (Rare earth magnetism equ 5.5.6)
+  //  for(int be=1;be<=3;++be)D(be,be)=f2*1/3;
+  // rather leave I=0 for static properties ! corresponds to  Deff=4pi/3+[D(q=0)]L
+  // and assume that applied field is internal field.
   // TERM II
   for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
   {

@@ -252,7 +252,7 @@ Matrix ER(double& R, Vector & rl);
 
 // calculates classical dipole interaction Fourier transform with Ewald Method accorind 
 // to bowden 1981 p 827 - to be use in line 216 of mcdisp.c and for q=0 in mcphas 
-ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB);
+ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double & gJA, Vector & tauAB,double & gJB,bool & deltaAB,Matrix & N);
 // input: hkl ... q-vector in Miller indices with respect to reciprocal lattice
 //        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
 //         v ........ volume of unit cell in A^3
@@ -261,6 +261,7 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice,double & v,Matrix & rez,double 
 //        gJA .. Lande factor of atom A
 //        gJB .. Lande factor of atom B
 //        deltaAB ... 1 if dA=dB and zero otherwise
+//        N ... demagnetisation tensor in SI units 
 // ouput DAB(q) according to equation (26) including a prefactor to obtain units of meV 
 //         DAB(q)=(gJA*gJB*muB)^2)(mu0/4pi) sum_j(neq i) Dij exp(-iqrij) 
 //         with rij=rj-ri, ri=rA and rj runs over rB+all lattice vectors

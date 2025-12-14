@@ -49,7 +49,7 @@ namespace std
 {
 
 enum module_orientation { abc_xyz = 1 , abc_yzx = 2 };
-enum module { external_class = -1 , external = 0 , kramer = 1 , cfield = 2 , brillouin = 3 , so1ion = 4 , cluster = 5 };
+enum module { external_class = -1 , external = 0 , kramer = 1 , cfield = 2 , brillouin = 3 , so1ion = 4 , cluster = 5, fixmom = 6 };
 }
    // integer to tell which module is loaded (remember to update pointc.c if the convention is changed !)
 
@@ -100,6 +100,7 @@ public:
    void scalepars (double scalefactor); // multiply all exchange parameters with scale factor
    void delpar (int & number); // remove a neighbour from list
    int addpar (Vector & dabc,Vector & drijk,int & subl); // add a neighbour with distance dabc and zero exchange, returns index of this parameter
+   int index(Vector & dabc); // given dabc return index of parameter, if neighbor not in list return 0
 
    void save (FILE *file,int & noindexchange,bool pd=false, bool ps=false); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
@@ -140,7 +141,7 @@ private:
 
 public:
   Vector MODPARS;   // storage for single ion module paramters
-  Vector MF; // to store exchange fields for mcdiff
+  Vector MF; // to store exchange fields for mcdiff and to store moments for module fixmom
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
    // from exchange field Hxc [meV] and external field Hext
    void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage,ComplexVector *& state);

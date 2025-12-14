@@ -299,7 +299,7 @@ Note that in order to use {\prg makenn\index{makenn}} you have to set up a
 working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure. 
 The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
 creates all neighbours within a sphere of distance 23.3\AA, for every neighbour the classical
-dipole interaction $J_{\alpha\beta}(\vec R)=\frac{\mu_0}{4\pi} (g_J \mu_B)^2 \frac{3R_{\alpha}R_{\beta}-\delta_{\alpha\beta}R^2}{R^5}$
+dipole interaction $J_{\alpha\beta}(\vec R =\vec R_j - \vec R_i)=\frac{\mu_0}{4\pi} g_{J_i} g_{J_j} \mu_B^2 \frac{3R_{\alpha}R_{\beta}-\delta_{\alpha\beta}R^2}{R^5}$
 (the factor $\frac{\mu_0}{4\pi}$ is necessary in SI units)
  is calculated and is stored in file {\prg makenn.j}. If the exchange %%@
 parameters 
@@ -601,17 +601,28 @@ $K^{-1}_{\alpha\beta}=\sum_{\alpha'=1,2,3}S_{\alpha\alpha'}\Omega^{-1}_{\alpha'\
    \end{equation}
 
 This expression (\ref{u}) for  $u_i^{\alpha}$   we substitute
- into the total Hamiltonian (\ref{Htot}) and neglect terms quadratic in the strain 
-$\epsilon$. Thus we get an effective multipole interaction contribution and an additional
+ into the total Hamiltonian (\ref{Htot}). 
+Thus we get an effective multipole interaction contribution and an additional
 magnetoelastic contribution instead of the Einstein term $K_{\alpha\beta}(ii)$ and the crystal field 
 phonon interaction $\Gamma^{\alpha\gamma}(ij) $ and the mixing term $G_{mix}^{\gamma\alpha}(i)$:
  \begin{eqnarray}
   \hat H_{\rm tot}&=& \dots + \frac{1}{2}\sum_{\alpha'\beta\beta',i \neq jj',\gamma\gamma'=1,\dots}
   \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij')  }
   {\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j) \langle O_{\gamma'}(\hat \mbf J_{j'}) \rangle + \nonumber\\
-  &&+\sum_{\alpha'\beta\beta',i\neq j,\alpha=1-6,\gamma=1,\dots} \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij) G_{mix}^{\alpha\beta'}(i) }
-  {\Omega_{\alpha'\alpha'}(ii)} \epsilon_{\alpha}O_{\gamma}(\hat \mbf J_j)+ \dots
+  \dots&+&\sum_{\stackrel{i\neq j,\alpha'\beta\beta'}{\alpha=1-6,\gamma=1,\dots}} \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij) G_{mix}^{\alpha\beta'}(i) }
+  {\Omega_{\alpha'\alpha'}(ii)} \epsilon_{\alpha}O_{\gamma}(\hat \mbf J_j)
++ \frac{1}{2}\sum_{\alpha\gamma=1-6}c_{\rm eff}^{\alpha\gamma}\epsilon_{\alpha}\epsilon_{\gamma}
  \end{eqnarray}   
+Moreover, the terms quadratic in the strain $\epsilon$ lead to a renormalisation of the
+elastic constants, which become softer because of the relaxation of atomic positions
+in the unit cell when the crystal is strained (an effect which is not included
+in the elastic constants in equations (\ref{elconst}))
+
+\begin{equation}\label{elconsteff}
+c_{\rm eff}^{\alpha\gamma}=c^{\alpha\gamma}+\sum_{\alpha'\beta\beta'} 
+\frac{G_{mix}^{\alpha\alpha'}(i)S_{\alpha'\beta'}S_{\beta\beta'}G_{mix}^{\gamma\beta}(i)}{\Omega_{\beta'\beta'}(ii)}
+\end{equation}
+
 This effective multipole interaction and  magnetoelastic terms are added in the output in case an atom which is removed has the phonon module.
 Special attention deserves in this context the first term with $j=j'$ which in general for $\gamma=\gamma'$
 has to be positive and corresponds to a phonon induced quadrupolar self interaction 

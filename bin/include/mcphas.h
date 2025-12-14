@@ -27,11 +27,12 @@
 #include <sys/stat.h>
 #include <vector.h>
 
+#define FEMIN_INI     1e6
 
      //calculation of physical properties at given HT point
 
 /*check if parameter file mcphas.ini has been changed*/
-void checkini(testspincf & testspins,qvectors & testqs,inipar & ini);
+void checkini(inipar & ini);
 
 
 /* calculate magnetic structure at a given HT- point
@@ -71,7 +72,7 @@ void physpropclc(Vector H,double T,
 
  */
 double fecalc(double & U, double & Eelastic,int & r,double & sc,Vector H,double T,inipar & ini,par & inputpars,
-            spincf & sps,mfcf & mf,testspincf & testspins,qvectors & testqs,physproperties * physprops = NULL);
+            spincf & sps,mfcf & mf,physproperties * physprops = NULL);
 
 
 

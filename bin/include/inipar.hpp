@@ -12,6 +12,8 @@
 #include<vector.h>
 #include"cryststruct.hpp"
 #include"par.hpp"
+#include"qvectors.hpp"
+#include"testspin.hpp"
 
 #define EXTERNAL_PARAMETER_DIMENSION  HEXT_DIMENSION+7  // dimension of xv, yv zero (see below)
 
@@ -36,7 +38,8 @@ class inipar
   par * ipx;par * ipy;par * ipz; // storage for two ion interaction parameter derivatives (djdx djdy djdz files)
   par * ipeps1;par * ipeps2;par * ipeps3; // storage for two ion interaction parameter derivatives (djdeps1-6 files)
   par * ipeps4;par * ipeps5;par * ipeps6;
-
+  testspincf * testspins;
+  qvectors * testqs;
   std::clock_t startcputime;
   int nofstapoints; // number of successful calls to htcalc
   int noffailedpoints; // number of failure calls to htcalc
@@ -131,6 +134,7 @@ bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc, Vector & M, Vecto
    void print();
    void print (const char * file);
    void print (FILE * fout);
+  void savedemagtensor (FILE * fout);
 void print_with_prefix(FILE * fout, inipar p);
 bool checkpr(FILE* fout,const char * var,int & val,int & masterval);
 bool checkpr(FILE* fout,const char * var,double val,double masterval);
@@ -150,7 +154,7 @@ bool checkpr(FILE* fout,const char * var,double val,double masterval);
 
  // exit with error message
    void errexit();
-   void finish_mcphas(int  nofqs,int  nofspincf);
+   void finish_mcphas();
   //load parameters from file, returns 1 on error, 0 on success
    int load();
    int load (int & nofinis,char**lofpref);

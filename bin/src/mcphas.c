@@ -211,12 +211,13 @@ T=0.0;h=0;
     if(tracetest!=0){fprintf(stderr,"# ATTENTION: option -t %i - tracing only test structure number %i from file %s\n",tracetest,tracetest,prefix); }           
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
     testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+    ini.testspins=&testspins;
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
     strcpy(prefix+11+strlen(ini.prefix),"mcphas.tst");
     testspins.save(prefix,"w");
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.qvc");
-    qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
-
+    qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins,inputpars,Imax,outfilename,verbose);
+    ini.testqs=&testqs;
 // declare variable physprop (typa class physproperties)
 
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs);
@@ -348,8 +349,9 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          {physproperties pp(physprop);
           Matrix s(1,6,1,6);//myPrintVector(pp.sps.epsilon,"Initial Strain");
           int cel_not_stable=0;
-          for(int n=1;n<=6;++n){h(6+n)+=cel;cel_not_stable+=htcalc(h,T,ini,inputpars,testqs,testspins,pp,tracetest);
-                                h(6+n)-=cel;//myPrintVector(pp.sps.epsilon,"Strain x=1-6");
+          for(int n=1;n<=6;++n){h(6+n)+=cel;if(verbose){printf("Applying");Vector stress(h(7,12));myPrintVector(stress,"Stress s1-6");}
+                                cel_not_stable+=htcalc(h,T,ini,inputpars,testqs,testspins,pp,tracetest);
+                                h(6+n)-=cel;if(verbose){myPrintVector(pp.sps.epsilon,"Calculated Strain eps1-6");}
                                 for(int m=1;m<=6;++m)s(n,m)=(pp.sps.epsilon(m)-physprop.sps.epsilon(m))/cel;
                                }  // sigma=cel* eps    eps=s*sigma
           // s and cel must be symmetric, thus if s is not - symmetrize it by averaging off diagonal elements
@@ -402,7 +404,7 @@ y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read fr
 endproper:
   testspins.save(filemode);testqs.save(filemode);
    if(argc>options+1) fclose(fin);
-   ini.finish_mcphas(testqs.nofqs (),testspins.n);
+   ini.finish_mcphas();
 #ifdef _THREADS
 for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
 #endif

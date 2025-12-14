@@ -215,8 +215,10 @@ if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Car
                                   }
  // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
    testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+   ini.testspins=&testspins;
    testspins.save("./results/_mcphas.tst","w");
-   qvectors testqs (ini,inputpars,Imax,"./results/mcphas.qvc",verbose);
+   qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins ,inputpars,Imax,"./results/mcphas.qvc",verbose);
+   ini.testqs=&testqs;
  // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs);
 	    int s=0;

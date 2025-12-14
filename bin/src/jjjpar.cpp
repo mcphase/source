@@ -227,6 +227,14 @@ void jjjpar::add(jjjpar & b,Vector & abc) // add set b to this (abc: lattice con
                }
  }
 }
+int jjjpar::index(Vector & dabc)
+// given dabc return index of parameter, if neighbor not in list return 0
+{
+for(int j=1;j<=paranz;++j)
+  if(Norm(dn[j]-dabc)<SMALL)
+    {return j;}
+ return 0;
+}
 
 int  jjjpar::addpar (Vector & dabc,Vector & drijk,int & subl)
 // add a neighbour with distance dabc and zero exchange, return index (=paranz) of this parameter
@@ -398,7 +406,7 @@ void jjjpar::save(FILE * file,int & noindexchange,bool pd, bool ps)
  if(npairs==0){++npairs;n1[npairs]=1;n2[npairs]=1;} // in case all exchange constants are zero ...
 
  // if there are less columns to be saved than  nofcomponentsxnofcomponents-2 -- > use indexchange format
-  if(npairs<nofcomponents*nofcomponents-2&&noindexchange==0)
+  if((npairs<nofcomponents*nofcomponents-2&&noindexchange==0)||noindexchange==-1)
 { int diagsav=diagonalexchange;diagonalexchange=2;
   saveatom(file);
   saveG(file);

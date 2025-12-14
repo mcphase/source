@@ -96,7 +96,7 @@ bool qvectors::is_in_1stBZ(Vector & hkl, Vector & abc,Matrix & rezijk)
 	nmm             nofcomponents of moment vector
         v               verbose switch
 */
-qvectors::qvectors (inipar & ini,par & inputpars,
+qvectors::qvectors (Vector & qmin,Vector & qmax,Vector &deltaq,int maxqperiod,int maxnofspins ,par & inputpars,
                     Vector & mmax,const char * savfile, int & v)
 { savfilename= new char [strlen(savfile)+1];
   strcpy(savfilename,savfile);
@@ -134,8 +134,8 @@ printf ("    0      0      1\n");
 printf ("range and spacings with respect to nonprimitive reciprocal lattice:\n");
 printf ("vector	min     max    delta \n");
  for (k=1;k<=3;++k)
- {printf ("REZ%i     %g      %g     %g\n",k,ini.qmin(k),ini.qmax(k),ini.deltaq(k));
-  if (ini.deltaq(k)==0){fprintf(stderr,"Error qvector.cpp: hkl-stepwidth(%i) is zero\n",k);exit(EXIT_FAILURE);}
+ {printf ("REZ%i     %g      %g     %g\n",k,qmin(k),qmax(k),deltaq(k));
+  if (deltaq(k)==0){fprintf(stderr,"Error qvector.cpp: hkl-stepwidth(%i) is zero\n",k);exit(EXIT_FAILURE);}
  }
 printf ("\n");
 printf ("primitive reciprocal lattice vectors:\n");
@@ -153,24 +153,24 @@ printf ("vector	min     max    delta \n");
   // this is done the same way as below for the q-range(deltaq of nonprimitive lattice forms quader) consequently the
   // qvector density is lower than specified in the nonprimitive lattice
   min=1000; max=-1000; //initialize
-  for (i1=0;i1<=1;++i1){hkl(1)=ini.deltaq(1)*i1; // loop cornerpoints
-  for (i2=0;i2<=1;++i2){hkl(2)=ini.deltaq(2)*i2;
-  for (i3=0;i3<=1;++i3){hkl(3)=ini.deltaq(3)*i3;
+  for (i1=0;i1<=1;++i1){hkl(1)=deltaq(1)*i1; // loop cornerpoints
+  for (i2=0;i2<=1;++i2){hkl(2)=deltaq(2)*i2;
+  for (i3=0;i3<=1;++i3){hkl(3)=deltaq(3)*i3;
     if((tryq=(r.Transpose()*hkl)(k))<min){min=tryq;} //determine min/max 
     if (tryq                        >max){max=tryq;}
   }}}
   delta=max-min;
   //initialize range - min and maximum of components are calculated by
-  // transforming points of the quader determined by ini.qmin and ini.qmax
+  // transforming points of the quader determined by qmin and qmax
   // to primitve recirpocal lattice coordinates and looking for the minimum/maximum
   // of coordinates
   min=1000; max=-1000; //initialize
-  for (i1=0;i1<=(ini.qmax(1)-ini.qmin(1))/ini.deltaq(1)+1;++i1)
-   {hkl(1)=ini.qmin(1)+ini.deltaq(1)*i1; // loop points in stepwidth 
-  for (i2=0;i2<=(ini.qmax(2)-ini.qmin(2))/ini.deltaq(2)+1;++i2)
-   {hkl(2)=ini.qmin(2)+ini.deltaq(2)*i2; // given by ini.deltaq
-  for (i3=0;i3<=(ini.qmax(3)-ini.qmin(3))/ini.deltaq(3)+1;++i3)
-   {hkl(3)=ini.qmin(3)+ini.deltaq(3)*i3;
+  for (i1=0;i1<=(qmax(1)-qmin(1))/deltaq(1)+1;++i1)
+   {hkl(1)=qmin(1)+deltaq(1)*i1; // loop points in stepwidth 
+  for (i2=0;i2<=(qmax(2)-qmin(2))/deltaq(2)+1;++i2)
+   {hkl(2)=qmin(2)+deltaq(2)*i2; // given by deltaq
+  for (i3=0;i3<=(qmax(3)-qmin(3))/deltaq(3)+1;++i3)
+   {hkl(3)=qmin(3)+deltaq(3)*i3;
     if((tryq=(r.Transpose()*hkl)(k))<min){min=tryq;} //determine min/max 
     if (tryq                        >max){max=tryq;}
   }}}
@@ -190,7 +190,7 @@ printf ("vector	min     max    delta \n");
   hchk[k][0]=min;hchk[k][1]=max;
   hchkn[k][0]=0; //initialize hchkn
   
-    for (tryperiode=1;tryperiode<ini.maxqperiod;tryperiode+=1.0)
+    for (tryperiode=1;tryperiode<maxqperiod;tryperiode+=1.0)
     {for (tryz=integer(tryperiode*min/1.0);
           tryz<=integer(tryperiode*max/1.0)+1;++tryz)
      {tryq=1.0*tryz/tryperiode; 
@@ -233,10 +233,10 @@ printf ("vector	min     max    delta \n");
  {dd(1)=hchk[1][ia(k)];dd(2)=hchk[2][ib(k)];dd(3)=hchk[3][ic(k)];
 //  printf("iaibic(%i %i %i)\n",ia(k),ib(k),ic(k));
   hkl=rez.Transpose()*dd;
-  if (hchkn[1][ia(k)]*hchkn[2][ib(k)]*hchkn[3][ic(k)]<=ini.maxnofspins&& //not too many spins
-      ini.qmin(1)-0.00001<=hkl(1)&&hkl(1)<=ini.qmax(1)+0.00001&&
-      ini.qmin(2)-0.00001<=hkl(2)&&hkl(2)<=ini.qmax(2)+0.00001&&
-      ini.qmin(3)-0.00001<=hkl(3)&&hkl(3)<=ini.qmax(3)+0.00001) //yes they are in the region-> increment nofq and store 
+  if (hchkn[1][ia(k)]*hchkn[2][ib(k)]*hchkn[3][ic(k)]<=maxnofspins&& //not too many spins
+      qmin(1)-0.00001<=hkl(1)&&hkl(1)<=qmax(1)+0.00001&&
+      qmin(2)-0.00001<=hkl(2)&&hkl(2)<=qmax(2)+0.00001&&
+      qmin(3)-0.00001<=hkl(3)&&hkl(3)<=qmax(3)+0.00001) //yes they are in the region-> increment nofq and store 
    { // !! here we could check if the qvector is in the 1st BZ and only
      // use it if it is ...!!
     if(is_in_1stBZ(hkl,inputpars.cs.abc,rezijk)){

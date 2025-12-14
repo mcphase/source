@@ -55,9 +55,11 @@ class inimcdis
   double emin; // energy boundary for dispersion (used for calc. of sta - see manual)
   double ki;
   double kf; // constant ki/kf
+  Matrix N; // demagnetisation tensor in SI units
   mfcf mf;
    void save(); // save parameters to results/_mcdisp.par results/_mcdisp.mf
    void save(const char * filename); // save parameters to file filename
+   void save_mf(FILE * fout); // save mf configuration to fout
    void print_usrdefcolhead(FILE *fout);
    void print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim,Vector & hkl, bool withtxt=false);
    void mfstring(char *str,size_t t);
