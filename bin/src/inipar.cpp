@@ -1050,7 +1050,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   ipeps1=NULL;ipeps2=NULL;ipeps3=NULL;ipeps4=NULL;ipeps5=NULL;ipeps6=NULL;
   testqs=NULL;
   testspins=NULL;
-  printf("reading file %s\n",savfilename);
+  printf("# reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
                 if(load()!=0){fprintf(stderr,"# Warning: Cannot load file %s - using default values ! \n",savfilename); 

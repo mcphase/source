@@ -58,7 +58,7 @@ char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
           Matrix s(1,6,1,6); //myPrintVector(sps.epsilon,"Initial Strain");
 if(fecalc(U0,Eelastic,r,spinchange,Happ,T,ini,phon,sps,mf)>FEMIN_INI)
  {fprintf(stderr,"Error reduce_unitcell option delatoms phon: free energy not stable for elastic constants estimate - modify mcphas.ini and restart\n");exit(EXIT_FAILURE);}
-           double cel=0.1;  // fixed stress to apply in GPa
+           double cel=0.01;  // fixed stress to apply in GPa
           for(int n=1;n<=6;++n){Happ(6+n)+=cel;
  if(fecalc(U,Eelastic,r,spinchange,Happ,T,ini,phon,sps,mf)>FEMIN_INI)
  {fprintf(stderr,"Error reduce_unitcell option delatoms phon: free energy not stable for elastic constants estimate - modify mcphas.ini and restart\n");exit(EXIT_FAILURE);}
@@ -96,9 +96,16 @@ if(fecalc(U0,Eelastic,r,spinchange,Happ,T,ini,phon,sps,mf)>FEMIN_INI)
 for(int n=pw.cs.nofatoms;n>0;--n)
 {h1=0;(*pw.jjj[n]).Icalc_parameter_storage_init(h1,Happ,T); // initialize eigenstate matrix
  if(!((*pw.jjj[n]).module_type==external_class&&
-      (*pw.jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*phon.jjj[n]).Icalc_parstorage)))
+      (*pw.jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*pw.jjj[n]).Icalc_parstorage)))
   {(*pw.jjj[n]).module_type=fixmom;(*pw.jjj[n]).MF=0; // for magnetic atoms use module fixmom
-   for(int al=1;al<=6;++al)for(int g=1;g<=pw.cs.nofcomponents;++g)(*(*pw.jjj[n]).G)(al,g)=0;   // and remove Gcfph not to disturb the following a) b) c)
+   // and remove Gcfph not to disturb the following a) b) c)
+   for(int al=1;al<=6;++al)for(int g=1;g<=pw.cs.nofcomponents;++g)(*(*pw.jjj[n]).G)(al,g)=0;  
+  // and remove Jij between magnetic atoms for the same reason
+   for(int m=1;m<=(*pw.jjj[n]).paranz;++m){int sl=(*pw.jjj[n]).sublattice[m];
+       if(!((*pw.jjj[sl]).module_type==external_class&&
+      (*pw.jjj[sl]).pcalc(u0,  T,  Hxc,Hext,(*pw.jjj[sl]).Icalc_parstorage)))(*pw.jjj[sl]).delpar(m);
+                                   }
+
   }
 }
 
@@ -122,7 +129,7 @@ if(fecalc(U0,Eelastic,r,spinchange,Happ,T,ini,phon,spsp,mfp)>FEMIN_INI)
 if(verbose){fprintf(stderr,"doeps=-1 U0=%12.12g",U0*phon.cs.nofatoms); } 
          
    for(int al=1;al<=6;++al){ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
-                            spsp.epsilon(al)=0.00350592;double Eel=0.5*spsp.epsilon(al)*a.Cel(al,al)*spsp.epsilon(al);
+                            spsp.epsilon(al)=1e-5;double Eel=0.5*spsp.epsilon(al)*a.Cel(al,al)*spsp.epsilon(al);
                             if(fecalc(Ub,Eelastic,r,spinchange,Happ,T,ini,phon,spsp,mfp)>FEMIN_INI)
         {fprintf(stderr,"Error reduce_unitcell option -delatoms phon: free energy not stable for %i  - modify mcphas.ini and restart\n",al);exit(EXIT_FAILURE);}
                             printf("Ub-U0=%12.12g  Eel=%12.12g \n",(Ub-U0)*phon.cs.nofatoms,Eel);      
@@ -154,7 +161,7 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
        if(fecalc(Ua,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf)>FEMIN_INI)
         {fprintf(stderr,"Error reduce_unitcell option delatoms phon: free energy not stable for %i - modify mcphas.ini and restart\n",g);exit(EXIT_FAILURE);}
   if((nd=(*a.jjj[n]).index(dnull))==0)nd=(*a.jjj[n]).addpar(dnull,dnull,n);
-   (*a.jjj[n]).jij[nd](g,g)+=-2.0*(Ua-U0)*pw.cs.nofatoms;  // nofatoms multiplied because U and f are normalised to meV/atom
+ (*a.jjj[n]).jij[nd](g,g)+=-2.0*(Ua-U0)*pw.cs.nofatoms;  // nofatoms multiplied because U and f are normalised to meV/atom
 //if(g==4){fprintf(stderr,"n=%i nd=%i g=%i Ua=%12.12g U0=%12.12g --> Jii44=%g\n",n,nd,g,Ua,U0,-2.0*(Ua-U0)*pw.cs.nofatoms);sps.print(stderr);}
 // ---------------------------------
 // 2 b)  nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to
@@ -162,12 +169,18 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
 //      energy of a) ----> Gcfph^alphagamma(i)   
    sps.epsilon=0;     
    for(int al=1;al<=6;++al){ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
-                            sps.epsilon(al)=1e-6;double Eelrenormdiveps=0.5*sps.epsilon(al)*a.Cel(al,al);
-                            if(fecalc(Ub,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf)>FEMIN_INI)
+                 sps.epsilon(al)=1e-6;
+                 double Eelrenormdiveps=0.5*sps.epsilon(al)*a.Cel(al,al);
+                if(fecalc(Ub,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf)>FEMIN_INI)
         {fprintf(stderr,"Error reduce_unitcell option delatoms phon: free energy not stable for %i %i - modify mcphas.ini and restart\n",g,al);exit(EXIT_FAILURE);}
-                              (*(*a.jjj[n]).G)(al,g)+=-(Ub-Ua)*pw.cs.nofatoms/sps.epsilon(al)+Eelrenormdiveps;
-                            sps.epsilon(al)=0;
-                            ini.doeps=0;
+          (*(*a.jjj[n]).G)(al,g)+=-(Ub-Ua)*pw.cs.nofatoms/sps.epsilon(al)+Eelrenormdiveps;
+/*if(al==1&&g==8){
+fprintf(stderr,"n=%i  Ub=%12.12g  Ua=%12.12g U0=%12.12g --> G11=%g\n",
+  n,Ub*pw.cs.nofatoms,Ua*pw.cs.nofatoms,U0*pw.cs.nofatoms,(*(*a.jjj[n]).G)(al,g));
+sps.print(stderr);}
+*/
+                  sps.epsilon(al)=0;
+                  ini.doeps=0;
                            }
 
   (*pw.jjj[n]).MF(g)=0;
@@ -193,8 +206,9 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
        if((nd=(*a.jjj[n]).index(dabc))==0){dadbdc2ijk(drijk,dabc,pw.cs.abc);
                                           nd=(*a.jjj[n]).addpar(dabc,drijk,n1);}
 (*a.jjj[n]).jij[nd](g,g1)+=-(Uc-U0)*pw.cs.nofatoms
-                           -(*a.jjj[n]).jij[(*a.jjj[n]).index(dnull)](g,g)/2
-                           -(*a.jjj[n1]).jij[(*a.jjj[n1]).index(dnull)](g1,g1)/2;
+                        -(*a.jjj[n]).jij[(*a.jjj[n]).index(dnull)](g,g)/2
+                      -(*a.jjj[n1]).jij[(*a.jjj[n1]).index(dnull)](g1,g1)/2;
+
 if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
       (*pw.jjj[n]).MF(g)=0;
       (*pw.jjj[n1]).MF(g1)=0;
@@ -204,7 +218,7 @@ if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
 // remove all phonons from a before outputting it ...
 for(int n=a.cs.nofatoms;n>0;--n)
 {h1=0;(*a.jjj[n]).Icalc_parameter_storage_init(h1,Happ,T); // initialize eigenstate matrix
- if(((*a.jjj[n]).module_type==external_class&&(*a.jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*phon.jjj[n]).Icalc_parstorage)))
+ if(((*a.jjj[n]).module_type==external_class&&(*a.jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*a.jjj[n]).Icalc_parstorage)))
   {(*a.jjj[n]).module_type=fixmom;// trick to avoid that Cel, interactions are changed when deleting phonon degree of freedom
     a.delatom(-n,dis);}
 }
