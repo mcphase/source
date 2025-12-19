@@ -144,6 +144,11 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
     int nofneighbours=myinput->dimA, ll=myinput->level;
     int thread_id = myinput->thread_id;
 #endif
+{ // <--- this bracket is necessary to embrace ComplexMatrix  definitions
+  // necessary in this routine and make them live within this bracket. at closing the bracket
+  // destructor is called correctly. On Apple without this 
+  // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
+ 
     Matrix maglat(1,3,1,3),magrez(1,3,1,3);double maglattvol; Vector maghkl(1,3);
   if(ini.include_cd){maglat=inputpars.cs.prim_unitcell_ijk();
                      for(int i=1;i<=3;++i){ 
@@ -263,7 +268,11 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
           }}
    }}}
  } // ini.include_cd
-
+} // <--- this bracket is necessary to embrace ComplexMatrix  definitions
+  // necessary in this routine and make them live within this bracket. at closing the bracket
+  // destructor is called correctly. On Apple without this 
+  // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
+ 
 #ifdef _THREADS_JSSS
    myinput->dimA=nofneighbours;
 #if defined  (__linux__) || defined (__APPLE__)
@@ -722,6 +731,7 @@ if(strcmp(filemode,"A")==0){// check if some q values have already been calculat
                                   }               
                  }
 if(firstcounter>ini.nofhkls){printf("# mcdisp: all hkl already calculated in previous run - nothing to do - exiting\n");exit(0);}
+// LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL ------------------
 for(ini.Qindex=firstcounter;ini.Qindex<=ini.nofhkls;++ini.Qindex){
 		     hkl(1)=ini.hkls[ini.Qindex][1];
 		     hkl(2)=ini.hkls[ini.Qindex][2];
@@ -1622,7 +1632,8 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
           thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {  tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,calcXobs,do_phonon,0.); 
-             tin[ithread]->epsilon=fabs(epsilon); thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md,1);
+             tin[ithread]->epsilon=fabs(epsilon); thrdat.J[ithread]= &J; //thrdat.J[ithread] = new jq(J);
+             thrdat.md[ithread] = new mdcf(md,1);
              thrdat.ch[ithread] = new ComplexMatrix(1,md.nofcomponents,1,md.nofcomponents);
           }
           ithread=0; int oldEstp=0.;
@@ -1734,7 +1745,8 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
 #ifdef _THREADSREFINE
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
-             delete thrdat.md[ithread];delete thrdat.J[ithread]; delete tin[ithread];
+             delete thrdat.md[ithread];// delete thrdat.J[ithread]; 
+             delete tin[ithread];
              delete thrdat.ch[ithread];
           }
           delete[] thrdat.ch; 
@@ -1748,6 +1760,8 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
    fprintf (foutqom, "\n");
    } // do jqfile
 } // next hkl
+// END LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL ------------------
+
 #ifdef _THREADS
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {  delete thrdat.ini[ithread]; 

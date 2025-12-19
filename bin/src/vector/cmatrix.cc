@@ -282,7 +282,6 @@ ComplexMatrix::~ComplexMatrix (void)
     if (!isempty) {
         if(!D) { isempty = true; } else
 	if ( (--(D->count) == 0 && temporary == 0) || D->count < 0) {
-
 	    // free data
 	    delete[] (M[rl]+cl);
 	    delete[] (M+rl);

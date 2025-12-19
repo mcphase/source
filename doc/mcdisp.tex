@@ -89,10 +89,17 @@ has to be evaluated for $\mbf q=0$ or for a reciprocal lattice vector
 $\mbf q=\mbf q_L$, it is ambigous due to a factor $q_{\alpha}q_{\beta}/q^2$ which appears
 in the first term ''I'' and in the second term ''II' in equation (26) 
 of\cite{bowden81-827}. This ambigousity reflects the shape
-of the sample. The factor $q_{\alpha}q_{\beta}/q^2$ is 
-approximated  by it's average
-with respect to spherical angle,
- i.e. $q_{\alpha}q_{\beta}/q^2 \sim \delta_{\alpha}q_{\beta}/3$.
+of the sample, compare the discussion on page 237 of \cite{jensen91-1}.
+ In contrast to the static properties
+such as spin and mean fields and single ion excitation energies {\prg mcphasit} 
+(where $D^{eff}(q=0)$ is used) for the 
+dispersion of excitations in {\prg mcdisp} the Fourier transform of the
+classical dipolar interaction is calculated for q=0 using equation 
+(5.5.6) in  \cite{jensen91-1}. This corresponds to setting the 
+zero by zero division in the first term ''I''
+and in the second term ''II'' in equation (26) of\cite{bowden81-827} equal to
+the demagnetisation tensor, i.e.
+$q_{\alpha}q_{\beta}/q^2 |_{q\rightarrow 0} \sim \m{n}_{\rm demag}$.
 				\item [{\prg -v}] option is to display\index{display} more information.
                                 
 				\item [{\prg -a}] can be used to avoid overwriting output files in results, new results

@@ -443,10 +443,10 @@ if(!withtext) // check output only in case withtext - in order to accommodate -c
  {if(fabs(Hext(i))>SMALL_FIELD)
   {switch(i)
    {case 1: case 2: case 3:{ bool cc=c[1]|c[2]|c[3]|c[4]|c[5]|c[6]|c[21];
-    if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini and restart\n");exit(EXIT_FAILURE); }
+    if(!cc){fprintf(stderr,"Error: External Magnetic Field H%i=%g T nonzero but not stored in output files \n - please change settings out out* in mcphas.ini and restart\n",i,Hext(i));exit(EXIT_FAILURE); }
                             } break;
     case 4: case 5: case 6: { bool cc=c[7]|c[8]|c[9]|c[10]|c[11]|c[12]|c[22];
-    if(!cc){fprintf(stderr,"#Warning: External Electric Field E nonzero but not stored in output files  - please change settings out out* in mcphas.ini a nd restart\n");exit(EXIT_FAILURE); }
+    if(!cc){fprintf(stderr,"Error: External Electric Field E%i=%g V/m nonzero but not stored in output files \n - please either change settings out out* in mcphas.ini and restart\n or  prevent polarisation calculation by making total charge nonzero - checkout in sipf files CHARGE= \n",i-3,Hext(i));exit(EXIT_FAILURE); }
                             }break;
     default: if(!c[i+6]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini and restart\n",i-6);exit(EXIT_FAILURE); }
    }

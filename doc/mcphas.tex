@@ -521,6 +521,13 @@ see equation (\ref{Gcfph}):
 # because the constants are symmetric Celij=Celji
 # Elastic constants refer to the Euclidean coordinate system ijk defined
 # with respect to abc as j||b, k||(a x b) and i normal to k and j
+# Note: these elastic constants refer to the elastic energy in the Hemiltonian
+#   and do not necessarily correspond to the experimental elastic constants
+# a) if phonon degrees of freedom are present, use elastic constants as created by 
+#    makenn (see manual section on Crystal field Phonon Interaction -  Elastic energy)
+# b) if only magnetic ions are present - use effective elastic constants 
+#    as measured at high temperature or computed by mcphasit or     reduce_unitcell from a 
+#    phonon model    
 #!  Cel11=+121111.877 Cel12=+35479.1703 Cel13=+35479.1703
 #!  Cel22=+121111.877 Cel23=+35479.1703
 #!  Cel33=+121111.877
@@ -674,8 +681,21 @@ given by Bowden\cite{bowden81-827}. Using this option permits to avoid a large n
 {\prg mcphas.j}. For the mean field loop the dipolar interaction in equation (26) of\cite{bowden81-827} 
 has to be evaluated for $q=0$, which is ambigous due to a factor $q_{\alpha}q_{\beta}/q^2$ which appears
 in the first term ''I'' in equation (26) of\cite{bowden81-827}. This ambigousity reflects the shape
-of the sample. The factor $q_{\alpha}q_{\beta}/q^2$ is approximated in {\prg mcphas} by it's average
-with respect to spherical angle, i.e. $q_{\alpha}q_{\beta}/q^2 \sim \delta_{\alpha}q_{\beta}/3$.
+of the sample. The factor $q_{\alpha}q_{\beta}/q^2$ is approximated in {\prg mcphas} by zero, i.e. ''I=0'' or
+ $q_{\alpha}q_{\beta}/q^2 \sim 0$. This choice corresponds to setting $D_{zz}(q=0)=D^{eff}_{zz}(q=0)$
+in \cite{jensen91-1}, p. 236 - on this page the energy in applied magnetic field is given, which
+includes the demagnetising factor according to equation (5.5.6). Adding the energy of the
+demagnetizing field (see \cite{blundell01-1} equation (6.49)) and introducing the internal
+applied magnetic field according to \cite{jensen91-1}, p. 236, equation (5.5.9) it can
+be seen, that the energy depends on $D^{eff}_{zz}(q=0)$ and the internal magnetic field
+$H_I$. The magnetic structure can be calculated my {\prg mcphasit} without taking into account explicitely the
+demagnetisation tensor. Note that the demagnetisation tensor (sample shape)
+will influence the excitations, see eplanation of option -cd for
+{\prg mcdisp} for details.
+\item[\prg  -cel  0.0001] to compute elastic constants by applying stress of 0.0001 GPa. This needs more computation
+     time, because one by one each component of the stress tensor is set to 0.0001 GPa and a mean field loop is done
+     to compute the results strains. In this way, elastic constants can be obtained, which can be compared to experiment.
+\item[\prg   -cv  0.01]   to compute specific heat by applying temperature step of 0.01K and computing derivative of energy u         
 \item[\prg   -v]  to  enable verbose mode with lots of messages of {\prg McPhas}. Specifically
 the verbose mode enables the following features:
   \begin{itemize}

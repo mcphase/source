@@ -10,7 +10,7 @@ unless($#ARGV>=3)
 
    print "             alternatively \n";
 
-   print "             use as: cpso1ion col1 col2 datafile file.levels.cef [-option]\n";
+   print "             use as: cpsingleion col1 col2 datafile file.levels.cef [-option]\n";
 
    print "                     (take cp-data from datafile and calculate\n";
 

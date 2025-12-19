@@ -19,15 +19,15 @@ unless ($#ARGV >1)
 
 
 
-$col1=$ARGV[0];shift @ARGV;
-$col2=$ARGV[0];shift @ARGV;
-if($col1=~/-cc/){$str=$ARGV[0];shift @ARGV;}
+$row1=$ARGV[0];shift @ARGV;
+$row2=$ARGV[0];shift @ARGV;
+if($row1=~/-cc/){$str=$ARGV[0];shift @ARGV;}
 
 @ARGV=map{glob($_)}@ARGV;
 
-      unless($col1=~/-t/||$col1=~/-n/)
-       { unless($col1=~/-cc/){$col1=~s/x/*/g;$col1=eval $col1;}
-         $col2=~s/x/*/g;$col2=eval $col2;
+      unless($row1=~/-t/||$row1=~/-n/)
+       { unless($row1=~/-cc/){$row1=~s/x/*/g;$row1=eval $row1;}
+         $row2=~s/x/*/g;$row2=eval $row2;
            }
 
   foreach (@ARGV)
@@ -45,29 +45,29 @@ if($col1=~/-cc/){$str=$ARGV[0];shift @ARGV;}
 
    while($line=<Fin>)
 
-     {++$i;
-      if($col1=~/-t/)
-       {     if ($line=~/\Q$col2\E/&&!($line=~/^\s*#/)) {print Fout "#".$line;}
+     {unless($line=~/^\s*#/){++$i;}
+      if($row1=~/-t/)
+       {     if ($line=~/\Q$row2\E/&&!($line=~/^\s*#/)) {print Fout "#".$line;}
              else{print Fout $line;}
        }
-      elsif($col1=~/-n/)
-       {     if ($line=~/\Q$col2\E/||$line=~/^\s*#/) {print Fout $line;}
+      elsif($row1=~/-n/)
+       {     if ($line=~/\Q$row2\E/||$line=~/^\s*#/) {print Fout $line;}
              else{print Fout "#".$line;}
        }
-      elsif($col1=~/-cc/)
+      elsif($row1=~/-cc/)
        {     if ($line=~/^\s*#/) {print Fout $line;}
              else{++$j;
                  @num=split(" ",$line);
-                  if($j==1){$nums=$num[$col2-1];}
-                  else{unless($nums==$num[$col2-1]){print Fout $str."\n";}
-                       $nums=$num[$col2-1];
+                  if($j==1){$nums=$num[$row2-1];}
+                  else{unless($nums==$num[$row2-1]){print Fout $str."\n";}
+                       $nums=$num[$row2-1];
                       }
                    print Fout $line;
                  }
       
        }
        else
-       {      if ($i<$col1||$i>$col2||$line=~/^\s*#/) {print Fout $line;}
+       {      if ($i<$row1||$i>$row2||$line=~/^\s*#/) {print Fout $line;}
               else{print Fout "#".$line;}
        }
       }

@@ -1583,7 +1583,12 @@ print $l1 "#--------------------------------------------------------------------
 sub outCel {
 my ($l)=@_;
 print $l "#! Primitive Unit Cell Volume [A^3]: pVol=".$pVolume."\n";
-print $l "# Nonzero Elastic constants [meV per primitive crystal unit cell] \n";
+print $l "# Nonzero ''Elastic constants'' [meV per primitive crystal unit cell] \n";
+print $l "# Note - these are NOT the elastic constants which can be measured \n";
+print $l "# (see manual section Crystal Field Phonon Interaction - Elastic Energy!)\n";
+print $l "# because a homogeneous strain is assumed within the unit cell\n";
+print $l "# - relaxing phonon displacements will yield smaller elastic constants\n"; 
+print $  "# which can be compared to experiment, use mcphasit to do a calculation\n";
 print $l "# in Voigt notation only first index<=second index has to be given\n";
 print $l "# because the constants are symmetric Celij=Celji\n";
 print $l "# Elastic constants refer to the Euclidean coordinate system ijk defined\n";
@@ -1592,7 +1597,8 @@ print $l "# with respect to abc as j||b, k||(a x b) and i normal to k and j\n";
 # here output the elastic constants table
 $i1=0;print $l "#! ";
 for($i=1;$i<=6;++$i){ if($i1>0){print $l "#! ";}
-for($j=$i;$j<=6;++$j){
+for($j=$i;$j<=6;++$j){if($Cel->at($i,$j)<-1){die "makenn internal error - elastic constant Cel($i,$j) = ".$Cel->at($i,$j)." negative\n"; }
+if($Cel->at($i,$j)<0){$Cel->slice("$i,$j")=0;}
 if(abs($Cel->at($i,$j))>1e-6){++$i1;print $l sprintf(" Cel%i%i=%+10.9g",$i,$j,$Cel->at($i,$j));}
                      }if($i1>0){print $l "\n";}}
 if($i1==0){print $l "\n";}

@@ -26,9 +26,9 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [[-prefix 020]h k l E]\n\
                     \n\
-1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
-   the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
-   is read and extracted from this file and printed on screen (stdout),\n \
+1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n\
+   the spin configuration at given temperature T[K] and magnetic effective field H[T]\n\
+   is read and extracted from this file and printed on screen (stdout),\n\
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>),\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
    Note: - T Ha Hb Hc stand for the 3rd 5th 6th 7th column in mcphas.* output files\n\
@@ -40,9 +40,9 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
    and printed on screen (stdout) etc. as 1)\n\
    Note: x y stands for the 1st and 2nd column in mcphas.* output files\n\
          (may have different meaning if out1 or out2 is set in mcphas.ini)\n\
-3) if used with -f filen n,  this file has to be a mcphas.tst file,\n \
-   the spin configuration number n\n \
-   is read and extracted from this file and printed on screen (stdout),\n \
+3) if used with -f filen n,  this file has to be a mcphas.tst file,\n\
+   the spin configuration number n\n\
+   is read and extracted from this file and printed on screen (stdout),\n\
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>)\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
@@ -93,39 +93,39 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
         spins -tI 2 0 0 1 \n\
         ... outputs a table with atomic positions and expectations values <I> \n\
 \n\
- This program outputs a magnetic structure (and magnetic excitation)\n \
- graphic/movie in the output files of different format:\n \
- results/spins*.eps (postscript), results/spins*.fst (fp_studio), \n \
- results/spins.out (ascii) and results/spins*.jvx (javaview)\n\n \
+ This program outputs a magnetic structure (and magnetic excitation)\n\
+ graphic/movie in the output files of different format:\n\
+ results/spins*.eps (postscript), results/spins*.fst (fp_studio), \n\
+ results/spins.out (ascii) and results/spins*.jvx (javaview)\n\n\
  the graphics output format can be fine tuned in .sps and .qev input files\n"
 " or results/graphics_parameters.set by show_abc_unitcell,\n"
-" show_primitive_crystal_unitcell, spins_scale_moment, spins_wave_amplitude\n \
- show_magnetic_unitcell, show_atoms, scale_view_1,scale_view_2, scale_view_3 ...\n\n \
+" show_primitive_crystal_unitcell, spins_scale_moment, spins_wave_amplitude\n\
+ show_magnetic_unitcell, show_atoms, scale_view_1,scale_view_2, scale_view_3 ...\n\n\
  jvx files can be viewed by:\n\
- java javaview results/spins.jvx \n \
+ java javaview results/spins.jvx \n\
  java javaview \"model=results/spins.*.jvx\" Animation.LastKey=16 background=\"255 255 255\" \n"
 " gif images stored by javaview can be connected to animated gif by ImageMagick \n"
 " magick -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif\n"
 " ppm images stored by javaveiw can be connected to mpeg video by ppmtompeg (part of netpbm package)\n"
 " ppmtompeg param \n param is a file with parameters - here an example:\n"
-"OUTPUT movie.mpeg\n \
-INPUT_DIR .\n \
-INPUT\n \
-*.ppm [001-021]\n \
-END_INPUT\n \
-BASE_FILE_FORMAT PNM\n \
-INPUT_CONVERT *\n \
-FRAME_RATE 25\n \
-PATTERN IBBPBBPBBPBBPBB\n \
-SLICES_PER_FRAME 16\n \
-GOP_SIZE 30\n \
-PIXEL HALF\n \
-IQSCALE 1\n \
-PQSCALE 5\n \
-BQSCALE 10\n \
-RANGE 5\n \
-PSEARCH_ALG TWOLEVEL\n \
-BSEARCH_ALG CROSS2\n \
+"OUTPUT movie.mpeg\n\
+INPUT_DIR .\n\
+INPUT\n\
+*.ppm [001-021]\n\
+END_INPUT\n\
+BASE_FILE_FORMAT PNM\n\
+INPUT_CONVERT *\n\
+FRAME_RATE 25\n\
+PATTERN IBBPBBPBBPBBPBB\n\
+SLICES_PER_FRAME 16\n\
+GOP_SIZE 30\n\
+PIXEL HALF\n\
+IQSCALE 1\n\
+PQSCALE 5\n\
+BQSCALE 10\n\
+RANGE 5\n\
+PSEARCH_ALG TWOLEVEL\n\
+BSEARCH_ALG CROSS2\n\
 REFERENCE_FRAME DECODED\n"
 );
  exit (1);

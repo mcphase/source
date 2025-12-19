@@ -294,7 +294,7 @@ mcphas.j\index{mcphas.j}} format
 - output is written to stdout
 
 %script2html_begin{makenn} \begin{description}
-\item\label{makenn}[\prg makenn 23.3{[options]}:]\addcontentsline{toc}{subsubsection}{\prg makenn} Program to calculate neighbors of atoms given a crystal structure.
+\item[\prg makenn 23.3{[options]}:]\label{makenn} \addcontentsline{toc}{subsubsection}{\prg makenn} Program to calculate neighbors of atoms given a crystal structure.
 Note that in order to use {\prg makenn\index{makenn}} you have to set up a 
 working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure. 
 The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
@@ -579,7 +579,8 @@ given by th parametrisation in file.sipf.
 \item[Option:  -ni ] forces output without indexchange  
 \item[Option: -delatoms 1,2,5,7 ]  instead of removing atoms connected by a lattice vector 
  			remove atoms number 1,2,5 and 7 from the list and also all interactions with those 
-                        In case the atoms to be removed have the phonon module, 
+                        Note the following approximation is of limited use and NOT recommended, better use -delatoms phon (see below):
+                     {\tiny   In case the atoms to be removed have the phonon module, 
                          effective interactions are introduced between the remaining atoms, in this way the 
                         crystal field phonon interactions with 4f shells can be treated in an effective way:
                         Minimizing the energy by setting zero the derivative of the Hamiltonian (\ref{Htot}) with respect to the phonon coordinate
@@ -642,6 +643,86 @@ point charge, then the charge density on the magnetc ion deforms according to th
 increases the electrostatic force between the point charge and the magnetic ion and the point charge moves accordingly  and 
 this movement leads to a further increase of the crystal field. The movement continues until the restoring elastic 
 force is equal to the increase in electrostatic force.
+}
+\item[Option: -delatoms phon ] instead of removing atoms connected by a lattice vector 
+ 			remove atoms which have a phonon module. This option is recommended to
+                        obtain a reduced model containing only magnetic ions. In contrast
+             to the option -delatoms 1,2,5,7 it takes into account
+                        the correlated displacements which arise when a stress is applied or a
+                        magnetic atom charge density is changed by magnetic field or temperature.
+                        The program will perform the following operations
+\begin{description}
+ \item[Renormalisation of Elastic Constants] The relaxation of the lattice
+       leads to a reduction of elastic constants with respect to the values obtained by 
+ the Born van Karman model equation (\ref{elconst}). Effective elastic constants (which
+ correspond to experimental observable elastic constants) can be computed from (\ref{Htot}) by applying
+ various external stresses and computing the strain. {\prg reduce\_unitcell} considers
+ in such a calculation {\em only} the phonon degrees of freedom (i.e. removes all magnetic ions) and
+ sets nonzero each component of the stress tensor to 0.01 GPa and computes the resulting
+ strains using the mean field loop of the {\prg mcphasit} program. For the computation the parameters in {\prg mcphas.ini} are used.
+ The elastic compliance matrix \cite{barron80-609} is obtained by 
+ dividing the computed strain by the stress of 0.01 GPa. 
+ The elastic constants $c_{\rm eff}^{\alpha\gamma}$ 
+ are computed by inverting the matrix of the compliances.
+ \item[Calculation of effective phonon induced  Quadrupolar Self Interaction]
+ A similar self consistent mean field procedure using (\ref{Htot}) is adopted to calculate the phonon induced
+ quadrupolar self interaction , initially without any stress/strain to determine the reference energy
+ $U_0$:
+  \begin{enumerate}
+   \item From the input parameters all interactions between the magnetic ions are removed
+   \item Similar, all the magnetoelastic interactions are removed.
+   \item all {\em magnetic} interaction operator expectation values are set to zero 
+         except one component $\gamma$ for the ion $n$, i.e.
+          $\langle I^i_{\beta}\rangle=\delta_{\beta\gamma}\delta_{in}$.
+   \item a mean field loop is performed at zero strain to determine the {\em phonon}
+         displacements $\langle \mbf u_{j} \rangle$ induced by the crystal field phonon
+         interaction $\Gamma^{\alpha\gamma}(jn)$ in equation (\ref{Gammacfph}) and
+         to determine the corresponding energy $U'<U_0$.
+   \item The phonon induced self interaction is determined 
+         by $\mathcal J_{\gamma\gamma}(nn)=-2(U'-U_0)$ and inserted in the output of
+         {\prg reduce\_unitcell}.
+   \item this procedure is repeated for all components of all interaction operators 
+         of all magnetic ions.
+  \end{enumerate}
+\item[Calculation of effective  phonon induced Magnetoelastic Interactions ]
+  The next step is to do mean field loops using (\ref{Htot}) the same way as for the 
+  quadrupolar self interaction (i.e. setting 
+          $\langle I^i_{\beta}\rangle=\delta_{\beta\gamma}\delta_{in}$) 
+  and setting the strain tensor constant 
+  to be $\epsilon_{\alpha}=\delta_{\alpha1} 10^{-6}$. {\em phonon}
+         displacements $\langle \mbf u_{j} \rangle$ and energy $U''$ are calculated
+   self consistently. The phonon induced magnetoelastic interaction 
+     $G^{1\gamma}_{\rm phon-induced-cfph}(n)$ is computed
+   using the energy difference $U''-U'$ and the effective elastic energy 
+   $E_{el}=\frac{1}{2}c_{\rm eff}^{11}\epsilon_{1}\epsilon_{1}$
+   by
+
+   \begin{equation}
+    G^{1\gamma}_{\rm phon-induced-cfph}(n)=-\frac{(U''-U')+E_{el}}{\epsilon_{1}}
+   \end{equation}
+   
+   This phonon induced magnetoelastic interaction 
+     $G^{1\gamma}_{\rm phon-induced-cfph}(n)$ is added to the $G^{1\gamma}_{\rm cfph}(n)$
+    given in the input file and the sum is output by {\prg reduce\_unitcell}.
+   The procedure outlined above for $\epsilon_1$ is repeated for all components of the strain
+   tensor $\epsilon_{\alpha}$ and thus the full set of phonon induced magnetoelastic
+   interactions $G^{\alpha\gamma}_{\rm phon-induced-cfph}(n)$ is obtained.
+\item[Calculation of effective phonon induced Quadrupolar Interactions]
+ In a further step the effective phonon induced Quadrupolar Interactions are calculated.
+ In the mean field loop the strain is kept zero. In order to compute
+ $\mathcal J_{\gamma\gamma'}(nn')$ the
+interaction operator expectation values are set to zero 
+         except for the 
+ component $\gamma$ for the ion $n$ and $\gamma'$ for the ion $n'$, i.e.
+  $\langle I^i_{\beta}\rangle=\delta_{\beta\gamma}\delta_{in}+\delta_{\beta\gamma'}\delta_{in'}$. 
+ Note the self interaction term ($\mathcal J_{\gamma\gamma}(nn)$ has been computed already).
+ The result of the mean field computation is the energy $U'''$ and the 
+ effective phonon induced quadrupolar interaction constants are computed by
+ $\mathcal J_{\gamma\gamma'}(nn')=-(U'''-U_0)-\mathcal J_{\gamma\gamma}(nn)/2-\mathcal J_{\gamma'\gamma'}(n'n')/2$.
+ These interactions are added by {\prg reduce\_unitcell} 
+ to the the two ion interactions of the input file.
+\end{description}
+          
 \item[Option: -delatoms 1:3+-0.75:4+-0.25,2,5,7]  removes atoms number 1,2,5,7 for atom 1 the interactions
  			 are transferred to 75\% to atom 3 and 25\% to atom 4 and interactions to atoms 3 and 4 are
  			 removed, for 2 5 7 all the interactions with other atoms are removed
@@ -837,6 +918,12 @@ options: -nt ......... by default only 5 transition energies are output,
          -ninit 3  ... consider only transitions from the 3 lowest eigenstates
          -maxE 30  ... consider only transitions with energy lower than 30 meV
          -E        ... output to stdout energy of cf levels instead of transition energy
+         -E0       ... output to stdout energy of cf levels relative to ground state ...
+         -E0f 0.3 0 2.1 3 4  ... output to stdout energy of cf levels relative to ground state 
+                       and calculate sta (sum of squared deviations) of nt (by default 5,
+                       see option -nt, which if used must be given prior to -E0f) 
+                       transition energies (meV) to the numbers following -E0f 
+                       a '0' will exclude this transition from contributing to sta
          -r ion.sipf . do not read mcphas-j but only the single ion
                        parameter file ion.sipf
          -U  ......... calculate energy U, ln of partition sum Z, free energy F

@@ -39,6 +39,12 @@ void helpexit()
           "         -ninit 3  ... consider only transitions from the 3 lowest eigenstates\n"
           "         -maxE 30  ... consider only transitions with energy lower than 30 meV\n"
           "         -E        ... output to stdout energy of cf levels instead of transition energy\n"
+          "         -E0       ... output to stdout energy of cf levels relative to ground state ...\n"
+          "         -E0f 0.3 0 2.1 3 4  ... output to stdout energy of cf levels relative to ground state \n"
+          "                       and calculate sta (sum of squared deviations) of nt (by default 5,\n"
+          "                       see option -nt, which if used must be given prior to -E0f) \n"
+          "                       transition energies (meV) to the numbers following -E0f \n"
+          "                       a '0' will exclude this transition from contributing to sta\n"
           "         -r ion.sipf . do not read mcphas-j but only the single ion\n"
           "                       parameter file ion.sipf\n"
           "         -U  ......... calculate energy U, ln of partition sum Z, free energy F\n"
@@ -328,7 +334,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
               double Estart,int Esteps,Vector & E,double dE,
               Vector & Hstart,int Hsteps,Vector & dH,
               double epsilon,double lambda, double X00,int verbose,double opmat,int no_trs_write,int HEnofcomp,
-              int calcX,Xunit unit)
+              int calcX,Xunit unit,double *fitE)
   { char filename[MAXNOFCHARINLINE];
     char  * pchr;int j;
     Matrix I(1,observable_nofcomponents,1,Tsteps);complex <double> X0 (X00,0);
@@ -351,6 +357,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
     if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i,HEnofcomp); // write transition trs files
 
      for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
+     if(elevels)jjj.eigenstates(Hxc,Hext,T(1));
      char trsstring[MAXNOFCHARINLINE];trsstring[0]='\0';
       switch(observable)
       {case L: jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
@@ -481,7 +488,15 @@ printf("%3i %8g ",i,T(Ti)); // printout ion number and temperature
        {if(Ti==1&&Ei==0){
           if(!elevels){printf("%s",trsstring);if(nmax<jmin){printf(" ...");}}
           else
-          {for(j=jjj.est.Clo();j<=jjj.est.Chi();++j){printf("%4g ",real(jjj.est(0,j)));}
+          {if(elevels==1)
+            for(j=1;j<=jjj.est.Chi();++j){printf("%4g ",real(jjj.est(0,j)));}
+           else
+            {double dE;
+             for(j=2;j<=jjj.est.Chi();++j){dE=real(jjj.est(0,j))-real(jjj.est(0,1));
+                                           if(elevels==3&&j-2<nmax&&fitE[j-1]>0){fitE[0]+=(dE-fitE[j-1])*(dE-fitE[j-1]);}
+                                           printf("%4g ",dE);}
+             
+            }
           }
                  } // fi Ti==1
        } // fi nmax>0
@@ -542,7 +557,7 @@ int main (int argc, char **argv)
 { int i,j,do_sipf=0,verbose=0;Xunit unit=none;
    double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10,Estart=0,epsilon=0,dE=0,X0=0,lambda=0;
    int Tsteps=0,Hsteps=0,Esteps=0,elevels=0,no_trs_write=0,calcX=0;
-   double Eend=0,Tend=0,Tstart=0;
+   double Eend=0,Tend=0,Tstart=0;double * fitE;
    Vector Hend(1,HEXT_DIMENSION),Hstart(1,HEXT_DIMENSION);
   int nofcomponents=0;
   Vector Hext(1,HEXT_DIMENSION),Q(1,3),Hxc_in(1,HXCMAXDIM);
@@ -590,7 +605,8 @@ for (i=1;i<argc;++i)
   else if(strcmp(argv[i],"-SI")==0) {unit=SI; }      
   else if(strcmp(argv[i],"-muBT")==0) {unit=muBT; }      
   else if(strcmp(argv[i],"-t")==0) {no_trs_write=1; }      
-  else if(strcmp(argv[i],"-nt")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -nt needs argument\n");exit(EXIT_FAILURE);}
+  else if(strcmp(argv[i],"-nt")==0) {if(elevels==3){fprintf(stderr,"Error in command: singleion option -nt must be given before option -E0f\n");exit(EXIT_FAILURE);}
+                                     if(i==argc-1){fprintf(stderr,"Error in command: singleion -nt needs argument\n");exit(EXIT_FAILURE);}
 	                                  nmax=(int)strtod(argv[i+1],NULL);++i;
     			             }       
   else if(strcmp(argv[i],"-pinit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -pinit needs argument\n");exit(EXIT_FAILURE);}
@@ -603,6 +619,13 @@ for (i=1;i<argc;++i)
 	                                  maxE=strtod(argv[i+1],NULL);++i;
     			             }       
   else if(strcmp(argv[i],"-E")==0) {elevels=1;}       
+  else if(strcmp(argv[i],"-E0")==0) {elevels=2;}       
+  else if(strcmp(argv[i],"-E0f")==0) {elevels=3; // fit elevels
+                                      fitE= new double [nmax+1];fitE[0]=0.0; // fitE[0] will be used to compute sta
+                                      for(int ct=0;ct<nmax;++ct){if(i==argc-1){fprintf(stderr,"Error in command: singleion -E0f needs more argument\n");exit(EXIT_FAILURE);}
+	                              fitE[ct+1]=strtod(argv[i+1],NULL);++i;
+                                      }
+                                     }       
   else if(strcmp(argv[i],"-r")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -r needs argument\n");exit(EXIT_FAILURE);}
 	                              do_sipf=1;strcpy(sipffile,argv[i+1]);++i;
     			             }       
@@ -703,7 +726,7 @@ if (!do_sipf)
               observable,observable_nofcomponents,nofcomponents,i,elevels,
               Tstart,Tsteps,T,TT,
               Estart,Esteps,E,dE,
-              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write,HEnofcomp,calcX,unit);
+              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write,HEnofcomp,calcX,unit,fitE);
    }
 
   
@@ -715,13 +738,14 @@ if (!do_sipf)
               observable,observable_nofcomponents,nofcomponents,1,elevels,
               Tstart,Tsteps,T,TT,
               Estart,Esteps,E,dE,
-              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write,HEnofcomp,calcX,unit);
+              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write,HEnofcomp,calcX,unit,fitE);
             
 fprintf(stderr,"# **********************end of program singleion************************\n");
 if(verbose)fprintf(stderr,"# ... you can now use 'cpsingleion' to calculate specific heat,\n"
        "#      entropy etc from results/*.levels.cef\n"
        "# **********************************************************************\n");
   }
+ if(elevels==3){printf("#!sta=%g\n",fitE[0]/nmax);delete []fitE;}
 }
 
 

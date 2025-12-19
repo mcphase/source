@@ -562,9 +562,12 @@ double intcalc_Erefine(ComplexMatrix & ch, int Estp,inimcdis & ini,par & inputpa
 #endif
  int dim=md.nofcomponents*md.nofatoms*md.n();
 // determine chi
+{ // <--- this bracket is necessary to embrace ComplexMatrix  definitions
+  // necessary in this routine and make them live within this bracket. at closing the bracket
+  // destructor is called correctly. On Apple without this 
+  // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
    ComplexMatrix chi(1,dim,1,dim);
    ComplexMatrix Ac(1,dim,1,dim);
-   ComplexMatrix Acinv(1,dim,1,dim);
    ComplexMatrix Bc(1,dim,1,dim);
    ComplexMatrix cc1(1,md.nofcomponents,1,md.nofcomponents);
    Ac=0;Bc=0;
@@ -594,7 +597,7 @@ double intcalc_Erefine(ComplexMatrix & ch, int Estp,inimcdis & ini,par & inputpa
 if(do_verbose){printf("inverting matrix A for Estep %i\n",Estp);//myPrintComplexMatrix(stdout,Ac); 
               }
  chi=Ac.Inverse()*Bc;
-
+ 
  // determine chi'' and S (bose factor)
    complex<double> im(0,1.0);
    double en=ini.emin+Estp*epsilon/2;
@@ -711,8 +714,11 @@ else
   intensity*=kf/ini.ki;
  }
 }
-
-
+} // <--- this bracket is necessary to embrace ComplexMatrix  definitions
+  // necessary in this routine and make them live within this bracket. at closing the bracket
+  // destructor is called correctly. On Apple without this 
+  // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
+ 
 #ifdef _THREADSREFINE
 #undef ini
 #undef inputpars

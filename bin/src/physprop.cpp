@@ -504,6 +504,7 @@ if(ini.cel!=0.0)
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
    fprintf(fout,"# Elastic Constants computed by applying stress of %g GPa and calculating strain\n",ini.cel);
+   fprintf(fout,"# - note, these elastic constants can be compared to experimental data\n");
       str[0]='\0';
    snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "  C11 C22  C33 C44 C55 C66 C12 C13 C14 C15 C16 C23 C24 C25 C26 C34 C35 C36 C45 C46 C56(GPa)");
    ini.print_usrdefcolhead(fout,str);

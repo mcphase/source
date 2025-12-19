@@ -107,6 +107,11 @@ int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector Happ, double
  #else
  int thread_id=1;
  #endif 
+ { // <--- this bracket is necessary to embrace ComplexMatrix  definitions
+  // necessary in this routine and make them live within this bracket. at closing the bracket
+  // destructor is called correctly. On Apple without this 
+  // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
+ 
  int i,ii,iii,tryrandom,nr,rr,ri,is,r;
  double fe,fered,Eelastic,U,sc;
  double u,lnz; // free- and magnetic energy per ion [meV]
@@ -379,6 +384,11 @@ int s1=1,s2=2;
                   delete []mq;
                  }
       }
+} // <--- this bracket is necessary to embrace ComplexMatrix  definitions
+  // necessary in this routine and make them live within this bracket. at closing the bracket
+  // destructor is called correctly. On Apple without this 
+  // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
+ 
       #ifndef _THREADS
       return 1;
       #else
