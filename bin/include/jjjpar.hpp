@@ -97,7 +97,8 @@ public:
    void addpars (int & number, jjjpar & addjjj); // enlarge the set of parameters by
                                                         // inserting a new exchange parameters addjjj
 							// into field at position number
-   void scalepars (double scalefactor); // multiply all exchange parameters with scale factor
+   void scalepars (double scalefactor,double scaleG); // multiply all exchange parameters with scale factor and Gs by scaleG
+   void sortpars(); // sorts exchange parameters according to increasing distance
    void delpar (int & number); // remove a neighbour from list
    int addpar (Vector & dabc,Vector & drijk,int & subl); // add a neighbour with distance dabc and zero exchange, returns index of this parameter
    int index(Vector & dabc); // given dabc return index of parameter, if neighbor not in list return 0

@@ -282,6 +282,7 @@ int  jjjpar::addpar (Vector & dabc,Vector & drijk,int & subl)
   delete []jijn;
   delete []dnn;
   delete []drr;
+  delete sl;
   return paranz;
 }
 
@@ -340,11 +341,53 @@ void jjjpar::addpars (int & number, jjjpar & addjjj)
 }
 
 // scale all interaction parameters
-void jjjpar::scalepars (double scalefactor)
+void jjjpar::scalepars (double scalefactor,double scaleG)
 {int i;for (i=1;i<=paranz;++i)
   {jij[i]*=scalefactor;
   }
- for(i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)*=scalefactor;
+ for(i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)*=scaleG;
+}
+
+// sort all interaction parameters by increasing distance
+void jjjpar::sortpars ()
+{int i;float r[paranz+1];
+  Matrix * jijn;
+  Vector * dnn;
+  Vector * drr;
+  int * sl;
+
+ for (i=1;i<=paranz;++i)
+  {r[i]=Norm(dr[i]);
+  }
+ int inew[paranz+1];
+ sort(r,1,paranz,inew);
+ // r[inew[1...paranz]] is sorted ascending r
+ 
+ jijn = new Matrix[paranz+1];
+ dnn = new Vector[paranz+1];
+ drr = new Vector[paranz+1];
+  sl = new int [paranz+1];
+
+  for (i=1;i<=paranz;++i)
+  {//printf("%g ",r[inew[i]]);
+   jijn[i]=jij[i];
+   dnn[i]=dn[i];
+   drr[i]=dr[i];
+   sl[i]=sublattice[i];
+  }
+ 
+ for (i=1;i<=paranz;++i)
+  {//printf("%i ",inew[i]);
+   jij[i]=jijn[inew[i]];
+   dn[i]=dnn[inew[i]];
+   dr[i]=drr[inew[i]];
+   sublattice[i]=sl[inew[i]];
+  }
+  delete []jijn;
+  delete []dnn;
+  delete []drr;
+  delete sl;
+
 }
 
 // remove neighbour from list

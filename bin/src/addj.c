@@ -23,6 +23,8 @@ int main (int argc, char **argv)
                         -ni                 ... forces output without indexchange \n \
                         -s  0.2             ... scales all interactions (including \n \
                                                 magnetoelastic G) in file1 by 0.2 before adding \n \
+                        -sJ  0.2             ... scales all interactions (but not \n \
+                                                magnetoelastic G) in file1 by 0.2 before adding \n \
                         -rmcomp 9 15        ... removes components 8 to 15 from result before output\n \
                         -pd                 ... output a column with distance  \n \
                         -ps                 ... output a column with sublattice index\n \
@@ -33,7 +35,7 @@ int main (int argc, char **argv)
                \n");
       exit (1);
     } else {fprintf(stderr, "#* addj 250712 *\n");}
- int ow=1; int n=0,noindexchange=0,rml=0,rmh;double scale=1.0;int verbose=0;
+ int ow=1; int n=0,noindexchange=0,rml=0,rmh;double scale=1.0,scaleG=1;int verbose=0;
  int pa=0,pi,prl,prh,pcl,pch;bool pd=false,ps=false,pG=false;
  while(argv[ow][0]=='-'){
  if(strcmp(argv[ow],"-nofcomponents")==0){ow+=1;
@@ -41,7 +43,8 @@ int main (int argc, char **argv)
  n=(int)strtod(argv[ow],NULL);
  if(n<1){fprintf(stderr,"Error program add option nofcomponents=%i is less than 1\n",n);exit(1);}
                                         }
- if(strcmp(argv[ow],"-s")==0){ow+=1;scale=strtod(argv[ow],NULL);}
+ if(strcmp(argv[ow],"-s")==0){ow+=1;scale=strtod(argv[ow],NULL);scaleG=scale;}
+ if(strcmp(argv[ow],"-sJ")==0){ow+=1;scale=strtod(argv[ow],NULL);}
  if(strcmp(argv[ow],"-rmcomp")==0){ow+=1;rml=(int)strtol(argv[ow], (char **)NULL, 10);
                                    ow+=1;rmh=(int)strtol(argv[ow], (char **)NULL, 10);
                              }
@@ -62,7 +65,7 @@ int main (int argc, char **argv)
 
  ++ow;}
 
- par a(argv[ow],verbose);a.scale(scale);
+ par a(argv[ow],verbose);a.scale(scale,scaleG);
 
  if(n>0){a.set_nofcomponents(n);}  
 

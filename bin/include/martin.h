@@ -33,6 +33,14 @@ ob obint(int  i);
 // choose random complex number c with 0<|c|<r, returns complex number and in r the randomly chosen |c|
 complex<double> crnd(double & r);
 
+extern void   sort(float * v,int jmin,int & jmax,int * jnew); // sorting function
+// input: v[jmin ... jmax] vector to be sorted
+ // jnew [jmin .... jmax]   sort index - after sorting the 
+ //                         vector jnew contains the indices
+ //                         in a sequence such that v[jnew[jmin ... jmax]] is
+ //                         sorted in ascending order 
+ 
+
 // function to print to stderr estimate of time until program end
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
 

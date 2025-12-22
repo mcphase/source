@@ -6,26 +6,7 @@
  // *************************************************************************
 
 
-void   sort(float * v,int jmin,int & jmax,int * jnew) // sorting function
-{// input: v[jmin ... jmax] vector to be sorted
- // jnew [jmin .... jmax]   sort index - after sorting the 
- //                         vector jnew contains the indices
- //                         in a sequence such that v[jnew[jmin ... jmax]] is
- //                         sorted in ascending order 
- int gap,i,j,temp,n;
- n=jmax-jmin+1;
- // initialize jnew
- for(i=jmin;i<=jmax;++i){jnew[i]=i;}
- // if nothing is to be done - return
- if (jmax<=jmin) {return;}
- 
- for (gap=n/2;gap>0;gap/=2)
-   for (i=gap;i<n;++i)
-     for (j=i-gap;j>=0 && v[jnew[jmin+j]]>v[jnew[jmin+j+gap]];j-=gap)
-      {temp=jnew[jmin+j];jnew[jmin+j]=jnew[jmin+j+gap]; jnew[jmin+j+gap]=temp;}
-      
- return;
-}
+
  
 //constructor
 physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,cryststruct & csin)

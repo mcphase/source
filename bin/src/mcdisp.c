@@ -1813,7 +1813,7 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
                            fprintf(jqfile,"#!scalefactor=%g\n",scalefactor);
                            }
        fclose(jqfile);
-      if(scalefactor!=1.0){inputpars.scale(scalefactor);
+      if(scalefactor!=1.0){inputpars.scale(scalefactor,scalefactor);
                            snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp_scaled.j",ini.prefix);
                           printf("# saving  %s\n",filename);
                           jqfile = fopen_errchk (filename,"w");

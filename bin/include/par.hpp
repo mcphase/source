@@ -43,6 +43,7 @@ class par
 ~par ();		//destruktor
 
 int newatom(jjjpar * p); //creates new atom from an existing and returns its index
+int delatom(int  n, int verbose=0); //removes atom n and returns new nofatoms
 int delatom(int  n, Matrix & distribute,int verbose=0); //removes atom n and returns new nofatoms
 // if n<0 then atom number |n| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
@@ -57,7 +58,8 @@ int delatom(int  n, Matrix & distribute,int verbose=0); //removes atom n and ret
 void reduce_unitcell(int & verbose);//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
-void scale(double scalefactor); // scale all interaction parameters by scalefactor
+void scale(double scalefactor,double scaleGfactor); // scale all interaction parameters by scalefactor and G by scaleGfactor
+void sort(); // sort all interaction parameters by increasing distance
 void save(FILE * fout,int noindexchange,bool pd=false,bool ps=false); // save lattice, atoms and exchange parameters to file
 void print_interaction(FILE * fout,int & pa,int & pi,int & prl,int & prh,int & pcl,int & pch); 
                   // prints interaction tensor (rows prl-prh,columns pcl-pch) pi of atom pa to fout

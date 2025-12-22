@@ -172,6 +172,43 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
 return cs.nofatoms;                 
 }
 
+int par::delatom(int  n, int  verbose) // removes atom number n 
+{jjjpar ** nnn;
+   
+ int j,s,again=0; 
+ FILE * out;
+ if(n<1||n>cs.nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,cs.nofatoms);exit(EXIT_FAILURE);}
+  --cs.nofatoms; // the number of atoms has to be decreased
+
+ nnn=new jjjpar * [cs.nofatoms+1];
+if(verbose)fprintf(stderr,"Deleting atom %i\n",n);
+ for (j=1;j<=cs.nofatoms+1;++j){if(j==n)++j;
+if(j<=cs.nofatoms+1)if(j>n){    // if ion j is after the ion to be deleted in the list, move its sipffilenam and xyz down in the list            
+ cs.sipffilenames[j-1]=(*jjj[j]).sipffilename;
+ cs.x[j-1]=(*jjj[j]).xyz[1];
+ cs.y[j-1]=(*jjj[j]).xyz[2];
+ cs.z[j-1]=(*jjj[j]).xyz[3];
+          }
+if(j<=cs.nofatoms+1)if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
+              if(j+1==n)++j;// if next ion is the ion to be deleted jump over it and treat in the next loops the remaining ions
+}
+
+// now completeley remove ion from the table of interactions jjj
+for (j=1;j<n;++j){nnn[j]=jjj[j];}
+for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];}
+// correct the sublattice numbering 
+for (j=1;j<=cs.nofatoms;++j){
+for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]>n)--(*nnn[j]).sublattice[s];}
+                              }
+if(again==0){out=fopen("reduce_unitcell_sipf.del","a");
+fprintf(out,"%s\n",(*jjj[n]).sipffilename);fclose(out);} 
+delete jjj[n];
+ delete []jjj;
+ jjj=nnn;      
+
+return cs.nofatoms; 
+}
+
 int par::delatom(int  nn, Matrix & distribute,int  verbose) // removes atom number n 
 // 1)if nn<0 then atom number |nn| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
@@ -383,8 +420,8 @@ FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
   if(fabs(rint(n(1))-n(1))<SMALL_MATCH_LATTICEVECTOR&&
      fabs(rint(n(2))-n(2))<SMALL_MATCH_LATTICEVECTOR&&
      fabs(rint(n(3))-n(3))<SMALL_MATCH_LATTICEVECTOR){//printf("del %i\n",j);
-                                                      k=-j;
-                                                      delatom(k,dis,verbose);--j;++ct;
+                                                     
+                                                      delatom(j,verbose);--j;++ct;
                                                       }
     }
   if(verbose){fprintf(stderr,"For atom %i there have been deleted %i equivalent atoms\n",i,ct);}
@@ -430,7 +467,7 @@ if(i1==cs.nofatoms)i1=0;
 ++i1;
 if(i1==i){fprintf(stderr,"# ... no matching atom found: adding new atom number %i with sipffilename=%s\n",cs.nofatoms+1,(*p1.jjj[i]).sipffilename);
 newatom(p1.jjj[i]);i1=cs.nofatoms;
-(*jjj[i1]).scalepars(0.0); // set jjjpars to zero - because there comes the add command in line 242
+(*jjj[i1]).scalepars(0.0,0.0); // set jjjpars to zero - because there comes the add command in line 242
  }
 }
     if (strcmp((*jjj[i1]).sipffilename,(*p1.jjj[i]).sipffilename)!=0){
@@ -445,13 +482,22 @@ i,(*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename,(*jjj[i]).sipffilename);}
  Cel+=p1.Cel; // add elastic constants
 }
 
-void par::scale(double scalefactor) // scale all interaction parameters by scalefactor
+void par::scale(double scalefactor,double scaleG) // scale all interaction parameters by scalefactor
 {int i;
  for(i=1;i<=cs.nofatoms;++i)
  {
-    (*jjj[i]).scalepars(scalefactor);
+    (*jjj[i]).scalepars(scalefactor,scaleG);
  }
 }
+
+void par::sort() // sort all interaction parameters by increasing distance
+{int i;
+ for(i=1;i<=cs.nofatoms;++i)
+ {
+    (*jjj[i]).sortpars();
+ }
+}
+
 
 void par::set_nofcomponents (int  n)
 {// sets the numberofcomponents to n
@@ -464,7 +510,7 @@ void par::increase_nofcomponents (int & n)
 
  int i;
  if (n<1) {fprintf(stderr,"ERROR increasing number of compoments in parameter set: n negative - number cannot be decreased\n");exit(EXIT_FAILURE);}
-  fprintf(stderr,"Warning: increasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
+  //fprintf(stderr,"Warning: increasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
 
  for(i=1;i<=cs.nofatoms;++i)
  {
@@ -479,7 +525,7 @@ void par::decrease_nofcomponents (int & n)
  int i;
  if (n<1) {fprintf(stderr,"ERROR decreasing number of compoments in parameter set: n negative - number cannot be decreased\n");exit(EXIT_FAILURE);}
  if (cs.nofcomponents-1<n) {fprintf(stderr,"ERROR decreasing number of compoments in parameter set: n = %i must be smaller than nofcomponents = %i\n",n,cs.nofcomponents);exit(EXIT_FAILURE);}
-  fprintf(stderr,"Warning: decreasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
+  //fprintf(stderr,"Warning: decreasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
 
  for(i=1;i<=cs.nofatoms;++i)
  {
