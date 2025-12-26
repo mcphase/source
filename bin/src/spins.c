@@ -221,6 +221,8 @@ fprintf(stderr,"# ***********************************************************\n"
  char outstr[MAXNOFCHARINLINE];
  char tstr[MAXNOFCHARINLINE];
  char infilename[MAXNOFCHARINLINE];
+ char mcphasjfilename[MAXNOFCHARINLINE];
+
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
  Vector nmin(1,3),nmax(1,3);
  Matrix N(1,3,1,3); // demagnetisation factor
@@ -239,10 +241,6 @@ gp.spins_scale_moment=0;
 gp.show_density=0;
 snprintf(gp.title,MAXNOFCHARINLINE,"output of program spins");
 
-// --------------------- load crystal structure information from mcphas.j for further processing  -----------------
-//   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)
- fprintf(stderr,"# loading crystal structure from mcphas.j ... \n");fflush(stderr);
- par inputpars("./mcphas.j");
  // check command line
  if (argc < 2){help_and_exit();}
 // first: options without graphics just screendump <I> or exchange field configuration at given HT
@@ -350,13 +348,26 @@ if(strcmp(argv[1+os],"-fst")==0){os+=1;fst=1;}
 if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
+ strcpy(mcphasjfilename,"./");strcpy(mcphasjfilename+2,prefix); // try prefix filename
+  strcpy(mcphasjfilename+2+strlen(prefix),"mcphas.j");fin = fopen(mcphasjfilename, "rb");
+ if(fin==NULL){strcpy(mcphasjfilename,"./results/");strcpy(mcphasjfilename+10,prefix); // try prefix filename
+              strcpy(mcphasjfilename+10+strlen(prefix),"mcphas.j");fin = fopen(mcphasjfilename, "rb");
+   if(fin==NULL){strcpy(mcphasjfilename+2,"mcphas.j");fin = fopen_errchk(mcphasjfilename, "rb");}
+              }
+ fclose(fin);
 
  strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
  strcpy(infilename+10+strlen(prefix),"mcphas.mf");fin = fopen(infilename, "rb");
  if(fin==NULL){strcpy(infilename+10,"mcphas.mf");fin = fopen_errchk(infilename, "rb");}
  printf("# reading from file %s\n",infilename);
-  
+ 
  }
+
+// --------------------- load crystal structure information from mcphas.j for further processing  -----------------
+//   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)
+ fprintf(stderr,"# loading crystal structure from %s ... \n",mcphasjfilename);fflush(stderr);
+ par inputpars(mcphasjfilename);
+
 char *out[NOF_USERDEF_MCPHAS_COLS+1];
 for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){out[col]=new char[20];}
 

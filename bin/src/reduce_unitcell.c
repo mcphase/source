@@ -34,13 +34,15 @@ if((fe=fecalc(U0,Eelastic,r,spinchange,Happ,T,ini,p,sps,mf))>FEMIN_INI)
 // - renormalising elastic constants
 // - calculating (phonon induced) magnetoelastic and quadrupolar interactions
 // ***************************************************************************
-void delphonons(par & a,bool symmetrize)
+void delphonons(par & a,bool symmetrize, int noindexchange)
 {fprintf(stderr,"# deleting phonons");
 // 1. renormalise elastic constants using only phonon degrees of freedom
 //   and calling fecalc with doeps for various applied external stresses ...
 double U,Eelastic,spinchange; int r; 
  par phon(a); // for phonon --> elastic constants
 par pw(a);  // pw working parameterset ---> multipolar and magnetoelastic interactions
+time_t curtime;
+  struct tm *loctime; 
 
  phon.set_nofcomponents(3);
 // remove nonphononic degrees of freedom from phon
@@ -53,6 +55,14 @@ for(int n=phon.cs.nofatoms;n>0;--n)
  if(!((*phon.jjj[n]).module_type==external_class&&(*phon.jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*phon.jjj[n]).Icalc_parstorage)))
   {phon.delatom(-n,dis);}
 }
+
+if(verbose){fprintf(stderr,"Creating file results/reduce_unitcell_phon_mcphas.j\n");
+         phon.save("results/reduce_unitcell_phon_mcphas.j",noindexchange);
+            fprintf(stderr,"Creating file results/reduce_unitcell_me_mcphas.j\n");
+         pw.save("results/reduce_unitcell_me_mcphas.j",noindexchange);
+            }
+
+           
 double U0,Ua,Ub,Uc; // reference energy
 
 char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
@@ -62,14 +72,50 @@ char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
 // ---------------------------------
 // only keep phononic degrees of freedom in phon and
 // apply various stresses 
+FILE * fout;
+if(verbose){fprintf(stderr,"Creating file results/reduce_unitcell_phon_mcphas.mf\n");
+           fout=fopen_errchk("results/reduce_unitcell_phon_mcphas.mf","w");
+ ini.outcolset=false;
+ini.defaultcolcode(1,0); // make T the column 1 in reduce_unitcell_phon.mf
+for(int n=1;n<=6;++n)ini.defaultcolcode(n+1,12+n);// put in col 2-7 the stress tensor
+
+fprintf(fout, "#output file of program reduce_unitcell ");
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+   fprintf(fout,"#!<--mcphas.mcphas.mf-->\n");
+   phon.savelattice(fout);phon.saveatoms(fout);
+   ini.savedemagtensor(fout);
+   fprintf (fout, "#!show_abc_unitcell=1.0\n");
+   fprintf (fout, "#!show_primitive_crystal_unitcell=1.0\n");
+   fprintf (fout, "#!show_magnetic_unitcell=1.0\n");
+   fprintf (fout, "#!show_atoms=1.0\n");
+   fprintf (fout, "#!show_chargedensity=1.0\n");
+   fprintf (fout, "#!spins_scale_moment=1.0\n");
+   fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
+   fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   ini.print_usrdefcolcodes(fout);
+   fprintf (fout, " nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");
+   fprintf (fout, "    #mf1(atom 1) mf1(atom 2) .... selfconsistent Mean field configuration \n"); 
+   fprintf (fout, "    #mf2(atom 1) mf2(atom 2) .... UNITS: mf(atom i)=gJ*mu_B*hxc(atom i)[meV] \n"); 
+   fprintf (fout, "    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]\n");
+   
+            }
+float x=1,y=1;Vector M(1,3);Vector P(1,3); M=0;P=0;
+         
  {        spincf sps(1,1,1,phon.cs.nofatoms,3);
           mfcf mf(1,1,1,phon.cs.nofatoms,3);
-          Matrix s(1,6,1,6); //myPrintVector(sps.epsilon,"Initial Strain");
+           Matrix s(1,6,1,6); //myPrintVector(sps.epsilon,"Initial Strain");
+          
     getU(U0,Eelastic,r,spinchange,Happ,T,ini,phon,sps,mf,"elastic constants U0");
     if(verbose)fprintf(stderr,"U0=%g meV ",U0);
            double cel=0.01;  // fixed stress to apply in GPa
           for(int n=1;n<=6;++n){Happ(6+n)+=cel;
  getU(U,Eelastic,r,spinchange,Happ,T,ini,phon,sps,mf,"elastic constants");
+ if(verbose){ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
+            fprintf (fout, " %i %i %i ",
+            mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+            fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+            mf.print(fout);fprintf(fout,"\n");}
+
                                 Happ(6+n)-=cel;if(verbose)myPrintVector(stderr,sps.epsilon,"Strain x=1-6");
  //                               printf("U+sigma.eps-U0=%12.12g U0=%12.12g -sigma.eps=%12.12g\n",(U-U0)*phon.cs.nofatoms+cel*sps.epsilon(n)*phon.cs.pVol()/1.60218e-1,U0*phon.cs.nofatoms,-cel*sps.epsilon(n)*phon.cs.pVol()/1.60218e-1);
 //if(n==4)sps.print(stdout);
@@ -90,6 +136,42 @@ char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                }
  }
 if(verbose)fprintf(stderr,"\n#elastic constants generated\n");
+if(verbose){fclose(fout);
+            fprintf(stderr,"creating file results/reduce_unitcell_me_mcphas.mf\n");
+            fout=fopen_errchk("results/reduce_unitcell_me_mcphas.mf","w");
+           ini.defaultcolcode(1,19); // make x the column 1 in reduce_unitcell_phon.mf
+           ini.defaultcolcode(2,20); // make y the column 2 in reduce_unitcell_phon.mf
+           ini.defaultcolcode(3,0); // make T the column 3 in reduce_unitcell_phon.mf
+           //for(int n=1;n<=6;++n)ini.defaultcolcode(n+1,12+n);// put in col 2-7 the stress tensor
+
+              fprintf(fout, "#output file of program reduce_unitcell ");
+               curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+               fprintf(fout,"#!<--mcphas.mcphas.mf-->\n");
+               pw.savelattice(fout);pw.saveatoms(fout);
+               ini.savedemagtensor(fout);
+   fprintf (fout, "#!show_abc_unitcell=1.0\n");
+   fprintf (fout, "#!show_primitive_crystal_unitcell=1.0\n");
+   fprintf (fout, "#!show_magnetic_unitcell=1.0\n");
+   fprintf (fout, "#!show_atoms=1.0\n");
+   fprintf (fout, "#!show_chargedensity=1.0\n");
+   fprintf (fout, "#!spins_scale_moment=1.0\n");
+   fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
+   fprintf (fout, "# x>0, y ... indicate which interaction operator Ialpha at which ion n is nonzero\n");
+   fprintf (fout, "#          x,y=(n-1)*nofcomponents+alpha  (two ion q-interaction)\n");
+   fprintf (fout, "#          with alpha=1,...,nofcomponents=%i and n=1,...,nofatoms=%i\n",pw.cs.nofcomponents,pw.cs.nofatoms);
+   fprintf (fout, "# x=0 ... only one interaction operator Ialpha ion n is nonzero (selfenergy)\n");
+   fprintf (fout, "# x<0, y ... strain epsilon_beta (bet=1...6) nonzero and interaction operator Ialpha at  ion n is nonzero\n");
+   fprintf (fout, "#          x=-beta y=(n-1)*nofcomponents+alpha  (crystal field phonon interation Gcfph(epsilon)\n");
+   fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   ini.print_usrdefcolcodes(fout);
+   fprintf (fout, " nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");
+   fprintf (fout, "    #mf1(atom 1) mf1(atom 2) .... selfconsistent Mean field configuration \n"); 
+   fprintf (fout, "    #mf2(atom 1) mf2(atom 2) .... UNITS: mf(atom i)=gJ*mu_B*hxc(atom i)[meV] \n"); 
+   fprintf (fout, "    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]\n");
+   
+            
+       }
+
 // generate magnetoelastic interactions 
 // strategy: - take full unreduced interactions and set for all magnetic ions Gcfph=0
 //           - determine phonon induced Gcfph^alphagamma(i)
@@ -155,7 +237,7 @@ exit(0);
 
 if(fecalc(U0,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf)>FEMIN_INI)
 {fprintf(stderr,"Error reduce_unitcell option delatoms phon: reference energy not stable - modify mcphas.ini and restart\n");exit(EXIT_FAILURE);}
-if(verbose){fprintf(stderr,"calculating self energy and Gcfph\nU0=%12.12g\n",U0);}
+if(verbose){fprintf(stderr,"\n ----- calculating self energy and Gcfph -------\nU0=%12.12g\n",U0);}
  
 // ---------------------------------
 // 2 a) zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)
@@ -166,8 +248,18 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
   for(int g=1;g<=pw.cs.nofcomponents;++g)
  {(*pw.jjj[n]).MF(g)=1;
        getU(Ua,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf,"selfenergy");
+      if(verbose){x=0;y=(n-1)*pw.cs.nofcomponents+g;
+             ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
+            fprintf (fout, " %i %i %i ",
+            mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+            fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+            mf.print(fout);fprintf(fout,"\n");}
+
   if((nd=(*a.jjj[n]).index(dnull))==0)nd=(*a.jjj[n]).addpar(dnull,dnull,n);
  (*a.jjj[n]).jij[nd](g,g)+=-2.0*(Ua-U0)*pw.cs.nofatoms;  // nofatoms multiplied because U and f are normalised to meV/atom
+if (fabs((*a.jjj[n]).jij[nd](g,g))<SMALL){(*a.jjj[n]).jij[nd](g,g)=0;} 
+else if (verbose){fprintf(stderr,"\n atom %i I_%i  <--> x=%g y=%g ",n,g,x,y);} 
+
 //if(g==4){fprintf(stderr,"n=%i nd=%i g=%i Ua=%12.12g U0=%12.12g --> Jii44=%g\n",n,nd,g,Ua,U0,-2.0*(Ua-U0)*pw.cs.nofatoms);sps.print(stderr);}
 // ---------------------------------
 // 2 b)  nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to
@@ -178,7 +270,16 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
                  sps.epsilon(al)=1e-6;
                  double Eelrenormdiveps=0.5*sps.epsilon(al)*a.Cel(al,al);
                 getU(Ub,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf,"Gcfph");
-          (*(*a.jjj[n]).G)(al,g)+=-(Ub-Ua)*pw.cs.nofatoms/sps.epsilon(al)+Eelrenormdiveps;
+      if(verbose){x=-al;y=(n-1)*pw.cs.nofcomponents+g;
+             ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
+            fprintf (fout, " %i %i %i ",
+            mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+            fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+            mf.print(fout);fprintf(fout,"\n");}
+ (*(*a.jjj[n]).G)(al,g)+=-(Ub-Ua)*pw.cs.nofatoms/sps.epsilon(al)+Eelrenormdiveps;
+if (fabs((*(*a.jjj[n]).G)(al,g))<SMALL){(*(*a.jjj[n]).G)(al,g)=0;} 
+else if (verbose){fprintf(stderr,"\nepsilon_%i - atom %i I_%i  <--> x=%g y=%g ",al,n,g,x,y);} 
+
 /*if(al==1&&g==8){
 fprintf(stderr,"n=%i  Ub=%12.12g  Ua=%12.12g U0=%12.12g --> G11=%g\n",
   n,Ub*pw.cs.nofatoms,Ua*pw.cs.nofatoms,U0*pw.cs.nofatoms,(*(*a.jjj[n]).G)(al,g));
@@ -190,7 +291,7 @@ sps.print(stderr);}
 
   (*pw.jjj[n]).MF(g)=0;
  }
-if(verbose){fprintf(stderr,"calculating bilinear interactions\n");}
+if(verbose){fprintf(stderr,"\n ------- calculating bilinear interactions -------\n");}
 
 // ---------------------------------
 // 2 c) zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)
@@ -209,6 +310,13 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
      {(*pw.jjj[n]).MF(g)=1;
       (*pw.jjj[n1]).MF(g1)=1;
   getU(Uc,Eelastic,r,spinchange,Happ,T,ini,pw,sps,mf,"bilinear interaction");
+     if(verbose){x=(n-1)*pw.cs.nofcomponents+g;y=(n1-1)*pw.cs.nofcomponents+g1;
+             ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
+            fprintf (fout, " %i %i %i ",
+            mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+            fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+            mf.print(fout);fprintf(fout,"\n");}
+
    double djij=-(Uc-U0)*pw.cs.nofatoms
                         -(*a.jjj[n]).jij[(*a.jjj[n]).index(dnull)](g,g)/2
                       -(*a.jjj[n1]).jij[(*a.jjj[n1]).index(dnull)](g1,g1)/2;
@@ -220,7 +328,8 @@ if(!symmetrize)
   if((nd=(*a.jjj[n]).index(dabc))==0){nd=(*a.jjj[n]).addpar(dabc,drijk,n1);}
 (*a.jjj[n]).jij[nd](g,g1)+=djij;
 
-if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}  
+if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;} 
+else if (verbose){fprintf(stderr,"\natom %i I_%i - atom %i I_%i  <--> x=%g y=%g ",n,g,n1,g1,x,y);} 
 }
 else
 {
@@ -268,7 +377,7 @@ if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
       (*pw.jjj[n]).MF(g)=0;
       (*pw.jjj[n1]).MF(g1)=0;
     }
-    
+fclose(fout);    
 
 // remove all phonons from a before outputting it ...
 for(int n=a.cs.nofatoms;n>0;--n)
@@ -378,7 +487,7 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
 if(n>0){a.set_nofcomponents(n);if(verbose){fprintf(stderr,"Setting nofcomponents=%i\n",n);}}
 
 if(delphon){
-delphonons(a,symmetrize);
+delphonons(a,symmetrize,noindexchange);
 }
 else
 if(i==0){

@@ -733,10 +733,12 @@ else
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    ini.print_usrdefcolcodes(fout);
-   fprintf (fout, " nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");}
+   fprintf (fout, " nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");
+   }
 else
   {ini.print_usrdefcolcodes(fout);
-   fprintf (fout, " nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab\n");}
+   fprintf (fout, " nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab\n");
+   }
    fprintf (fout, "    #mf1(atom 1) mf1(atom 2) .... selfconsistent Mean field configuration \n"); 
    fprintf (fout, "    #mf2(atom 1) mf2(atom 2) .... UNITS: mf(atom i)=gJ*mu_B*hxc(atom i)[meV] \n"); 
    fprintf (fout, "    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]}\n");

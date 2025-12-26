@@ -20,10 +20,10 @@
 
 
 class inipar
-{ private:
-  bool outcolset; // indicates wether in mcphas.ini user has set some output columns
+{ 
   
   public:
+  bool outcolset; // indicates wether in mcphas.ini user has set some output columns
   bool defaultcolcode(int  col,int  colcode); // resets default columns if not set by user (outcolset==true)
                                              // returns true if reset has been successful
   double  calcmf_duration; // time for mean fields calculation
