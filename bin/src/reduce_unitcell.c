@@ -25,6 +25,7 @@ void getU(double & U0,double & Eelastic,int & r, double & spinchange,Vector & Ha
 {double fe;
 if((fe=fecalc(U0,Eelastic,r,spinchange,Happ,T,ini,p,sps,mf))>FEMIN_INI)
  {fprintf(stderr,"Mean Fields:");mf.print(stderr);
+  fprintf(stderr,"<I>:");sps.print(stderr);
   fprintf(stderr,"Error reduce_unitcell option delatoms phon: free energy not stable");
   if(fe==2*FEMIN_INI)fprintf(stderr,"divmaxloop"); else fprintf(stderr,"divmaxspinchange");
   fprintf(stderr,"for %s  - modify mcphas.ini and restart\n",info);exit(EXIT_FAILURE);}

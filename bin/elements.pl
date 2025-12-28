@@ -19,7 +19,7 @@
 # Ionic radius and colours are taken from the file elements.ini from VESTA ( http://jp-minerals.org/vesta/ )
 # Name, real_b, imag_b, ismag,  valence,	r_ion,	colour
 %element = (
-"E",	[0     ,0,      0,      "-1",           0.2,   [0,0,224]],
+"E",	[0     ,0,      0,      "-1",           0.2,    [0,0,224]],
 "H",	[-3.739,0,	0,	"1,-1",		0.46,	[255,204,204]],
 "D",	[6.671,	0,	0,	"1,-1",		0.46,	[204,204,255]],
 "He",	[3.26,	0,	0,	0,		1.22,	[252,232,206]],

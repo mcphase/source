@@ -9,6 +9,7 @@
 #include "graphic_parameters.hpp"
 #include "cryststruct.hpp"
 #include "densities_func.c"
+#include "elements.c"
 
 void help_and_exit()
     { printf ("\n\
@@ -892,7 +893,24 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
   for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){h(nt)=hh(nt+inputpars.cs.nofcomponents*(ii-1));}
   if(true==(*inputpars.jjj[ii]).pcalc(pos,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
  {double charge;charge=(*inputpars.jjj[ii]).charge;if(charge==0)charge=0.01;
-  snprintf(cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g",charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
+   snprintf(cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g",
+           charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
+  // if we can determine from sipffilename the element --> put r g b information
+    
+  unsigned int r,g,b; char element []  ="E\0";
+   element[0]=toupper((*inputpars.jjj[ii]).sipffilename[0]);
+   if(isalpha((*inputpars.jjj[ii]).sipffilename[1]))
+   element[1]=tolower((*inputpars.jjj[ii]).sipffilename[1]);
+  for(int i=0;i<NOFELEMENTS_RGB;++i)
+   if(0==strncmp(element,elstr[i],2)){
+r=(unsigned int)(unsigned char)elstr[i][2];
+g=(unsigned int)(unsigned char)elstr[i][3];
+b=(unsigned int)(unsigned char)elstr[i][4];
+   snprintf(cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g %s r=%i g=%i b=%i",
+           charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333),
+           element,r,g,b);}
+   // printf("%s\n",cs.sipffilenames[ii]);
+
 // printf("#! atom %i %s displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,cs.sipffilenames[ii],ii,pos(1),ii,pos(2),ii,pos(3));
   printf("#! atom %i  displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,ii,pos(1),ii,pos(2),ii,pos(3));
  }

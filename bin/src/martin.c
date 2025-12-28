@@ -275,16 +275,19 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
  // while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
  
   if ((token = strstr (instr, parameter))==NULL) return 1; // parameter string not found
-  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"��/><;@:=+-~|"))return 1; // no space etc before parameter
+  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"/><;@:=+-~|")){++token;
+        return extract(token,parameter,var,ob); } // no space etc before parameter
  td=instr;while ((te=strstr(td,"#!"))!=NULL){td=te+1;} // skip all "#!" signs and
  if ((td=strchr(td,'#'))!=NULL){if(td<token) return 1;} // check if comment sign "#" appears before parameter - if yes return 1
  
   //extract parameter
-  
   token+=strlen(parameter);
   if (strstr (token, "=")==NULL) return 1;  // no '=' found after parameter string
+
   while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
-  if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
+  
+
+  if (strstr(token,"=")!=token) return extract(token++,parameter,var,ob); // there are other characters than tab or spaces between parameter and =
   ++token;
   snprintf(ptrim,MAXNOFCHARSINLINE,"%s",parameter);
   rtrim(ptrim);

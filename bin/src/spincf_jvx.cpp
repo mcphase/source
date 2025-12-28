@@ -332,7 +332,13 @@ fprintf(fout,"        <colors type=\"rgb\">\n");n=0;
              (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {
 fprintf(fout,"          <c>  %i       %i       %i </c>\n",255,255,255);
-fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
+int r=(int)(255*gp.show_atoms),g=(int)(gp.show_atoms*((l*97)%256)),b=0;
+ extract(cs.sipffilenames[l],"r",r);
+ extract(cs.sipffilenames[l],"g",g);
+ extract(cs.sipffilenames[l],"b",b);
+// here should be rgb color of the ion !!
+fprintf(fout,"          <c>  %i       %i       %i </c>\n",r,g,b);
+//printf("          <c> %s  %i       %i       %i </c>\n",cs.sipffilenames[l],r,g,b);
 	     }
 	  }
        }}}

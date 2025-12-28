@@ -727,6 +727,7 @@ start = time(0);
   mf.epsmf/=sps.n();
 // if(r==1){mf.print_human_readable(stdout);}
 
+
   
   sta=sqrt(sta/sps.n()/inputpars.cs.nofatoms);
   bigstep=fmodf(ini.bigstep-0.0001,1.0);
@@ -864,6 +865,9 @@ mf.epsmf(6)+=0.5*dldlssumeps6;
                }}}
                  if(ini.doeps>0)sps.epsilon=inputpars.CelInv*(mf.epsmf+sigma);
                }
+//if(Norm(Happ)>SMALL&&r==80){myPrintVector(Happ);
+//sps.print(stdout);myPrintVector(sps.epsilon,"epsilon");
+//exit(0);}
 
   //treat program interrupts
   #ifdef _THREADS
