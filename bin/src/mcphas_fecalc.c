@@ -767,8 +767,9 @@ Vector Pel(1,3);Pel=0;
       for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
      (*inputpars.jjj[l]).mcalc(mom,T, d1,Hint,(*inputpars.jjj[l]).Icalc_parstorage);
      M+=mom;
-     if(fabs(inputpars.totalcharge)<SMALLCHARGE)(*inputpars.jjj[l]).pelcalc(mom,T, d1,Hint,(*inputpars.jjj[l]).Icalc_parstorage);
-     Pel+=mom; // sum dipolar moments
+     if(fabs(inputpars.totalcharge)<SMALLCHARGE)
+       if((*inputpars.jjj[l]).pelcalc(mom,T, d1,Hint,(*inputpars.jjj[l]).Icalc_parstorage))
+         Pel+=mom; // sum dipolar moments
                   
     }}}}
     M=(Mfact/(double)sps.n())*ini.N*M;

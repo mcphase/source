@@ -231,14 +231,15 @@ if(Norm(M)>1e-20)
 if(Norm(P)>1e-20)
  {Vector Edepol(1,3);Edepol=N*P; // demagnetizing field in ijk coordinates
   ijk2dadbdc(v,Edepol,abcu);
+
   switch (i) {
-              case 25: ret+=v(1);break;
-              case 26: ret+=v(2);break;
-              case 27: ret+=v(3);break;
-              case 28: ret+=Edepol(1);break;
-              case 29: ret+=Edepol(2);break;
-              case 30: ret+=Edepol(3);break;
-              case 23: ret=Norm(Eijk+Edepol); break;
+              case 31: ret+=v(1);break;
+              case 32: ret+=v(2);break;
+              case 33: ret+=v(3);break;
+              case 34: ret+=Edepol(1);break;
+              case 35: ret+=Edepol(2);break;
+              case 36: ret+=Edepol(3);break;
+              case 24: ret=Norm(Eijk+Edepol); break;
               default: break;
              }  
  

@@ -349,13 +349,7 @@ if(strcmp(argv[1+os],"-fst")==0){os+=1;fst=1;}
 if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
- strcpy(mcphasjfilename,"./");strcpy(mcphasjfilename+2,prefix); // try prefix filename
-  strcpy(mcphasjfilename+2+strlen(prefix),"mcphas.j");fin = fopen(mcphasjfilename, "rb");
- if(fin==NULL){strcpy(mcphasjfilename,"./results/");strcpy(mcphasjfilename+10,prefix); // try prefix filename
-              strcpy(mcphasjfilename+10+strlen(prefix),"mcphas.j");fin = fopen(mcphasjfilename, "rb");
-   if(fin==NULL){strcpy(mcphasjfilename+2,"mcphas.j");fin = fopen_errchk(mcphasjfilename, "rb");}
-              }
- fclose(fin);
+ 
 
  strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
  strcpy(infilename+10+strlen(prefix),"mcphas.mf");fin = fopen(infilename, "rb");
@@ -366,7 +360,15 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
 
 // --------------------- load crystal structure information from mcphas.j for further processing  -----------------
 //   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)
- fprintf(stderr,"# loading crystal structure from %s ... \n",mcphasjfilename);fflush(stderr);
+ FILE * fj;
+ strcpy(mcphasjfilename,"./");strcpy(mcphasjfilename+2,prefix); // try prefix filename
+  strcpy(mcphasjfilename+2+strlen(prefix),"mcphas.j");fj = fopen(mcphasjfilename, "rb");
+ if(fj==NULL){strcpy(mcphasjfilename,"./results/");strcpy(mcphasjfilename+10,prefix); // try prefix filename
+              strcpy(mcphasjfilename+10+strlen(prefix),"mcphas.j");fj = fopen(mcphasjfilename, "rb");
+   if(fj==NULL){strcpy(mcphasjfilename+2,"mcphas.j");fj = fopen_errchk(mcphasjfilename, "rb");}
+              }
+ fclose(fj);
+fprintf(stderr,"# loading crystal structure from %s ... \n",mcphasjfilename);fflush(stderr);
  par inputpars(mcphasjfilename);
 
 char *out[NOF_USERDEF_MCPHAS_COLS+1];
