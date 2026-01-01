@@ -89,7 +89,8 @@ $nn,$_,$imax[$nn-1]
 .
      if(open($h, $file)) {# let user select reflection
       while(<$h>)
-      {next if /^\s*#/;  
+      {if (/^\s*#/){@header=split " ";}
+       next if /^\s*#/;  
       $x=new PDL(split " ");
  
        for ($k=7;$k<(($x->dims)[0]-1);$k+=4+$FT)
@@ -127,9 +128,9 @@ $nn,$_,$imax[$nn-1]
       if($n=~/,/){print $l "#Warning hkl: $y reflex not found in file $file\n";$r=$y;}
       else {$r=$v[$n];}
       if($FT==0)
-      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values of Intensity of ".$r."vs sqrt(int or |m(Q)|) as read from file $file\n");}
+      {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  values of Intensity of ".$r."vs sqrt(int or |m(Q)|) as read from file $file\n");}
       else
-      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values REAL(m(Q)) vs IMAG(m(Q)) of ".$r." as read from file $file\n");}
+      {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  values REAL(m(Q)) vs IMAG(m(Q)) of ".$r." as read from file $file\n");}
       while(<$h>)
       {next if /^\s*#/;  
       $x=new PDL(split " ");

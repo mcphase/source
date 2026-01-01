@@ -490,6 +490,16 @@ void par::scale(double scalefactor,double scaleG) // scale all interaction param
  }
 }
 
+void par::shiftpos(Vector & dabc) // shift all atomic positions by da db dc = dabc
+{
+for(int i=1;i<=cs.nofatoms;++i)  
+  { (*jjj[i]).xyz+=dabc;
+   cs.x[i]=(*jjj[i]).xyz[1];
+   cs.y[i]=(*jjj[i]).xyz[2];
+   cs.z[i]=(*jjj[i]).xyz[3];
+  }
+}
+
 void par::sort() // sort all interaction parameters by increasing distance
 {int i;
  for(i=1;i<=cs.nofatoms;++i)

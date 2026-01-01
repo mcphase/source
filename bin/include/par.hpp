@@ -59,6 +59,7 @@ void reduce_unitcell(int & verbose);//checks every atom in the unit cell and rem
                        // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
 void scale(double scalefactor,double scaleGfactor); // scale all interaction parameters by scalefactor and G by scaleGfactor
+void shiftpos(Vector & dabc); // shift all atomic positions by da db dc = dabc
 void sort(); // sort all interaction parameters by increasing distance
 void save(FILE * fout,int noindexchange,bool pd=false,bool ps=false); // save lattice, atoms and exchange parameters to file
 void print_interaction(FILE * fout,int & pa,int & pi,int & prl,int & prh,int & pcl,int & pch); 
