@@ -198,6 +198,7 @@ void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipea
     {
     fprintf(fout,"#definitions:\n#\n");
     fprintf(fout,"#sta                               = sum_i |weight(i)|*[Eexp(i) - nearestEcalc]^[2*sign(weight(i))]\n");
+    fprintf(fout,"#        + |negative or imaginary eigenvalues of dynamic Matrix A| (in case of non stable DMD indicating metastable structure)\n");
     fprintf(fout,"#sta_int                           = sum_i |weight(i)|*[Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^[2*sign(weight(i))]\n",SMALLINT);
     fprintf(fout,"#sta_without_antipeaks             = sum_i_with_weight(i)>0  weight(i)*[Eexp(i) - nearestEcalc]^2\n");
     fprintf(fout,"#sta_int_without_antipeaks         = sum_i_with_weight(i)>0  weight(i)*[Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^2\n",SMALLINT);

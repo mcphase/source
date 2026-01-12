@@ -985,6 +985,30 @@ if (do_jqfile){
  }
  else
  {// no jqfile but excitations to be calculated
+if(qincr==-1){qincr=0;hkl2ijk(qijk,hkl, inputpars.cs.abc);qold=qijk;
+              // for the first q vector in the loop we have to initialize files ...
+              snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+              if(calc_rixs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
+              else if(calcXobs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qeX%s",ini.prefix,obs[calcXobs]);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
+                     else {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+                           if(do_Erefine==1){
+                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);                    
+                                            }
+                           }
+               writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,calcXobs,do_Erefine);  
+              //------------observables-----------------------------------
+               if(ini.calculate_chargedensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_spindensity_oscillation)  {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_orbmomdensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_phonon_oscillation)       {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_magmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_pel_oscillation)          {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qpe",ini.prefix);foutqpe=evfileinit(filemode,filename,inputpars,"qpe",PEL_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_spinmoment_oscillation)   {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_orbmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);printf("#saving %s\n",filename);}
+               //-----------------------------------------------------------
+               lastcputime=std::clock();
+              } 
  if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i DMD Eigenvalue prblem  A t = hbar omega Lambda t, Matrix  A=\n",dimA,dimA);
                            myPrintMatrix(Ac,"#Ac"); 
                            myPrintMatrix(Lambda,"#Matrix Lambda"); 
@@ -1024,12 +1048,11 @@ if (do_jqfile){
          } else {
             // Skips q-point, but make sure qincr is correct.
             fprintf(stderr,"# Skipping this q-point.\n");
-            if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
+             // In order to keep the q-increments the same - since we're missing a point here.
                qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
                ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                fprintf (foutqei, "%4.4g           ",0.); // print energy zero
                fprintf(foutqei, "-1    -1   -1\n");
-            }
             continue;
          }
       }
@@ -1054,19 +1077,25 @@ if (do_jqfile){
       eigrval = myEigenSystemGeneral(Lambda,Ac,Enc,Tau);
       if(eigrval!=0) { 
          fprintf(stderr,"# The non-symmetric eigensolver failed. This Q point will be skipped.\n");
-         if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
+          // In order to keep the q-increments the same - since we're missing a point here.
             qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
             ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
             fprintf (foutqei, "%4.4g           ",0.);
             fprintf(foutqei, "-1    -1   -1\n");
-         }
-         continue;
+         // maybe here we could try to estimate how bad is the matrix Ac
+         //  and increas sta by that amount ! 
+           myEigenValuesHermitean (Ac,En,sort=1,maxiter);
+           myPrintVector(En,"Eigenvalues of Ac");
+            for(i=1; i<=dimA; i++) {if(En(i)<0){sta+=fabs(10*En(i));}
+                             }
+  continue;
       }
       Enc=1./Enc;
       sortEc(Enc,Tau);    // Sorts by the real part of the eigenvalues
-      for(i=1; i<=dimA; i++) En(i) = (imag(Enc(i))==0) ? real(Enc(i)) : -DBL_MAX;  // Sets -DBL_MAX as flag that eigenvalue is complex
+      for(i=1; i<=dimA; i++) {En(i) = (imag(Enc(i))==0) ? real(Enc(i)) : -DBL_MAX;  // Sets -DBL_MAX as flag that eigenvalue is complex
+                              if(imag(Enc(i))!=0){sta+=abs(Enc(i));}
+                             }
    }
-
  if(do_verbose==1){   ComplexMatrix test(1,dimA,1,dimA);
    // check normalisation of eigenvectors -------------------- only do this in verbose mode MR 5.6.2013
    bool notnorm = false;
@@ -1118,30 +1147,8 @@ if (do_jqfile){
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
   intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,calcXobs,do_phonon,hkl);
   qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);QQ=Norm(qijk);
-  if(qincr==-1){qincr=0;qold=qijk;
-              // for the first q vector in the loop we have to initialize files ...
-              snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
-              if(calc_rixs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
-              else if(calcXobs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qeX%s",ini.prefix,obs[calcXobs]);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
-                     else {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
-                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
-                           if(do_Erefine==1){
-                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);                    
-                                            }
-                           }
-               writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,calcXobs,do_Erefine);  
-              //------------observables-----------------------------------
-               if(ini.calculate_chargedensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_spindensity_oscillation)  {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_orbmomdensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_phonon_oscillation)       {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_magmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_pel_oscillation)          {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qpe",ini.prefix);foutqpe=evfileinit(filemode,filename,inputpars,"qpe",PEL_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_spinmoment_oscillation)   {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);printf("#saving %s\n",filename);}
-               if(ini.calculate_orbmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);printf("#saving %s\n",filename);}
-               //-----------------------------------------------------------
-               lastcputime=std::clock();
-              } else
+
+if(qincr!=-1)
              {// close and reopen files to prevent data loss if process ends 
                if ((std::clock() - lastcputime) / (double)CLOCKS_PER_SEC >60)
               {lastcputime=std::clock();
@@ -1762,6 +1769,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
 } // next hkl
 // END LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL ------------------
 
+
 #ifdef _THREADS
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {  delete thrdat.ini[ithread]; 
@@ -1770,7 +1778,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
    delete[] thrdat.inputpars; delete[] thrdat.md; delete[] thrdat.ini;delete[] thrdat.J;
 #endif
 
-                                     
+                                  
 
     if (do_jqfile) 
      {fprintf(stdout,"#!the largest eigenvalue of J(q) is jqmax=%g meV at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
@@ -1822,8 +1830,9 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
                            }
      }
     else
-     {
-      if(!calc_rixs&&!calcXobs){staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
+     {   
+      if(!calc_rixs&&!calcXobs){
+      staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(foutqei,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(stdout,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       if (do_Erefine==1){fclose(foutds);}
@@ -1842,6 +1851,7 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
                         if(ini.calculate_orbmoment_oscillation)fclose(foutqel);
                         
      } 
+
 }
 
 //*************************************************************************************************
