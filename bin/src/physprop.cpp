@@ -136,7 +136,7 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                                      default: ;
                                    }
                                }
-                  if(ini.cv!=0){if(i-nofcols==1)ptr=&cv;snprintf(hs,40,"cV[meV/ionK]");
+                  if(ini.cv!=0){if(i-nofcols==1){ptr=&cv;snprintf(hs,40,"cV[meV/ionK]");}
                                 nofcols+=1;
                                }
                   if(ini.doeps){switch(i-nofcols) {
