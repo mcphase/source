@@ -1061,7 +1061,7 @@ if(qincr==-1){qincr=0;hkl2ijk(qijk,hkl, inputpars.cs.abc);qold=qijk;
                  }
    else if(eigrval<0 && eigrval>=-dimA) { // -dimA<eigrval<0 means algorithm did not converge.
       fprintf(stderr,"# The Hermitian-definite eigensolver failed to converge. Trying again with a non-symmetric eigensolver.\n");
-      fprintf(stderr,"#   This can generate complex/imaginary eigenvalues, which will be outputed as comments in mcdisp.qei\n");
+      fprintf(stderr,"#   This can generate complex/imaginary eigenvalues, which will be output as comments in mcdisp.qei\n");
       fprintf(stderr,"#   without intensities. Real eigenvalues will be treated normally.\n");
       notposdef = true;
    }
@@ -1070,7 +1070,7 @@ if(qincr==-1){qincr=0;hkl2ijk(qijk,hkl, inputpars.cs.abc);qold=qijk;
       fprintf(stderr,"#   possible reason: magnetic structure in mcdisp.mf is metastable, leading to soft modes at this Q-vector which could\n");
       fprintf(stderr,"#   be a possible ordering wavevector for the actual stable structure. It could also be due to rounding errors.\n");
       fprintf(stderr,"#   McDisp will now use a non-symmetric eigensolver. Real eigenvalues will be treated as normal. Complex/imaginary eigenvalues\n");
-      fprintf(stderr,"#   will be outputed to mcdisp.qei in a commented out line, but the corresponding intensities will not be calculated.\n");
+      fprintf(stderr,"#   will be output to mcdisp.qei in a commented out line, but the corresponding intensities will not be calculated.\n");
       notposdef = true;
    }
    if(notposdef) {
@@ -1082,20 +1082,19 @@ if(qincr==-1){qincr=0;hkl2ijk(qijk,hkl, inputpars.cs.abc);qold=qijk;
             ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
             fprintf (foutqei, "%4.4g           ",0.);
             fprintf(foutqei, "-1    -1   -1\n");
-         // maybe here we could try to estimate how bad is the matrix Ac
+                     }
+         //  here we  try to estimate how bad is the matrix Ac
          //  and increas sta by that amount ! 
-           myEigenValuesHermitean (Ac,En,sort=1,maxiter);
-           myPrintVector(En,"Eigenvalues of Ac");
-            for(i=1; i<=dimA; i++) {if(En(i)<0){sta+=fabs(10*En(i));}
-                             }
-  continue;
-      }
+           myEigenValuesHermitean (Ac,En,sort=1,maxiter); 
+            printf("Negative Eigenvalues of Ac:");
+            for(i=1; i<=dimA; i++)if(En(i)<0){sta+=fabs(En(i));printf(" %g",En(i));}
+            printf("\n");
+      if(eigrval!=0)continue;  // if EigensystemGeneral fails continue
+
       Enc=1./Enc;
       sortEc(Enc,Tau);    // Sorts by the real part of the eigenvalues
-      for(i=1; i<=dimA; i++) {En(i) = (imag(Enc(i))==0) ? real(Enc(i)) : -DBL_MAX;  // Sets -DBL_MAX as flag that eigenvalue is complex
-                              if(imag(Enc(i))!=0){sta+=abs(Enc(i));}
-                             }
-   }
+      for(i=1; i<=dimA; i++)En(i) = (imag(Enc(i))==0) ? real(Enc(i)) : -DBL_MAX;  // Sets -DBL_MAX as flag that eigenvalue is complex
+                }
  if(do_verbose==1){   ComplexMatrix test(1,dimA,1,dimA);
    // check normalisation of eigenvectors -------------------- only do this in verbose mode MR 5.6.2013
    bool notnorm = false;

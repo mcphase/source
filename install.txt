@@ -92,14 +92,15 @@ There is a hardcoded maximum of 255 threads.
 
 
 ]
-**************
-Windows Mpe: Ich glaube es hat damit zu tun, dass mpe Spuren im System hinterlässt, 
-die bei der Deinstallation nicht gelöscht werden. Auf meinem alten Windows
- Rechner habe ich bemerkt, dass es  Folder "mcphaseexplorer" in 
-hidden Ordner unter “home/AppData/Roaming” und “home/AppData/Local” gibt, die gelöscht werden sollten, 
-dann lässt sich mpe starten und initialisiert das ganze neu. --> make note in install on the location
-of this file !!!
-*******************************
+************** known problems ****
+Windows mcphaseexploerer, mpe does not open:
+- if there is a window showing problems with some modules: click disable modules and continue
+- if mpe crashes restart from black windows "mpe"
+- if you had mcphase installed there might be traces of mpe in the system which
+  hamper a smooth start, there could exist  folders "mcphaseexplorer" in 
+hidden folders under “home/AppData/Roaming” and “home/AppData/Local” which you should
+delete by hand, maybe then it works ...
+**********************************
 
 -------------------------------------------------------------------
 II  LINUX 
@@ -210,5 +211,105 @@ f) type
    
    to remove files which are not needed
 ]
+
+-------------------------------------------------------------------
+II  Tips for McPhase installation on Mac OS
+-------------------------------------------------------------------
+
+start with linux distribution and proceed like linux:
+
+- use linux version mcph**.tgz
+
+- get g++ and gfortran compiler
+- get perl
+... careful: it might be that e.g. in makenn "perl" ist used
+and sometimes it is necessary to say which perl version to use, because
+several are installed at the computer e.g. /usr/bin/perl
+/opt/local/bin/perl by editing the first line files in bin/*.pl
+
+- java:  !! do not install java 17 or 18 jdk, because it will override the 
+standard java version "1.8.0_333" Java(TM) SE Runtime Environment (build 1.8.0_333-b02)
+and give security issues not opening files !!
+  for compiling  netbeans install java 1.8.0_06 jdk
+  use zulu for mcOS delivered with mcphase in folder bin/zulu...
+
+- simple without compiling: download /usr/local/gfortran/lib/*
+     in order to have all fortran libraries 
+and try to run executables such as singleion etc. !
+ ... if this does not work: 
+
+on McOs Monterey
+
+- for gcc,gfortran install homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+ 
+- with hombrew install gcc ... it includes gfortran
+
+- install  SciPDL binary https://pdl.perl.org/?page=install
+           to use add to lin.bat source /Applications/PDL/setup_bash
+[[[ alternatively for PDL on McOs Sierra use sudo port ... to install 
+
+get PerlPDL
+
+as superuser do:
+cpan install PDL
+
+maybe with force
+cpan -f -i PDL
+
+(on system update do)
+cpan reinstall PDL
+
+test with:
+perl -e "use PDL"
+
+# necessary to make PDL and Extutils::F77 ok:
+export PERL5LIB=/opt/local/lib/perl5/site_perl/5.24/
+
+if this does not wotk to install PDL ...
+
+possibly download manually lates source of PDL 
+https://sourceforge.net/projects/pdl/files/PDL/2.4.11/
+and untar and follow instructions in INSTALL to compile and install
+it (you might need to cpan -i ExtUtils::F77 in order that this works
+and you will have to set WITH_SLATEC=1 in .perdld.conf ...)
+... 
+
+but also without this manual download you might be successful 
+- the problem might be, 
+that fortran compiler does not work because -lSystem is not found, 
+in this case try:
+
+export LIBRARY_PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+export LD_LIBRARY_PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+
+or 
+
+
+export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/15.2.0/lib/gcc/current/
+]]]
+
+
+
+in lin.bat make the following settings:
+
+# necessary to make run gcalc interpolation algorthm (perl would not find MAth:interpolate.pm)
+export PERL5LIB=/opt/local/lib/perl5/site_perl/5.16.3/
+#export PERL5LIB=
+
+export PATH=$MCPHASE_DIR/bin:$MCPHASE_DIR/Output/important_scripts:$PATH
+# uncomment this to set the path to the java directory on your computer
+export jdkhome=/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home
+export JAVA_BINDIR=/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/bin
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home
+export JAVA_ROOT=/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk
+export JRE_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_05.jdk/Contents/Home/jre
+
+
+- latex2html in order to recompile html-manual (brew or port)
+
+sudo port install libpng
+sudo port install latex2html
+
 	  	  
 \end{verbatim}}
