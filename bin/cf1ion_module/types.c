@@ -1108,7 +1108,7 @@ typedef struct _kristallfeld{
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
  
 typedef struct _calfun{ /* struct _CALFUN wird von CALFUN gebraucht */
-   DOUBLE   (*funk)();  /* CALFUN wird in MINIMA.C  definiert       */
+   DOUBLE   (*funk)(SETUP *, EWPROBLEM *, ITERATION *, VEKTOR *);  /* CALFUN wird in MINIMA.C  definiert       */
    SETUP     *setup;
    EWPROBLEM *ewproblem;
    ITERATION *iteration;
