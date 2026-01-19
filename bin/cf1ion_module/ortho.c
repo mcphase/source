@@ -40,13 +40,13 @@ extern INT       output(SETUP *setup,EWPROBLEM *ewproblem,KRISTALLFELD *kristall
 extern MATRIX    *aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps);          /* definiert in INTENSIT.C */
 extern DOUBLE    zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur);    /* definiert in INTENSIT.C */
 extern DOUBLE    suszept(DOUBLE   (*mat_Ji2)(VEKTOR *ev_ir,VEKTOR *ev_ks,DOUBLE macheps),EWPROBLEM *ewproblem,INT  einheitnr_in,DOUBLE t,DOUBLE gj);          /* definiert in INTENSIT.C */
-extern DOUBLE    mat_Jx2();          /* definiert in INTENSIT.C */
-extern DOUBLE    mat_Jy2();          /* definiert in INTENSIT.C */
-extern DOUBLE    mat_Jz2();          /* definiert in INTENSIT.C */
+extern DOUBLE    mat_Jx2(VEKTOR *, VEKTOR *, DOUBLE);          /* definiert in INTENSIT.C */
+extern DOUBLE    mat_Jy2(VEKTOR *, VEKTOR *, DOUBLE);          /* definiert in INTENSIT.C */
+extern DOUBLE    mat_Jz2(VEKTOR *, VEKTOR *, DOUBLE);          /* definiert in INTENSIT.C */
 extern DOUBLE    magnetm();          /* definiert in INTENSIT.C */
-extern KOMPLEX   *mat_Jx();          /* definiert in INTENSIT.C */
-extern KOMPLEX   *mat_Jy();          /* definiert in INTENSIT.C */
-extern KOMPLEX   *mat_Jz();          /* definiert in INTENSIT.C */
+extern KOMPLEX   *mat_Jx(VEKTOR *, VEKTOR *);          /* definiert in INTENSIT.C */
+extern KOMPLEX   *mat_Jy(VEKTOR *, VEKTOR *);          /* definiert in INTENSIT.C */
+extern KOMPLEX   *mat_Jz(VEKTOR *, VEKTOR *);          /* definiert in INTENSIT.C */
  
 extern VEKTOR    *vr_alloc(INT n);        /* definiert in MATRIX.C */
 extern INT       free_vr(VEKTOR *v);          /* definiert in MATRIX.C */
@@ -1113,12 +1113,12 @@ DOUBLE   Chi2(SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *v)/
    CHAR           *ionname;
    VEKTOR      /* *fix,*v0,*/*w,*vr_alloc(INT n),*ew,*ew_exp,*d_ew_exp;
    VEKTOR         *v1_v2(ITERATION *iter,VEKTOR    *v);
-   KOMPLEX        *mat_Jx(),*mat_Jy(),*mat_Jz();
+   KOMPLEX        *mat_Jx(VEKTOR *, VEKTOR *),*mat_Jy(VEKTOR *, VEKTOR *),*mat_Jz(VEKTOR *, VEKTOR *);
    NEBENBEDINGUNG *neben;
    INT            free_vr(VEKTOR *v),i,k,ii,ionennr/*,diff*/;
    INT            datnr,anz_dat,ipos,*nummer,posanzahl,*sort(DOUBLE *werte,INT    *nummer,INT anz),*numcomp;
    DOUBLE         pos_icin,pos_icqe,*pos_e,*pos_i,dummy,*werte,*werti;
-   DOUBLE         mat_Jx2(),mat_Jy2(),mat_Jz2();
+   DOUBLE         mat_Jx2(VEKTOR *, VEKTOR *, DOUBLE),mat_Jy2(VEKTOR *, VEKTOR *, DOUBLE),mat_Jz2(VEKTOR *, VEKTOR *, DOUBLE);
    DOUBLE         chi2,chi2_z/*,chi2_n*/,norm,normi,dum;
    DOUBLE         chi2_1/*,chi2_1z,chi2_1n*/,chi2_g,chi2_p;
    DOUBLE         chi2_a,chi2_b,chi2_c;
