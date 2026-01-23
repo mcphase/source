@@ -1476,7 +1476,7 @@ if (! -d "results") { mkdir "results"; }
 print "\n";
 print "Created files:\n";
 print "\n";
-print " mcphas_all.j                         ... contains all atoms (magnetic and not)\n";
+print " mcphas_all_atoms.j                         ... contains all atoms (magnetic and not)\n";
 print " mcphas_magnetic_atoms.j == mcphas.j  ... contains only magnetic atoms\n";
 for (keys %ions) {
   $atm = $atoms[$ions{$_}]; 

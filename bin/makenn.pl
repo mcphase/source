@@ -1597,7 +1597,7 @@ print $l "# with respect to abc as j||b, k||(a x b) and i normal to k and j\n";
 # here output the elastic constants table
 $i1=0;print $l "#! ";
 for($i=1;$i<=6;++$i){ if($i1>0){print $l "#! ";}
-for($j=$i;$j<=6;++$j){if($Cel->at($i,$j)<-1){die "makenn internal error - elastic constant Cel($i,$j) = ".$Cel->at($i,$j)." negative\n"; }
+for($j=$i;$j<=6;++$j){if($Cel->at($i,$j)<-1&&$i==$j){die "makenn internal error - elastic constant Cel($i,$j) = ".$Cel->at($i,$j)." negative\n"; }
 if($Cel->at($i,$j)<0){$Cel->slice("$i,$j")=0;}
 if(abs($Cel->at($i,$j))>1e-6){++$i1;print $l sprintf(" Cel%i%i=%+10.9g",$i,$j,$Cel->at($i,$j));}
                      }if($i1>0){print $l "\n";}}

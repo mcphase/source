@@ -169,12 +169,12 @@ for $ii (0..2) { # loop cube around primitive unit cell and determine ijkmin max
   @ddd = ();
   $dd0 = pdl @minv;                        $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @minv; $dd0->set(0,$maxv[0]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @minv; $dd0->set(0,$maxv[1]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @minv; $dd0->set(0,$maxv[2]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
-  $dd0 = pdl @minv; $dd0->set(0,$maxv[3]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @maxv;                        $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @maxv; $dd0->set(0,$minv[0]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @maxv; $dd0->set(0,$minv[1]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @maxv; $dd0->set(0,$minv[2]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
-  $dd0 = pdl @maxv; $dd0->set(0,$minv[3]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   push @ijkmin, int(min($ddd))-1.;
   push @ijkmax, int(max($ddd))+1.;
 }
