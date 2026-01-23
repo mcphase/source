@@ -27,9 +27,10 @@
 // --------------------------------------------------------------------------------------------------------------- //
 // Converts a C++ string to upper case
 // --------------------------------------------------------------------------------------------------------------- //
-std::string strtoupper(std::string instring)
+std::string strtoupper(const std::string& instring)
 {
    std::string outstring;
+   outstring.resize(instring.size());
    int i,strlength = instring.length();
    for(i=0; i<strlength; i++)
       outstring[i] = std::toupper(instring[i]);

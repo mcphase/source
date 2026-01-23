@@ -17,7 +17,7 @@
 /****************************************************************************/
 /****************************************************************************/
 int jjjpar::pcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
-{int j;
+{int j = -1;
   for(int i=1;i<=T.Hi();++i){
            Vector m(mom.Column(i));
            j=pcalc(m,T(i),Hxc,Hext,parstorage);
@@ -70,7 +70,7 @@ int  jjjpar::dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & P1
 /****************************************************************************/
 /****************************************************************************/
 int jjjpar::pelcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
-{int j;
+{int j = -1;
   for(int i=1;i<=T.Hi();++i){
            Vector m(mom.Column(i));
            j=pelcalc(m,T(i),Hxc,Hext,parstorage);
@@ -1108,7 +1108,7 @@ return ro;
 // of Zlm R^2(r) at a given temperature T and  effective field H
 /****************************************************************************/
 int jjjpar::spindensity_coeff (Matrix &I,int xyz, Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
-{int ret; for(int Ti=1;Ti<=T.Hi();++Ti)
+{int ret = -1; for(int Ti=1;Ti<=T.Hi();++Ti)
                  {Vector II(I.Column(Ti));ret=spindensity_coeff(II,xyz,T(Ti),Hxc,Hext,parstorage);
                    SetColumn(Ti,I,II);
                  }
@@ -1304,7 +1304,7 @@ return mm;
 // of Zlm F(r) at a given temperature T and  effective field H
 /****************************************************************************/
 int jjjpar::orbmomdensity_coeff (Matrix &I,int xyz, Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
-{int ret; for(int Ti=1;Ti<=T.Hi();++Ti)
+{int ret = -1; for(int Ti=1;Ti<=T.Hi();++Ti)
                  {Vector II(I.Column(Ti));ret=orbmomdensity_coeff(II,xyz,T(Ti),Hxc,Hext,parstorage);
                   SetColumn(Ti,I,II);}
  return ret;}

@@ -504,7 +504,7 @@ void cfpars::conv(std::string &newcfname)                     // Converts parame
                  1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
 // double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
-   strtoupper(newcfname);
+   str2upper(newcfname);
 #define CFCMP newcfname.compare
 #define CFLOOP(ARG) i=0; for(k=0;k<3;k++) for(q=0; q<(4*(k+1)+1); q++) { ARG i++; } 
 #define normstev _normalisation.assign("Stevens")

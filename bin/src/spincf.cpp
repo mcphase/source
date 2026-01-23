@@ -320,7 +320,7 @@ int spincf::load(FILE * fin_coq)
   na[0]=MAXNOFSPINS;
   nb[0]=MAXNOFSPINS;
   nc[0]=MAXNOFSPINS;
-  long int pos;
+  long int pos = -1;
   char instr[MAXNOFCHARINLINE];
   // input comment lines 
   instr[0]='#';

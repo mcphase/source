@@ -59,7 +59,7 @@ void HermiteH (int n, double x, double &y, double &dy, double &d2y)
     Matpack.Error(Mat::ArgumentDomain, "%s: %s", "HermiteH",
 		  "bad argument");
 
-  double dk, dn, ym, yp, dnn, ypm;
+  double dk, dn, ym, yp, dnn, ypm = 0.;
   y = 1.0;
   dy = 0.0;
   d2y = 0.0;
