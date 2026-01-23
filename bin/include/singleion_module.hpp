@@ -5,7 +5,7 @@ class singleion_module
 {
 public:
 //singleion_module(const char * filename);
-~singleion_module() = default;
+virtual ~singleion_module() = default;
 virtual bool Icalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,double & gJ,Vector & ABC,char * sipffilename ,double & lnZ,double & U)
            {return false;};
 virtual bool IMcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,double & gJ,Vector & ABC,char * sipffilename ,Vector & lnZ,Vector & U)

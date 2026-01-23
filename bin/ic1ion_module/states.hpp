@@ -42,7 +42,7 @@ enum orbital {  S=0,		//	 0 = sharp
 // --------------------------------------------------------------------------------------------------------------- //
 // Declarations for functions in states.cpp, which are not constructors/members of any class below
 // --------------------------------------------------------------------------------------------------------------- //
-std::string strtoupper(std::string instring);           // Converts the characters of a string to upper case
+std::string strtoupper(const std::string& instring);    // Converts the characters of a string to upper case
 std::string Lout(const orbital & l);                    // Converts the enumerated value of l into a string
 orbital Lin(std::string & l);                           // Converts a string of the spectroscopy notation to l
 // --------------------------------------------------------------------------------------------------------------- //

@@ -65,7 +65,7 @@ double LegendreP (int l, int m, double x)
     if (l == (m+1))
       return pmmp1;
     else {
-      double pll;
+      double pll = 0.;
       for (int ll = m+2; ll <= l; ll++) {
 	pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
 	pmm = pmmp1;

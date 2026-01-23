@@ -557,6 +557,8 @@ bool icf1ion_module::Icalc(Vector &Jret,          // Output single ion momentum 
                       double &lnZ,        // Output scalar logarithm of partition function
                       double &U)          // Output scalar internal energy 
 {Matrix JM(1,Jret.Hi(),1,1);double  d;Vector dd;
+ lnZ = 0.;
+ U = 0.;
  for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
  Vector TT(1,1);TT(1)=T;
  Vector lnZZ(1,1);lnZZ(1)=lnZ;
