@@ -189,7 +189,7 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
   inputpars.Cel.Inverse();
           }
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
-if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields");}
+if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields\n");}
 T=1.0;for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
       for (im=1;im<=inputpars.cs.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
                             (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);

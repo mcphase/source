@@ -270,35 +270,40 @@ fprintf(fout,"        <points>\n");
             // and refer to the same atom
          for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
             if(Norm(dd-ddd)<0.2&&ll!=l){
-                                        // here we decide what to do with two ions at the same position
-                                        // static: magmom(1..3)  moment (arrow)
-                                        //         phonon (1..3) displacement (shift of position)
-                                        // dynamic: pev_real,imag contains nuclear movement
-                                        //          magmomev_real,imag   moment oscillation eigenvector
-                                        //          densityev_real,imag  chargedensity oscillation eigenvector
+                    // here we decide what to do with two ions at the same position
+                    // static: magmom(1..3)  moment (arrow)
+                    //         phonon (1..3) displacement (shift of position)
+                    // dynamic: pev_real,imag contains nuclear movement
+                    //          magmomev_real,imag   moment oscillation eigenvector
+                    //          densityev_real,imag  chargedensity oscillation eigenvector
 
-                                        // if neighbour ll is displacement (radius!=0) and  l is moment - 
-                                       // do not show point and set oscillation of l  equal to ll
-                                         double radius=0;extract(cs.sipffilenames[ll],"radius",radius);
-                                         if(radius!=0){radius=0;
-                                         extract(cs.sipffilenames[l],"radius",radius);
-                                         if(radius==0){//printf("%i %i %i taking for magnetic atom nr %i position from atom nr %i\n",i,j,k,l,ll);
-                                                   pl[l]=ll;
-                                                   showdd=0;}}
+                    // if neighbour ll is displacement (radius!=0) and  l is moment - 
+                    // do not show point and set oscillation of l  equal to ll
+                     double radius=0;extract(cs.sipffilenames[ll],"radius",radius);
+                     if(radius!=0){radius=0;
+                                   extract(cs.sipffilenames[l],"radius",radius);
+                                   if(radius==0){
+                                   //printf("%i %i %i taking for magnetic atom nr %i position from atom nr %i\n",i,j,k,l,ll);
+                                   pl[l]=ll;
+                                   showdd=0;}
+                                  }
                                        }
 
             }
 
          dd+=dd0;
             if(showdd==1)if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
-            (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
+                            (gp.showprim==1&&
+                            i<=1+(nofa-1)*gp.scale_view_1&&
+                            j<=1+(nofb-1)*gp.scale_view_2&&
+                            k<=1+(nofc-1)*gp.scale_view_3))
             {double QR;  QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
              Vector p(1,3),xyz(1,3);p=0;
              double radius=0;extract(cs.sipffilenames[l],"radius",radius);if(radius!=0){p=phonon.moment(i,j,k,l);}
              if(pl[l]!=l)p=phonon.moment(i,j,k,pl[l]); 
              xyz=gp.phonon_scale_static_displacements*p;
-             xyz+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+             xyz+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
 //printf("i1=%i j1=%i k1=%i i=%i j=%i k=%i l=%i pl=%i dd=%g %g %g xyz = %g %g %g \n ",i1,j1,k1,i,j,k,l,pl[l],dd(1),dd(2),dd(3),xyz(1),xyz(2),xyz(3));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),myround(dd(2)+xyz(2)),myround(dd(3)+xyz(3)));
@@ -389,7 +394,7 @@ fprintf(fout,"        <points>\n");
              if(gp.spins_show_oscillation){xyz+=gp.spins_wave_amplitude*(cos(-phase+QR)*magmomev_real.moment(i,j,k,l)+sin(phase-QR)*magmomev_imag.moment(i,j,k,l));}
               //if(pl[l]!=l)dd+=gp.phonon_scale_static_displacements * phonon.moment(i,j,k,pl[l]);
                dd+=gp.phonon_scale_static_displacements * phonon.moment(i,j,k,pl[l]);
-               dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+               dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
               //printf("gJ=%g magmom=%g %g %g %g %g %g %g %g %g\n",cs.gJ[l],mom[in(i,j,k)](1),mom[in(i,j,k)](2),mom[in(i,j,k)](3),mom[in(i,j,k)](4),mom[in(i,j,k)](5),mom[in(i,j,k)](6),xyz(1),xyz(2),xyz(3));
               //if(l==170||l==171){fprintf(stderr,"l=%i\n %4.4f + i %4.4f\n %4.4f + i %4.4f\n %4.4f + i %4.4f\n",
               //                    l,magmomev_real.moment(i,j,k,l)(1),magmomev_imag.moment(i,j,k,l)(1),
@@ -460,7 +465,7 @@ fprintf(fout,"        <points>\n");
                           xyz=magmom.moment(i,j,k,l);
             //if(pl[l]!=l)dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,pl[l]);
             dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,pl[l]);
-            dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+            dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
              
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
@@ -512,7 +517,7 @@ fprintf(fout,"        <points>\n");
              QR*=2*PI;
              //if(pl[l]!=l)dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,pl[l]);
              dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,pl[l]);
-             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
                           int phi;
              for(phi=0;phi<=16;phi++)
              {
@@ -572,7 +577,7 @@ for(int l=1;l<=nofatoms;++l)
    QR*=2*PI;
       //if(pl[l]!=l)dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,pl[l]);
       dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,pl[l]);
-      dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+      dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
                              for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
    {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
@@ -640,7 +645,7 @@ for(l=1;l<=nofatoms;++l)
         dd=pos(i,j,k,l, cs); 
       double QR; QR=(hkl*abc_in_ijk_Inverse)*dd;
       QR*=2*PI;
-        dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,l)+gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));             
+        dd+=gp.phonon_scale_static_displacements*phonon.moment(i,j,k,l)+gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));             
         for(tt=0;tt<=3.1415/dtheta;++tt){for(ff=0;ff<=2*3.1415/dfi;++ff){
              theta=(double)tt*dtheta;fi=(double)ff*dfi;
              dx=rp*sin(theta)*cos(fi)+dd(1);dy=rp*sin(theta)*sin(fi)+dd(2);dz=rp*cos(theta)+dd(3);

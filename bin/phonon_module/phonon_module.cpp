@@ -48,8 +48,7 @@ phonon_module::~phonon_module()
 //routine Icalc for phonon
 
 bool phonon_module::Icalc(Vector &u0, double & T, Vector &  Fxc,Vector & Hext,double & gJ,Vector & MODPAR,char * sipffilename ,double & lnZ,double & U)
-{   
-    /*on input
+{   /*on input
     T		temperature[K]
     Hext	vector of external magnetic field [T] (1-3) not used electric field [kV/mm] (4-6)
     Fxc         exchange Force on the oscillator in [meV]

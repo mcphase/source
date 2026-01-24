@@ -69,8 +69,10 @@ $ARGV[4]=~s/exp/essp/g;$ARGV[4]=~s/x/*/g;$ARGV[4]=~s/essp/exp/g;
 my ($deltaE) = eval $ARGV[4];
 print "#Emin=".$Emin." meV   Emax=".$Emax." meV deltaE=".$deltaE." meV\n";
 print "#Ha[T] Hb[T] Hc[T] T[K] Q[A^-1] energy[meV] powderintensity powderintensity_bey powderintensity_nuc [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n";
-
-$n=int(($Emax-$Emin)/$deltaE);
+if($Emin>=$Emax){die "Error powdermagnon: Emin>=Emax\n";}
+if($deltaE<=0){die "Error powdermagnon: deltaE<=0\n";}
+if($deltaE>$Emax-$Emin){$deltaE=$Emax-$Emin;print "# deltaE>Emax-Emin: setting deltaE=Emax-Emin=$deltaE\n";}
+$n=int(($Emax-$Emin)/$deltaE);$Emax=$Emin+$n*$deltaE;
 
 my (@ints)=();$#ints=$n;
 my (@intsbey)=();$#intsbey=$n;
@@ -85,8 +87,8 @@ while(<$h>)
   $line=~s/D/E/g;@numbers=split(" ",$line);
   $q=$numbers[7];
   if($q!=$qold&&$qold!=0){
-     for($i=0;$i<=$n;++$i){
-     $E=$Emin+($i-0.5)*$deltaE;
+     for($i=0;$i<$n;++$i){
+     $E=$Emin+($i+0.5)*$deltaE;
      $ints[$i]/=$counter;
      $intsbey[$i]/=$counter;
      $intsnuc[$i]/=$counter;
@@ -115,8 +117,8 @@ while(<$h>)
  }
 close $h;
 
-for($i=0;$i<=$n&&$counter>0;++$i){
-     $E=$Emin+($i-0.5)*$deltaE;
+for($i=0;$i<$n&&$counter>0;++$i){
+     $E=$Emin+($i+0.5)*$deltaE;
      $ints[$i]/=$counter;
      $intsbey[$i]/=$counter;
      $intsnuc[$i]/=$counter;
