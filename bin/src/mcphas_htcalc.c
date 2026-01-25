@@ -101,6 +101,7 @@ DWORD WINAPI htcalc_iteration(void *input)
 int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector Happ, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
 #endif
 {
+
  #ifdef _THREADS
  htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector Happ(1,HEXT_DIMENSION); Happ = thrdat.Happ;
  THRLC_SET(threadSpecificKey, myinput); int tlsfemin=0;  // Thread local variable to judge whether to print output
@@ -177,9 +178,10 @@ int s1=1,s2=2;
 		       } // randomize spin rr
                       
                     }
- 
+       sps.epsilon=physprops.sps.epsilon; // initialize epsilon in case it is not done
       //!!!calculate free energy - this is the heart of this loop !!!!
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+
       fe=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( ">for_str_%i(%ix%ix%i) "  ,j,sps.na(),sps.nb(),sps.nc());
@@ -221,7 +223,7 @@ int s1=1,s2=2;
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,Happ,(*inputpars.jjj[l1]).Icalc_parstorage);
                    for(m1=1;m1<=3;++m1){magmom.m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}} 
-                  
+
                  // display spinstructure
                 if (verbose==1)
                 {float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
@@ -384,10 +386,13 @@ int s1=1,s2=2;
                   delete []mq;
                  }
       }
+
+// if (verbose==1) {fprintf(stderr,"-");fflush(stderr);}
 } // <--- this bracket is necessary to embrace ComplexMatrix  definitions
   // necessary in this routine and make them live within this bracket. at closing the bracket
   // destructor is called correctly. On Apple without this 
   // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
+// if (verbose==1) {fprintf(stderr,"[%i]",thread_id);fflush(stderr);}
  
       #ifndef _THREADS
       return 1;
@@ -618,13 +623,12 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  #endif
  THRLC_FREE(threadSpecificKey);
 #endif
-
 if (femin>=FEMIN_INI) // did we find a stable structure ??
  {if(ini.nofmaxspinchangeDIV-start_nofmaxspinchangeDIV<ini.nofmaxloopDIV-start_nofmaxloopDIV)
           return 2; else return 3;
  }
 else // if yes ... then
- {if(verbose==1){printf("... calculating physical properties ");}
+ {if(verbose==1){printf("... calculating physical properties ");fflush(stdout);}
  if (physprops.j>0){ // take spinconfiguration ----
                      sps=(*testspins.configurations[physprops.j]);
                        if (sps.wasstable==0)
@@ -646,7 +650,7 @@ else // if yes ... then
 			(*testspins.configurations[physprops.j]).wasstable=sps.wasstable;    
                        }
 	      }
- if(verbose==1){printf("<");}
+ if(verbose==1){printf("<");fflush(stdout);}
 /*    else     // ---- or take q vector 
             // removed because not necessary MR 15.12.15
             { sps.spinfromq(testqs.na(-physprops.j),testqs.nb(-physprops.j),
@@ -703,7 +707,7 @@ else // if yes ... then
                 delete[]x;delete []y; delete []z;
 		}
   //printf("G");fflush(stdout);delete magmom;
-   if(verbose==1){printf(">");}
+   if(verbose==1){printf(">");fflush(stdout);}
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofMCsteps==0){int eq=0;
    #ifndef _THREADS

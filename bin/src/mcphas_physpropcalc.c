@@ -27,6 +27,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
     physprops.m/=(double)sps.n()*(double)sps.nofatoms;
  
 
+
 // electrical polarisation P (makes only sense if total charge is zero)
 // in units C/m^2...
 // to get it in|e|/A^2 ... sum dipole moment |e|A of magnetic unit cell and divide by unit cell volume in A^3
@@ -47,6 +48,8 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
 
 
     }}}}
+
+
     physprops.Pel/=(double)sps.n()*inputpars.cs.pVol(); // divide by number of primitive cells in supercelland Vol of prim unitcell
 // thus we have not Pel in units of |e|A/A^3=|e|/A^2. For SI we need it in C/m^2
 // |e|=1.602189e-19 Coulomb
@@ -56,7 +59,6 @@ physprops.Pel*=16.02189;
   if(verbose==1){printf(".. calculating electrical Polarisation\n");}
 }else
 {physprops.Pel=0;if(verbose==1){printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);}}
-
 
 
 // thermal expansion - magnetostricton correlation-functions

@@ -219,6 +219,9 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp pa
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
 
+reduce_unitcell.o: reduce_unitcell.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
+	$(CCC) $(CFLAGS) $(THREADFLAG) $<
+
 anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 	$(CCC) $(CFLAGS)  $(THREADFLAG) $<
 
@@ -261,8 +264,6 @@ radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp ../../vers
 addj.o: addj.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
-reduce_unitcell.o: reduce_unitcell.c par.hpp  martin.h vector.h mcphas.h mcphas_fecalc.c
-	$(CCC) $(CFLAGS) $<
 
 mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c inimcdiff.hpp spincf.hpp mfcf.hpp ../../version
 	$(CCC) $(CFLAGS) $<
@@ -332,6 +333,10 @@ ip.o: ionpars.cpp
 	@echo Linking ../anisotropyit
 	@$(LINKER)  -Wall  -o ../anisotropyit  $^ $(LFLAGS) $(THREADLINK)
 
+../reduce_unitcell$(EXE): reduce_unitcell.o $(OBJS)   martin.o  $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
+	@echo Linking ../reduce_unitcell
+	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)  $(THREADLINK)
+
 ../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o mathparser.o perlparse.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
 	@echo Linking ../spins
 	@$(LINKER)  -Wall  -o ../spins $^  $(LFLAGS)
@@ -364,9 +369,6 @@ ip.o: ionpars.cpp
 	@echo Linking ../addj
 	@$(LINKER)  -Wall  -o ../addj $^  $(LFLAGS)
 
-../reduce_unitcell$(EXE): reduce_unitcell.o $(OBJS)    $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  density.o
-	@echo Linking ../reduce_unitcell
-	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)
 
 ../fediff$(EXE): fediff.o martin.o jjjpar.o mathparser.o inipar.o par.o ionpars.o density.o spincf.o mfcf.o testspin.o myev.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)
 	@echo Linking ../fediff

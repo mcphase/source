@@ -330,8 +330,9 @@ if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
                       (*inputpars.jjj[l]).Icalc_parstorage.Rhi(),
                       (*inputpars.jjj[l]).Icalc_parstorage.Clo(),
                       (*inputpars.jjj[l]).Icalc_parstorage.Chi());
-  (*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1])=(*inputpars.jjj[l]).Icalc_parstorage;
 
+
+  (*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1])=(*inputpars.jjj[l]).Icalc_parstorage;
 //if((*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1])!=(*inputpars.jjj[l]).Icalc_parstorage)
 // {printf("error in matrix copy\n");exit(1);}
 
@@ -915,16 +916,14 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
   }
  }
 if (r>ini.maxnofmfloops){if(ini.nofMCsteps==0) 
-    { for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
+    {     if (verbose==1) {fprintf(stderr,"feDIV!MAXlooP");fflush(stderr);}
+     for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
      delete []JS;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){int im1=i-1,jm1=j-1,km1=k-1;
       delete Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1];
      }}}} delete []Icalcpars;
 
-     if (verbose==1) {fprintf(stderr,"feDIV!MAXlooP");
-
-                     }
 #ifdef _THREADS
 MUTEX_LOCK (&mutex_ini_nofmaxloopDIV);
 #endif
@@ -1328,7 +1327,8 @@ if (ini.displayall==1)
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
       sleep(2000);
-  }
+  }     
+
  for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
  delete []JS;
   delete []lnzi;delete []ui;

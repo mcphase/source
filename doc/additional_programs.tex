@@ -571,7 +571,7 @@ output of powdercell,output is written to mcphas.j.  Example of input file:
 given by th parametrisation in file.sipf.
 %script2html_end{radwavfunc} \end{description}
 %script2html_begin{reduce_unitcell} \begin{description}
-\item[\prg reduce\_unitcell\index{reduce\_unitcell} mcphas.j:] \addcontentsline{toc}{subsubsection}{\prg reduce\_unitcell}
+\item[\prg reduce\_unitcell\index{reduce\_unitcell} {[options]} mcphas.j:] \addcontentsline{toc}{subsubsection}{\prg reduce\_unitcell}
                 This program checks every atom in the unit cell in file mcphas.j and removes
                 any atom, which is connected to another by a lattice vector. Useful for
                 going from a description in an extended unit cell to the primitive unit cell.
@@ -582,7 +582,8 @@ given by th parametrisation in file.sipf.
 \item[Option:  -ni ] forces output without indexchange  
 \item[Option: -delatoms 1,2,5,7 ]  instead of removing atoms connected by a lattice vector 
  			remove atoms number 1,2,5 and 7 from the list and also all interactions with those 
-                        Note the following approximation is of limited use and NOT recommended, better use -delatoms phon (see below):
+                        Note the following approximation is of limited use and NOT recommended, better 
+                       use -delatoms phon (see below) instead of -delatoms 1,2,\dots:
                      {\tiny   In case the atoms to be removed have the phonon module, 
                          effective interactions are introduced between the remaining atoms, in this way the 
                         crystal field phonon interactions with 4f shells can be treated in an effective way:
@@ -662,7 +663,10 @@ force is equal to the increase in electrostatic force.
  various external stresses and computing the strain. {\prg reduce\_unitcell} considers
  in such a calculation {\em only} the phonon degrees of freedom (i.e. removes all magnetic ions) and
  sets nonzero each component of the stress tensor to 0.01 GPa and computes the resulting
- strains using the mean field loop of the {\prg mcphasit} program. For the computation the parameters in {\prg mcphas.ini} are used.
+ strains using the mean field loop of the {\prg mcphasit} program. For the computation the parameters 
+ in {\prg reduce\_unitcell.ini} are used, supercells should be specified
+ in order to relax displacements not only with the periodicity of the primitive
+ unit cell as given in the input file.
  The elastic compliance matrix \cite{barron80-609} is obtained by 
  dividing the computed strain by the stress of 0.01 GPa. 
  The elastic constants $c_{\rm eff}^{\alpha\gamma}$ 
@@ -746,7 +750,7 @@ interaction operator expectation values are set to zero
     the method of Buckmaster (phys. stat. sol. a, vol 13,  pp 9, 1972) and
     Rudowicz (J. Phys: Solid State Phys., vol 18, pp 1415, 1985).   
 
-    usage: $0 [-h] [--help] 
+    usage: rotateBlm [-h] [--help] 
               [-i input_file] [--input input_file]
 	      [-o output_file] [--output output_file]
               [-v] [--verbose] [-th theta] [-fi fi] [CF parameters]
@@ -802,8 +806,9 @@ program to setup a fit of exchange parameters in order to reproduce an experimen
     magnitude of $J(Q)$ for the competing wavevectors in the list in{\prg  mcdisp.par}.
 %script2html_end{setup_jqfit} \end{description}
 %script2html_begin{setup_mcdiff_in} \begin{description}
-\item [\prg setup\_mcdiff\_in\index{setup_mcdiff_in}\label{setup_mcdiff_in}  T Ha Hb Hc:] \addcontentsline{toc}{subsubsection}{\prg setup\_mcdiff\_in}
-\item [\prg setup\_mcdiff\_in\index{setup_mcdiff_in}  x y:] 
+\item [\prg setup\_mcdiff\_in\index{setup_mcdiff_in}\label{setup_mcdiff_in} {[option]} T Ha Hb Hc:] \addcontentsline{toc}{subsubsection}{\prg setup\_mcdiff\_in}
+\item [\prg setup\_mcdiff\_in\index{setup_mcdiff_in} {[option]} x y:] 
+\item [\prg setup\_mcdiff\_in\index{setup_mcdiff_in} {[option]} out1 out2 out3 ou4 out5 out6 out7:] 
 program
  to setup {\prg mcdiff.in} with information on spinconfiguration
                     to be used by program {\prg mcdiff\index{mcdiff}}. Note, you must
@@ -817,7 +822,8 @@ program
      -h          : help  message
       T          : Temperature (K)
       Ha,Hb,Hc   : Magnetic Field (T)
-     x,y         : x,y values in phasediagram
+      x,y         : x,y values in phasediagram
+      out1-out7  : values of external parameters in columns 1-7 of output files mcphas.*
 
     required input files:
 
@@ -837,11 +843,17 @@ program
 
     - after running this program you can start mcdiff to do the calculation
       magnetic diffraction pattern
+
+    options:
+
+    -prefix 001  :  instead of results/mcphas.mf read results/001mcphas.mf
+
 \end{verbatim}
 %script2html_end{setup_mcdiff_in} \end{description}
 %script2html_begin{setup_mcdisp_mf} \begin{description}
-\item [ \prg   setup\_mcdisp\_mf \index{setup_mcdisp_mf}\label{setup_mcdisp_mf} T Ha Hb Hc:]\addcontentsline{toc}{subsubsection}{\prg setup\_mcdisp\_mf} 
-\item [ \prg   setup\_mcdisp\_mf \index{setup_mcdisp_mf} x y:] 
+\item [ \prg   setup\_mcdisp\_mf \index{setup_mcdisp_mf}\label{setup_mcdisp_mf} {[options]} T Ha Hb Hc:]\addcontentsline{toc}{subsubsection}{\prg setup\_mcdisp\_mf} 
+\item [ \prg   setup\_mcdisp\_mf \index{setup_mcdisp_mf} {[options]} x y:] 
+\item [ \prg   setup\_mcdisp\_mf \index{setup_mcdisp_mf} {[options]} out1 out2 out3 ou4 out5 out6 out7:] 
 
 program to setup{\prg mcdisp.mf} with information on meanfields
                     to be used by program {\prg mcdisp\index{mcdisp}}. Note, you must
@@ -857,6 +869,7 @@ program to setup{\prg mcdisp.mf} with information on meanfields
       T          : Temperature (K)
       Ha,Hb,Hc   : Magnetic Field (T)
       x,y        : x,y values in phasediagram
+      out1-out7  : values of external parameters in columns 1-7 of output files mcphas.*
 
     required input files:
 
@@ -869,6 +882,11 @@ program to setup{\prg mcdisp.mf} with information on meanfields
 
     - after running this program you can start mcdisp to do the calculation
       of dispersion of excitations or diffuse scattering
+
+    options:
+
+    -prefix 001  :  instead of results/mcphas.mf read results/001mcphas.mf
+
 \end{verbatim}
 %script2html_end{setup_mcdisp_mf} \end{description}
 

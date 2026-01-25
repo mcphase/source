@@ -84,6 +84,7 @@ int jjjpar::pelcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Compl
    case cfield:
    case so1ion: 
    case brillouin: 
+   case fixmom: 
    case cluster: // fprintf(stderr,"Warning: pel in internal modules not implemented, continuing ... \n");
           return false;break;
    case external_class: return si_mod->pelcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
@@ -135,7 +136,8 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case cluster: cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZ,U);return true;break;
    case external_class:
              return si_mod->mcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
-             break;                                       
+             break;  
+   case fixmom: mom=0; return true; break; // we need Zeeman term for reduce_unitcell energy estimations                                     
    default: if (m==NULL) {mom=0;return false;} 
             else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
@@ -230,10 +232,11 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case cfield:
    case so1ion: (*iops).Jcalc(Lmom,T,Hxc,Hext,parstorage);Lmom*=(2.0-gJ);return true;break;
    case brillouin: brillouin_Icalc(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
+   case fixmom: 
    case cluster: return false;break; 
    case external_class:
              return si_mod->Lcalc(Lmom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
-             break;   
+             break; 
    default: if (Lf==NULL) {Lmom=0;return false;} 
             else{(*Lf)(&Lmom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
@@ -309,6 +312,7 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case cfield:
    case so1ion: (*iops).Jcalc(Smom,T,Hxc,Hext,parstorage);Smom*=(gJ-1.0);return true;break;
    case brillouin: brillouin_Icalc(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
+   case fixmom: 
    case cluster: return false;break; 
    case external_class:
              return si_mod->Scalc(Smom,T,Hxc,Hext,gJ,MODPARS,sipffilename);

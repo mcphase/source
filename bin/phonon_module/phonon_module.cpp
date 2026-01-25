@@ -109,7 +109,6 @@ Vector F(1,3);
 // F [meV] is term -F.u in harmonic osciallator with dimensionless u=x/a0
 // i.e. Felectric=charge x E x a0 
 double a0=0.5219e-10; // Bohr radius in meter
-
 F(1)=Fxc(1)+Hext(4)*charge*a0*1e9; // factor 1e9 to convert MeV to meV 
 F(2)=Fxc(2)+Hext(5)*charge*a0*1e9;
 F(3)=Fxc(3)+Hext(6)*charge*a0*1e9;
@@ -258,7 +257,7 @@ lnZ+=0.5*uu*F/KBT; // last term  to correct energy
   u0[1] = uu(1);
   u0[2] = uu(2); // should in principle be F/m w0^2, but we set it zero to keep atoms in equilibrium position
   u0[3] = uu(3);
-//printf("Icalc phonon u= %g %g %g u=%g lnz=%g \n",u0[1],u0[2],u0[3],(*U),(*lnZ));
+//printf("Icalc phonon u= %g %g %g u=%g lnz=%g \n",u0[1],u0[2],u0[3],U,lnZ);
 return true;
 }
 /**************************************************************************/
