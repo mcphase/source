@@ -13,8 +13,8 @@ in our particular compound.
 
 \PP Tell me what is interesting in your compound and I will talk to him.
 
-\EE I think maybe here the program{\prg mcdisp} might help to speed up the process of finding
-a model a little bit.
+\EE I think maybe here the program {\prg mcdisp} might help to speed up a bit the process of finding
+a model.
 %script2html_begin{mcdispit} 
 For a given field $\mbf H$ and temperature $T$ the dynamics of the  system
 can be calculated by the program {\prg mcdisp\index{mcdisp}}, 
@@ -411,13 +411,18 @@ Which  transition has the largest intensity ?
 \subsection{Viewing the results of McDisp}
 
 \begin{quote}
-\item [\prg displaybubbles\index{displaybubbles} ] produces a plot of the calculated dispersion on screen, which is 
-                       automatically updated when the file changes. In contrast to the normal
-		       display\index{display} program the radius of the symbols is increased according to
+\item[\prg display\index{display}] In order to have the size of the symbols proportional to
+		       the values of a  column (in our case intensity column in file
+		       mcdisp.qei) use as {\prg display 
+		       xcol ycolbrcol filename}, e.g. {\prg display 
+		       5 9b10 results/mcdisp.qei}.
+\item [\prg displaybubbles\index{displaybubbles}(outdated) ] produces a plot of the calculated dispersion on screen, which is 
+                       automatically updated when the file changes. The radius of the symbols is increased according to
 		       the values of a radius column (in our case intensity column in file
-		       mcdisp.qui). Use as {\prg displaybubbles\index{displaybubbles} 
+		       mcdisp.qei). Use as {\prg displaybubbles\index{displaybubbles} 
 		       xcol ycol rcol filename} - i.e. for displaying the dispersion along
-		       {\em h} type {\prg displaybubbles\index{displaybubbles}  5 8 9 mcdisp.qei}. 
+		       {\em h} type {\prg displaybubbles\index{displaybubbles}  5 8 9 mcdisp.qei},
+                       {\prg displaybubbles} is outdated, better use {\prg display}
 \item [\prg displaycontour\index{displaycontour}] displays contour plot of scattering intensity - use as
                        {\prg displaycontour\index{displaycontour} xcol ycol zcol filename} - i.e. for displaying
 		       the intensity versus {\em hk} type {\prg displaycontour\index{displaycontour} 5 6 8 mcdisp.dsigma.tot}

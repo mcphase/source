@@ -156,26 +156,26 @@ sub read_data_file_2D {
 
       else
 
-      {$x=new PDL(split " ");if (($x->dims)[0]>7) {$xx=xvals(($x->dims)[0]-7)+1;}
+      {$x=new PDL(split " ");if (($x->dims)[0]>8) {$xx=xvals(($x->dims)[0]-8)+1;}
 
       } 
 
       # extract en and int
 
-      for ($kk=7;$kk<(($x->dims)[0]);++$kk)
+      for ($kk=8;$kk<(($x->dims)[0]);++$kk)
 
       {$y=$x->slice("0:6");
+
 
        #add xyz to piddle
 
        $z=$x->slice($kk.":".$kk);
 
-       $int=$xx->slice(($kk-7).":".($kk-7));
+       $int=$xx->slice(($kk-8).":".($kk-8));
 
        push(@xlist,$y->append($z)->append($int));
 
        $out=$y->append($z)->append($int);$out=~s/\[/ /g;$out=~s/\]/ /g;   
-
        }
 
      }
