@@ -121,7 +121,7 @@ gitdir = Output/mcphase~mcphase
 
 
 
-all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan manual
+all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan 
 allwin: vectorwin larpackwin functionswin cfieldwin mcphasewin ic1ionwin phononwin exampleswin tutorial bfkwin bcfphwin cowanwin
 
 
@@ -207,10 +207,10 @@ java    :
 	cd ./bin/jar ; make
 
 package :  
-	make windows  tgz  
+	make manual windows  tgz  
 
 windows: 
-	make clean cleanexe allwin 
+	make manual clean cleanexe allwin 
 	make clean 
 	unix2dos ./bin/*.pl ./demo/*.bat
 	substitute sleep wait ./demo/*.bat 
@@ -257,7 +257,7 @@ winno:
 	mv Output/mysetup.exe $(HOME)/mcph.exe
 
 tgz : 
-	make cleanexe clean all 
+	make manual cleanexe clean all 
 	make clean 
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
