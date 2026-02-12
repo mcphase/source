@@ -185,8 +185,8 @@ qvectors testqs_phon (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspin
  double cf=phon.cs.pVol()*10.0/1.60218;
           a.Cel=cf*s.Inverse();  
           for(int h=1;h<=6;++h)   
-          for(int k=1;k<=6;++k){if(a.Cel(h,k)<-1){fprintf(stderr,"elastic constants negative - rerun with stricter limits in mcphas.ini\n");exit(EXIT_FAILURE);}
-                               if(fabs(a.Cel(h,k))<1){a.Cel(h,k)=0;}
+          for(int k=1;k<=6;++k){if(h==k&&h<4&&a.Cel(h,k)<-1){fprintf(stderr,"elastic constants negative - rerun with stricter limits in mcphas.ini\n");exit(EXIT_FAILURE);}
+                                if(fabs(a.Cel(h,k))<1){a.Cel(h,k)=0;}
                                }
 #ifdef _THREADS
 for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];

@@ -128,12 +128,12 @@ obs[calcXobs]);
                                                           " Imag[barn/sr/f.u.] Inuc[barn/sr/f.u.] ");
             switch(ini.outS)
             {case 0:break;
-             case 1:fprintf(foutqei,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 2:fprintf(foutqei,"Smagperp: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 3:fprintf(foutqei,"Smagperp_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
-             case 4:fprintf(foutqei,"Smagperp: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
-             case 5:fprintf(foutqei,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 6:fprintf(foutqei,"Smag_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 1:fprintf(foutqei,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyr Sxyi Sxzr Sxzi Syxr Syxi Syyr Syyi Syzr Syzi Szxr Szxi Szyr Szyi Szzr Szzi [barn/sr/f.u.]");break;
+             case 2:    fprintf(foutqei,"Smagperp: Sxxreal(Q,omega) Sxximag Sxyr Sxyi Sxzr Sxzi Syxr Syxi Syyr Syyi Syzr Syzi Szxr Szxi Szyr Szyi Szzr Szzi [barn/sr/f.u.]");break;
+             case 3:fprintf(foutqei,"Smagperp_dip: Suureal(Q,omega) Suuimag Suvr Suvi Suwr Suwi Svur Svui Svvr Svvi Svwr Svwi Swur Swui Swvr Swvi Swwr Swwi [barn/sr/f.u.]");break;
+             case 4:    fprintf(foutqei,"Smagperp: Suureal(Q,omega) Suuimag Suvr Suvi Suwr Suwi Svur Svui Svvr Svvi Svwr Svwi Swur Swui Swvr Swvi Swwr Swwi [barn/sr/f.u.]");break;
+             case 5:    fprintf(foutqei,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyr Sxyi Sxzr Sxzi Syxr Syxi Syyr Syyi Syzr Syzi Szxr Szxi Szyr Szyi Szzr Szzi [barn/sr/f.u.]");break;
+             case 6:    fprintf(foutqei,"Smag_dip: Suureal(Q,omega) Suuimag Suvr Suvi Suwr Suwi Svur Svui Svvr Svvi Svwr Svwi Swur Swui Swvr Swvi Swwr Swwi [barn/sr/f.u.]");break;
              }
             fprintf(foutqei,"f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
@@ -144,12 +144,12 @@ obs[calcXobs]);
            fprintf(foutdstot,"Itot-DMDdip Itot-DMDbey ");
             switch(ini.outS)
             {case 0:break;
-             case 1:fprintf(foutdstot,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 2:fprintf(foutdstot,"Smagperp: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 3:fprintf(foutdstot,"Smagperp_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
-             case 4:fprintf(foutdstot,"Smagperp: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
-             case 5:fprintf(foutdstot,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 6:fprintf(foutdstot,"Smag_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 1:fprintf(foutdstot,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyr Sxyi Sxzr Sxzi Syxr Syxi Syyr Syyi Syzr Syzi Szxr Szxi Szyr Szyi Szzr Szzi [barn/sr/f.u.]");break;
+             case 2:fprintf(foutdstot,    "Smagperp: Sxxreal(Q,omega) Sxximag Sxyr Sxyi Sxzr Sxzi Syxr Syxi Syyr Syyi Syzr Syzi Szxr Szxi Szyr Szyi Szzr Szzi [barn/sr/f.u.]");break;
+             case 3:fprintf(foutdstot,"Smagperp_dip: Suureal(Q,omega) Suuimag Suvr Suvi Suwr Suwi Svur Svui Svvr Svvi Svwr Svwi Swur Swui Swvr Swvi Swwr Swwi [barn/sr/f.u.]");break;
+             case 4:fprintf(foutdstot,    "Smagperp: Suureal(Q,omega) Suuimag Suvr Suvi Suwr Suwi Svur Svui Svvr Svvi Svwr Svwi Swur Swui Swvr Swvi Swwr Swwi [barn/sr/f.u.]");break;
+             case 5:fprintf(foutdstot,    "Smag_dip: Sxxreal(Q,omega) Sxximag Sxyr Sxyi Sxzr Sxzi Syxr Syxi Syyr Syyi Syzr Syzi Szxr Szxi Szyr Szyi Szzr Szzi [barn/sr/f.u.]");break;
+             case 6:fprintf(foutdstot,    "Smag_dip: Suureal(Q,omega) Suuimag Suvr Suvi Suwr Suwi Svur Svui Svvr Svvi Svwr Svwi Swur Swui Swvr Swvi Swwr Swwi [barn/sr/f.u.]");break;
              }
             if(do_Erefine)fprintf(foutdstot," Itot-integrated from mcdisp.dsigma");
              fprintf(foutdstot,"\n");

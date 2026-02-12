@@ -281,7 +281,10 @@ if($stps<11){
 
  $rnd=rand;
     $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
-    if($pt==0){    sta_calc();($sta)=sta_read();$stacurr=$sta; }# CALCULATE sta  !!!!
+   ++$stepnumber;
+    if($pt==0){    sta_calc();($sta)=sta_read();$stacurr=$sta; 
+   if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set(">>$s0file");}
+              }# CALCULATE sta  !!!!
     else {
 
 
@@ -321,11 +324,10 @@ while (scalar @children) {
        foreach(@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;if(($pti+1)%3==0){$stacurr.="\n";}
                        if($s<$sta){$sta=$s;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
                        ++$pti;
+   if($tablestep!=0&&$stepnumber%$tablestep==0){ write_ptset(">>$s0file",$s,$pti);}
                       }$stacurr.=")min-> ".$sta;
          }
-   ++$stepnumber;
    
-   if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set(">>$s0file");}
    if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in $s1file - $probe other sets to be found, continuing ...\n";write_set(">>$s1file");                      
                 last if ($probe==0);
                                 }
@@ -412,9 +414,11 @@ $deltastore=rotate $deltastore,-1;
 $parstore= rotate $parstore,-1;
 }
 
+print "parstore:\n";
 print $parstore;
 $b=$parstore->slice(0)->copy;
 $parstore.=$parstore-$b;
+print "parstore-modified:\n";
 print $parstore;
 $V=$parstore->slice('1:-1');
 $c=$deltastore->slice(0)->copy;
@@ -429,7 +433,9 @@ $V=rotate $V,1;$delta=rotate $delta,1;--$i6;
 }
 $delta=$delta->slice('1:-1');
 $V=$V->slice('1:-1');
+print "V:\n";
 print $V;
+print "delta:\n";
 print $delta;
 
 #{$cov="calculation of covariance matrix not successfull because last n steps of simulated annealing were not orthogonal in parameter space - restart simannfit and try again ...\n";}
@@ -471,7 +477,7 @@ print $delta;
                    ++$i;}
   if($chisquared){
      print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens  (you will get error=0) restart and try again):\n";
-$Fij=$delta x inv($V);
+ $Fij=$delta x inv($V);
  $FtF=$Fij->xchg(0,1) x $Fij;
  $cov=$sta*inv($FtF);  # multiply by sta=chi2 in order to get covariance matrix
      print $cov; print Fout $cov;
@@ -723,3 +729,16 @@ sub write_set()
   close FH;
                                
 }
+
+sub write_ptset()
+{ my ($filename,$sta,$pti)=@_;
+  unless(open(FH,$filename)){die "Error openening $filename\n";}
+     my $dd=sprintf("%i.%i ",$stepnumber+$tableoffset,$index+$pti);print FH $dd;
+        my $ii=0;my @ppp=@{$ptpar[$pti]};
+        foreach(@par){$dd=sprintf("%e ",$ppp[$ii]);print FH $dd;++$ii} 
+        print FH $sta;print FH "\n";
+        
+  close FH;
+                               
+}
+

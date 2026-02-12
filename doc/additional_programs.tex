@@ -650,8 +650,17 @@ force is equal to the increase in electrostatic force.
 }
 \item[Option: -delatoms phon ] instead of removing atoms connected by a lattice vector 
  			remove atoms which have a phonon module. This option is recommended to
-                        obtain a reduced model containing only magnetic ions. In contrast
-             to the option -delatoms 1,2,5,7 it takes into account
+                        obtain a reduced model containing only magnetic ions of the form
+
+\begin{eqnarray}\label{Hreduced}
+\hat H_{\rm red} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) - \sum_i g_{J_i} \mu_B \hat \mbf J_i \mbf H+ \\
+&+&\frac{1}{2}\sum_{\alpha\gamma=1-6} c_{\rm eff}^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} -\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha} -\nonumber \\
+&-&\sum_{i,\alpha=1-6,\gamma=1,...} G_{\rm cfph-eff}^{\alpha\gamma}(i) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_i) \nonumber \\
+&-&\frac{1}{2}\sum_{ij\gamma\gamma'}\mathcal J^{\rm eff}_{\gamma\gamma'}(ij) O_{\gamma}(\hat \mbf J_i) O_{\gamma'}(\hat \mbf J_{j})
+ \end{eqnarray}
+
+         In contrast
+             to the option -delatoms 1,2,5,7 the option -delatoms phon takes into account
                         the correlated displacements which arise when a stress is applied or a
                         magnetic atom charge density is changed by magnetic field or temperature.
                         The program will perform the following operations
@@ -691,6 +700,12 @@ force is equal to the increase in electrostatic force.
    \item this procedure is repeated for all components of all interaction operators 
          of all magnetic ions.
   \end{enumerate}
+  Mind that the self interaction calculated in this way is actually a sum of the self
+  interaction and interactions with all neighbours on the sublattice $n$, i.e.
+  $U'=U_0 -1/2 \sum_{n' | n'-n=\rm lattice\ vector} \mathcal J_{\gamma\gamma}(nn')$.
+  Provided that
+  interactions with these neighbours $n'$ is negligible, the calculated $\mathcal J_{\gamma\gamma}(nn)$
+  can be considered the phonon induced self interaction.
 \item[Calculation of effective  phonon induced Magnetoelastic Interactions ]
   The next step is to do mean field loops using (\ref{Htot}) the same way as for the 
   quadrupolar self interaction (i.e. setting 
@@ -710,7 +725,9 @@ force is equal to the increase in electrostatic force.
    
    This phonon induced magnetoelastic interaction 
      $G^{1\gamma}_{\rm phon-induced-cfph}(n)$ is added to the $G^{1\gamma}_{\rm cfph}(n)$
-    given in the input file and the sum is output by {\prg reduce\_unitcell}.
+    given in the input file and the sum 
+    $G^{1\gamma}_{\rm cfph-eff}(n)=G^{1\gamma}_{\rm phon-induced-cfph}(n)+G^{1\gamma}_{\rm cfph}(n)$
+   is output by {\prg reduce\_unitcell}.
    The procedure outlined above for $\epsilon_1$ is repeated for all components of the strain
    tensor $\epsilon_{\alpha}$ and thus the full set of phonon induced magnetoelastic
    interactions $G^{\alpha\gamma}_{\rm phon-induced-cfph}(n)$ is obtained.
@@ -723,7 +740,9 @@ interaction operator expectation values are set to zero
  component $\gamma$ for the ion $n$ and $\gamma'$ for the ion $n'$, i.e.
   $\langle I^i_{\beta}\rangle=\delta_{\beta\gamma}\delta_{in}+\delta_{\beta\gamma'}\delta_{in'}$. 
  Note the self interaction term ($\mathcal J_{\gamma\gamma}(nn)$ has been computed already).
- The result of the mean field computation is the energy $U'''$ and the 
+ The result of the mean field computation is the energy 
+ $U'''=U_0-\sum_{l=\rm lattice\ vector}\mathcal J_{\gamma\gamma'}(n,n'+l)-1/2 \mathcal J_{\gamma\gamma'}(nn)-1/2 \mathcal J_{\gamma\gamma'}(n'n')$ 
+ Assuming that  $J_{\gamma\gamma'}(n,n'+l)$ is zero for $l\neq 0$ the
  effective phonon induced quadrupolar interaction constants are computed by
  $\mathcal J_{\gamma\gamma'}(nn')=-(U'''-U_0)-\mathcal J_{\gamma\gamma}(nn)/2-\mathcal J_{\gamma'\gamma'}(n'n')/2$.
  These interactions are added by {\prg reduce\_unitcell} 
@@ -1491,6 +1510,48 @@ result is stored in col y
 \item [\prg newline\index{newline}\label{newline} n text file:]\addcontentsline{toc}{subsubsection}{\prg newline} creates a new line number n  in file containing %%@
 the text 
 %script2html_end{newline} \end{description}
+%script2html_begin{posls} \begin{description}
+\item [\prg posls\index{posls}\label{posls} {[options]} cp datafile cpos cI calcfile:]\addcontentsline{toc}{subsubsection}{\prg posls}  
+position least squares computation - 
+                computes a measure of goodness of a list of peaks $P_{\rm calc}$
+                given  in {\prg calcfile} (in column {\prg cpos}
+ with intensities in column {\prg cI})
+                by comparing it to experimental data in {\prg datafile}
+                (given as a list of peak positions $P_{\rm exp}$ in column {\prg cp})
+
+                The following quantities are computed:
+\begin{enumerate}
+\item ${\rm sta}                               = \frac{1}{N}  \sum_{i} |w(i)|*[P_{\rm exp}(i) - {\rm nearest}P_{\rm calc}]^{2*\sgn(w(i))}$
+\item ${\rm sta}_{\rm without antipeaks }            = \frac{1}{N}  \sum_{i|w(i)>0}  w(i)*[P_{\rm exp}(i) - {\rm nearest}P_{\rm calc}]^2$
+\item ${\rm sta}_{\rm without weights}               = \frac{1}{N}  \sum_{i} [P_{\rm exp}(i) - {\rm nearest}P_{\rm calc}]^{2*\sgn(w(i))}$
+\item ${\rm sta}_{\rm without antipeaks weights}     = \frac{1}{N}  \sum_{i|w(i)>0} [P_{\rm exp}(i) - {\rm nearest}P_{\rm calc}]^2$
+\end{enumerate}
+with 
+\begin{tabular}{ll}
+$P_{\rm exp}(i)$ & an experimental peak position taken from column cp in datafile \\
+$w(i)$           & corresponding weight, by default set to 1, or set by option -w \\
+${\rm nearest}P_{\rm calc}$ & indicates the calculated energy which is next to $P_{\rm exp}(i)$\\
+$N$ & number of contributions to the sum\\
+\end{tabular}
+
+Options:
+\begin{description}
+\item [-w cw]           read weight from column cw, a negative value indicates an antipeak - i.e.
+                a position where no peak is observed 
+\item [-i 0.001]       take into account calculated energy only if it is larger than $I_{\rm min}=0.001$ (default $I_{\rm min}=0$)
+\item [-s 1 ]             output to stdout ${\rm sta}={\rm sta}$ (default)
+\item [-s 2 ]             output to stdout ${\rm sta}={\rm sta}_{\rm without antipeaks }$ 
+\item [-s 3 ]             output to stdout ${\rm sta}={\rm sta}_{\rm without weights}$
+\item [-s 4 ]             output to stdout ${\rm sta}={\rm sta}_{\rm without antipeaks weights}$
+\item [-r ]             reverse sums, i.e. sum over calculated peaks meaning calculate
+   \begin{enumerate}
+\item ${\rm sta}                               = \frac{1}{N}  \sum_{i} |w({\rm nearestexp})|*[P_{\rm calc}(i) - {\rm nearest}P_{\rm exp}]^{2*\sgn(w({\rm nearestexp}))}$
+\item ${\rm sta}_{\rm without antipeaks }            = \frac{1}{N}  \sum_{i}  w({\rm nearestexp})*[P_{\rm exp}(i) - {\rm nearest}P_{\rm exp|w>0}]^2$
+\item ${\rm sta}_{\rm without weights}               = \frac{1}{N}  \sum_{i} [P_{\rm calc}(i) - {\rm nearest}P_{\rm exp}]^{2*\sgn(w({\rm nearestexp}))}$
+\item ${\rm sta}_{\rm without antipeaks weights}     = \frac{1}{N}  \sum_{i} [P_{\rm calc}(i) - {\rm nearest}P_{\rm exp|w>0}]^2$
+\end{enumerate}
+\end{description}
+%script2html_end{posls} \end{description}
 %script2html_begin{potcol} \begin{description}
 \item [\prg potcol\index{potcol}\label{potcol} col const file:]\addcontentsline{toc}{subsubsection}{\prg potcol}  col=col$^{\rm const}$ in file
 %script2html_end{potcol} \end{description}

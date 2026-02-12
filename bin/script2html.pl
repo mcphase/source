@@ -65,6 +65,7 @@ newcols              newcols
 newline             newline
 pointc              pointc
 potcol              potcol
+posls               posls
 radwavfunc          radwavfunc
 range               range
 reduce_unitcell     reduce_unitcell
