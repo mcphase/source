@@ -523,7 +523,10 @@ while (@ARGV)
                if($line=~/\<img(.*)src\s*=/){($filename)=($line=~m|\<img.*src\s*=\s*"([^\s^>^<^=]+)"|);
                 if($filename=~/\.gif$/){# notneeded ..$filen=$filename; $filen=~s/\\_/_/g; ($heightref, $widthref) = gifdim($filen);
                                        # convert gif files to jpg so they can be processed by pdflatex
-                                       system("giftopnm $filename | pnmtojpeg > $filename.jpg");$filename.=".jpg";
+                                      if( system("giftopnm  $filename | pnmtojpeg > $filename.jpg"))
+                                      {mycopy($DOC."/figsrc/mcphase_logo.jpg ",$filename.".jpg");}
+                                      $filename.=".jpg";
+
                                       } $filename=~s/\\_/_/g;
                 if($figure==1){ 
               $line=~s!(\s*#?\s*)\<img(.*)src\s*="([^"]*)"[^\>]*\>!\\includegraphics[angle=0,width=0.6\\columnwidth]\{$filename\}!;
@@ -552,6 +555,15 @@ while (@ARGV)
         $line=~s/\<h3\>/\\subsubsection\{/g; $line=~s/\<\/h3\>/\}/g;
         $line=~s/\<h4\>/\\paragraph\{/g; $line=~s/\<\/h4\>/\}/g;
         $line=~s/\<h5\>/\\subparagraph\{/g; $line=~s/\<\/h5\>/\}/g;
+        # table commands
+        $line=~s/\<table\>/\\begin\{tabular\}\{\*\{50\}\{l\}\}/g;
+        $line=~s/\<\/table\>/\\end\{tabular\}/g;
+        $line=~s/\<tr\>//g;
+        $line=~s/\<\/tr\>/\\\\/g;
+        $line=~s/\<\/td\>\s*\<td\>/mytablespacer/g;
+        $line=~s/\<td\>//g;
+        $line=~s/\<\/td\>//g;
+ 
         $line=~s/\<sub\>/\\(_\{/g;$line=~s/\<\/sub\>/\}\\)/g;
         $line=~s/\<ol\>/\\begin\{itemize\}/g;$line=~s/\<\/ol\>/\\end\{itemize\}/g;
         $line=~s/\<li\>/\\item /g;$line=~s/\<\/li\>//g;
@@ -560,7 +572,7 @@ while (@ARGV)
                          |dd|del|dfn|div|dl|dt|em|fieldset|figure|figcaption|form|frame|
                          |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
                          |map|meta|noframes|noscript|object|ol|optgroup|option|
-                         |p|pre|small|span|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>//g; 
+                         |p|pre|small|span|sub|sup|tbody|textarea|tfoot|th|title|tt|u|ul|var)([^\>]*?)\>//g; 
         $line=~s/\<(\/?)([i])(\s*?)\>//g;# html tag <i>
         }
         else
@@ -598,7 +610,9 @@ $line=~s/myrightrectangularbracket/\]/g;
 $line=~s/myleftangularbracket/\(/g;
 $line=~s/myrightangularbracket/\)/g;
 
-           #do substituion to get in latex an equation\( \) \[ \] should become $ and begin equation ...
+$line=~s/mytablespacer/&/g;
+
+           #do substitution to get in latex an equation\( \) \[ \] should become $ and begin equation ...
              $line=~s/\\\(/\$/g; # inline math
              $line=~s/\\\)/\$/g;
              $line=~s/\\\[/\n\\begin\{equation\}\n/g; # equation
@@ -724,3 +738,14 @@ if($check=~/$S/){#print STDERR "cu  $S $Z true\n";
 return true;}else{#print STDERR "cu $S $Z false\n";
 return undef;}
 }
+
+sub mycopy { my ($file1,$file2)=@_;
+
+             if ($^O=~/MSWin/){$file1=~s|\/|\\|g;$file2=~s|\/|\\|g;
+                               return system("copy ".$file1." ".$file2);
+                              }
+                 else
+                              {return system("cp -pf ".$file1." ".$file2);
+                              }
+
+           }

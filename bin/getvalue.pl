@@ -25,6 +25,7 @@ options: -c 24.13   compare the value with 24.13+-0.01 (error corresponds to las
                     not corresponding
           -s 24.13  same as -c but compute standard deviation (yvalue-24.13)^2 and output #!sta=
           -var 24.13  same as -c but compute variance (yvalue-24.13)^2/0.01^ 2 and output #!sta=
+          -v        verbose
 
  examples:
 
@@ -63,7 +64,8 @@ exit(1);
 
 GetOptions("c=s"=>\$compare,
            "s=s"=>\$s,
-           "var=s"=>\$r);
+           "var=s"=>\$r,
+           "v"=>\$verbose);
 
 if($ARGV[0]=~/H/){($cx)=($ARGV[0]=~m|H(.*)|);shift @ARGV;}else{$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;}
 if($ARGV[0]=~/H/){($cy)=($ARGV[0]=~m|H(.*)|);shift @ARGV;}else{$ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;}
@@ -73,8 +75,8 @@ foreach(@ARGV)
 {$filename=$_;
 ($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$dE,$filename);
 if (abs($yvalue)>1e-300){$yinv=1/$yvalue;}else{$yinv=" ";}
-print "echo \"#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds\"\n";
-print "echo \"#! to the yvalue=$yvalue  (1/yvalue=$yinv)";if($sta>0){print "deviations sta=$sta\"\n";}else{print"\"\n";}
+if(defined $verbose){print "echo \"#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds to the yvalue=$yvalue  (1/yvalue=$yinv)";
+if($sta>0){print " deviations sta=$sta\"\n";}else{print"\"\n";}}
 } 
 # for setting environment variables
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
@@ -226,7 +228,7 @@ unless(0==($numbers[$colx]-$numbers1[$colx]))
 #print "$constx $dE ".$numbers[$colx]." ".$numbers1[$colx]."\n";
    @numbers1=@numbers;
    }} 
-  if (abs($esum)<1e-300){print "echo \"# getvalue: xvalues variance on averaging is too small ($esum) for $file for calculation of deviations sta\"\n";$sta=-1;}
+  if (abs($esum)<1e-300){if(defined $verbose){print "echo \"# getvalue: xvalues variance on averaging is too small ($esum) for $file for calculation of deviations sta\"\n";}$sta=-1;}
   else{$sta/=$esum;}
   close Fin;
   return ($Iav,$sta);
