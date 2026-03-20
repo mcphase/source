@@ -737,7 +737,7 @@ std::vector<double> racah_EtoF(std::vector<double> E)      // Converts from E to
    F[1] = (          E[1] + 143*E[2] + 11*E[3] )/42.;
    F[2] = (          E[1] - 130*E[2] +  4*E[3] )/77.;
    F[3] = (          E[1] +  35*E[2] -  7*E[3] )/462.;
-   return E;
+   return F;
 }
 std::vector<double> racah_FtoF_k(std::vector<double> F)    // Converts from F^k to F_k
 {

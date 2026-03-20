@@ -205,10 +205,16 @@ unless(0==($numbers[$colx]-$numbers1[$colx]))
    }
 
   close Fin;
+ if( !defined $colx || !defined $coly )
+{ # if the column definitions have not been given (required column header not present)  return zero
+ print STDERR "# getvalue: Warning - column header(s) $cx $cy not present - returning zero\n";
+ $Iav=0;$sta=0;
+} else 
+{
   if($j==1&&$numbers[$colx]==$constx){# only one point in file and specified, special ...
             $esum=1;$Iav=$numbers[$coly];
            }
-  if (abs($esum)<1e-10){print STDERR " first xvalue sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of x values\n";<stdin>;}
+  if (abs($esum)<1e-10){print STDERR " first xvalue sum (colx=$colx) on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of x values\n";<stdin>;}
  #print STDERR "# j=$j Iav=$Iav esum=$esum\n";  
  $Iav/=$esum; 
   my $sta=0; # here calculate sta (scattering of data in interval dE)
@@ -231,6 +237,7 @@ unless(0==($numbers[$colx]-$numbers1[$colx]))
   if (abs($esum)<1e-300){if(defined $verbose){print "echo \"# getvalue: xvalues variance on averaging is too small ($esum) for $file for calculation of deviations sta\"\n";}$sta=-1;}
   else{$sta/=$esum;}
   close Fin;
+ }
   return ($Iav,$sta);
 }
 

@@ -104,10 +104,10 @@ int n,j;
       if(n>=17){for(int ii=1;ii<=6;++ii)spins.epsilon(ii)=numbers[11+ii];}
       if (dd<delta)
        {delta=dd;
-                snprintf(outstr,MAXNOFCHARINLINE,"%s=%g %s=%g %s=%g %s=%g %s=%g %s=%g %s=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",
+                snprintf(outstr,MAXNOFCHARINLINE,"%s=%g %s=%g %s=%g %s=%g %s=%g %s=%g %s=%g n=%g spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",
                         out[1],myround(numbers[1]),out[2],myround(numbers[2]),out[3],myround(numbers[3]),out[4],myround(numbers[4]),
                         out[5],myround(numbers[5]),out[6],myround(numbers[6]),out[7],myround(numbers[7]),
-                        myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
+                        myround(numbers[8]),spins.na(),spins.nb(),spins.nc(),(int)numbers[9],(int)numbers[10]);
         savmf=spins;x=0;y=0;
         extract_xyTHext(outstr,x,y,T,Hext,abc);
 
@@ -126,7 +126,7 @@ int n,j;
  {// look for config number -Tin
   for(n=1;n<=(int)aa[0];++n)
   {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }
-  }snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.nofatoms,savmf.nofcomponents);
+  }snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,savmf.nofcomponents);
  }
  return 0; // ok structure found
 }

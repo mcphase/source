@@ -217,8 +217,8 @@ double ninej(int j1, int j2, int J12, int j3, int j4, int J34, int J13, int J24,
    double out = 0.;
 
    // Finds the allowed values of g
-   min_g = G[0]; for(g=1; g<3; g++) if(G[g]<min_g) min_g = G[g];
-   max_g = G[3]; for(g=4; g<6; g++) if(G[g]>max_g) max_g = G[g];
+   min_g = G[0]; for(g=1; g<3; g++) if(G[g]>min_g) min_g = G[g]; // mind we should look for the maximum value of G(0,1,2) to find the minimum range boundary of g
+   max_g = G[3]; for(g=4; g<6; g++) if(G[g]<max_g) max_g = G[g]; // mind we should look for the minimum value of G(3,4,5) to find the maximum range boundary of g
    for(g=min_g; g<=max_g; g++)  // g==2g, as all integers here represents twice their values (to accomodate half integral values).
       out += pow(-1.,g) * (g+1) * sixj(j1,j2,J12,J34,J,g) * sixj(j3,j4,J34,j2,g,J24) * sixj(J13,J24,J,g,j1,j3);
 

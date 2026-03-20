@@ -352,16 +352,19 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc)
 {Vector hkl(1,3),u(1,3),v(1,3),w(1,3),q1(1,3),q2(1,3);q1=0;q2=0;
  static Vector wold(1,3);
  ComplexMatrix M(1,3,1,3);
+ // take current Q-vector
  hkl(1)=ini.hkls[ini.Qindex][1];
  hkl(2)=ini.hkls[ini.Qindex][2];
  hkl(3)=ini.hkls[ini.Qindex][3];
  hkl2ijk(u,hkl,abc);
+ // take as q1 previous Q- vector ...
  int i=ini.Qindex-1;
  if(i==0){i++;}
  hkl(1)=ini.hkls[i][1];
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
+ // and find a q2 in the list following q1, which is not parallel in the Q-vector list (if possible)
  while(fabs(fabs(q1*q2)-Norm(q1)*Norm(q2))<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i<ini.nofhkls){
  hkl(1)=ini.hkls[i+1][1];
  hkl(2)=ini.hkls[i+1][2];
@@ -369,14 +372,17 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc)
  hkl2ijk(q2,hkl,abc);
      i++;}
 //printf("A:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i ini.Qindex=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,ini.Qindex);
+// ... if it is not possible look for a not parallel q1 before in the list
  while(fabs(fabs(q1*q2)-Norm(q1)*Norm(q2))<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i>1){i--;
  hkl(1)=ini.hkls[i][1];
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
      }
+
 //printf("B:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i ini.Qindex=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,ini.Qindex);
  xproduct(w,q1,q2);
+// if all q-vectors in the list are parallel exit with error !
  if(Norm(w)<SMALL_XPROD_FOR_PARALLEL_VECTORS){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
  xproduct(v,w,u);
  // normalize

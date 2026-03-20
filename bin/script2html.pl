@@ -567,9 +567,10 @@ while (@ARGV)
         $line=~s/\<sub\>/\\(_\{/g;$line=~s/\<\/sub\>/\}\\)/g;
         $line=~s/\<ol\>/\\begin\{itemize\}/g;$line=~s/\<\/ol\>/\\end\{itemize\}/g;
         $line=~s/\<li\>/\\item /g;$line=~s/\<\/li\>//g;
+        $line=~s/\<em\>/\{\\em /g;$line=~s/\<\/em\>/\}/g;
         
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
-                         |dd|del|dfn|div|dl|dt|em|fieldset|figure|figcaption|form|frame|
+                         |dd|del|dfn|div|dl|dt|fieldset|figure|figcaption|form|frame|
                          |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
                          |map|meta|noframes|noscript|object|ol|optgroup|option|
                          |p|pre|small|span|sub|sup|tbody|textarea|tfoot|th|title|tt|u|ul|var)([^\>]*?)\>//g; 
