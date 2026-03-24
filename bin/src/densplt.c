@@ -116,7 +116,7 @@ switch(argv[1][0]) // dimension definition from jjjpar.hpp
 printf("#chargedensity is expanded in tesseral harmonics Zlm\n\
 #   ro(r) sum_lm (a(l,m) R^2(r) Zlm(Omega)\n\
 #   M. Rotter et al. J Phys: Conf Ser. 325 (2011) 012005\n#\n ");
- snprintf(text,MAXNOFCHARINLINE,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, chargedensity ro(r)</title>\n", T,Hext(1),Hext(2),Hext(3),coord);
+ snprintf(text,MAXNOFCHARINLINE,"T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, chargedensity ro(r)", T,Hext(1),Hext(2),Hext(3),coord);
  snprintf(gp.title,MAXNOFCHARINLINE,"chargedensity ro(r)");
  gp.threshhold=-0.05;
            break;
@@ -124,7 +124,7 @@ printf("#chargedensity is expanded in tesseral harmonics Zlm\n\
 printf("#spindensity is expanded in tesseral harmonics Zlm\n\
 #   M(r).(%g,%g,%g)= sum_lm aS(l,m) R^2(r) Zlm(Omega)\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
- snprintf(text,MAXNOFCHARINLINE,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, spindensity S(r).(%g,%g,%g)</title>\n", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
+ snprintf(text,MAXNOFCHARINLINE,"T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, spindensity S(r).(%g,%g,%g)", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
   if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of spindensity Ms(r).(%g,%g,%g)",xx,yy,zz);
   if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of spindensity div Ms(r)");gp.scale_density_vectors=0;}
   if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of spindensity |Ms(r)|");
@@ -136,7 +136,7 @@ printf("#orbital momdensity is expanded in tesseral harmonics Zlm\n\
 #   M(r).(%g,%g,%g)= sum_lm  aL(l,m) F(r) Zlm(Omega)\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
- snprintf(text,MAXNOFCHARINLINE,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, orbital momdensity L(r).(%g,%g,%g)</title>\n", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
+ snprintf(text,MAXNOFCHARINLINE,"T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, orbital momdensity L(r).(%g,%g,%g)", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
   if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of orbmomdensity Ms(r).(%g,%g,%g)",xx,yy,zz);
   if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of orbmomdensity div ML(r)");gp.scale_density_vectors=0;}
   if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of orbmomdensity |ML(r)|");
@@ -148,7 +148,7 @@ printf("#magnetic momdensity is expanded in tesseral harmonics Zlm\n\
 #   M(r).(%g,%g,%g)= sum_lm (aS(l,m) R^2(r)+ aL(l,m) F(r)) Zlm(Omega)\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
- snprintf(text,MAXNOFCHARINLINE,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, magnetic momdensity M(r).(%g,%g,%g)</title>\n", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
+ snprintf(text,MAXNOFCHARINLINE,"T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, magnetic momdensity M(r).(%g,%g,%g)", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
   if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of momdensity M(r).(%g,%g,%g)",xx,yy,zz);
   if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of momdensity div ML(r)");gp.scale_density_vectors=0;}
   if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of momdensity |ML(r)|");
@@ -160,7 +160,7 @@ printf("#currdensity is expanded in tesseral harmonics Zlm\n\
 #   j(r).(%g,%g,%g)= sum_lm (b(l,m) R^2(r)+ d(l,m) F(r) Zlm(Omega)\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
- snprintf(text,MAXNOFCHARINLINE,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, currentdensity j(r).(%g,%g,%g)</title>\n", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
+ snprintf(text,MAXNOFCHARINLINE,"T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates %s, currentdensity j(r).(%g,%g,%g)", T,Hext(1),Hext(2),Hext(3),coord,xx,yy,zz);
   if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of currdensity j(r).(i=%g,j=%g,k=%g)(milliAmp/A^2)",xx,yy,zz);
   if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of currdensity div j(r)");gp.scale_density_vectors=0;}
   if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of currdensity |j(r)|(milliAmp/A^2)");
