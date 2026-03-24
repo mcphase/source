@@ -295,10 +295,10 @@ void spincf::spinfromq (int & n1,int & n2, int & n3,Vector & qvector,Vector & ne
 		 for(l=1;l<=nofcomponents*nofatoms;++l)
 	          {
 //		  mom[in(rra,rrb,rrc)](l)=copysign(nettom(l),qv*(0.01+
-//		  copysign(1.0,momentq0(l)+cos(phi(l)+qvector*2.0*3.141529*rr)))
+//		  copysign(1.0,momentq0(l)+cos(phi(l)+qvector*2.0*3.1415926535*rr)))
 //				                    )                    ;	
 		  mom[in(rra,rrb,rrc)](l)=nettom(l)*qv*(0.01+
-		  momentq0(l)+cos(phi(l)+qvector*2.0*3.141529*rr))
+		  momentq0(l)+cos(phi(l)+qvector*2.0*3.1415926535*rr))
 				                                        ;	
                   }
 	         }
