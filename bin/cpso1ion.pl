@@ -118,7 +118,7 @@ $ii=0;$sta=0;
 
 # read temperatures and calculate cp + comp to experiment
 
-  print  "# T(K)  $cptext  exp-$cpctext\n";
+  print  "# T(K)  $cptext  exp-$cptext\n";
 
   while($line=<Fin>)
 
@@ -138,7 +138,7 @@ $ii=0;$sta=0;
 
 	 $sta+=($cpclc-$cpexp)*($cpclc-$cpexp);
 
-         print   "$T $cpclc $cpexp\n";
+         print   "$T0 $cpclc $cpexp\n";
 
         }
 
