@@ -93,7 +93,7 @@ void spectre_vrot(icpars &pars, double &elim, bool isreal=true, double *dVrot=0,
       if(Eunrot[Esort[i-1]]<=Eunrot[Esort[i]]) { i=j; j++; }
       else { ii=Esort[i-1]; Esort[i-1]=Esort[i]; Esort[i]=ii; i--; if(i==0) i=1; }
    }
-   if(elim>=0) {for(imax=0; imax<num_states; imax++) {if((Eunrot[Esort[imax]]-Eunrot[Esort[0]])>elim) {break;} imax--;}}
+   if(elim>=0) {for(imax=0; imax<num_states; imax++) {if((Eunrot[Esort[imax]]-Eunrot[Esort[0]])>elim) {break;}}}
    delete[]Eunrot;
 
    // Construct the rotation matrix from the full eigenvector matrix, but putting the columns in Energy-order
