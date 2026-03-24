@@ -245,7 +245,7 @@ snprintf(gp.title,MAXNOFCHARINLINE,"output of program spins");
  // check command line
  if (argc < 2){help_and_exit();}
 // first: options without graphics just screendump <I> or exchange field configuration at given HT
- if (strncmp(argv[1],"-f",2)==0)
+ if (strcmp(argv[1],"-f")==0||strcmp(argv[1],"-fc")==0)
  { os=2;if (strcmp(argv[1],"-fc")==0){os=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
                                       maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
                                      }
@@ -405,7 +405,7 @@ for(i=os+1;i<argc;++i){
 if(strcmp(argv[i],"-prefix")==0){apf=2;}
                        }
 double lnZ,U,x,y; 
-if (strncmp(argv[1],"-f",2)==0&&argc<3+os){
+if ((strcmp(argv[1],"-f")==0||strcmp(argv[1],"-fc")==0)&&argc<3+os){
                  // in this case we have exactly one argument left,
                  // i.e.  aa[1] becomes a number of a spinconfig in a file
                  aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[1]);
@@ -503,7 +503,7 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
-  if (strncmp(argv[1],"-f",2)==0) 
+  if (strcmp(argv[1],"-f")==0||strcmp(argv[1],"-fc")==0)
  { inputpars.savelattice(fout);
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    fprintf(fout,"#! strain tensor: eps1=%4.4g (epsii) eps2=%4.4g (epsjj) eps3=%4.4g (epskk) eps4=%4.4g (2epsjk) eps5=%4.4g (2epsik) eps6=%4.4g (2epsij)\n",
