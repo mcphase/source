@@ -332,15 +332,15 @@ void ic_cmag(const char *filename, icpars &pars, double elim)
          for(j=0; j<nT; j++) 
             FILEOUT << T[j] << "\t" << Hm*pars.yHa << "\t" << Hm*pars.yHb << "\t" << Hm*pars.yHc << "\t" << mag[j]*convfact
                     << "   \t" << ma[j]*convfact << "   \t" << mb[j]*convfact << "   \t" << mc[j]*convfact << "   \t"
-                    << (ma[j]*gjmbH[1] + mb[j]*gjmbH[3] + mc[j]*gjmbH[5])*convfact << "\n";
+                    << (ma[j]*gjmbH[3] + mb[j]*gjmbH[4] + mc[j]*gjmbH[5])*convfact << "\n";
       }
       else
       {
          Hm = (Hmin+i*Hstep)/xnorm;
-         for(j=0; j<nT; j++) 
+         for(j=0; j<nT; j++)
             FILEOUT << Hm*pars.xHa << "\t" << Hm*pars.xHb << "\t" << Hm*pars.xHc << "\t" << T[j] << "\t" << mag[j]*convfact
-                    << "   \t" << ma[j]*convfact << "   \t" << mb[j]*convfact << "   \t" << mc[j]*convfact << "   \t" 
-                    << (ma[j]*gjmbH[1] + mb[j]*gjmbH[3] + mc[j]*gjmbH[5])*convfact << "\n";
+                    << "   \t" << ma[j]*convfact << "   \t" << mb[j]*convfact << "   \t" << mc[j]*convfact << "   \t"
+                    << (ma[j]*gjmbH[3] + mb[j]*gjmbH[4] + mc[j]*gjmbH[5])*convfact << "\n";
       }
    }
 }
