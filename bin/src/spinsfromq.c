@@ -105,9 +105,9 @@ printf("#*****************************************************\n");
   // transform hkl to primitive reciprocal lattice
   
  
-  spincf savspin (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
-  spincf savspin1 (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
-  spincf savspin2 (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
+  spincf savspin (n1,n2,n3,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+  spincf savspin1 (n1,n2,n3,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+  spincf savspin2 (n1,n2,n3,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
   // n1 n2 n3 .. periodicity of supercell
 // nettom .... saturation moment (positive)
 // qvector ... wave vector in units of reciprocal lattice
