@@ -1621,7 +1621,7 @@ if (mode==7) then
       ks=sqrt(ksks) 
       kappa=sqrt(qq(1)*qq(1)+qq(2)*qq(2) +qq(3)*qq(3))
       do i=1,3
-        kapnv(i)=kapv(i)/kappa
+        kapnv(i)=qq(i)/kappa
        end do
        if (w7==1) then
          st=strfak(kappa)
