@@ -52,7 +52,7 @@ void getU(double & U,Vector & Happ,double & T,
          ini.maxnofmfloops=maxnofmfloops;
          ini.maxstamf=maxstamf;
          
-  if(j>0){fprintf(stderr,"Error reduce_unitcell: self consistent MF calculation not convergedfor %s  - modify mcphas.ini and restart\n",info);exit(EXIT_FAILURE);}
+  if(j>0){fprintf(stderr,"Error reduce_unitcell: self consistent MF calculation not converged for %s  - modify reduce_unitcell.ini and restart\n",info);exit(EXIT_FAILURE);}
  U=physprop.u;
 }
 // ***************************************************************************
