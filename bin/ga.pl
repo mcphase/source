@@ -273,9 +273,9 @@ $fi=$nn1*2*$PI/$nfi;
 #
 # QR= (qh, qk, ql) . (Ra,Rb,Rc)=2pi (h da + k db + l dc)
     $QR=2*$PI*($qh*$n1+$qk*$n2+$ql*$n3);
-    $inp=$inp->append( pdl ([$rvec->at(0)+($evrx[$n]-$evrx[$nnn])*cos($QR+$fi)-($evix[$n]-$evix[$nnn])*sin($QR+$fi)]));
-    $jnp=$jnp->append( pdl ([$rvec->at(1)+($evry[$n]-$evry[$nnn])*cos($QR+$fi)-($eviy[$n]-$eviy[$nnn])*sin($QR+$fi)]));
-    $knp=$knp->append( pdl ([$rvec->at(2)+($evrz[$n]-$evrz[$nnn])*cos($QR+$fi)-($eviz[$n]-$eviz[$nnn])*sin($QR+$fi)]));
+    $inp=$inp->append( pdl ([$rvec->at(0)+($evrx[$nz]-$evrx[$nnn])*cos($QR+$fi)-($evix[$nz]-$evix[$nnn])*sin($QR+$fi)]));
+    $jnp=$jnp->append( pdl ([$rvec->at(1)+($evry[$nz]-$evry[$nnn])*cos($QR+$fi)-($eviy[$nz]-$eviy[$nnn])*sin($QR+$fi)]));
+    $knp=$knp->append( pdl ([$rvec->at(2)+($evrz[$nz]-$evrz[$nnn])*cos($QR+$fi)-($eviz[$nz]-$eviz[$nnn])*sin($QR+$fi)]));
                                }
                                      
                       }
