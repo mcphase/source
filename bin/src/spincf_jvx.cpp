@@ -570,7 +570,7 @@ for(int l=1;l<=nofatoms;++l)
   if(radius==0) // this is a trick: if radius is given as sipffilename then a sphere with this is radius is generated (pointcharge)
   {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
    density cd(gp.title,dtheta,dfi);int ndd;
-   for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_2;++k){
+   for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_3;++k){
    Vector dd(1,3);dd=pos(i,j,k,l, cs);
    Vector moments(1,nofcomponents);//printf("nofcomp=%i\n",nofcomponents);
    double QR;  QR=(hkl*abc_in_ijk_Inverse)*dd;
@@ -660,7 +660,7 @@ for(l=1;l<=nofatoms;++l)
   fprintf(fout,"<points >\n");
   jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
    density cd(gp.title,dtheta,dfi);int ndd;
-   for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_2;++k){
+   for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_3;++k){
    dd=pos(i,j,k,l, cs); 
    Vector moments(1,nofcomponents);
    double QR; QR=(hkl*abc_in_ijk_Inverse)*dd;
