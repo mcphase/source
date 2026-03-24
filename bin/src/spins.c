@@ -541,7 +541,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
      gp.scale_density_vectors=0;gp.show_density=0; // do not show charge densities
              Vector hkl1(1,3);hkl1=0;
              Vector gjmbHxc1(1,3);gjmbHxc1=0;
-     spincf magmom(savmf.na(),savmf.nb(),savmf.nb(),savmf.nofatoms,3); // the magnetic moment guess 
+     spincf magmom(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,3); // the magnetic moment guess
      int i,j,k,l;for (i=1;i<=savmf.na();++i){for (j=1;j<=savmf.nb();++j){for (k=1;k<=savmf.nc();++k){for(l=1;l<=magmom.nofatoms;++l)  
          for(int momdim=1;momdim<=3&&momdim<=savmf.nofcomponents;++momdim)
                {magmom.moment(i,j,k,l)(momdim)=savmf.moment(i,j,k,l)(momdim);}
