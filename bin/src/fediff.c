@@ -201,6 +201,7 @@ double fecalc(Vector Hex, double T, par &inputpars, spincf &sps, mfcf &mf, doubl
             for(k=1;k<=sps.nc();++k)
             {
                s=sps.in(i,j,k);
+               diff=sps.m(i,j,k);
                for(l=1;l<=inputpars.nofatoms;++l)
                {
                   int lm1m3;
