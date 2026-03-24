@@ -408,7 +408,7 @@ double lnZ,U,x,y;
 if (strncmp(argv[1],"-f",2)==0&&argc<3+os){
                  // in this case we have exactly one argument left,
                  // i.e.  aa[1] becomes a number of a spinconfig in a file
-                 aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[1]);
+                 aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[0]);
                  }
                            
 else{if(argc-1==2+os||argc-1==6+os+apf){
