@@ -29,10 +29,10 @@ phonon_wave_amplitude=0;
 threshhold=0.05;
 density_dtheta=0.2;
 density_dfi=0.2;
-read();
 gridi=30;
 gridj=30;
 gridk=30;
+read();
 }
 
 int graphic_parameters::read()
