@@ -199,8 +199,8 @@ void ic1ion_module::truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<
    F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,Vf,&Hsz,&zbeta,zmt,&Hsz);
    F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);
    for(int ii=0; ii<cb; ii++) for(int jj=ii; jj<cb; jj++) { 
-      if(fabs(Hrot[ii*cb+jj].r)>DBL_EPSILON) outmat(ii+1,jj+1)=Hrot[ii*cb+jj].r; 
-      if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) outmat(jj+1,ii+1)=Hrot[ii*cb+jj].i; 
+      if(fabs(Hrot[ii*cb+jj].r)>DBL_EPSILON) outmat(ii+1,jj+1)=Hrot[ii*cb+jj].r;
+      if(fabs(Hrot[ii*cb+jj].i)>DBL_EPSILON) outmat(jj+1,ii+1)=Hrot[ii*cb+jj].i;
    } 
  //memcpy(&outmat[0][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
  //delete[]Vf; 
