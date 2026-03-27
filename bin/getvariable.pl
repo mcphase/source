@@ -106,8 +106,9 @@ sub extract {$value="not found";
              my ($variable,$comp,$filename)=@_;
              $var="\Q$variable\E";
              if(open (Fin,$filename))
-             {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {#($value)=($line=~m|$var\s*=\s*([^\s^>^<^=]+)|);
+             {while($line=<Fin>){if($line=~/^(#!|[^#])*?\b$var\s*=/)
+                # if($line=~/^.*$var\s*=/) 
+                                        {#($value)=($line=~m|$var\s*=\s*([^\s^>^<^=]+)|);
                                           ($v)=($line=~m|$var\s*=\s*([^\s][^>^<^=]+)|);
                                           @g=split(" ",$v);
                                           $value=$g[$comp-1];

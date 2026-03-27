@@ -1010,11 +1010,9 @@ $nnat=$#pos+1;
 print FOUT "#<!--mcphase.mcphas.j-->\n";
 print FOUT "#***************************************************************\n";
 print FOUT "# Lattice and Exchange Parameter file for\n";
-print FOUT "# mcphas version 5.2\n";
-print FOUT "# - program to calculate static magnetic properties\n";
+print FOUT "# mcphas - program to calculate static magnetic properties\n";
 print FOUT "# reference: M. Rotter JMMM 272-276 (2004) 481\n";
-print FOUT "# mcdisp version 5.2\n";
-print FOUT "# - program to calculate the dispersion of magnetic excitations\n";
+print FOUT "# mcdisp - program to calculate the dispersion of magnetic excitations\n";
 print FOUT "# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n";
 print FOUT "#***************************************************************\n";
 print FOUT "#\n";
@@ -1063,11 +1061,9 @@ if($debug==0) { open (FOUT, ">mcphas_magnetic_atoms.j"); }
 print FOUT "#<!--mcphase.mcphas.j-->\n";
 print FOUT "#***************************************************************\n";
 print FOUT "# Lattice and Exchange Parameter file for\n";
-print FOUT "# mcphas version 5.2\n";
-print FOUT "# - program to calculate static magnetic properties\n";
+print FOUT "# mcphas - program to calculate static magnetic properties\n";
 print FOUT "# reference: M. Rotter JMMM 272-276 (2004) 481\n";
-print FOUT "# mcdisp version 5.2\n";
-print FOUT "# - program to calculate the dispersion of magnetic excitations\n";
+print FOUT "# mcdisp  - program to calculate the dispersion of magnetic excitations\n";
 print FOUT "# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n";
 print FOUT "#***************************************************************\n";
 print FOUT "#\n";
@@ -1134,6 +1130,12 @@ for (keys %ions) {
     $eltab = $magions{$ionname.$rl};             # Looks up information about the magnetic ions
     $fftab = $magff{$ionname};               #   and form factor
     $nofelectrons = ${$eltab}[0];
+  # here we look in the mcphaseexplorer database if there is such an ion and
+  # if we find it compare the information and give a warning if it is different
+#  unless(defined $rl){
+check_ionpars_with_mpe_files($ionname,$eltab,$fftab,$realb[$ions{$_}],$imagb[$ions{$_}]);
+#}
+
     if ($nofelectrons =~ /f/) {
       $so1ionname = ${$eltab}[3];
     } else { 
@@ -1206,6 +1208,16 @@ for (keys %ions) {
       print FOUT "#----------------------------------------------------------------------\n";
       print FOUT $zk;
     }
+      print FOUT "#---------------------------------------------------------------------------------------------\n";
+      print FOUT "# radial wave function parameters, for transition metal ions the the values are tabulated in\n";
+      print FOUT "# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave\n";
+      print FOUT "# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)\n";
+      print FOUT "# Freeman and Watson PR 127 (1962) 2058\n";
+      print FOUT "#---------------------------------------------------------------------------------------------\n";
+      for my $i (1 .. 6) {
+       if ($rwv{"C".$i}!=0){print FOUT "N".$i."=".$rwv{"N".$i}." C".$i."=".$rwv{"C".$i}." XI".$i."=".$rwv{"XI".$i}."\n";}
+                             }
+
     if ($modulename eq "ic1ion" || $modulename eq "icf1ion") {
       print FOUT "\n";
       print FOUT "#-----------------------------------------------------------------------\n";
@@ -1495,6 +1507,71 @@ print "   in the magnetic ions .sipf files before running mcdiff !!\n";
 print "\n";
 
 
+  # here we look in the mcphaseexplorer database if there is such an ion and
+  # if we find it compare the information and give a warning if it is different
+  # returns radial wave function parameters if possible.
+sub  check_ionpars_with_mpe_files
+{ my ($ionname,$eltab,$fftab,$rb,$ib)=@_;
+#    $eltab     # information about the magnetic ion
+#    $fftab     #    form factor
+ $ionf=$ionname; $ionf =~ s/\+/p/g;
+
+# try to find a matching 
+ my $sipffilename=$ENV{'MCPHASE_DIR'}.'/bin/mcphaseexplorer/ions/'.$ionf.".sipf";
+
+print "Verifying $ionname information in ".$sipffilename."\n";
+ unless(open (Fin,$sipffilename)){print "file $sipffilename not available\n"; return;}
+
+ my $nofelectrons = ${$eltab}[0];$nofelectrons =~ s/^[0-9][a-z]//;
+#print $ionname."e\n";
+
+my %hash=split(/=|\s/,${$fftab}[1]);
+$hash {"nof_electrons"}=$nofelectrons;
+$hash {"IONTYPE"}=$ionname;
+# $hash {"conf"}=${$eltab}[0];
+$hash {"GJ"}=${$eltab}[4];
+$hash {"R2"}=${$eltab}[5];
+$hash {"R4"}=${$eltab}[6];
+$hash {"R6"}=${$eltab}[7];
+$hash {"zeta"}=${$eltab}[8];
+$hash {"F2"}=${$eltab}[9];
+$hash {"F4"}=${$eltab}[10];
+$hash {"F6"}=${$eltab}[11];
+$hash {"SCATTERINGLENGTHREAL"}=$rb;
+$hash {"SCATTERINGLENGTHIMAG"}=$ib;
+$rwv {"N1"}=0;$rwv {"C1"}=0;$rwv {"XI1"}=0;
+$rwv {"N2"}=0;$rwv {"C2"}=0;$rwv {"XI2"}=0;
+$rwv {"N3"}=0;$rwv {"C3"}=0;$rwv {"XI3"}=0;
+$rwv {"N4"}=0;$rwv {"C4"}=0;$rwv {"XI4"}=0;
+$rwv {"N5"}=0;$rwv {"C5"}=0;$rwv {"XI5"}=0;
+$rwv {"N6"}=0;$rwv {"C6"}=0;$rwv {"XI6"}=0;
+
+#foreach my $key (keys %hash) {print "$key=$hash{$key}\n";}
+
+  while($line= <Fin> ) {foreach my $key (keys %hash) {
+                
+                if ($line=~/^(#!|[^#])*?\b$key\s*=/) 
+                 {($v)=($line=~m|$key\s*=\s*([^\s][^>^<^=]+)|);
+                                          @g=split(" ",$v);
+                                         unless($hash{$key}==$g[0])
+{print "Warning cif2mcphas: in elements.pl table is $key= $hash{$key} \n";
+ print "          in  mcphaseexplorer/ions database $key = $g[0]\n taking elements.pl table value\n"; 
+};
+                 }
+                                                }
+# try also to find and set also radial wave function paramters
+foreach my $key (keys %rwv){
+if ($line=~/^(#!|[^#])*?\b$key\s*=/) 
+                 {($v)=($line=~m|$key\s*=\s*([^\s][^>^<^=]+)|);
+                                          @g=split(" ",$v);
+                  $rwv{$key}=$g[0];
+                  }
+                          }
+                      }
+close Fin;
+#foreach my $key (keys %hash) {print "$key=$hash{$key}\n";}
+}
+
 # Rounds up a value, using int() function
 sub my_ceil
 {
@@ -1507,3 +1584,5 @@ sub my_floor
 {
     return ($_[0] < 0) ? int($_[0]) - 1 : int($_[0]);
 }
+
+
