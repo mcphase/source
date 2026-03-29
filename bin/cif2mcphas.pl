@@ -1520,15 +1520,18 @@ sub  check_ionpars_with_mpe_files
  my $sipffilename=$ENV{'MCPHASE_DIR'}.'/bin/mcphaseexplorer/ions/'.$ionf.".sipf";
 
 print "Verifying $ionname information in ".$sipffilename."\n";
+if($rl){print "(note R2 R4 R6 will be different in case option -rl is used)\n\n"; }
  unless(open (Fin,$sipffilename)){print "file $sipffilename not available\n"; return;}
 
  my $nofelectrons = ${$eltab}[0];$nofelectrons =~ s/^[0-9][a-z]//;
 #print $ionname."e\n";
 
-my %hash=split(/=|\s/,${$fftab}[1]);
+my %hash=split(/[=,\s]+/,${$fftab}[1]);
+#@a=split(/[=,\s]+/,${$fftab}[1]);
+#foreach (@a) {print $_."\n";} exit;
 $hash {"nof_electrons"}=$nofelectrons;
 $hash {"IONTYPE"}=$ionname;
-# $hash {"conf"}=${$eltab}[0];
+$hash {"conf"}=${$eltab}[0];
 $hash {"GJ"}=${$eltab}[4];
 $hash {"R2"}=${$eltab}[5];
 $hash {"R4"}=${$eltab}[6];
@@ -1547,15 +1550,15 @@ $rwv {"N5"}=0;$rwv {"C5"}=0;$rwv {"XI5"}=0;
 $rwv {"N6"}=0;$rwv {"C6"}=0;$rwv {"XI6"}=0;
 
 #foreach my $key (keys %hash) {print "$key=$hash{$key}\n";}
-
+#exit;
   while($line= <Fin> ) {foreach my $key (keys %hash) {
                 
                 if ($line=~/^(#!|[^#])*?\b$key\s*=/) 
                  {($v)=($line=~m|$key\s*=\s*([^\s][^>^<^=]+)|);
                                           @g=split(" ",$v);
-                                         unless($hash{$key}==$g[0])
+                                         unless($hash{$key} eq $g[0])
 {print "Warning cif2mcphas: in elements.pl table is $key= $hash{$key} \n";
- print "          in  mcphaseexplorer/ions database $key = $g[0]\n taking elements.pl table value\n"; 
+ print "          in  mcphaseexplorer/ions database $key= $g[0]\n taking elements.pl table value\n"; 
 };
                  }
                                                 }
