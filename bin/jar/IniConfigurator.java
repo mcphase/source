@@ -6,8 +6,6 @@ import java.applet.*;
 
 //import com.sun.java.swing.*;
 import javax.swing.*;
-import borland.jbcl.control.*;
-import borland.jbcl.layout.*;
 
 /******************************************
  * class declaration
