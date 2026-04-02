@@ -49,7 +49,7 @@ manual.pdf: manual.tex version.tex manual.bbl $(wildcard ./*.bib) $(wildcard ./*
 	pdflatex  manual 
 
 manual: manual.pdf
-	rm -r ./manual/*
+	rm -rf ./manual/*
 	latex2html -local_icons manual.tex 
 
 clean :
