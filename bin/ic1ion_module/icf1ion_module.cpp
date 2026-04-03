@@ -2219,23 +2219,23 @@ void icf_printheader(const char *outfile, icpars &pars)
    std::string Lstr = Lout(pars.l); strtolower(Lstr);
    FILEOUT << "# icf1ionmodule version " << IC1IONMODULE_VERSION << " " << ctime(&curtime);
    if(!pars.ionname.empty()) FILEOUT << "# Ion name: " << pars.ionname << "\n";
-   FILEOUT << "# Free ion configuration: " << Lstr << "^" << pars.n << "\n";
-   FILEOUT << "# Spin orbit parameter (" << pars.e_units << "): zeta=" << pars.xi << "\n";
-   FILEOUT << "# Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
+   FILEOUT << "#! Free ion configuration: " << Lstr << "^" << pars.n << "\n";
+   FILEOUT << "#! Spin orbit parameter (" << pars.e_units << "): zeta=" << pars.xi << "\n";
+   FILEOUT << "#! Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
    std::string norm=pars.B.norm(); strtolower(norm); if(norm.find("stev")!=std::string::npos)
    {
       std::string op; if(pars.B.op_equiv==Lt) op.assign("L"); else op.assign("J");
-      FILEOUT << "# Stevens Factors: <" << op << "||alpha||" << op << ">=" << pars.B.alpha();
+      FILEOUT << "#! Stevens Factors: <" << op << "||alpha||" << op << ">=" << pars.B.alpha();
       FILEOUT <<                  ", <" << op << "||beta||" << op << ">=" << pars.B.beta();
       if(pars.l==F) {FILEOUT << ", <" << op << "||gamma||" << op << ">=" << pars.B.gamma();} FILEOUT << "\n";
    }
-   FILEOUT << "# Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
+   FILEOUT << "#! Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)
    {
-      FILEOUT << "# With magnetic field: Bx=" << pars.Bx << ", By=" << pars.By << ", Bz=" << pars.Bz << " Tesla.\n";
+      FILEOUT << "#! With magnetic field: Bx=" << pars.Bx << ", By=" << pars.By << ", Bz=" << pars.Bz << " Tesla.\n";
    }
    if(fabs(pars.Dx2)>DBL_EPSILON || fabs(pars.Dy2)>DBL_EPSILON || fabs(pars.Dz2)>DBL_EPSILON)
-      FILEOUT << "# With spin anisotropy: Dx2=" << pars.Dx2 << ", Dy2=" << pars.Dy2 << ", Dz2=" << pars.Dz2 << " " << pars.e_units << ".\n";
+      FILEOUT << "#! With spin anisotropy: Dx2=" << pars.Dx2 << ", Dy2=" << pars.Dy2 << ", Dz2=" << pars.Dz2 << " " << pars.e_units << ".\n";
    FILEOUT.close();
 }
  
@@ -2281,7 +2281,7 @@ void icf_showoutput(const char *filename,                       // Output file n
 
    icf_printheader(filename,pars);
    std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out | std::fstream::app); // Opens file for appending
-   FILEOUT << "# Energy offset, E0=" << real(est(0,1))*conv << pars.e_units << "\n";
+   FILEOUT << "#! Energy offset, E0=" << real(est(0,1))*conv << pars.e_units << "\n";
    if(!iscomplex) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L_J,mJ) \n"; else
    FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) \n";
 

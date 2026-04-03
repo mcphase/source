@@ -153,6 +153,7 @@ par::~par ()
 }
 
 int par::newatom(jjjpar * p) //creates new atom from an existing and returns its index
+// leaves existing atoms indices unchanged
 { jjjpar ** nnn;
   int j;
                   ++cs.nofatoms; // the number of atoms has to be increased
@@ -436,6 +437,49 @@ FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
    (*jjj[i]).xyz=cs.r*n;
  }
  Cel*=(double)cs.nofatoms/nold; // renormalise elastic constants to reduced unit cell dimension
+}
+
+void par::extend_unitcell(int & n1,int & n2,int & n3)
+                       // extends (primitive) unit cell
+                       // by factor n1 n2 n3, renormalizes elastic constants
+{
+int nold=cs.nofatoms;
+for(int i1=1;i1<=n1;++i1)
+ for(int i2=1;i2<=n2;++i2)
+  for(int i3=1;i3<=n3;++i3)
+   if(i1!=1||i2!=1||i3!=1)
+    for(int n=1;n<=nold;++n)
+     {int ni=newatom(jjj[n]);
+      cs.x[ni]+=cs.r(1,1)*(i1-1)+cs.r(1,2)*(i2-1)+cs.r(1,3)*(i3-1);
+      cs.y[ni]+=cs.r(2,1)*(i1-1)+cs.r(2,2)*(i2-1)+cs.r(2,3)*(i3-1);
+      cs.z[ni]+=cs.r(3,1)*(i1-1)+cs.r(3,2)*(i2-1)+cs.r(3,3)*(i3-1);
+      (*jjj[ni]).xyz[1]=cs.x[ni];
+      (*jjj[ni]).xyz[2]=cs.y[ni];
+      (*jjj[ni]).xyz[3]=cs.z[ni];
+     }
+Cel*=n1*n2*n3; // renormalise elastic constants to extended unit cell dimension
+ // extend primitive unit cell vectors 
+for(int i=1;i<=3;++i){cs.r(i,1)*=n1;cs.r(i,2)*=n2;cs.r(i,3)*=n3;}
+// recalculate reciprocal lattice
+rez=cs.r.Inverse();
+Vector hkl(1,3),hkl_rint(1,3);
+//redetermine sublattices and rij 
+  for(int i=1;i<=cs.nofatoms;++i)
+  {for(int n=1;n<=(*jjj[i]).paranz;++n)
+   {(*jjj[i]).sublattice[n]=0;
+    for(int j=1;j<=cs.nofatoms;++j)
+    {//try if neighbour n is on sublattice j
+     hkl=rez*((*jjj[i]).xyz+(*jjj[i]).dn[n]-(*jjj[j]).xyz);
+     // check if hkl is integer - if yes then the neighbour n is on sublattice j
+     for(int l=1;l<=3;++l){hkl_rint(l)=rint(hkl(l));}
+     if(Norm(hkl_rint-hkl)<0.001){(*jjj[i]).sublattice[n]=j;}
+    }
+    if((*jjj[i]).sublattice[n]==0){fprintf(stderr,"Warning mcphas - par.cpp - extend unitcell inconsistent:  neighbour %i of atom %i at %g %g %g is not on any sublattice. Continuing putting it onto sublattice 1 ...\n",n,i,(*jjj[i]).dn[n](1),(*jjj[i]).dn[n](2),(*jjj[i]).dn[n](3));
+                                   (*jjj[i]).sublattice[n]=1;}
+
+   }
+  }
+
 }
 
 void par::add (par & p1)

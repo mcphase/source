@@ -43,6 +43,7 @@ class par
 ~par ();		//destruktor
 
 int newatom(jjjpar * p); //creates new atom from an existing and returns its index
+                         // leaves existing atoms indices unchanged
 int delatom(int  n, int verbose=0); //removes atom n and returns new nofatoms
 int delatom(int  n, Matrix & distribute,int verbose=0); //removes atom n and returns new nofatoms
 // if n<0 then atom number |n| is removed and also all interactions of other atoms
@@ -57,6 +58,9 @@ int delatom(int  n, Matrix & distribute,int verbose=0); //removes atom n and ret
 
 void reduce_unitcell(int & verbose);//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
+void extend_unitcell(int & n1,int & n2,int & n3); // extends (primitive) unit cell
+                       // by factor n1 n2 n3, renormalizes elastic constants
+                       
 void add(par & b); // add exchange parameters
 void scale(double scalefactor,double scaleGfactor); // scale all interaction parameters by scalefactor and G by scaleGfactor
 void shiftpos(Vector & dabc); // shift all atomic positions by da db dc = dabc

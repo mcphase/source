@@ -142,28 +142,28 @@ void ic_printheader(const char *outfile, icpars &pars)
    FILEOUT << "#{ ic1ionmodule version " << IC1IONMODULE_VERSION << " " << ctime(&curtime);
    if(!pars.ionname.empty()) FILEOUT << "# Ion name: " << pars.ionname << "\n";
    FILEOUT << "# Free ion configuration: " << Lstr << "^" << pars.n << "\n";
-   FILEOUT << "# Free ion parameters (" << pars.e_units << "): F^2=" << pars.F[1] << " F^4=" << pars.F[2];
+   FILEOUT << "#! Free ion parameters (" << pars.e_units << "): F^2=" << pars.F[1] << " F^4=" << pars.F[2];
    if(pars.l==F) {FILEOUT << " F^6=" << pars.F[3];} FILEOUT << " zeta=" << pars.xi << " alpha=" << pars.alpha[0] << " beta=" << pars.alpha[1]; 
    if(pars.l==D) {FILEOUT << "\n";} else {FILEOUT << " gamma=" << pars.alpha[2] << "\n";}
    std::string norm=pars.B.norm(); strtolower(norm); 
    pars.B.conv(wy);
-   FILEOUT << "# Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
-   FILEOUT << "# Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
+   FILEOUT << "#! Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
+   FILEOUT << "#! Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
    pars.B.conv(stev);
-   FILEOUT << "# Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
+   FILEOUT << "#! Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
 // if(norm.find("stev")!=std::string::npos)
 //   {
       std::string op; if(pars.B.op_equiv==Lt) op.assign("L"); else op.assign("J");
-      FILEOUT << "# Stevens Factors: <" << op << "||alpha||" << op << ">=" << pars.B.alpha();
+      FILEOUT << "#! Stevens Factors: <" << op << "||alpha||" << op << ">=" << pars.B.alpha();
       FILEOUT <<                  ", <" << op << "||beta||" << op << ">=" << pars.B.beta();
       if(pars.l==F) FILEOUT << ", <" << op << "||gamma||" << op << ">=" << pars.B.gamma(); 
       FILEOUT << "\n";
 //   }
-   FILEOUT << "# Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
+   FILEOUT << "#! Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
    pars.B.convback();
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)
    {
-      FILEOUT << "# With magnetic field: Bx=" << pars.Bx << ", By=" << pars.By << ", Bz=" << pars.Bz << " Tesla.\n";
+      FILEOUT << "#! With magnetic field: Bx=" << pars.Bx << ", By=" << pars.By << ", Bz=" << pars.Bz << " Tesla.\n";
    }
    FILEOUT.close();
 }
@@ -191,7 +191,7 @@ void ic_showoutput(const char *filename,                        // Output file n
 
    ic_printheader(filename,pars);
    std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out | std::fstream::app); // Opens file for appending
-   FILEOUT << "# Energy offset, E0=" << VE.E(0)*conv << pars.e_units << "\n";
+   FILEOUT << "#! Energy offset, E0=" << VE.E(0)*conv << pars.e_units << "\n";
    std::string basis; basis.assign(pars.basis); strtolower(basis);
    if(basis.find("msml")!=std::string::npos)
    {

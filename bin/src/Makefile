@@ -150,7 +150,8 @@ all :  martin.o ../clusterize$(EXE) ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE
 	../singleion$(EXE) ../mcdispit$(EXE) ../mcphasit$(EXE) ../spins$(EXE) \
 	../spinsfromq$(EXE) ../addj$(EXE)  ../reduce_unitcell$(EXE)  \
 	../densplt$(EXE)  ../pointc$(EXE) ../mcdiff$(EXE) \
-        ../formfactor$(EXE) ../radwavfunc$(EXE) ../anisotropyit$(EXE)
+        ../formfactor$(EXE) ../radwavfunc$(EXE) ../anisotropyit$(EXE) \
+        ../extend_unitcell$(EXE)
 
 test: ../ionpars$(EXE) ../jjjpar$(EXE)
 testperlparse:  ../perlparse$(EXE)
@@ -221,6 +222,9 @@ mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 
 reduce_unitcell.o: reduce_unitcell.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
+
+extend_unitcell.o: extend_unitcell.c $(INCL) 
+	$(CCC) $(CFLAGS)  $<
 
 anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 	$(CCC) $(CFLAGS)  $(THREADFLAG) $<
@@ -336,6 +340,10 @@ ip.o: ionpars.cpp
 ../reduce_unitcell$(EXE): reduce_unitcell.o $(OBJS)   martin.o  $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
 	@echo Linking ../reduce_unitcell
 	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)  $(THREADLINK)
+
+../extend_unitcell$(EXE): extend_unitcell.o $(OBJS)  $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
+	@echo Linking ../extend_unitcell
+	@$(LINKER)  -Wall  -o ../extend_unitcell $^  $(LFLAGS) 
 
 ../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o mathparser.o perlparse.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
 	@echo Linking ../spins
