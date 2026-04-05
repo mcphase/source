@@ -413,7 +413,8 @@ void par::reduce_unitcell(int & verbose)
  int i,j,k,nold=cs.nofatoms;
  Vector d(1,3),n(1,3);Matrix dis(1,1,1,1);dis=0;
 FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
-  
+  // recalculate reciprocal lattice in case it is not set correctly
+ rez=cs.r.Inverse();
  for(i=1;i<cs.nofatoms;++i){int ct=0;
   for(j=i+1;j<=cs.nofatoms;++j){//printf("nofatoms=%i %i %i\n",cs.nofatoms,i,j);
   d=(*jjj[j]).xyz-(*jjj[i]).xyz;
@@ -437,18 +438,24 @@ FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
    (*jjj[i]).xyz=cs.r*n;
  }
  Cel*=(double)cs.nofatoms/nold; // renormalise elastic constants to reduced unit cell dimension
+ 
 }
 
-void par::extend_unitcell(int & n1,int & n2,int & n3)
+void par::extend_unitcell(int & n1,int & n2,int & n3,int c1, int c2, int c3) 
                        // extends (primitive) unit cell
                        // by factor n1 n2 n3, renormalizes elastic constants
-{
+                       // note: c1,c2,c3 denotes the primitve subcell, which should
+                       //       be heading the list of atoms in the supercell
+{if(c1<1||c1>n1){fprintf(stderr,"Error par::extend_unitcell - subcell index c1=%i not in allowed range 0<c1<%i\n",c1,n1);exit(1);}
+ if(c2<1||c2>n2){fprintf(stderr,"Error par::extend_unitcell - subcell index c1=%i not in allowed range 0<c2<%i\n",c2,n2);exit(1);}
+ if(c3<1||c3>n3){fprintf(stderr,"Error par::extend_unitcell - subcell index c1=%i not in allowed range 0<c3<%i\n",c3,n3);exit(1);}
+
 int nold=cs.nofatoms;
 for(int i1=1;i1<=n1;++i1)
  for(int i2=1;i2<=n2;++i2)
   for(int i3=1;i3<=n3;++i3)
-   if(i1!=1||i2!=1||i3!=1)
-    for(int n=1;n<=nold;++n)
+   if(i1!=c1||i2!=c2||i3!=c3)// create atoms in all subcells except c1c2c3
+    {for(int n=1;n<=nold;++n)
      {int ni=newatom(jjj[n]);
       cs.x[ni]+=cs.r(1,1)*(i1-1)+cs.r(1,2)*(i2-1)+cs.r(1,3)*(i3-1);
       cs.y[ni]+=cs.r(2,1)*(i1-1)+cs.r(2,2)*(i2-1)+cs.r(2,3)*(i3-1);
@@ -457,13 +464,26 @@ for(int i1=1;i1<=n1;++i1)
       (*jjj[ni]).xyz[2]=cs.y[ni];
       (*jjj[ni]).xyz[3]=cs.z[ni];
      }
+    }
+
+// shift original atoms into subcell c1c2c3
+for(int ni=1;ni<=nold;++ni)
+     {
+      cs.x[ni]+=cs.r(1,1)*(c1-1)+cs.r(1,2)*(c2-1)+cs.r(1,3)*(c3-1);
+      cs.y[ni]+=cs.r(2,1)*(c1-1)+cs.r(2,2)*(c2-1)+cs.r(2,3)*(c3-1);
+      cs.z[ni]+=cs.r(3,1)*(c1-1)+cs.r(3,2)*(c2-1)+cs.r(3,3)*(c3-1);
+      (*jjj[ni]).xyz[1]=cs.x[ni];
+      (*jjj[ni]).xyz[2]=cs.y[ni];
+      (*jjj[ni]).xyz[3]=cs.z[ni];
+     }
+
 Cel*=n1*n2*n3; // renormalise elastic constants to extended unit cell dimension
  // extend primitive unit cell vectors 
 for(int i=1;i<=3;++i){cs.r(i,1)*=n1;cs.r(i,2)*=n2;cs.r(i,3)*=n3;}
 // recalculate reciprocal lattice
 rez=cs.r.Inverse();
 Vector hkl(1,3),hkl_rint(1,3);
-//redetermine sublattices and rij 
+//redetermine sublattices  
   for(int i=1;i<=cs.nofatoms;++i)
   {for(int n=1;n<=(*jjj[i]).paranz;++n)
    {(*jjj[i]).sublattice[n]=0;

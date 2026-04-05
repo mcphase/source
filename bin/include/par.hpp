@@ -58,8 +58,11 @@ int delatom(int  n, Matrix & distribute,int verbose=0); //removes atom n and ret
 
 void reduce_unitcell(int & verbose);//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
-void extend_unitcell(int & n1,int & n2,int & n3); // extends (primitive) unit cell
+void extend_unitcell(int & n1,int & n2,int & n3,int c1=1, int c2=1, int c3=1); 
+                       // extends (primitive) unit cell
                        // by factor n1 n2 n3, renormalizes elastic constants
+                       // note: c1,c2,c3 denotes the primitve subcell, which should
+                       //       be heading the list of atoms in the supercell
                        
 void add(par & b); // add exchange parameters
 void scale(double scalefactor,double scaleGfactor); // scale all interaction parameters by scalefactor and G by scaleGfactor

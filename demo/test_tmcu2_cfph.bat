@@ -65,8 +65,8 @@ call mcdispit -prefix test_ -pinit 0.1
 
 range 7 0.49 0.51 results/test_mcdisp.qei
 getvalue.pl -c 0.000529  9 12 12.9345     0    results/test_mcdisp.qei
-getvalue.pl -c 0.01138  9 11 12.9345      0    results/test_mcdisp.qei
-getvalue.pl -c 0.01141   9 10 12.9345      0    results/test_mcdisp.qei
+getvalue.pl -c 0.01147  9 11 12.9345      0    results/test_mcdisp.qei
+getvalue.pl -c 0.01149   9 10 12.9345      0    results/test_mcdisp.qei
  
 REM  <h2> diffraction pattern </h2>
 

@@ -79,8 +79,8 @@ getvalue.pl -c 52.85719 0 9 1 0 results/test_mcphas.fum
  mcdispit -prefix test_ -pinit 0.1
 
 range 7 0.2 0.4 results/test_mcdisp.qei
-getvalue.pl -c 0.005526 9 10 13.9967 0 results/test_mcdisp.qei
-getvalue.pl -c 0.005499 9 11 13.9967 0 results/test_mcdisp.qei
+getvalue.pl -c 0.005594 9 10 13.9967 0 results/test_mcdisp.qei
+getvalue.pl -c 0.005568 9 11 13.9967 0 results/test_mcdisp.qei
 getvalue.pl -c 0.000816 9 12 13.9967 0 results/test_mcdisp.qei
   
 

@@ -59,12 +59,14 @@ void getU(double & U,Vector & Happ,double & T,
 // routine for the case of removing phononic degrees of freedom and
 // - renormalising elastic constants
 // - calculating (phonon induced) magnetoelastic and quadrupolar interactions
+// ... interactions will be calculated for the first nprim atoms in unit celll par a 
 // ***************************************************************************
-void delphonons(par & a,bool symmetrize, int noindexchange)
+void delphonons(par & a,bool symmetrize, int noindexchange,int nprim)
 {fprintf(stderr,"# deleting phonons");
 // 1. renormalise elastic constants using only phonon degrees of freedom
 //   and calling htcalc with doeps for various applied external stresses ...
 double U; int r; 
+if (nprim>a.cs.nofatoms){fprintf(stderr,"Error reduce_unitcell - delphonons: nprim=%i>nofatoms=%i\n",nprim,a.cs.nofatoms);exit(1); }
  par phon(a); // for phonon --> elastic constants
 par pw(a);  // pw working parameterset ---> multipolar and magnetoelastic interactions
 time_t curtime;
@@ -349,7 +351,8 @@ Vector dabc(1,3),drijk(1,3);
 Matrix prim_unitcell_ijk(1,3,1,3);
 prim_unitcell_ijk=pw.cs.prim_unitcell_ijk();
 ini.doeps=0;
-for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
+//for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
+for(int n=nprim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
   for(int n1=pw.cs.nofatoms;n1>0;--n1)// go through all magnetic ions
    if((*pw.jjj[n1]).module_type==fixmom)
@@ -501,6 +504,10 @@ int main (int argc, char **argv)
                         -delatoms phons\n   \
                          same as -delatoms phon but symmetrize interactions by creating equivalent nearest\n \
                          neighbours and averaging calculated two ion interactions \n \
+                        -delatoms phone 3 3 3 2 2 2 \n   \
+                         same as -delatoms phon but as inital step extend  primitive unit cell \n \
+                         to a 3x3x3 supercell - then perform the calculation and \n \
+                         ouput the results only for the primitive subcell 2 2 2 \n \
                         -mcdiff   create also mcdiff.in file with reduced unit cell\n \
                         -v  verbose mode\n \
                         -vv very verbose mode\n \
@@ -508,7 +515,7 @@ int main (int argc, char **argv)
       exit (1);
     } else { fprintf (stderr,"#* reduce_unitcell 250123 *\n"); }
 
-int ow=1,i=0; int n=0,noindexchange=0,mcdiff=0;bool delphon=false,symmetrize;
+int ow=1,i=0; int n=0,noindexchange=0,mcdiff=0,n1=1,n2=1,n3=1,s1=1,s2=1,s3=1;bool delphon=false,symmetrize,extend=false;
 char * token;
 char *substr[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];
 float ns[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];ns[0]=MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL;
@@ -524,6 +531,15 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
  if(strcmp(argv[ow],"phon")==0){delphon=true;symmetrize=false;}
  else
  if(strcmp(argv[ow],"phons")==0){delphon=true;symmetrize=true;}
+ else
+ if(strcmp(argv[ow],"phone")==0){delphon=true;symmetrize=false;extend=true;
+                                 ++ow; n1=atoi(argv[ow]);
+                                 ++ow; n2=atoi(argv[ow]);
+                                 ++ow; n3=atoi(argv[ow]);
+                                 ++ow; s1=atoi(argv[ow]);
+                                 ++ow; s2=atoi(argv[ow]);
+                                 ++ow; s3=atoi(argv[ow]);
+                                }
  else{
  // substitute all commma with spaces
   while ((token=strrchr(argv[ow],','))!=NULL){++i;substr[i]=token+1;*token='\0';}
@@ -542,8 +558,10 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
 
 if(n>0){a.set_nofcomponents(n);if(verbose){fprintf(stderr,"Setting nofcomponents=%i\n",n);}}
 
-if(delphon){
-delphonons(a,symmetrize,noindexchange);
+if(delphon){Matrix p(1,3,1,3);int nprim=a.cs.nofatoms;p=a.cs.r;// remember primitive lattice
+  if(extend){a.extend_unitcell(n1,n2,n3,s1,s2,s3);}
+ delphonons(a,symmetrize,noindexchange,nprim);
+  if(extend){a.cs.r=p;a.reduce_unitcell(verbose);} // go back to original primitive lattice 
 }
 else
 if(i==0){
