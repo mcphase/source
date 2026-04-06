@@ -245,14 +245,28 @@ icf1ion (no file.levels.cef required, takes values from icf1ion.out) .
 		 be sorted according to descending T values !!!
                  output is written to stdout.
 %script2html_end{epsdebye} \end{description}
-%script2html_begin{extendunitcell} \begin{description}
-\item [\prg extendunitcell\index{extendunitcell}\label{extendunitcell} n1 n2 n3]program to extend crystallographic %%@
-unit cell n 
-                times in r1 (or r2,r3) direction, meaning take mcphas.j, mcphas.tst 
-                and mcdiff\index{mcdiff}.in and generate an extended description of the unit %%@
-cell 
-                n1xr1,n2xr2,n3xr3 put result into extend.j, extend.tst and extend.in
-%script2html_end{extendunitcell} \end{description}
+%script2html_begin{extend_unitcell} \begin{description}
+\item[\prg extend\_unitcell\index{extend\_unitcell}\label{extendunitcell} {[options]}  n1 n2 n3 mcphas.j]\addcontentsline{toc}{subsubsection}{\prg extend\_unitcell} 
+ program to extend crystallographic unit cell n1 (n2,n3) 
+ times in r1 (r2,r3) direction, meaning take mcphas.j
+ and generate an extended description of the unit cell 
+ n1xr1,n2xr2,n3xr3 put result into stdout.
+
+Options:
+\begin{itemize}
+ \item -nofcomponents 23 fixes the nofcomponents to 23 by 
+                         reducing (removing entries) or increasing (by filling with zeroes) 
+                         the exchange parameter tables
+  \item -i  forces output with indexchange 
+  \item -ni  forces output without indexchange 
+\end{itemize}
+ Options for creating quantum dots, quantum chains and quantum planes: 
+\begin{itemize}
+  \item -r1    remove interactions beyond the extended unit cell in r1 direction
+  \item -r2    remove interactions beyond the extended unit cell in r2 direction
+  \item -r3    remove interactions beyond the extended unit cell in r3 direction
+\end{itemize}
+%script2html_end{extend_unitcell} \end{description}
 %script2html_begin{fermicol} \begin{description}
 \item [\prg fermicol\index{fermicol}\label{fermicol} col T filename]\addcontentsline{toc}{subsubsection}{\prg fermicol} calculates the Fermifunction from energy in column col.
 \begin{description}

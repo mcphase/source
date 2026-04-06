@@ -35,7 +35,7 @@ displaytext         displaytext
 displaycontour      displaycontour
 epsdebye            epsdebye
 expcol              expcol
-extendunitcell      extendunitcell
+extend_unitcell     extend_unitcell
 factcol             factcol
 fermicol            fermicol
 fform               fform
