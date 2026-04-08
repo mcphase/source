@@ -101,7 +101,7 @@ if(ini.nofrndtries<0){fprintf(stderr,"# Error reduce_unitcell - nofrndtries<0 - 
   Vector h1ext(1,HEXT_DIMENSION);h1ext=0;
 
 
-// initialize output file
+// initialize output file of mf configurations
 FILE * fout;
 if(verbose){fprintf(stderr,"Creating file results/reduce_unitcell_phon_mcphas.mf\n");
            fout=fopen_errchk("results/reduce_unitcell_phon_mcphas.mf","w");
@@ -130,7 +130,7 @@ fprintf(fout, "#output file of program reduce_unitcell ");
    
             }
 // ---------------------------------
-// 1. compute elastic constants ....
+fprintf(stderr,"# 1. computing elastic constants ....\n");
 // ---------------------------------
 // only keep phononic degrees of freedom in phon and
 // apply various stresses 
@@ -176,6 +176,7 @@ qvectors testqs_phon (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspin
  //                               printf("U+sigma.eps-U0=%12.12g U0=%12.12g -sigma.eps=%12.12g\n",(U-U0)*phon.cs.nofatoms+cel*sps.epsilon(n)*phon.cs.pVol()/1.60218e-1,U0*phon.cs.nofatoms,-cel*sps.epsilon(n)*phon.cs.pVol()/1.60218e-1);
 //if(n==4)sps.print(stdout);
                                 for(int m=1;m<=6;++m)s(n,m)=physprop_phon.sps.epsilon(m)/cel;
+print_time_estimate_until_end((6-n)/n);
                                }  // sigma=cel* eps    eps=s*sigma
           // s and cel must be symmetric, thus if s is not - symmetrize it by averaging off diagonal elements
           s=0.5*(s+s.Transpose());
@@ -233,8 +234,6 @@ if(verbose){fclose(fout);
        }
 
 // ---------------------------------
-// 2. generate magnetoelastic interactions 
-// ---------------------------------
 // strategy: - take full unreduced interactions and set for all magnetic ions Gcfph=0
 //           - determine phonon induced Gcfph^alphagamma(i)
 //           - and multipolar Jgammagamma'(ij)by calculating the energy
@@ -288,12 +287,17 @@ ini.doeps=0; // set epsilon=0
  physprop.sps.epsilon=0;  
 
 getU(U0,Happ,T,ini,pw,testqs,testspins,physprop,"U0-reference");
-if(verbose){fprintf(stderr,"\n ----- calculating self energy and Gcfph -------\nU0=%12.12g\n",U0);}
+if(verbose){fprintf(stderr,"\n U0=%12.12g\n",U0);}
  
 // ---------------------------------
-// 2 a) zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)
+fprintf(stderr,"# 2. computing multipolar self interaction J(0 0 0) and magnetoelastic interaction Gcfph\n");
+// zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)
 // ---------------------------------
-Vector dnull(1,3);dnull=0; int nd;
+Vector dnull(1,3);dnull=0; int nd;int nofptstodo=0,nofptsdone=0;
+for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
+ if((*pw.jjj[n]).module_type==fixmom)
+  for(int g=1;g<=pw.cs.nofcomponents;++g){++nofptstodo;}
+
 for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
   for(int g=1;g<=pw.cs.nofcomponents;++g)
@@ -313,9 +317,9 @@ else if (verbose){fprintf(stderr,"\n atom %i I_%i  <--> x=%g y=%g ",n,g,x,y);}
 
 //if(g==4){fprintf(stderr,"n=%i nd=%i g=%i Ua=%12.12g U0=%12.12g --> Jii44=%g\n",n,nd,g,Ua,U0,-2.0*(Ua-U0)*pw.cs.nofatoms);sps.print(stderr);}
 // ---------------------------------
-// 2 b)  nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to
-// ---------------------------------
+//nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to
 //      energy of a) ----> Gcfph^alphagamma(i)   
+// ---------------------------------
    physprop.sps.epsilon=0;     
    for(int al=1;al<=6;++al){ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
                  physprop.sps.epsilon(al)=1e-6;
@@ -341,16 +345,17 @@ physprop.sps.print(stderr);}
                            }
 
   (*pw.jjj[n]).MF(g)=0;
+ ++nofptsdone;--nofptstodo;print_time_estimate_until_end(nofptstodo/nofptsdone);
  }
-if(verbose){fprintf(stderr,"\n ------- calculating bilinear interactions -------\n");}
 
 // ---------------------------------
-// 2 c) zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)
+fprintf(stderr,"# 3. computing multipolar two ion interactions\n");
+//  zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)
 // ---------------------------------
 Vector dabc(1,3),drijk(1,3); 
 Matrix prim_unitcell_ijk(1,3,1,3);
 prim_unitcell_ijk=pw.cs.prim_unitcell_ijk();
-ini.doeps=0;
+ini.doeps=0;nofptstodo=0;nofptsdone=0;
 //for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
 for(int n=nprim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
@@ -358,8 +363,17 @@ for(int n=nprim;n>0;--n)// go through all magnetic ions
    if((*pw.jjj[n1]).module_type==fixmom)
     for(int g=1;g<=pw.cs.nofcomponents;++g)
      for(int g1=1;g1<=pw.cs.nofcomponents;++g1)
+     if(n1!=n||g1!=g){++nofptstodo;}
+
+for(int n=nprim;n>0;--n)// go through all magnetic ions
+ if((*pw.jjj[n]).module_type==fixmom)
+  for(int n1=pw.cs.nofatoms;n1>0;--n1)// go through all magnetic ions
+   if((*pw.jjj[n1]).module_type==fixmom)
+    for(int g=1;g<=pw.cs.nofcomponents;++g)
+     for(int g1=1;g1<=pw.cs.nofcomponents;++g1)
      if(n1!=n||g1!=g)
-     {(*pw.jjj[n]).MF(g)=1;
+     {
+      (*pw.jjj[n]).MF(g)=1;
       (*pw.jjj[n1]).MF(g1)=1;
   getU(Uc,Happ,T,ini,pw,testqs,testspins,physprop,"bilinear interaction");
      if(verbose){x=(n-1)*pw.cs.nofcomponents+g;y=(n1-1)*pw.cs.nofcomponents+g1;
@@ -428,7 +442,8 @@ if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
 
       (*pw.jjj[n]).MF(g)=0;
       (*pw.jjj[n1]).MF(g1)=0;
-    }
+  ++nofptsdone;--nofptstodo;print_time_estimate_until_end(nofptstodo/nofptsdone); 
+ }
 fclose(fout);    
 
 // remove all phonons from a before outputting it ...
@@ -498,7 +513,7 @@ int main (int argc, char **argv)
                          constants by applying different components of the stress tensor and computing\n   \
                          self consistent strain, furthermore compute phonon induced magnetoelastic and \n   \
                          quadrupolar interactions by self consistent mean field calculations for various \n   \
-                         strains and quadrupolar moments - this approach is to be preferred over the Einstein model \n   \                        
+                         strains and quadrupolar moments - this approach is to be preferred over the Einstein model \n   \
                          this approach needs a file reduce_unitcell.ini and optional reduce_unitcell.tst with  \n   \
                          the files correspond in the format exactly to mcphas.ini and mcphas.tst \n \
                         -delatoms phons\n   \
