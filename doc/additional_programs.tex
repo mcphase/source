@@ -4,7 +4,7 @@ This section  contains some further programs which do some important manipulatio
 in magnetism, ...
 \begin{description} 
 %script2html_begin{addj} \begin{description}
-\item [\prg addj\index{addj}\label{addj} \addcontentsline{toc}{subsubsection}{\prg addj}
+\item [{\prg addj}\index{addj}\label{addj} \addcontentsline{toc}{subsubsection}{\prg addj}
 file1.j file2.j:]adds exchange parameters of file2.j to the %%@
 parameters in
 file1.j - output is written to stdout, if file2.j is not given, a copy of the input file is saved 
@@ -762,6 +762,73 @@ interaction operator expectation values are set to zero
  These interactions are added by {\prg reduce\_unitcell} 
  to the the two ion interactions of the input file.
 \end{description}
+\item[Option: -delatoms phone 3 3 3 2 2 2]
+   Option {\prg-delatoms phone} is similar to option {\prg -delatoms phon}.
+  However, actually before starting {\prg reduce\_unitcell} extend
+  unit cell by $3 3 3$ to form a supercell. Do the deletion of atoms
+  using this supercell as the primitive unit cell. Do calculation of
+  interactions only for a specific subcell $2 2 2$ of this supercell to save
+  computation time. After deleting phononic atoms in this way, output
+  file with the computed interactions. 
+
+\OO This is all fine, yet I prefer the simple formula in the small text above 
+based on the Einstein model approach !
+
+\PP  Yes it would be wonderful to have a simple formula - but nature is complex and it is of 
+general interest to study the complexity of the solid state. I have a question:
+what the hell is the difference between (i) extending a unit cell using the 
+{\prg reduce\_unitell.ini} file ({\prg maxqperiod, maxnofspins} and (hkl) range may be set
+to creat nice supercells) and (ii) this option {\prg -delatoms phone } ?
+
+\EE You are touching an important point, indeed, honourable \pp ! Let me try to
+explain on a simple example: (i) if we stay with the primitive unit cell and
+let the program build supercells by settings in the {\prg reduce\_unitell.ini } file,
+the program will for example calculate the quadrupolar $O_2^0-O_2^0$ interaction between
+atom 1 and atom 2 in the primitive unit cell by forcing 
+the expectation valu $\langle O_2^0 \rangle$ on all atoms 1 and atoms 2
+in the supercell to be  $\langle O_2^0 \rangle=I_6\equiv 1$ and
+ relaxing the phonon coordinates
+of all atoms in the supercell. What we will get in this way is
+the sum of the $O_2^0$-interactions between atom 1 and all atoms 2, i.e.
+$sum_{n\in {\rm atom 2 sublattice}} J^{\rm eff}_{66}(\mbf R_n-\mbf R_{1})$.
+ On the other hand, if we use the (ii) option {\prg -delatoms phone 3 3 3 2 2 2}
+the program will create a $3x3x3$ supercell before doing any calculation which
+use the {\prg reduce\_unitell.ini} file. If we set in {\prg reduce\_unitell.ini} 
+{\prg maxqperiod=1}, no super-supercells of this $3x3x3$ supercell will be created.
+The program will then  calculate the quadrupolar $O_2^0-O_2^0$ interaction between
+atom 1 and atom 2 in the primitive unit cell number $2 2 2$ (the central primitive cell in
+the supercell) by forcing $\langle O_2^0 \rangle$ on atoms 1 and atoms 2
+only in this central primitive unitcell to be  $\langle O_2^0 \rangle=I_6\equiv 1$
+ (in all supercells of the crystal).
+In this way the result will be the quadrupolar interaction between
+atom 1 and 2 (provided $O_2^0-O_2^0$ interactions to more distant atoms 2 sitting in
+the central primitive unitcell of neighbouring supercells can be neglected)
+ If we choose the supercell large enough
+we can hope to derive from such a calculation the individual $J^{\rm eff}_{66}(\mbf R_2-\mbf R_{1})$.
+
+\OO Brilliant ! So why is option {\prg -delatoms phone 3 3 3 2 2 2} not the standard way
+of deriving a reduced model ? Why is this an option ?
+
+\EE Oh - computing time, creating a large supercell means we have to do a lot of
+calculations. There is no other reason.
+
+\PP I see, you need a larger computer - is the program parallelized ? Then I can
+tell a student to install it on our supercomputer.
+
+\EE Dear \pp, I appreciate this great idea, reduce\_unitell calculations are parallelized.
+   It would be nice to have also some more scientists thinking about how
+   to develop a more clever approach. I think option {\prg -delatoms phone 3 3 3 2 2 2}
+   is not the best we can do.
+
+\OO I see, there is some more theoretical work to be done, let us try to find
+   clever scientists with interest in this problem ! 
+   Supercomputers and money are only a small part of the world.
+
+\PP I see your point, but do not agree ... 
+  
+  [we do not print the following discussion about the importance of
+   ideas and money and power, which can frequently be observed in any organisation built
+   by humans.]
           
 \item[Option: -delatoms 1:3+-0.75:4+-0.25,2,5,7]  removes atoms number 1,2,5,7 for atom 1 the interactions
  			 are transferred to 75\% to atom 3 and 25\% to atom 4 and interactions to atoms 3 and 4 are

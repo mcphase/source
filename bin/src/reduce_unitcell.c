@@ -160,7 +160,7 @@ qvectors testqs_phon (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspin
 
 
     Matrix s(1,6,1,6); //myPrintVector(sps.epsilon,"Initial Strain");
-          
+          if(verbose){printf("Calculating Reference Energy U0\n");}
     getU(U0,Happ,T,ini,phon,testqs_phon,testspins_phon,physprop_phon,"elastic constants U0");
     if(verbose)fprintf(stderr,"U0=%g meV ",U0);
            double cel=0.01;  // fixed stress to apply in GPa
@@ -290,8 +290,11 @@ getU(U0,Happ,T,ini,pw,testqs,testspins,physprop,"U0-reference");
 if(verbose){fprintf(stderr,"\n U0=%12.12g\n",U0);}
  
 // ---------------------------------
-fprintf(stderr,"# 2. computing multipolar self interaction J(0 0 0) and magnetoelastic interaction Gcfph\n");
-// zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)
+fprintf(stderr,"# 2. computing multipolar self interaction J(0 0 0)\ and magnetoelastic interaction Gcfph\n");
+fprintf(stderr,"#a) zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)\n");
+fprintf(stderr,"#b) nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to\n");
+fprintf(stderr,"#      energy of a) ----> Gcfph^alphagamma(i) \n");
+
 // ---------------------------------
 Vector dnull(1,3);dnull=0; int nd;int nofptstodo=0,nofptsdone=0;
 for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
@@ -302,6 +305,8 @@ for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
   for(int g=1;g<=pw.cs.nofcomponents;++g)
  {(*pw.jjj[n]).MF(g)=1;
+          if(verbose){printf("Calculating self interaction J%i(0) for atom %i(%i), i.e. for component %i \n",g,n,pw.cs.nofatoms,g);}
+  
        getU(Ua,Happ,T,ini,pw,testqs,testspins,physprop,"selfenergy");
       if(verbose){x=0;y=(n-1)*pw.cs.nofcomponents+g;
              ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
@@ -321,7 +326,10 @@ else if (verbose){fprintf(stderr,"\n atom %i I_%i  <--> x=%g y=%g ",n,g,x,y);}
 //      energy of a) ----> Gcfph^alphagamma(i)   
 // ---------------------------------
    physprop.sps.epsilon=0;     
-   for(int al=1;al<=6;++al){ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
+   for(int al=1;al<=6;++al){
+ if(verbose){printf("Calculating magnetoelastic interaction  for atom %i(%i), term Gcfph epsilon_%i I%i \n",n,pw.cs.nofatoms,al,g);}
+  
+                 ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
                  physprop.sps.epsilon(al)=1e-6;
                  double Eelrenormdiveps=0.5*physprop.sps.epsilon(al)*a.Cel(al,al);
                 getU(Ub,Happ,T,ini,pw,testqs,testspins,physprop,"Gcfph");
@@ -350,7 +358,7 @@ physprop.sps.print(stderr);}
 
 // ---------------------------------
 fprintf(stderr,"# 3. computing multipolar two ion interactions\n");
-//  zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)
+fprintf(stderr,"# zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)\n");
 // ---------------------------------
 Vector dabc(1,3),drijk(1,3); 
 Matrix prim_unitcell_ijk(1,3,1,3);
@@ -372,7 +380,8 @@ for(int n=nprim;n>0;--n)// go through all magnetic ions
     for(int g=1;g<=pw.cs.nofcomponents;++g)
      for(int g1=1;g1<=pw.cs.nofcomponents;++g1)
      if(n1!=n||g1!=g)
-     {
+     {if(verbose){printf("Calculating two ion interaction J%i%i(%i%i), i.e. for atom %i I%i - atom %i I%i \n",g,g1,n,n1,n,g,n1,g1);}
+  
       (*pw.jjj[n]).MF(g)=1;
       (*pw.jjj[n1]).MF(g1)=1;
   getU(Uc,Happ,T,ini,pw,testqs,testspins,physprop,"bilinear interaction");
