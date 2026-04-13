@@ -139,11 +139,11 @@ iceig spectre_eig(sMat<double> Hic, double *Vrot, int cb)
    // Diagonalises the truncated and rotated matrix
    iceig VEr; VEr.calc(cb,Hrot); delete[]Hrot;
 
-   // Transform the eigenvectors of the rotated basis back into the original |alpha,LSJmJ> basis
-   memset(mt,0.,ns*cb*sizeof(double)); double *Vr = new double[cb*ns*sizeof(double)]; 
-   for(i=0; i<ns; i++) for(j=0; j<cb; j++) Vr[i*cb+j] = VEr.V(i,j);
-   F77NAME(dgemm)(&notranspose,&transpose,&cb,&ns,&cb,&alpha,Vr,&cb,Vrot,&ns,&beta,mt,&cb);  // (Vr*Vrot')'
-   delete[]Vr;
+   // Transform the eigenvectors of the rotated basis back into the original |alpha,LSJmJ> basis.
+   // We need V_orig = Vrot[:,0:cb] * VEr.  Compute mt = VEr^T * Vrot[:,0:cb]^T via dgemm,
+   // then store V = mt^T.  For real matrices 'C'='T'.
+   memset(mt,0.,ns*cb*sizeof(double));
+   F77NAME(dgemm)(&transpose,&transpose,&cb,&ns,&cb,&alpha,VEr.V(0),&cb,Vrot,&ns,&beta,mt,&cb);
    iceig VE(ns,true); double *En = VE.E(); for(i=0; i<cb; i++) En[i] = VEr.E(i); for(i=cb; i<ns; i++) En[i] = -DBL_MAX;
    double *V = VE.V(0); for(i=0; i<ns; i++) for(j=0; j<cb; j++) V[j*ns+i] = mt[i*cb+j]; delete[]mt;
 
@@ -165,15 +165,17 @@ iceig spectre_eig(sMat<double> Hic, sMat<double> iHic, complexdouble *Vrot, int 
    // Diagonalises the truncated and rotated matrix
    iceig VEr; VEr.calc(cb,Hrot); delete[]Hrot;
 
-   // Transform the eigenvectors of the rotated basis back into the original |alpha,LSJmJ> basis
+   // Transform the eigenvectors of the rotated basis back into the original |alpha,LSJmJ> basis.
+   // We need V_orig = Vrot[:,0:cb] * VEr.  Compute zmt = VEr^T * Vrot[:,0:cb]^T via zgemm,
+   // then store zV = zmt^T (plain transpose, no conjugation).
+   // Use 'T' (not 'C') for VEr since it may have complex entries; Vrot is real so 'C'='T'.
+   // This also fixes the old manual-copy loop which read VEr out of bounds (i up to ns > cb).
    memset(zmt,0.,ns*cb*sizeof(complexdouble));
-   complexdouble *Vr = new complexdouble[cb*ns*sizeof(complexdouble)]; 
-   for(i=0; i<ns; i++) for(j=0; j<cb; j++) Vr[i*cb+j] = VEr.zV(i,j);
-   F77NAME(zgemm)(&notranspose,&transpose,&cb,&ns,&cb,&zalpha,Vr,&cb,Vrot,&ns,&zbeta,zmt,&cb);  // (Vr*Vrot')'
-   delete[]Vr;
-   double *En = VE.E(); complexdouble *zV = VE.zV(0); 
+   char plaintranspose='T';
+   F77NAME(zgemm)(&plaintranspose,&transpose,&cb,&ns,&cb,&zalpha,VEr.zV(0),&cb,Vrot,&ns,&zbeta,zmt,&cb);
+   double *En = VE.E(); complexdouble *zV = VE.zV(0);
    for(i=0; i<cb; i++) {En[i] = VEr.E(i);} for(i=cb; i<ns; i++) {En[i] = -DBL_MAX;}
-   for(i=0; i<ns; i++) for(j=0; j<cb; j++) { zV[j*ns+i].r = zmt[i*cb+j].r; zV[j*ns+i].i = -zmt[i*cb+j].i; }
+   for(i=0; i<ns; i++) for(j=0; j<cb; j++) { zV[j*ns+i].r = zmt[i*cb+j].r; zV[j*ns+i].i = zmt[i*cb+j].i; }
    delete[]zmt; 
 
    return VE;

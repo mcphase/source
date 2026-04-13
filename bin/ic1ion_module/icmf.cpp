@@ -26,7 +26,7 @@
 // --------------------------------------------------------------------------------------------------------------- //
 // Member function for complexdouble struct
 // --------------------------------------------------------------------------------------------------------------- //
-complexdouble complexdouble::operator=(const double v) { complexdouble t; t.r=v; t.i=0.; return t; }
+complexdouble& complexdouble::operator=(const double v) { r=v; i=0.; return *this; }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Constructors for class iceig::
@@ -67,7 +67,7 @@ iceig::iceig(int Hsz, double *E, complexdouble *zV, int step)
 // --------------------------------------------------------------------------------------------------------------- //
 // Copy constructors
 // --------------------------------------------------------------------------------------------------------------- //
-iceig::iceig(const iceig &p) { *this = p; }
+iceig::iceig(const iceig &p) : _Hsz(0), _E(0), _V(0), _zV(0) { *this = p; }
 iceig &iceig::operator = (const iceig &p) 
 { 
    if(_Hsz==p._Hsz)
@@ -273,7 +273,8 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, int xyz)
 
 icmfmat::icmfmat(const icmfmat & pp)
 {_n=pp._n;_l=pp._l;_num_op=pp._num_op;_xyz=pp._xyz;_save_matrices=pp._save_matrices;
- J=pp.J;T=pp.T;iflag=pp.iflag;
+ J=pp.J;iflag=pp.iflag;
+ T.assign(pp.T.size(),NULL); // Don't share heap pointers; truncation matrices are recalculated on demand
 }
 
 icmfmat::~icmfmat()

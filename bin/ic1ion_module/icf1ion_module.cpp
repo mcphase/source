@@ -48,7 +48,7 @@ icf1ion_module::icf1ion_module(const char * filename)
 }
 
 icf1ion_module::icf1ion_module(const icf1ion_module & pp)
-{for(int i=0;i<=IOP_DIM;++i)st[i]=pp.st[i];
+{for(int i=0;i<=IOP_DIM;++i)st[i]=NULL; // Don't share heap pointers; operator matrices are regenerated on demand
  pars=pp.pars;
  Hcf=pp.Hcf; Hcfi=pp.Hcfi;
 }
@@ -128,7 +128,7 @@ void icf_DS2(sMat<double> &Hcf, icpars &pars)
    fstates_t gs = hunds_gs(n, e_l);
    int J2min, J2max, ns=0, L2=2*abs(gs.L), S2=gs.S2;
    J2min = abs(L2-S2); J2max = L2+S2;
-   sMat<double> rm(J2min-J2max+1,J2min-J2max+1);
+   sMat<double> rm(J2max-J2min+1,J2max-J2min+1);
 
    // Calculates the reduced matrix element
    for (int J2=J2min; J2<=J2max; J2+=2) 
@@ -336,7 +336,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
    fstates_t gs = hunds_gs(n, e_l);
    int J2min, J2max, ns=0, L2=2*abs(gs.L), S2=gs.S2;
    J2min = abs(L2-S2); J2max = L2+S2;
-   sMat<double> rm(J2min-J2max+1,J2min-J2max+1);
+   sMat<double> rm(J2max-J2min+1,J2max-J2min+1);
    for (int J2=J2min; J2<=J2max; J2+=2) 
    {
       ns+=J2+1; 
