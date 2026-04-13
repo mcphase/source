@@ -312,7 +312,7 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
    // Calculates the mean field Hamiltonian = H_singleion + sum_i(gjmbH[i]*Operator[i])
    for(int iJ=1; iJ<=(gjmbH.Hi()-gjmbH.Lo()+1); iJ++)
    {
-      if (q[iJ]<0) a.r = -gjmbH[iJ+gjmbH.Lo()-1]; else a.r = -gjmbH[iJ+gjmbH.Lo()-1];
+      a.r = -gjmbH[iJ+gjmbH.Lo()-1];
       if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,mfmat.T[iJ+1],&incx,Hrot,&incx);
   }
 
