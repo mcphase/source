@@ -48,7 +48,7 @@ icf1ion_module::icf1ion_module(const char * filename)
 }
 
 icf1ion_module::icf1ion_module(const icf1ion_module & pp)
-{for(int i=0;i<=IOP_DIM;++i)st[i]=pp.st[i];
+{for(int i=0;i<=IOP_DIM;++i)st[i]=NULL; // Don't share heap pointers; operator matrices are regenerated on demand
  pars=pp.pars;
  Hcf=pp.Hcf; Hcfi=pp.Hcfi;
 }
