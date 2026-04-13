@@ -26,7 +26,7 @@
 // --------------------------------------------------------------------------------------------------------------- //
 // Member function for complexdouble struct
 // --------------------------------------------------------------------------------------------------------------- //
-complexdouble complexdouble::operator=(const double v) { complexdouble t; t.r=v; t.i=0.; return t; }
+complexdouble& complexdouble::operator=(const double v) { r=v; i=0.; return *this; }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Constructors for class iceig::

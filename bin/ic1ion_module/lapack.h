@@ -34,7 +34,7 @@
 //typedef struct { double r,i; } complexdouble;
 struct complexdouble {
    double r, i;
-   complexdouble operator=(const double v);
+   complexdouble& operator=(const double v);
 };
 
 #if  defined(RIOS) && !defined(CLAPACK)
