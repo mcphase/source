@@ -224,7 +224,7 @@ void IntVector::Resize (int ncl, int nch)
 	    if ((csize = nch-ch)  > 0) copyval(v+hi+1,Zero,csize);
 
 	    // remove old vector
-	    delete (V+cl);
+	    delete[] (V+cl);
 
 	} else {  // newly initialized vector
 	    

@@ -371,8 +371,8 @@ void Matrix::Resize (int nrl, int nrh, int ncl, int nch)
 #endif
 	
 	// remove old matrix
-	delete (M[rl]+cl);
-	delete (M+rl);
+	delete[] (M[rl]+cl);
+	delete[] (M+rl);
 	
 	
     } else {  // newly initialized matrix

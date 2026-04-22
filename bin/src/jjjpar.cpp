@@ -282,7 +282,7 @@ int  jjjpar::addpar (Vector & dabc,Vector & drijk,int & subl)
   delete []jijn;
   delete []dnn;
   delete []drr;
-  delete sl;
+  delete []sl;
   return paranz;
 }
 
@@ -386,7 +386,7 @@ void jjjpar::sortpars ()
   delete []jijn;
   delete []dnn;
   delete []drr;
-  delete sl;
+  delete []sl;
 
 }
 
