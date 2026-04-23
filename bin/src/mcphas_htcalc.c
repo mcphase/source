@@ -205,6 +205,18 @@ int s1=1,s2=2;
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mfcf mf1(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                if ((fered=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps1,mf1))<=fe*(1.0000000000001)){mf=mf1;
+#ifndef _THREADS
+if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
+                                                                                     sps=sps1;fe=fered;}
+                                                                                                  else {
+                                 if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
+                                                                                                       }
+                                                }
+                                       else {
+                                 if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%ife=%fmeV ",sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
+                                            }
+
+#else
                                  if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
@@ -214,6 +226,7 @@ int s1=1,s2=2;
                                        else {
                                  if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
                                             }
+#endif
                     spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
                    for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
@@ -528,7 +541,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
                   }
-*/ // moved to mcphas.c
+*/ // moved to mcphas.c / anisotropy.c
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
  MUTEX_INIT(mutex_min);
@@ -554,7 +567,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  for (k= -testqs.nofqs();(tracetest!=0 ? j<tracetest : k<=testspins.n );++k)
  {++j; if (j>testspins.n) j=-testqs.nofqs();
 #ifndef _THREADS
-       htcalc_iteration(j, femin, spsmin, H, T,ini, inputpars, testqs, testspins, physprops);
+       htcalc_iteration(j, femin, spsmin, Happ, T,ini, inputpars, testqs, testspins, physprops);
 #else
         (*tin[ithread]).j = j;
        #if defined  (__linux__) || defined (__APPLE__)

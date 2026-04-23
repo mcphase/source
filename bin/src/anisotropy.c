@@ -141,7 +141,7 @@ fprintf(fout,
 "#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
 "#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",T(1));
 }
-
+// ***********************************************
 if(do_sipffile){
  jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
  int nofcomponents=argc-(P+3);
@@ -200,6 +200,7 @@ fprintf(stdout,"#\n#1    2        3\n#T(K) H(Tesla) Mpolycrystal(muB) \n");
 if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
 
  par inputpars("./mcphas.j",verbose ); inputpars.save("./results/_mcphas.j",0); 
+
  nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
   Vector Imom(1,inputpars.cs.nofcomponents);
@@ -208,11 +209,18 @@ if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Car
   inputpars.save_sipfs("./results/_");
   //determine saturation momentum (used for scaling the plots, generation of qvectors)
   for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T(1)); // initialize eigenstate matrix
+
   for (im=1;im<=inputpars.cs.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
                             (*inputpars.jjj[l]).Icalc(Imom,T(1),h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
                             Imax(inputpars.cs.nofcomponents*(l-1)+im)=Imom(im);
                                               }
                                   }
+#ifdef _THREADS
+if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
+                  for (int ithread=0; ithread<NUM_THREADS; ithread++) 
+                    tin[ithread] = new htcalc_input(0,ithread,&inputpars);
+#endif
+
  // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
    testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
    ini.testspins=&testspins;
@@ -287,7 +295,12 @@ fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T(Ti),
    std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << ini.nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
    std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << ini.nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
 
-
+#ifdef _THREADS
+std::cout << "#! nofthreads= " << nofthreads << " threads were used in parallel processing " << std::endl;
+for (int ithread=0; ithread<nofthreads; ithread++) delete tin[ithread];
+#else
+std::cout << "# anisotropy was compiled without parallel processing option " << std::endl;
+#endif
 } // do_sipffile
 
 
@@ -299,14 +312,6 @@ fclose(fout);
    double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
    std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
    
-#ifdef _THREADS
-std::cout << "#! nofthreads= " << nofthreads << " threads were used in parallel processing " << std::endl;
-for (int ithread=0; ithread<nofthreads; ithread++) delete tin[ithread];
-#else
-std::cout << "# anisotropy was compiled without parallel processing option " << std::endl;
-#endif
-
- 
    fprintf(stderr,"#**********************************************\n");
    fprintf(stderr,"#          End of Program anisotropy\n");
    fprintf(stderr,"#**********************************************\n");

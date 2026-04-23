@@ -259,5 +259,6 @@ delete[]x;delete []y; delete []z;
   //sps.display(text);
 delete []mq;
 delete magmom;
+if(verbose==1){printf(".. calculating physprops finished\n");}
 }
 }

@@ -323,8 +323,9 @@ if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
  ComplexMatrix ** Icalcpars;Icalcpars=new ComplexMatrix*[inputpars.cs.nofatoms*sdim+2];
 
 // for each ion in the supercell make a copy of the parstorage matrix 
- for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
- {for (l=1;l<=inputpars.cs.nofatoms;++l){int im1=i-1,jm1=j-1,km1=k-1;
+ for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
+ for (l=1;l<=inputpars.cs.nofatoms;++l)
+ {int im1=i-1,jm1=j-1,km1=k-1;
   Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1]=
     new ComplexMatrix((*inputpars.jjj[l]).Icalc_parstorage.Rlo(),
                       (*inputpars.jjj[l]).Icalc_parstorage.Rhi(),
@@ -336,7 +337,7 @@ if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
 //if((*Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1])!=(*inputpars.jjj[l]).Icalc_parstorage)
 // {printf("error in matrix copy\n");exit(1);}
 
-  }}}}
+  }
 
  int diagonalexchange=1;
  FILE * fout;
