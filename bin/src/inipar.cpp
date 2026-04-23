@@ -1072,7 +1072,10 @@ nofthreads=0;getnofthread(nofthreads);
   nofcalls=0;
   noffailedpoints=0;
   sta=0;
+printf("nofstapoints=%i\n",nofstapoints);
   print();
+printf("nofstapoints=%i\n",nofstapoints);
+
  // append also the default values for different prefixes 
  // scan Ha Hb Hc Hi Hj Hk chia chib chic 
  FILE * fout = fopen_errchk (savfilename,"a");

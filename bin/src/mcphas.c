@@ -19,34 +19,7 @@ const char * filemode="w";
 #include "mcphas_fecalc.c"
 #include "mcphas_physpropcalc.c"
 
-// for exchange striction - load exchange striction parameters into ip and store _file
-// returns true if successful
-bool parload(par *& ip,char * iniprefix, const char * filename, int & verbose,par & inputpars, par * ipx = NULL)
-{ char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
-  FILE * fin=NULL; 
-  strcpy(prefix,iniprefix);strcpy(prefix+strlen(iniprefix),filename);
- fin=fopen(prefix,"rb"); if(fin==NULL)strcpy(prefix,filename); else  fclose(fin);
- fin=fopen(prefix,"rb");
- if(fin!=NULL){if(verbose==1){printf("reading parameters from file %s\n",prefix);}
-               ip= new par(prefix,verbose);  
-// here save single ion property files to results
-  strcpy(prefix,"./results/_");strcpy(prefix+11,iniprefix);
-  strcpy(prefix+11+strlen(iniprefix),filename);(*ip).save(prefix,0);
-  fclose(fin);
-   // check if inputpars abc nofatoms  atomic positions sipffilenames nofcomponents  agree with
-  // ipx y z
- // check if ini ipx and ipy and ipz have the same paranz for each neighbour
- // operator ~ returns 8 7 6 5 4 3 2 1 0depending on agreement of
- //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
- //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
- if((inputpars!=(*ip))>3){fprintf(stderr,"# Error - %s does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n",filename);exit(1);}
-  if(ipx!=NULL){
-  if(((*ipx)!=(*ip))>1){fprintf(stderr,"# Error - mcphas.djdx / mcphas.djdeps1 does not match %s in nofneighbours or neighbour positions\n",filename);exit(1);}
-   } 
-  if(verbose)fprintf(stdout,"# strain due to derivatives of 2ion interactions in %s will be calculated\n",filename);
-  return true;
- }   else   return false; 
-}  
+ 
  
 // main program
 int main (int argc, char **argv)
@@ -72,7 +45,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   for (im=1;im<argc;++im)  // im=0  argv[0] is command "mcphasit"
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
-   if (strcmp(argv[im],"-cd")==0) {inc_cd=true;if (options<im)options=im;} // do strain epsilon calculation
+   if (strcmp(argv[im],"-cd")==0) {inc_cd=true;if (options<im)options=im;} // do classical dipole interaction 
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
    if (strcmp(argv[im],"-linepsjj")==0) {linepsjj=1;if (options<im)options=im;} // do exchange strain epsilon calculation linear

@@ -57,6 +57,10 @@ sub usage() {
       nofthetasteps    : number of theta steps to be calculated for polycrystal average
 
     options:
+    -cd            : add classical dipole  interaction using Ewald summation, 
+                     Bowden J.Phys.C:solid state phys. 14(1981) L827  
+                     only the first three interaction operators I1.I2.I3 are considered and it 
+                     is assumed that gJ*I1,gJ*I2,gJ*I3 are the components of the magnetic moment (gJ given in sipf file)
     -doeps         : refine strain epsilon using elastic and magnetoelastic constants
     -linepscf with -doeps use zero strain single ion Hamiltoanian for every mean field iteration
     -linepsjj with -doeps use zero strain two ion interaction Hamiltoanian for every mean field iteration
