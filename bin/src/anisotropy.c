@@ -15,7 +15,7 @@ int verbose=0;
 #include "mcphas_fecalc.c"
 #include "mcphas_physpropcalc.c"
 
-int rephtcalc(Vector Happ,double T,inipar & ini,par & inputpars,qvectors & testqs,
+int rephtcalc(Vector & Happ,double T,inipar & ini,par & inputpars,qvectors & testqs,
              testspincf & testspins, physproperties & physprops)
 {int j=1;
 

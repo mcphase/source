@@ -16,6 +16,14 @@
 ###									###
 ###########################################################################
 
+#debug flag
+#DEBUG=debug
+
+# uncomment next line and set NUM_THREADS in mcphas_htcalc.c and mcdisp.c
+# according to your machine if you want to use multiple processing to speed up
+# calculations
+#  threads=1
+# 
 # Hint for compilation with several Linux PC distributions:
 # When linking it is sometimes not sufficient to use the flags -lX11 -lXpm 
 # only. The path -L /usr/X11R6 must be set explicitly.
@@ -163,8 +171,6 @@ LFLAGS+= -static-libgcc -static-libstdc++ -static-libgfortran
 endif
 endif
 
-#debug flag
-#DEBUG=debug
 
 #                       Optimizer or ANSI standard?
 ifdef DEBUG
@@ -224,3 +230,12 @@ LIBL= /usr/lib/libfl.a
 # ... this is how it should be, but will not work with old compilers !
 CCOPTS+= -std=c++11  
 #CCOPTS+= -std=c++0x 
+
+###########################################################################
+# GCC ADRESS SANITIZER
+ifdef DEBUG
+SANOPTS = -fsanitize=address -fno-omit-frame-pointer
+ CCOPTS += $(SANOPTS)
+ COPTS  += $(SANOPTS)
+ LFLAGS += $(SANOPTS)
+endif

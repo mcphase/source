@@ -1,3 +1,5 @@
+include ../src/Makefile.common
+
 OSTYPE=$(shell uname)
 
 ifdef icc
@@ -75,8 +77,8 @@ endif
 
 ifdef GCC4
  LIBFORTRAN=-lgfortran
- LDFLAGS=-L/usr/local/gfortran/lib/ 
-# LDFLAGS=-L/opt/homebrew/Cellar/gcc/11.3.0_1/lib/gcc/11/
+# LDFLAGS=-L/usr/local/gfortran/lib/ 
+ LDFLAGS=-L/opt/homebrew/Cellar/gcc/15.2.0_1/lib/gcc/current/
 else
  LIBFORTRAN=-lg2c
  CFLAGS+=-D_G77
@@ -185,6 +187,15 @@ ifdef distrib
 #CFLAGS += -mtune=pentium3 -march=i686
 STATIC = -static
 endif
+###########################################################################
+# GCC ADRESS SANITIZER
+ifdef DEBUG
+SANOPTS = -fsanitize=address -fno-omit-frame-pointer
+ CFLAGS  += $(SANOPTS)
+ LDFLAGS += $(SANOPTS)
+endif
+
+
 ##################################################################################
 
 # List of object files to be created and their headers

@@ -49,11 +49,11 @@ void checkini(inipar & ini);
  // returns 1 if too maxnofspinconfigurations is exceeded
  // returns 2 if no spinconfiguration has been found at ht point
  */
-int htcalc(Vector H,double T,inipar & ini, par & inputpars,qvectors & testqs,
+int htcalc(Vector & H,double T,inipar & ini, par & inputpars,qvectors & testqs,
                      testspincf & testspins,physproperties & physprops, int tracetest);
 
 // calculate physical properties for stabilized HT point
-void physpropclc(Vector H,double T,
+void physpropclc(Vector & H,double T,
                                spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars);
 
 // here the free energy is calculated for a given (initial) spinconfiguration
@@ -71,7 +71,7 @@ void physpropclc(Vector H,double T,
     u		mangetic energy[meV]
 
  */
-double fecalc(double & U, double & Eelastic,int & r,double & sc,Vector H,double T,inipar & ini,par & inputpars,
+double fecalc(double & U, double & Eelastic,int & r,double & sc,Vector & H,double T,inipar & ini,par & inputpars,
             spincf & sps,mfcf & mf,physproperties * physprops = NULL);
 
 

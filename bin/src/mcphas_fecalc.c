@@ -269,7 +269,7 @@ else
 }
 
 
-double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector Happ,double T,inipar & ini,par & inputpars,
+double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector & Happ,double T,inipar & ini,par & inputpars,
              spincf & sps,mfcf & mf,physproperties * physprops)
 {/*on input:
     T		Temperature[K]

@@ -430,7 +430,7 @@ if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(
       #endif // def _THREADS
 }
 
-int  htcalc (Vector Happ,double T,inipar & ini,par & inputpars,qvectors & testqs,
+int  htcalc (Vector & Happ,double T,inipar & ini,par & inputpars,qvectors & testqs,
              testspincf & testspins, physproperties & physprops,int tracetest)
 {/* calculates magnetic structure at a given HT- point  
   on input: 

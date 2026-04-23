@@ -1,7 +1,7 @@
 
 
 /************************************************************************/
-void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
+void physpropclc(Vector & H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
 { int i,j,k,l,n,m1; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq; 
  //save fe and u
 //save spinarrangement
