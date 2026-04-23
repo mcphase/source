@@ -191,8 +191,8 @@ IntMatrix::~IntMatrix (void)
 	if ( (--(D->count) == 0 && temporary == 0) || D->count < 0) {
 
 	    // free data
-	    delete (M[rl]+cl);
-	    delete (M+rl);
+	    delete[] (M[rl]+cl);
+	    delete[] (M+rl);
 
 	    // free info block
 	    delete D;
@@ -259,8 +259,8 @@ void IntMatrix::Resize (int nrl, int nrh, int ncl, int nch)
 #endif
 	
 	// remove old matrix
-	delete (M[rl]+cl);
-	delete (M+rl);
+	delete[] (M[rl]+cl);
+	delete[] (M+rl);
 	
 	
     } else {  // newly initialized matrix
