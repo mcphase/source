@@ -227,7 +227,7 @@ FILE * evfileinit(const char * filemode,const char*filename,par & inputpars,cons
           fprintf (fout, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (fout, "#!extended_eigenvector_dimension=%i\n",ev_dim); 
           writeheader(inputpars,fout);
-          fprintf (fout, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  Inuc [barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          fprintf (fout, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  Inuc [barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
   return fout;
   }
 

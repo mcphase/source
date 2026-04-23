@@ -287,7 +287,9 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
  for(i2=1;i2<=ini.mf.na();++i2) for(j2=1;j2<=ini.mf.nb();++j2) for(k2=1;k2<=ini.mf.nc();++k2) { 
    bval=md.baseindex_max(i2,j2,k2); if(bval>maxb) maxb=bval; 
    nval=md.in(i2,j2,k2); if(nval>md.ncel) md.ncel=nval; } md.ncel++;
-   if(maxb==md.nofcomponents) maxb++; // To ensure matrix is not square so overloaded operator ComplexMatrix=(complex<double>) sets all elements to 1e-16 not just diagonal.
+   if(maxb==md.nofcomponents) maxb++; 
+   // To ensure matrix is not square so overloaded operator ComplexMatrix=(complex<double>) 
+   // sets all elements to 1e-16 not just diagonal.
    if(md.Ug==0) { md.Ug = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.Ug[i]=0; }
    if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
    if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
@@ -305,6 +307,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
 chi=0;chibey=0;chiPhon=0;
 int ssm1,in1,in2;
 
+
 // determine chi''
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
    in1=md.in(i1,j1,k1);      
@@ -312,37 +315,64 @@ int ssm1,in1,in2;
  for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
       s=index_s(i1,j1,k1,l1,t1,md,ini);// sm1=s-1;//s3=sm1*mqdim;
       b=md.baseindex(i1,j1,k1,l1,t1);
+ 
+
   for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
     in2=md.in(i2,j2,k2);
   for(l2=1;l2<=md.nofatoms;++l2){
   for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
       ss=index_s(i2,j2,k2,l2,t2,md,ini);ssm1=ss-1;
       bb=md.baseindex(i2,j2,k2,l2,t2);
-   
       if(do_phonon)
-      { if((*md.PgU[in1])(1,b)==defval)  (*md.PgU[in1])(1,b)  = conj(md.sqrt_GammaP(i1,j1,k1)(b))
+      { 
+         #ifdef _THREADS
+          if((*md.PgU[in1])(1,b)==defval)   // take gU Ug from previous runs only for threading - otherwise it fails
+        #endif                              // when threading for each new q-vector we reinitalize gU Ug=0
+                                            // thus it is clear that at each new q-vector these
+                                            // conditions are met to reset md.gU correctly
+                                            // when not threading: only at first call gU=Ug=0
+                                          (*md.PgU[in1])(1,b)  = conj(md.sqrt_GammaP(i1,j1,k1)(b))
                                                                  * md.dPs(i1,j1,k1)(b);
-        if((*md.PUg[in2])(1,bb)==defval) (*md.PUg[in2])(1,bb) = conj(md.dPs(i2,j2,k2)(bb))
+        #ifdef _THREADS
+          if((*md.PUg[in2])(1,bb)==defval) // take gU Ug from previous runs only for threading - otherwise it fails
+        #endif 
+                                         (*md.PUg[in2])(1,bb) = conj(md.dPs(i2,j2,k2)(bb))
                                                                  * md.sqrt_GammaP(i2,j2,k2)(bb);
          chiPhon(1,1)+= PI * (*md.PgU[in1])(1,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.PUg[in2])(1,bb);          
               } // i,j,do_phonon
 
       if(intensitybey>0)
       {for(j=1;j<=mqdim;++j){
-         if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))
+         #ifdef _THREADS
+          if((*md.bUg[in2])(j,bb)==defval) // take gU Ug from previous runs only for threading - otherwise it fails
+        #endif 
+                                         (*md.bUg[in2])(j,bb) = conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))
                                                                  * md.sqrt_Gamma(i2,j2,k2)(bb);
          for(i=1;i<=mqdim;++i){
-        if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(b))
+        #ifdef _THREADS
+          if((*md.bgU[in1])(i,b)==defval) // take gU Ug from previous runs only for threading - otherwise it fails
+        #endif 
+                                          (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(b))
                                                                  * md.dMQs(i1,j1,k1)((b-1)*mqdim+i);
                        
          chibey(i,j)+= PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);         
       }}} // i,j,intensitybey
 
       for(j=1;j<=mqdim;++j){
-        if((*md.Ug[in2])(j,bb)==defval) (*md.Ug[in2])(j,bb) = conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))
+        #ifdef _THREADS
+          if((*md.Ug[in2])(j,bb)==defval) // take gU Ug from previous runs only for threading - otherwise it fails
+        #endif 
+                                         (*md.Ug[in2])(j,bb) = conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))
                                                                  * md.sqrt_Gamma_dip(i2,j2,k2)(bb);
+
          for(i=1;i<=mqdim;++i){
-        if((*md.gU[in1])(i,b)==defval)  (*md.gU[in1])(i,b)  = conj(md.sqrt_Gamma_dip(i1,j1,k1)(b))
+        #ifdef _THREADS
+          if((*md.gU[in1])(i,b)==defval) // take gU Ug from previous runs only for threading - otherwise it fails
+        #endif                              // when threading for each new q-vector we reinitalize gU Ug=0
+                                            // thus it is clear that at each new q-vector these
+                                            // conditions are met to reset md.gU correctly
+                                            // when not threading: only at first call gU=Ug=0
+                                            (*md.gU[in1])(i,b)  = conj(md.sqrt_Gamma_dip(i1,j1,k1)(b))
                                                                  * md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i);
                      
          chi(i,j)+= PI * (*md.gU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.Ug[in2])(j,bb);         
@@ -389,7 +419,6 @@ int ssm1,in1,in2;
    }}}}
   }}}
  }}}
-
 
   //complex<double> im(0,1.0);
 
@@ -443,7 +472,10 @@ else if (calc_rixs){// use 1-9 components of chi to store result !!! (other comp
             if(do_phonon){sumS=chiPhon(1,1)/PI/2.0/(double)ini.mf.n();sumS*=bose;// printf("chiPhon= %g i %g ",real(chiPhon(1,1)),imag(chiPhon(1,1)));
                           intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: phonon intensity in approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: phonon  intensity  in  approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
-                         }                              
+                         } 
+ 
+
+            
 // here should be entered factor  k/k' 
 if (ini.ki==0)
 {if (ini.kf*ini.kf+0.4811*en<0)

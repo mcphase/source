@@ -772,8 +772,11 @@ fprintf(stdout,"\n");
       thrdat.J[ithread] = &J;
      // thrdat.J[ithread] = new jq(J);
       tin[ithread]->dimA=0; 
-      thrdat.md[ithread] = new mdcf(md,0);      
-   } 
+      thrdat.md[ithread] = new mdcf(md,0);     // here for each q-vector when threading we 
+                                               // create a new md[ithread] from md
+                                               // thus the gU Ug etc are initialized to 0
+                                               
+    } 
    int thrcount=0, ithread=0;
 #endif
 
