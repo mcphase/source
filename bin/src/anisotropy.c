@@ -75,6 +75,7 @@ int linepscf=0,linepsjj=0;int options=0;bool inc_cd=false;
 for (int im=1;im<argc;++im) 
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) exit(EXIT_FAILURE); // display help message
+   if (strcmp(argv[im],"-a")==0) {filemode="a";if (options<im)options=im;} // append output files
    if (strcmp(argv[im],"-cd")==0) {inc_cd=true;if (options<im)options=im;} // do classical dipole interaction 
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
@@ -123,7 +124,7 @@ if(poly==0){
  r2/=Norm(r2);
         }
 
- FILE * fout;fout=fopen_errchk("./results/anisotropy.out","w");
+ FILE * fout;fout=fopen_errchk("./results/anisotropy.out",filemode);
 if(poly==0){
 fprintf(fout,
 "# output file of program: anisotropy @command\n"
@@ -261,7 +262,7 @@ if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - ch
  // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
    testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
    ini.testspins=&testspins;
-   testspins.save("./results/_mcphas.tst","w");
+   testspins.save("./results/_mcphas.tst",filemode);
    qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins ,inputpars,Imax,"./results/mcphas.qvc",verbose);
    ini.testqs=&testqs;
  // declare variable physprop (typa class physproperties)
@@ -291,7 +292,7 @@ if(poly==0){
                  physprop.T,h(1),h(2),h(3));}
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T(1),H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
-  physprop.save(verbose,"w",s,ini,inputpars,"anisotropy_"); 
+  physprop.save(verbose,filemode,s,ini,inputpars,"anisotropy_"); 
 
   } // H/T loop 
  }

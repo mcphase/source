@@ -42,35 +42,37 @@ sub usage() {
            anisotropy [options] T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
            anisotropy [options] T H -p nofthetasteps [-Tsteps 10 27][-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
-     -h           : this (help) message
-      T           : temperature in Kelvin
-      H           : absolute value of the external magnetic field (T)
-      xn,yn,zn    : direction normal to plane, in which the anisotropy
-                    should be calculated ... e.g. if you want to
-                    calculate the anisotropy in the xy plane, then
-                    enter xn yn zn = 0 0 1, xn yn zn refer to euclidean coordinates
-                    defined with respect to the crystal axes a,b,c as:  y||b, z||(a x b) 
-                    and x normal to z and y
-      nofsteps    : number of steps to be calculated 
-     -p           : calculate numerical polycrystal average of the magnetic moment (is isotropic)
-                    and output to stdout
-      nofthetasteps    : number of theta steps to be calculated for polycrystal average
+     -h              this (help) message
+      T              temperature in Kelvin
+      H              absolute value of the external magnetic field (T)
+      xn,yn,zn       direction normal to plane, in which the anisotropy
+                     should be calculated ... e.g. if you want to
+                     calculate the anisotropy in the xy plane, then
+                     enter xn yn zn = 0 0 1, xn yn zn refer to euclidean coordinates
+                     defined with respect to the crystal axes a,b,c as:  y||b, z||(a x b) 
+                     and x normal to z and y
+      nofsteps       number of steps to be calculated 
+     -p              calculate numerical polycrystal average of the magnetic moment (is isotropic)
+                     and output to stdout
+      nofthetasteps  number of theta steps to be calculated for polycrystal average
 
     options:
-    -cd            : add classical dipole  interaction using Ewald summation, 
-                     Bowden J.Phys.C:solid state phys. 14(1981) L827  
-                     only the first three interaction operators I1.I2.I3 are considered and it 
-                     is assumed that gJ*I1,gJ*I2,gJ*I3 are the components of the magnetic moment (gJ given in sipf file)
-    -doeps         : refine strain epsilon using elastic and magnetoelastic constants
+     -a             append output files (do not overwrite) 
+     -cd            add classical dipole  interaction using Ewald summation, 
+                    Bowden J.Phys.C:solid state phys. 14(1981) L827  
+                    only the first three interaction operators I1.I2.I3 are considered 
+                    and it is assumed that gJ*I1,gJ*I2,gJ*I3 are the components of the 
+                    magnetic moment (gJ given in sipf file)
+    -doeps          refine strain epsilon using elastic and magnetoelastic constants
     -linepscf with -doeps use zero strain single ion Hamiltoanian for every mean field iteration
     -linepsjj with -doeps use zero strain two ion interaction Hamiltoanian for every mean field iteration
-    -v             : verbose mode with more detailed output
-    -Tsteps      : in addition to initial temperature calculate 10 further temperatures
-                       until 27K has been reached
-    -r sipffilename: filename of single ion parameter file
-                      Hxc1,Hxc2,... are the exchange field components (meV)
-                     (exchange field is kept constant, external magnetic
-                     field is rotated in the anisotropy calculation)
+    -v              verbose mode with more detailed output
+    -Tsteps         in addition to initial temperature calculate 10 further temperatures
+                    until 27K has been reached
+    -r sipffilename filename of single ion parameter file
+                    Hxc1,Hxc2,... are the exchange field components (meV)
+                    (exchange field is kept constant, external magnetic
+                    field is rotated in the anisotropy calculation)
 
     output files:
 

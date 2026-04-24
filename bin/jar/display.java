@@ -255,8 +255,14 @@ replot
                                               for (int i=0;i<noffiles;++i)
                                              { if(colyerr[i]=="0"&&colxerr[i]=="0")
                                                { XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer(i);
-                                                renderer.setSeriesLinesVisible(i,!renderer.getSeriesLinesVisible(i));
-                                                renderer.setSeriesShapesVisible(i,!renderer.getSeriesShapesVisible(i));
+                                                boolean lines=renderer.getSeriesLinesVisible(i);
+                                                boolean sym=renderer.getSeriesShapesVisible(i);
+                                                if(lines&&sym){lines=false;sym=true;}
+                                                else if(lines&&!sym){lines=true;sym=true;}
+                                                else if(!lines&&sym){lines=true;sym=false;}
+
+                                                renderer.setSeriesLinesVisible(i,lines);
+                                                renderer.setSeriesShapesVisible(i,sym);
                                                 update_legend();
                                                }
                                             }}
@@ -300,7 +306,7 @@ replot
        System.out.println("  program display - show and watch data file by viewing a xy graphic on screen\n");
        System.out.println("use as:  display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]\n");
        System.out.println("         xcol,ycol ... column to be taken as x-, y- axis in a lineplot, expressions such as 'c1xc2+1*(c3==2)*(c5<7)' are allowed\n");
-       System.out.println("         to plot sum/ productof columns");
+       System.out.println("         to plot sum/ product of columns, including math function such as abs,acos,asin,atan,... see complete list in manual ");
        System.out.println("	 filename ..... filename of datafile");
        System.out.println("	 Data files may contain lines to tune the display output, such as");
        System.out.println("	 # displaytitle=My new Graph");
@@ -316,6 +322,7 @@ replot
        System.out.println("                 -logx -logy  make x(y) a logarithmic axis");
        System.out.println("                 -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
        System.out.println("                 -xmax -ymin -ymax -xtext -ytext -title ...similar");
+       System.out.println("                 -s -l -sl shows symbols/lines/both");
        System.out.println("                 -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
        System.out.println("                          a text to be written as line label can be added by inserting | and adding the text");
        System.out.println("                 -hlines 2,3.4,12.3 shows horizontal lines at specified y values");
@@ -335,7 +342,7 @@ replot
        //      System.out.println(sx+" "+sy);
        //      p.valueOf(strLine);
        //    double[] myDatax = {};
-       int j=0;int k=0; jpgfilename="";showgrid=false;
+       int j=0;int k=0; jpgfilename="";showgrid=false;showlines=false;showsymbols=true;
        String title="display";
        s=args[0];s=SF.TrimString(s); // command line arguments are treated here
        //look if options are present
@@ -355,6 +362,18 @@ replot
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showgrid=true;
             }
+            else if(SF.TrimString(s).substring(0, 3).equalsIgnoreCase("-sl")) // option "-sl"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             showlines=true;showsymbols=true;
+            }
+            else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-s")) // option "-s"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             showsymbols=true;showlines=false;
+            }
+            else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-l")) // option "-l"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             showlines=true;showsymbols=false;
+            }
             else if(SF.TrimString(s).substring(0, 4).equalsIgnoreCase("-dim")) // option "-dim 500 223"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              detdim=false;ss=SF.FirstWord(s);prefxsize=p.valueOf(ss).intValue();
@@ -362,11 +381,11 @@ replot
                           ss=SF.FirstWord(s);prefysize=p.valueOf(ss).intValue();
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
-            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logx")) // option "-xmin 23"
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logx")) // option "-logx"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              logx=true;
             }
-            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logy")) // option "-xmin 23"
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logy")) // option "-logy"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              logy=true;
             }
@@ -407,16 +426,17 @@ replot
             }
             else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-hlines")) // option "-hlines 3,2,4"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detTitle=false;ss=SF.FirstWord(s);Hlines=ss;
+             ss=SF.FirstWord(s);Hlines=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-vlines")) // option "-vlines 3,2,4"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detTitle=false;ss=SF.FirstWord(s);Vlines=ss;
+             ss=SF.FirstWord(s);Vlines=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
-            else {System.out.println("ERROR: option,"+SF.TrimString(s)+" not implemented !\n\n");System.exit(0);}
+            else {break;}
           }
+
        for(int i=k;s.length()>0;	i+=0)
        {Integer pp;
        ss=SF.FirstWord(s);
@@ -469,7 +489,8 @@ replot
  static double scale;
  static double xmin,xmax,ymin,ymax;
  static Integer prefxsize,prefysize;
- static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit,showgrid,logx,logy;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit;
+ static boolean showgrid,showlines,showsymbols,logx,logy;
  static String [] legend; 
  static String yText = "";
  static String xText = "";
@@ -569,7 +590,7 @@ replot
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
-plot.setRangeGridlinesVisible(showgrid);
+plot.setRangeGridlinesVisible(showgrid); 
 plot.setRangeGridlinePaint(Color.BLACK);
 
 plot.setDomainGridlinesVisible(showgrid);
@@ -592,7 +613,7 @@ plot.setDomainGridlinePaint(Color.BLACK);
         renderer.setSeriesPaint(3, Color.black); // dark
         renderer.setSeriesPaint(4, Color.orange);
         renderer.setSeriesPaint(5, Color.pink);
-
+        
         brenderer.setSeriesPaint(1, Color.blue);
         brenderer.setSeriesPaint(0, Color.red);
         brenderer.setSeriesPaint(3, Color.green);
@@ -602,7 +623,7 @@ plot.setDomainGridlinePaint(Color.BLACK);
        renderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator());
        brenderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator());
     
-
+               
    for(int i=6;i<=MAX_NOF_FILES;++i){ renderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
    for(int i=6;i<=MAX_NOF_FILES;++i){ brenderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
            //renderer.setPlotShapes(true);
@@ -633,8 +654,8 @@ plot.setDomainGridlinePaint(Color.BLACK);
                            //            legendItemsNew.add(brenderer.getLegendItem(i,i));
                       }else{plot.setRenderer(i,renderer);
                            plot.setDataset(i,dataset);
-                           renderer.setSeriesLinesVisible(i,false);
-                           renderer.setSeriesShapesVisible(i, true);
+                           renderer.setSeriesLinesVisible(i,showlines);
+                           renderer.setSeriesShapesVisible(i,showsymbols);
                            }
         
 
@@ -789,13 +810,15 @@ protected static void reload_data(int i){    try{
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext="))
               {chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;}
                             }
-        if(detxText==true){
+        if(detyText==true){
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext="))
               {chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;}
                           }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
+        if(detTitle==true){
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
+                          }
         }
         // if no data has yet been read  -go through string and try to find automatically column headers
         if(detxText==true&&dxtf==0&&j==0&&SF.NofCols(strLine)>0)

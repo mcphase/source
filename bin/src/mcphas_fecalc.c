@@ -289,7 +289,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
 
  */
 Vector Hint(1,Happ.Hi());Hint=Happ;
-if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
+//if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
  double fe,dE; // free energy
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector sigma(1,6); // external stress tensor in Voigt notation and units meV/pVol
@@ -376,7 +376,7 @@ if(ini.doeps){ // set coupling matrix
 // --------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
 // for (r=0;r<=sdim;++r)
-if (verbose==1){fprintf(stderr,"c");fflush(stderr);}
+//if (verbose==1){fprintf(stderr,"c");fflush(stderr);}
 
 int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
             
@@ -638,7 +638,7 @@ if(exstr>0){int iparanz;
 // exstrictexstrictexstrict EXCHANGE STRICTION exstrictexstrictexstrictexstrictexstrict
 
    } // for m loop nofatoms
-if (verbose==1){fprintf(stderr,"s");fflush(stderr);}
+//if (verbose==1){fprintf(stderr,"s");fflush(stderr);}
 
 // Transform Coupling Coefficients into sparse matrix sMat:
 sMat<double> ** JS; JS= new sMat <double> *[(sdim+2)*(1+exstr)];   if (JS == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
@@ -651,7 +651,7 @@ JS[i][ln]=M2mat(JJ[i][ln]);
 //cout << JS[i][ln].display_full() << endl;
  } delete []JJ[i];
 }
-if (verbose==1){fprintf(stderr,"t");fflush(stderr);}
+//if (verbose==1){fprintf(stderr,"t");fflush(stderr);}
  delete []JJ;
 
 //printf("coupling coefficients JS ready\n");
@@ -692,7 +692,7 @@ if (ini.displayall==1)   // display spincf if button is pressed
 // mf loop for selfconsistency **********************************************************
 // mf loop for selfconsistency **********************************************************
 time_t start, start2;  
-if (verbose==1){fprintf(stderr,"l");fflush(stderr);}
+//if (verbose==1){fprintf(stderr,"l");fflush(stderr);}
 for (r=1;sta>ini.maxstamf;++r)
 {if (spinchange>ini.maxspinchange)
     {for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
@@ -754,7 +754,7 @@ start2 = time(0);
  if ((ini.maxnofmfloops<=1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
 else
 {mfold=mf;
- if (r==1&&verbose==1){fprintf(stderr,"m");fflush(stderr);}
+ //if (r==1&&verbose==1){fprintf(stderr,"m");fflush(stderr);}
 
 // - if ini.demag ==1 : calculate magnetisation and polarisation in order to
 // be able to correct applied field with demagnetisating / depolarising field
