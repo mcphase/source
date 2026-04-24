@@ -54,6 +54,8 @@ import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.ui.HorizontalAlignment;
 
 import expr.*;
 import java.text.DecimalFormat;
@@ -298,7 +300,7 @@ replot
   public static void main(String[] args) {
       xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
       ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
-      detxText=true;detyText=true;detTitle=true;detdim=true;logx=false;logy=false;
+      detxText=true;detyText=true;detTitle=true;detsTitle=true;detdim=true;logx=false;logy=false;
       prefxsize=500;prefysize=270;
            String ss; String s;
       if (args.length<1)
@@ -321,7 +323,7 @@ replot
        System.out.println("                 -c file.jpg  only creates a jpg file and exit immediately, also create file.jpg.gnu ");
        System.out.println("                 -logx -logy  make x(y) a logarithmic axis");
        System.out.println("                 -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
-       System.out.println("                 -xmax -ymin -ymax -xtext -ytext -title ...similar");
+       System.out.println("                 -xmax -ymin -ymax -xtext -ytext -title -stitle...similar");
        System.out.println("                 -s -l -sl shows symbols/lines/both");
        System.out.println("                 -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
        System.out.println("                          a text to be written as line label can be added by inserting | and adding the text");
@@ -348,6 +350,7 @@ replot
        //look if options are present
        while(SF.TrimString(s).substring(0, 1).equalsIgnoreCase("-"))
           {// yes there are options
+
            if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-o")) // option "-o file.jpg"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              jpgfilename=SF.FirstWord(s);
@@ -362,17 +365,17 @@ replot
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showgrid=true;
             }
-            else if(SF.TrimString(s).substring(0, 3).equalsIgnoreCase("-sl")) // option "-sl"
-            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             showlines=true;showsymbols=true;
-            }
-            else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-s")) // option "-s"
+            else if(SF.TrimString(s).equalsIgnoreCase("-s")) // option "-s"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showsymbols=true;showlines=false;
             }
             else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-l")) // option "-l"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showlines=true;showsymbols=false;
+            }
+            else if(SF.TrimString(s).substring(0, 3).equalsIgnoreCase("-sl")) // option "-sl"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             showlines=true;showsymbols=true;
             }
             else if(SF.TrimString(s).substring(0, 4).equalsIgnoreCase("-dim")) // option "-dim 500 223"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
@@ -414,14 +417,19 @@ replot
              detyText=false;ss=SF.FirstWord(s);yText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
-            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext meV"
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext "
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              detxText=false;ss=SF.FirstWord(s);xText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
-            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title meV"
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title text"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detTitle=false;ss=SF.FirstWord(s);Title=ss;
+             detTitle=false;ss=SF.FirstWord(s);Title=ss;Title=Title.replace("_", " ");
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-stitle")) // option "-stitle smalltext"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detsTitle=false;ss=SF.FirstWord(s);sTitle=ss;sTitle=sTitle.replace("_", " ");
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-hlines")) // option "-hlines 3,2,4"
@@ -489,12 +497,13 @@ replot
  static double scale;
  static double xmin,xmax,ymin,ymax;
  static Integer prefxsize,prefysize;
- static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detsTitle,detdim,doexit;
  static boolean showgrid,showlines,showsymbols,logx,logy;
  static String [] legend; 
  static String yText = "";
  static String xText = "";
  static String Title = "";
+ static String sTitle = "";
  static String Vlines = "";
  static String Hlines = "";
  static LegendTitle Legendt;
@@ -587,6 +596,12 @@ replot
         chart = ChartFactory.createScatterPlot(
                 Title, yText, xText, dataset,
                 PlotOrientation.HORIZONTAL, true, true, false);
+         chart.getTitle().setFont(new Font("SansSerif", Font.PLAIN, 13));
+        TextTitle stit=new TextTitle(sTitle);
+        stit.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        stit.setPosition(RectangleEdge.BOTTOM);
+        stit.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        chart.addSubtitle(stit);
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
@@ -819,6 +834,9 @@ protected static void reload_data(int i){    try{
         if(detTitle==true){
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
                           }
+        //if(detsTitle==true){
+        //if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+14).equalsIgnoreCase("displaystitle=")){chart.setsubTitle(strLine.substring(i1+14,strLine.length()));}}
+        //                  }
         }
         // if no data has yet been read  -go through string and try to find automatically column headers
         if(detxText==true&&dxtf==0&&j==0&&SF.NofCols(strLine)>0)
