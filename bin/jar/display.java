@@ -56,6 +56,8 @@ import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.ui.HorizontalAlignment;
+import java.awt.GraphicsEnvironment;
+
 
 import expr.*;
 import java.text.DecimalFormat;
@@ -75,6 +77,7 @@ static myStringfunc SF=new myStringfunc();
 static int xy[]={0,0,0,0};
  static String gVlines = "";
  static String gHlines = "";
+ static String fontname = "Sans Serif";
 //static Frame frame;
 //static Frame popup;
 //static ToolTipManager ToolTipManager;
@@ -201,7 +204,6 @@ GnuOutputStream.writeBytes("set yr ["+chart.getXYPlot().getDomainAxis().getRange
          +chart.getXYPlot().getDomainAxis().getRange().getUpperBound()+"]\n");
 GnuOutputStream.writeBytes(gHlines);
 GnuOutputStream.writeBytes(gVlines);
-
  GnuOutputStream.writeBytes("set xlabel '"+chart.getXYPlot().getRangeAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set ylabel '"+chart.getXYPlot().getDomainAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set title '"+chart.getTitle()+"'\n");
@@ -330,6 +332,8 @@ replot
        System.out.println("                 -hlines 2,3.4,12.3 shows horizontal lines at specified y values");
        System.out.println("                 -g shows gridlines");
        System.out.println("                 -dim 400 200  set dimension of plot (in pixels width 400 height 200)\n");
+       System.out.println("                 -font Times_New_Roman  set font");
+       System.out.println("                 -fontlist  list available fonts");
        System.out.println("                 Press Enter to Continue");
 
        System.exit(0);
@@ -412,6 +416,11 @@ replot
              detymax=false;ss=SF.FirstWord(s);ymax=p.parseDouble(ss);
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
+            else if(SF.TrimString(s).equalsIgnoreCase("-font")) // option "-font Gill_Sans"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             ss=SF.FirstWord(s);fontname=ss;fontname=fontname.replace("_", " ");
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ytext")) // option "-ytext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              detyText=false;ss=SF.FirstWord(s);yText=ss;
@@ -441,6 +450,15 @@ replot
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              ss=SF.FirstWord(s);Vlines=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 9).equalsIgnoreCase("-fontlist")) // option "-fontlist"
+           {
+            String availableFonts[] = 
+              GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+        for (String fontFamilyName : availableFonts) {
+            System.out.println(fontFamilyName);
+             } System.exit(0);
             }
             else {break;}
           }
@@ -596,9 +614,11 @@ replot
         chart = ChartFactory.createScatterPlot(
                 Title, yText, xText, dataset,
                 PlotOrientation.HORIZONTAL, true, true, false);
-         chart.getTitle().setFont(new Font("SansSerif", Font.PLAIN, 13));
+         chart.getTitle().setFont(new Font(fontname, Font.BOLD, 13));
+         chart.getXYPlot().getRangeAxis().setLabelFont(new Font(fontname, Font.BOLD, 13));
+         chart.getXYPlot().getDomainAxis().setLabelFont(new Font(fontname, Font.BOLD, 13));
         TextTitle stit=new TextTitle(sTitle);
-        stit.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        stit.setFont(new Font(fontname, Font.PLAIN, 10));
         stit.setPosition(RectangleEdge.BOTTOM);
         stit.setHorizontalAlignment(HorizontalAlignment.CENTER);
         chart.addSubtitle(stit);
@@ -667,6 +687,7 @@ plot.setDomainGridlinePaint(Color.BLACK);
              if(colyerr[i].startsWith("b")) {    plot.setRenderer(i,brenderer);
                       plot.setDataset(i,bdataset);
                            //            legendItemsNew.add(brenderer.getLegendItem(i,i));
+                      
                       }else{plot.setRenderer(i,renderer);
                            plot.setDataset(i,dataset);
                            renderer.setSeriesLinesVisible(i,showlines);
@@ -939,12 +960,12 @@ try{
 
                if(!bubbles)
                    {//dataset.removeSeries(file[i]+s.valueOf(i));
-                    dataset.addSeries(file[i]+s.valueOf(i),data);
+                    dataset.addSeries(colx[i]+" "+coly[i]+" "+file[i]+s.valueOf(i),data);
                     
                    }
                 else
                    {//bdataset.removeSeries(file[i]+s.valueOf(i));
-                      bdataset.addSeries(file[i]+s.valueOf(i),bdata);
+                      bdataset.addSeries(colx[i]+" "+coly[i]+" "+file[i]+s.valueOf(i),bdata);
                     }
                }
               }
