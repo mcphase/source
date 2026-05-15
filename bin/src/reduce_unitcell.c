@@ -55,11 +55,15 @@ void getU(double & U,Vector & Happ,double & T,
   if(j>0){fprintf(stderr,"Error reduce_unitcell: self consistent MF calculation not converged for %s  - modify reduce_unitcell.ini and restart\n",info);exit(EXIT_FAILURE);}
  U=physprop.u;
 }
+
+
+
+
 // ***************************************************************************
 // routine for the case of removing phononic degrees of freedom and
 // - renormalising elastic constants
 // - calculating (phonon induced) magnetoelastic and quadrupolar interactions
-// ... interactions will be calculated for the first nprim atoms in unit celll par a 
+// ... interactions will be calculated for the first nprim atoms in unit cell par a 
 // ***************************************************************************
 void delphonons(par & a,bool symmetrize, int noindexchange,int nprim)
 {fprintf(stderr,"# deleting phonons");
@@ -290,16 +294,19 @@ getU(U0,Happ,T,ini,pw,testqs,testspins,physprop,"U0-reference");
 if(verbose){fprintf(stderr,"\n U0=%12.12g\n",U0);}
  
 // ---------------------------------
-fprintf(stderr,"# 2. computing multipolar self interaction J(0 0 0)\ and magnetoelastic interaction Gcfph\n");
+fprintf(stderr,"# 2. computing multipolar self interactions J(0 0 0) and magnetoelastic interaction Gcfph\n");
 fprintf(stderr,"#a) zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)\n");
 fprintf(stderr,"#b) nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to\n");
 fprintf(stderr,"#      energy of a) ----> Gcfph^alphagamma(i) \n");
 
 // ---------------------------------
 Vector dnull(1,3);dnull=0; int nd;int nofptstodo=0,nofptsdone=0;
+
+// count points to do (for timing) ----------->
 for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
   for(int g=1;g<=pw.cs.nofcomponents;++g){++nofptstodo;}
+// points counted <------------
 
 for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
@@ -326,19 +333,21 @@ else if (verbose){fprintf(stderr,"\n atom %i I_%i  <--> x=%g y=%g ",n,g,x,y);}
 //      energy of a) ----> Gcfph^alphagamma(i)   
 // ---------------------------------
    physprop.sps.epsilon=0;     
-   for(int al=1;al<=6;++al){
+   if(n<=nprim)for(int al=1;al<=6;++al){  // --> this has to be done only for n in primitive unitcell
  if(verbose){printf("Calculating magnetoelastic interaction  for atom %i(%i), term Gcfph epsilon_%i I%i \n",n,pw.cs.nofatoms,al,g);}
   
                  ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
                  physprop.sps.epsilon(al)=1e-6;
                  double Eelrenormdiveps=0.5*physprop.sps.epsilon(al)*a.Cel(al,al);
                 getU(Ub,Happ,T,ini,pw,testqs,testspins,physprop,"Gcfph");
+
       if(verbose){x=-al;y=(n-1)*pw.cs.nofcomponents+g;
              ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
             fprintf (fout, " %i %i %i ",
             physprop.mf.n()*physprop.mf.nofatoms,physprop.mf.nofatoms,physprop.mf.nofcomponents);
             fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(physprop.sps.epsilon(1)),myround(physprop.sps.epsilon(2)),myround(physprop.sps.epsilon(3)),myround(physprop.sps.epsilon(4)),myround(physprop.sps.epsilon(5)),myround(physprop.sps.epsilon(6)));
             physprop.mf.print(fout);fprintf(fout,"\n");}
+
  (*(*a.jjj[n]).G)(al,g)+=-(Ub-Ua)*pw.cs.nofatoms/physprop.sps.epsilon(al)+Eelrenormdiveps;
 if (fabs((*(*a.jjj[n]).G)(al,g))<SMALL){(*(*a.jjj[n]).G)(al,g)=0;} 
 else if (verbose){fprintf(stderr,"\nepsilon_%i - atom %i I_%i  <--> x=%g y=%g ",al,n,g,x,y);} 
@@ -353,7 +362,7 @@ physprop.sps.print(stderr);}
                            }
 
   (*pw.jjj[n]).MF(g)=0;
- ++nofptsdone;--nofptstodo;print_time_estimate_until_end(nofptstodo/nofptsdone);
+ ++nofptsdone;--nofptstodo;print_time_estimate_until_end((double)nofptstodo/(double)nofptsdone);
  }
 
 // ---------------------------------
@@ -363,7 +372,10 @@ fprintf(stderr,"# zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui ---
 Vector dabc(1,3),drijk(1,3); 
 Matrix prim_unitcell_ijk(1,3,1,3);
 prim_unitcell_ijk=pw.cs.prim_unitcell_ijk();
-ini.doeps=0;nofptstodo=0;nofptsdone=0;
+ini.doeps=0;
+
+// count points to do (for timing) ----------->
+nofptstodo=0;nofptsdone=0;
 //for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
 for(int n=nprim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
@@ -372,6 +384,9 @@ for(int n=nprim;n>0;--n)// go through all magnetic ions
     for(int g=1;g<=pw.cs.nofcomponents;++g)
      for(int g1=1;g1<=pw.cs.nofcomponents;++g1)
      if(n1!=n||g1!=g){++nofptstodo;}
+// reinitilize timer
+print_time_estimate_until_end(-1.0);
+// points counted <-----------------
 
 for(int n=nprim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
@@ -451,7 +466,7 @@ if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
 
       (*pw.jjj[n]).MF(g)=0;
       (*pw.jjj[n1]).MF(g1)=0;
-  ++nofptsdone;--nofptstodo;print_time_estimate_until_end(nofptstodo/nofptsdone); 
+  ++nofptsdone;--nofptstodo;print_time_estimate_until_end((double)nofptstodo/(double)nofptsdone); 
  }
 fclose(fout);    
 
@@ -528,7 +543,7 @@ int main (int argc, char **argv)
                         -delatoms phons\n   \
                          same as -delatoms phon but symmetrize interactions by creating equivalent nearest\n \
                          neighbours and averaging calculated two ion interactions \n \
-                        -delatoms phone 3 3 3 2 2 2 \n   \
+                        -delatoms phone 3 3 3 2 2 2 4 \n   \
                          same as -delatoms phon but as inital step extend  primitive unit cell \n \
                          to a 3x3x3 supercell - then perform the calculation and \n \
                          ouput the results only for the primitive subcell 2 2 2 \n \

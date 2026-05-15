@@ -373,7 +373,7 @@ replot
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showsymbols=true;showlines=false;
             }
-            else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-l")) // option "-l"
+            else if(SF.TrimString(s).equalsIgnoreCase("-l")) // option "-l"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showlines=true;showsymbols=false;
             }

@@ -123,11 +123,11 @@ char * mystrnstr(const char *s, const char *find, size_t slen)
 	return ((char *)s);
 }
 
-// function to print to stdout estimate of time until program end
+// function to print to stdout estimate of time until program end, timer initialize with ratio=-1
 void print_time_estimate_until_end(double ratio) //input :ratio = nofpointstodo / nofpointsdone
 {static std::clock_t last_call_time=0; 
  static std::clock_t startcputime=0;
- if(last_call_time==0){last_call_time=std::clock();startcputime=last_call_time;}
+ if(last_call_time==0||ratio==-1){last_call_time=std::clock();startcputime=last_call_time;}
  if ((std::clock()-last_call_time)/(double)CLOCKS_PER_SEC>60) // print only if 2 minutes passed since last print
    { // estimate time until end 
     time_t time_since_start=std::clock()-startcputime;

@@ -127,10 +127,14 @@ $nn,$_,$imax[$nn-1]
       open($l,">./results/hkl.asc");
       if($n=~/,/){print $l "#Warning hkl: $y reflex not found in file $file\n";$r=$y;}
       else {$r=$v[$n];}
+      # print column numbers
+      for($i=1;$i<8;++$i){print $l $i;$sp=$header[$i-1];$sp=~s/./ /g;print $l $sp;}
+      print $l "     8             9\n";
+      # print header
       if($FT==0)
-      {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  values of Intensity of ".$r."vs sqrt(int or |m(Q)|) as read from file $file\n");}
+      {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  Intensity  vs sqrt(int or |m(Q)|) of ".$r." as read from file $file\n");}
       else
-      {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  values REAL(m(Q)) vs IMAG(m(Q)) of ".$r." as read from file $file\n");}
+      {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  REAL(m(Q)) vs IMAG(m(Q)) of ".$r." as read from file $file\n");}
       while(<$h>)
       {next if /^\s*#/;  
       $x=new PDL(split " ");
