@@ -63,9 +63,11 @@ void getU(double & U,Vector & Happ,double & T,
 // routine for the case of removing phononic degrees of freedom and
 // - renormalising elastic constants
 // - calculating (phonon induced) magnetoelastic and quadrupolar interactions
-// ... interactions will be calculated for the first nprim atoms in unit cell par a 
+// ... interactions will be calculated for the first nprim atoms in unit cell par a
+// ... if na<nprim, then interactions will be calculated for the first na magnetic atoms
+// ... interactions will be calculated for interaction operators Igmin,...,Inofcomponents only
 // ***************************************************************************
-void delphonons(par & a,bool symmetrize, int noindexchange,int nprim)
+void delphonons(par & a,bool symmetrize, int noindexchange,int nprim,int na, int gmin)
 {fprintf(stderr,"# deleting phonons");
 // 1. renormalise elastic constants using only phonon degrees of freedom
 //   and calling htcalc with doeps for various applied external stresses ...
@@ -301,16 +303,18 @@ fprintf(stderr,"#      energy of a) ----> Gcfph^alphagamma(i) \n");
 
 // ---------------------------------
 Vector dnull(1,3);dnull=0; int nd;int nofptstodo=0,nofptsdone=0;
-
+int nmag=0,nlim=nprim;
 // count points to do (for timing) ----------->
-for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
+for(int n=1;n<=pw.cs.nofatoms;++n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
-  for(int g=1;g<=pw.cs.nofcomponents;++g){++nofptstodo;}
+  {++nmag;if(nmag==na){nlim=n;} 
+   for(int g=gmin;g<=pw.cs.nofcomponents;++g){++nofptstodo;}}
+print_time_estimate_until_end(-1.0); // reset timer
 // points counted <------------
 
 for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
-  for(int g=1;g<=pw.cs.nofcomponents;++g)
+  for(int g=gmin;g<=pw.cs.nofcomponents;++g)
  {(*pw.jjj[n]).MF(g)=1;
           if(verbose){printf("Calculating self interaction J%i(0) for atom %i(%i), i.e. for component %i \n",g,n,pw.cs.nofatoms,g);}
   
@@ -333,7 +337,7 @@ else if (verbose){fprintf(stderr,"\n atom %i I_%i  <--> x=%g y=%g ",n,g,x,y);}
 //      energy of a) ----> Gcfph^alphagamma(i)   
 // ---------------------------------
    physprop.sps.epsilon=0;     
-   if(n<=nprim)for(int al=1;al<=6;++al){  // --> this has to be done only for n in primitive unitcell
+   if(n<=nlim)for(int al=1;al<=6;++al){  // --> this has to be done only for n in primitive unitcell up to the desired magnetic atom na
  if(verbose){printf("Calculating magnetoelastic interaction  for atom %i(%i), term Gcfph epsilon_%i I%i \n",n,pw.cs.nofatoms,al,g);}
   
                  ini.doeps=-1; // ini.doeps=-1 will preserve the strain 
@@ -377,23 +381,23 @@ ini.doeps=0;
 // count points to do (for timing) ----------->
 nofptstodo=0;nofptsdone=0;
 //for(int n=pw.cs.nofatoms;n>0;--n)// go through all magnetic ions
-for(int n=nprim;n>0;--n)// go through all magnetic ions
+for(int n=nlim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
   for(int n1=pw.cs.nofatoms;n1>0;--n1)// go through all magnetic ions
    if((*pw.jjj[n1]).module_type==fixmom)
-    for(int g=1;g<=pw.cs.nofcomponents;++g)
-     for(int g1=1;g1<=pw.cs.nofcomponents;++g1)
+    for(int g=gmin;g<=pw.cs.nofcomponents;++g)
+     for(int g1=gmin;g1<=pw.cs.nofcomponents;++g1)
      if(n1!=n||g1!=g){++nofptstodo;}
 // reinitilize timer
 print_time_estimate_until_end(-1.0);
 // points counted <-----------------
 
-for(int n=nprim;n>0;--n)// go through all magnetic ions
+for(int n=nlim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
   for(int n1=pw.cs.nofatoms;n1>0;--n1)// go through all magnetic ions
    if((*pw.jjj[n1]).module_type==fixmom)
-    for(int g=1;g<=pw.cs.nofcomponents;++g)
-     for(int g1=1;g1<=pw.cs.nofcomponents;++g1)
+    for(int g=gmin;g<=pw.cs.nofcomponents;++g)
+     for(int g1=gmin;g1<=pw.cs.nofcomponents;++g1)
      if(n1!=n||g1!=g)
      {if(verbose){printf("Calculating two ion interaction J%i%i(%i%i), i.e. for atom %i I%i - atom %i I%i \n",g,g1,n,n1,n,g,n1,g1);}
   
@@ -543,10 +547,13 @@ int main (int argc, char **argv)
                         -delatoms phons\n   \
                          same as -delatoms phon but symmetrize interactions by creating equivalent nearest\n \
                          neighbours and averaging calculated two ion interactions \n \
-                        -delatoms phone 3 3 3 2 2 2 4 \n   \
+                        -delatoms phone 3 3 3 2 2 2 5 4 \n   \
                          same as -delatoms phon but as inital step extend  primitive unit cell \n \
                          to a 3x3x3 supercell - then perform the calculation and \n \
                          ouput the results only for the primitive subcell 2 2 2 \n \
+                         do the calculation of interactions only for the first 5 atoms in the primitive \n \
+                         subcell and consider interaction only operators with indices \n \
+                         greater than 4, i.e.  I4, I5, I6, ... Inofcomponents \n \
                         -mcdiff   create also mcdiff.in file with reduced unit cell\n \
                         -v  verbose mode\n \
                         -vv very verbose mode\n \
@@ -554,7 +561,7 @@ int main (int argc, char **argv)
       exit (1);
     } else { fprintf (stderr,"#* reduce_unitcell 250123 *\n"); }
 
-int ow=1,i=0; int n=0,noindexchange=0,mcdiff=0,n1=1,n2=1,n3=1,s1=1,s2=1,s3=1;bool delphon=false,symmetrize,extend=false;
+int ow=1,i=0; int n=0,noindexchange=0,mcdiff=0,n1=1,n2=1,n3=1,s1=1,s2=1,s3=1,gmin=1,na=10000;bool delphon=false,symmetrize,extend=false;
 char * token;
 char *substr[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];
 float ns[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];ns[0]=MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL;
@@ -578,6 +585,8 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
                                  ++ow; s1=atoi(argv[ow]);
                                  ++ow; s2=atoi(argv[ow]);
                                  ++ow; s3=atoi(argv[ow]);
+                                 ++ow; na=atoi(argv[ow]); // nof atoms to do computations for
+                                 ++ow; gmin=atoi(argv[ow]); // minimum index Ig
                                 }
  else{
  // substitute all commma with spaces
@@ -599,7 +608,7 @@ if(n>0){a.set_nofcomponents(n);if(verbose){fprintf(stderr,"Setting nofcomponents
 
 if(delphon){Matrix p(1,3,1,3);int nprim=a.cs.nofatoms;p=a.cs.r;// remember primitive lattice
   if(extend){a.extend_unitcell(n1,n2,n3,s1,s2,s3);}
- delphonons(a,symmetrize,noindexchange,nprim);
+ delphonons(a,symmetrize,noindexchange,nprim,na,gmin);
   if(extend){a.cs.r=p;a.reduce_unitcell(verbose);} // go back to original primitive lattice 
 }
 else
