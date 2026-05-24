@@ -98,12 +98,13 @@ void *htcalc_iteration(void *input)
 DWORD WINAPI htcalc_iteration(void *input)
 #endif
 #else
-int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector Happ, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
+int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector & Happ, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
 #endif
 {
 
  #ifdef _THREADS
- htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector Happ(1,HEXT_DIMENSION); Happ = thrdat.Happ;
+ htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; 
+ Vector Happ(1,HEXT_DIMENSION); Happ = thrdat.Happ;
  THRLC_SET(threadSpecificKey, myinput); int tlsfemin=0;  // Thread local variable to judge whether to print output
  #else
  int thread_id=1;
@@ -816,7 +817,8 @@ int checkspincf(int & j,spincf & sps1,qvectors & testqs,Vector & nettom,
 
 // check newly added configuration
 for (i=testspins.ninitial+1;i<=testspins.n;++i)
- {if (sps==(*testspins.configurations[i])) 
+ {
+   if (sps==(*testspins.configurations[i])) 
 	 {
 	 physprops.j=i;return 1;} //ok
    }

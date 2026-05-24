@@ -14,10 +14,12 @@
 #endif
 
 void getnofthread(int & nofthreads){
+
   if(nofthreads<1) { // User has not set number of threads in mcphas.ini file
     char* c_nofthreads=getenv("MCPHASE_NOFTHREADS");  // Check if system environment variable set from dos.bat/lin.bat
     if (c_nofthreads)
-       nofthreads = atoi(c_nofthreads);
+      { nofthreads = atoi(c_nofthreads);
+       }
     else {
 #if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
        nofthreads = get_nprocs();
@@ -29,9 +31,11 @@ void getnofthread(int & nofthreads){
        SYSTEM_INFO sysinfo; GetSystemInfo(&sysinfo);
        nofthreads = sysinfo.dwNumberOfProcessors;
 #endif
+
     }
     if(nofthreads<1||nofthreads>255) nofthreads=1;   // All else fails: use only 1 thread
   }
+
 }
 
 

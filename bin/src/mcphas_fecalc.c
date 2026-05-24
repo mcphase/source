@@ -288,6 +288,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
     u		magnetic energy[meV]
 
  */
+
 Vector Hint(1,Happ.Hi());Hint=Happ;
 //if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
  double fe,dE; // free energy
@@ -370,6 +371,7 @@ if(ini.doeps){ // set coupling matrix
              sigma*=inputpars.cs.pVol()/1.60218e-1;
 
              }
+
 // --------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
 // coupling coefficients JS[](a-c) calculation  --------------------------------------------
@@ -786,7 +788,6 @@ Vector Pel(1,3);Pel=0;
 }
 
 
-
 //2. calculate sps from mf||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {diff=sps.m(i,j,k);
@@ -796,6 +797,8 @@ Vector Pel(1,3);Pel=0;
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
   }}}
+
+
   if(ini.doeps){// if doeps<0 we do not want to set sps.epsilon but fix it
 
                  // here should come the exchange striction: calculate correlation function

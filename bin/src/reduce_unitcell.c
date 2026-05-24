@@ -3,7 +3,7 @@
  * reduce_unitcell.c - program to reduce unit cell by removing 
  *
  ***********************************************************************/
-
+// #undef _THREADS
 
 #include "par.hpp"
 #include "martin.h"
@@ -13,16 +13,44 @@ int verbose=0;
 const char * filemode="w";
 // for statistics 
 int isfull=0;
-
 #include "myev.h"
-#include "mcphas_htcalc.c"
+
+#ifdef _THREADS
+#undef _THREADS
 #include "mcphas_fecalc.c"
+#include "mcphas_htcalc.c"
 #include "mcphas_physpropcalc.c"
+#define _THREADS 
+#else
+#include "mcphas_fecalc.c"
+#include "mcphas_htcalc.c"
+#include "mcphas_physpropcalc.c"
+#endif
+
+#ifdef _THREADS
+#if defined  (__linux__) || defined (__APPLE__)
+#include <pthread.h>
+#define MUTEX_LOCK     pthread_mutex_lock
+#define MUTEX_UNLOCK   pthread_mutex_unlock
+#define MUTEX_TYPE     pthread_mutex_t
+#define MUTEX_INIT(m)  pthread_mutex_init (&m, NULL)
+#else
+#include <windows.h>
+#define MUTEX_LOCK     EnterCriticalSection
+#define MUTEX_UNLOCK   LeaveCriticalSection
+#define MUTEX_TYPE     CRITICAL_SECTION
+#define MUTEX_INIT(m)  InitializeCriticalSection (&m)
+#endif
+#define NUM_THREADS ini.nofthreads
+#endif // def _THREADS
 
 
-void getU(double & U,Vector & Happ,double & T,
-           inipar & ini,par & p,qvectors & testqs,testspincf & testspins,physproperties & physprop,const char * info)
-{int j=1;int nofreppoints=ini.nofreppoints,nofconvrep=ini.nofconvrep;
+// ----------------------------------------------------------------------------------- //
+// Routine to calculate the energy U
+// ----------------------------------------------------------------------------------- //
+void getU(double & U,Vector & Happ,double & T, inipar & ini,par & p,qvectors & testqs,
+          testspincf & testspins,physproperties & physprop,const char * info)
+{ int j=1;int nofreppoints=ini.nofreppoints,nofconvrep=ini.nofconvrep;
  float rr=fmodf(ini.repeat-0.00001,1.0);
           double maxstamf=ini.maxstamf;int rep;
           int maxnofmfloops=ini.maxnofmfloops;
@@ -56,6 +84,178 @@ void getU(double & U,Vector & Happ,double & T,
  U=physprop.u;
 }
 
+#ifdef _THREADS
+
+// ----------------------------------------------------------------------------------- //
+// Declares a struct to store all the information needed for each disp_calc iteration
+// ----------------------------------------------------------------------------------- //
+typedef struct{
+   double U;
+   double U0;
+   Vector Happ;
+   double T;
+   inipar **ini;
+   qvectors  **testqs;
+   testspincf  **testspins;
+   physproperties **physprop;
+   const char * info;
+   bool symmetrize;
+   int thread_id;
+   par **a;
+   FILE * fout;
+} getU_thread_data;
+class getU_input { public:
+   int thread_id;
+   int g,g1,n,n1;
+   par *pw; 
+   getU_input(int _tid, int _g, int _g1, int _n, int _n1,par * pwin)
+   { 
+      thread_id = _tid; 
+      g=_g; g1=_g1;n=_n; n1=_n1;pw = new par(*pwin); 
+   }
+};
+// ----------------------------------------------------------------------------------- //
+// Declares these variables global, so all threads can see them
+// ----------------------------------------------------------------------------------- //
+getU_thread_data uthrdat;
+MUTEX_TYPE mutex_filla;
+
+// now define a function getU_th() which each thread calls
+// (in case of no thread define it as normal function)
+// to enable this double use rename all symbols:
+#define U uthrdat.U
+#define U0 uthrdat.U0
+#define symmetrize uthrdat.symmetrize
+#define T uthrdat.T
+#define ini (*uthrdat.ini[thread_id])
+#define pw (*myinput->pw)
+#define a (*uthrdat.a[thread_id])
+#define testqs (*uthrdat.testqs[thread_id])
+#define testspins (*uthrdat.testspins[thread_id])
+#define physprop (*uthrdat.physprop[thread_id])
+#define info uthrdat.info
+#define fout uthrdat.fout
+#if defined  (__linux__) || defined (__APPLE__)
+void *getU_th(void *input)
+#else
+DWORD WINAPI getU_th(void *input)
+#endif
+#else  // no thread
+void *getU_th(double & U,Vector & Happ,double & T,inipar & ini,par & pw,
+              qvectors &testqs,testspincf & testspins,physproperties & physprop,
+              const char * info,FILE * fout,int & g,int & n,int & g1,int & n1,
+              bool & symmetrize,par & a, double & U0)
+#endif
+{
+#ifdef _THREADS
+    getU_input *myinput; myinput = (getU_input *)input;
+    int g=myinput->g, g1=myinput->g1;
+    int n=myinput->n, n1=myinput->n1;
+     Vector Happ(1,HEXT_DIMENSION); Happ = uthrdat.Happ;
+ 
+    int thread_id = myinput->thread_id;
+      (*pw.jjj[n]).MF(g)=1;
+      (*pw.jjj[n1]).MF(g1)=1;
+#endif
+    getU(U,Happ,T,ini,pw,testqs,testspins,physprop,info);
+
+#ifdef _THREADS
+// --------------------- BLOCK other threads to write this -----
+MUTEX_LOCK(&mutex_filla); 
+ if(verbose){float x=(n-1)*pw.cs.nofcomponents+g;float y=(n1-1)*pw.cs.nofcomponents+g1;
+            Vector M(1,3);Vector P(1,3); M=0;P=0;
+             ini.print_usrdefcols(fout,x,y,T,Happ,pw.cs.abc,M,P,false);
+            fprintf (fout, " %i %i %i ",
+            physprop.mf.n()*physprop.mf.nofatoms,physprop.mf.nofatoms,physprop.mf.nofcomponents);
+            fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(physprop.sps.epsilon(1)),myround(physprop.sps.epsilon(2)),myround(physprop.sps.epsilon(3)),myround(physprop.sps.epsilon(4)),myround(physprop.sps.epsilon(5)),myround(physprop.sps.epsilon(6)));
+            physprop.mf.print(fout);fprintf(fout,"\n");}
+#endif
+
+Vector dnull(1,3);dnull=0;Vector dabc(1,3),drijk(1,3); 
+   double djij=-(U-U0)*pw.cs.nofatoms
+                        -(*a.jjj[n]).jij[(*a.jjj[n]).index(dnull)](g,g)/2
+                      -(*a.jjj[n1]).jij[(*a.jjj[n1]).index(dnull)](g1,g1)/2;
+int nd;
+if(!symmetrize)
+{  dabc=(*a.jjj[n1]).xyz-(*a.jjj[n]).xyz;
+
+// either  a) only one representative interaction 
+  dadbdc2ijk(drijk,dabc,pw.cs.abc);
+  if((nd=(*a.jjj[n]).index(dabc))==0){nd=(*a.jjj[n]).addpar(dabc,drijk,n1);}
+(*a.jjj[n]).jij[nd](g,g1)+=djij;
+
+if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;} 
+else if (verbose){float x=(n-1)*pw.cs.nofcomponents+g;float y=(n1-1)*pw.cs.nofcomponents+g1;
+                  fprintf(stderr,"\natom %i I_%i - atom %i I_%i  <--> x=%g y=%g ",n,g,n1,g1,x,y);} 
+}
+else
+{double r;
+//  b) 
+// here we should generate all nearest neighbours on sublattice n1 and distribute
+// the effective interaction on them - this should then be 
+// in line with the symmetry of the system
+// probe +- one supercell ... calculate distance to neighbours and 
+// multiplicity
+Vector s(1,3);double rm=1e10;int mult=0;
+for(int si=-1;si<=1;++si)
+for(int sj=-1;sj<=1;++sj)
+for(int sk=-1;sk<=1;++sk)
+ {s(1)=si;s(2)=sj;s(3)=sk;
+  dabc=(*a.jjj[n1]).xyz+s-(*a.jjj[n]).xyz;
+  dadbdc2ijk(drijk,dabc,pw.cs.abc);
+  r=Norm(drijk);
+  if(fabs(rm-r)<SMALL){++mult;}
+  else
+  if(r<rm-SMALL)if(r>SMALL){rm=r;mult=1;}
+  
+ }
+for(int si=-1;si<=1;++si)
+for(int sj=-1;sj<=1;++sj)
+for(int sk=-1;sk<=1;++sk)
+ {s(1)=si;s(2)=sj;s(3)=sk;
+  dabc=(*a.jjj[n1]).xyz+s-(*a.jjj[n]).xyz;
+  dadbdc2ijk(drijk,dabc,pw.cs.abc);
+  r=Norm(drijk);
+  if(fabs(rm-r)<SMALL){
+//-----------
+       if((nd=(*a.jjj[n]).index(dabc))==0){nd=(*a.jjj[n]).addpar(dabc,drijk,n1);}
+(*a.jjj[n]).jij[nd](g,g1)+=djij/mult;
+
+if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
+
+
+//-----------
+                       }
+
+  }
+}
+#ifdef _THREADS
+MUTEX_UNLOCK(&mutex_filla);
+// ---- END of BLOCK other threads
+
+      (*pw.jjj[n]).MF(g)=0;
+      (*pw.jjj[n1]).MF(g1)=0;
+#if defined  (__linux__) || defined (__APPLE__)
+    pthread_exit(NULL);
+#else
+return true;
+#endif
+#endif // if _THREADS
+}
+#ifdef _THREADS
+#undef U
+#undef U0
+#undef a
+#undef symmetrize
+#undef T
+#undef ini
+#undef pw
+#undef testqs
+#undef testspins
+#undef physprop
+#undef info
+#undef fout
+#endif // if _THREADS
 
 
 
@@ -68,10 +268,14 @@ void getU(double & U,Vector & Happ,double & T,
 // ... interactions will be calculated for interaction operators Igmin,...,Inofcomponents only
 // ***************************************************************************
 void delphonons(par & a,bool symmetrize, int noindexchange,int nprim,int na, int gmin)
-{fprintf(stderr,"# deleting phonons");
+{
+
+
+
+fprintf(stderr,"# deleting phonons");
 // 1. renormalise elastic constants using only phonon degrees of freedom
 //   and calling htcalc with doeps for various applied external stresses ...
-double U; int r; 
+double U; double r; 
 if (nprim>a.cs.nofatoms){fprintf(stderr,"Error reduce_unitcell - delphonons: nprim=%i>nofatoms=%i\n",nprim,a.cs.nofatoms);exit(1); }
  par phon(a); // for phonon --> elastic constants
 par pw(a);  // pw working parameterset ---> multipolar and magnetoelastic interactions
@@ -144,11 +348,7 @@ fprintf(stderr,"# 1. computing elastic constants ....\n");
 float x=1,y=1;Vector M(1,3);Vector P(1,3); M=0;P=0;
          
  {
-#ifdef _THREADS
-if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
-                  for (int ithread=0; ithread<NUM_THREADS; ithread++) 
-                    tin[ithread] = new htcalc_input(0,ithread,&phon);
-#endif
+
  physproperties physprop_phon(ini.nofspincorrs,ini.maxnofhkls,phon.cs);
    testspincf testspins_phon (ini.maxnoftestspincf,"reduce_unitcell_phon.tst",outfilename,phon.cs.nofatoms,phon.cs.nofcomponents);
    Vector Imax_phon(1,phon.cs.nofatoms*phon.cs.nofcomponents);
@@ -167,7 +367,7 @@ qvectors testqs_phon (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspin
 
     Matrix s(1,6,1,6); //myPrintVector(sps.epsilon,"Initial Strain");
           if(verbose){printf("Calculating Reference Energy U0\n");}
-    getU(U0,Happ,T,ini,phon,testqs_phon,testspins_phon,physprop_phon,"elastic constants U0");
+getU(U0,Happ,T,ini,phon,testqs_phon,testspins_phon,physprop_phon,"elastic constants U0");
     if(verbose)fprintf(stderr,"U0=%g meV ",U0);
            double cel=0.01;  // fixed stress to apply in GPa
           for(int n=1;n<=6;++n){Happ(6+n)+=cel;
@@ -197,9 +397,6 @@ print_time_estimate_until_end((6-n)/n);
           for(int k=1;k<=6;++k){if(h==k&&h<4&&a.Cel(h,k)<-1){fprintf(stderr,"elastic constants negative - rerun with stricter limits in mcphas.ini\n");exit(EXIT_FAILURE);}
                                 if(fabs(a.Cel(h,k))<1){a.Cel(h,k)=0;}
                                }
-#ifdef _THREADS
-for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
-#endif
 
  }
 if(verbose)fprintf(stderr,"\n#elastic constants generated\n");
@@ -279,11 +476,7 @@ for(int n=pw.cs.nofatoms;n>0;--n)
   }
 }
 qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins,pw,Imax,outfilename,verbose);
-#ifdef _THREADS
-if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
-                  for (int ithread=0; ithread<NUM_THREADS; ithread++) 
-                    tin[ithread] = new htcalc_input(0,ithread,&pw);
-#endif
+
 
  ini.testspins=&testspins;  ini.testqs=&testqs;
 
@@ -373,6 +566,51 @@ physprop.sps.print(stderr);}
 fprintf(stderr,"# 3. computing multipolar two ion interactions\n");
 fprintf(stderr,"# zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)\n");
 // ---------------------------------
+
+#ifdef _THREADS
+
+   // Initialises mutual exclusions and threads
+   MUTEX_INIT(mutex_filla);
+//   MUTEX_INIT(mutex_index);
+//   EVENT_INIT(checkfinish);
+   #if defined  (__linux__) || defined (__APPLE__)
+   pthread_t threads[NUM_THREADS]; int rc; void *status;
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+   #else
+   HANDLE threads[NUM_THREADS];
+   DWORD tid[NUM_THREADS], dwError;
+   long unsigned int retval;
+   #endif
+   int ithread;
+  getU_input *tin[NUM_THREADS];     
+   uthrdat.ini = new inipar*[NUM_THREADS]; 
+   uthrdat.a = new par*[NUM_THREADS];
+   uthrdat.testqs  = new qvectors*[NUM_THREADS];    
+   uthrdat.testspins         = new testspincf*[NUM_THREADS];
+   uthrdat.physprop         = new physproperties*[NUM_THREADS];
+   uthrdat.symmetrize=symmetrize;
+   uthrdat.fout=fout;
+   uthrdat.U0 = U0;
+   uthrdat.T = T;
+   uthrdat.Happ=Happ;
+   uthrdat.info="bilinear interaction";
+    for (ithread=0; ithread<NUM_THREADS; ithread++) 
+   { uthrdat.ini[ithread] = new inipar(ini); 
+     uthrdat.testqs[ithread] = new qvectors(testqs);
+     uthrdat.testspins[ithread] = new testspincf(testspins);
+     uthrdat.physprop[ithread] = new physproperties(physprop);
+    uthrdat.a[ithread]=&a;
+    } 
+
+
+if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
+                  for (int ithread=0; ithread<NUM_THREADS; ithread++) 
+                    tin[ithread] = new getU_input(ithread,0,0,0,0,&pw);
+#endif
+
+
 Vector dabc(1,3),drijk(1,3); 
 Matrix prim_unitcell_ijk(1,3,1,3);
 prim_unitcell_ijk=pw.cs.prim_unitcell_ijk();
@@ -391,6 +629,10 @@ for(int n=nlim;n>0;--n)// go through all magnetic ions
 // reinitilize timer
 print_time_estimate_until_end(-1.0);
 // points counted <-----------------
+#ifdef _THREADS
+int thrcount=0;  ithread=0;
+    fprintf(stderr,"#  running with nofthreads=%i\n",NUM_THREADS);
+#endif
 
 for(int n=nlim;n>0;--n)// go through all magnetic ions
  if((*pw.jjj[n]).module_type==fixmom)
@@ -400,79 +642,67 @@ for(int n=nlim;n>0;--n)// go through all magnetic ions
      for(int g1=gmin;g1<=pw.cs.nofcomponents;++g1)
      if(n1!=n||g1!=g)
      {if(verbose){printf("Calculating two ion interaction J%i%i(%i%i), i.e. for atom %i I%i - atom %i I%i \n",g,g1,n,n1,n,g,n1,g1);}
-  
+ 
+#ifndef _THREADS
       (*pw.jjj[n]).MF(g)=1;
       (*pw.jjj[n1]).MF(g1)=1;
-  getU(Uc,Happ,T,ini,pw,testqs,testspins,physprop,"bilinear interaction");
-     if(verbose){x=(n-1)*pw.cs.nofcomponents+g;y=(n1-1)*pw.cs.nofcomponents+g1;
-             ini.print_usrdefcols(fout,x,y,T,Happ,phon.cs.abc,M,P,false);
-            fprintf (fout, " %i %i %i ",
-            physprop.mf.n()*physprop.mf.nofatoms,physprop.mf.nofatoms,physprop.mf.nofcomponents);
-            fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(physprop.sps.epsilon(1)),myround(physprop.sps.epsilon(2)),myround(physprop.sps.epsilon(3)),myround(physprop.sps.epsilon(4)),myround(physprop.sps.epsilon(5)),myround(physprop.sps.epsilon(6)));
-            physprop.mf.print(fout);fprintf(fout,"\n");}
-
-   double djij=-(Uc-U0)*pw.cs.nofatoms
-                        -(*a.jjj[n]).jij[(*a.jjj[n]).index(dnull)](g,g)/2
-                      -(*a.jjj[n1]).jij[(*a.jjj[n1]).index(dnull)](g1,g1)/2;
-if(!symmetrize)
-{  dabc=(*a.jjj[n1]).xyz-(*a.jjj[n]).xyz;
-
-// either  a) only one representative interaction 
-  dadbdc2ijk(drijk,dabc,pw.cs.abc);
-  if((nd=(*a.jjj[n]).index(dabc))==0){nd=(*a.jjj[n]).addpar(dabc,drijk,n1);}
-(*a.jjj[n]).jij[nd](g,g1)+=djij;
-
-if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;} 
-else if (verbose){fprintf(stderr,"\natom %i I_%i - atom %i I_%i  <--> x=%g y=%g ",n,g,n1,g1,x,y);} 
-}
-else
-{
-//  b) 
-// here we should generate all nearest neighbours on sublattice n1 and distribute
-// the effective interaction on them - this should then be 
-// in line with the symmetry of the system
-// probe +- one supercell ... calculate distance to neighbours and 
-// multiplicity
-Vector s(1,3);double rm=1e10;int mult=0;
-for(int si=-1;si<=1;++si)
-for(int sj=-1;sj<=1;++sj)
-for(int sk=-1;sk<=1;++sk)
- {s(1)=si;s(2)=sj;s(3)=sk;
-  dabc=(*a.jjj[n1]).xyz+s-(*a.jjj[n]).xyz;
-  dadbdc2ijk(drijk,dabc,pw.cs.abc);
-  r=Norm(drijk);
-  if(fabs(rm-r)<SMALL){++mult;}
-  else
-  if(r<rm-SMALL)if(r>SMALL){rm=r;mult=1;}
+  getU_th(U,Happ,T,ini,pw,testqs,testspins,physprop,"bilinear interaction",fout,g,n,g1,n1,symmetrize,a,U0);
   
- }
-for(int si=-1;si<=1;++si)
-for(int sj=-1;sj<=1;++sj)
-for(int sk=-1;sk<=1;++sk)
- {s(1)=si;s(2)=sj;s(3)=sk;
-  dabc=(*a.jjj[n1]).xyz+s-(*a.jjj[n]).xyz;
-  dadbdc2ijk(drijk,dabc,pw.cs.abc);
-  r=Norm(drijk);
-  if(fabs(rm-r)<SMALL){
-//-----------
-       if((nd=(*a.jjj[n]).index(dabc))==0){nd=(*a.jjj[n]).addpar(dabc,drijk,n1);}
-(*a.jjj[n]).jij[nd](g,g1)+=djij/mult;
-
-if (fabs((*a.jjj[n]).jij[nd](g,g1))<SMALL){(*a.jjj[n]).jij[nd](g,g1)=0;}
-
-
-//-----------
-                       }
-
-  }
-}
-
-
       (*pw.jjj[n]).MF(g)=0;
       (*pw.jjj[n1]).MF(g1)=0;
   ++nofptsdone;--nofptstodo;print_time_estimate_until_end((double)nofptstodo/(double)nofptsdone); 
- }
-fclose(fout);    
+ 
+#else
+      thrcount++;
+      tin[ithread]->g=g;
+      tin[ithread]->g1=g1;
+      tin[ithread]->n=n;
+      tin[ithread]->n1=n1;
+      #if defined  (__linux__) || defined (__APPLE__)
+      rc = pthread_create(&threads[ithread], &attr, getU_th, (void *) tin[ithread]);
+      if(rc) { printf("Error return code %i from getU thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+      #else
+      threads[ithread] = CreateThread(NULL, 0, getU_th, (void *) tin[ithread], 0, &tid[ithread]);
+      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %lu from fetU thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+      #endif
+      if(thrcount%NUM_THREADS==0)
+      {
+         #if defined  (__linux__) || defined (__APPLE__)
+         for(int th=0; th<NUM_THREADS; th++)
+            rc = pthread_join(threads[th], &status);
+         #else
+         retval=WaitForMultipleObjects(NUM_THREADS,threads,TRUE,INFINITE);
+         if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects jsss\n"); exit(EXIT_FAILURE); }
+         for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);
+         #endif
+         ithread=0;
+         nofptsdone+=NUM_THREADS;nofptstodo-=NUM_THREADS;print_time_estimate_until_end((double)nofptstodo/(double)nofptsdone); 
+      }
+      else ithread++;
+#endif
+   }
+#ifdef _THREADS
+    #if defined  (__linux__) || defined (__APPLE__)
+    for(int th=0; th<ithread; th++)
+       rc = pthread_join(threads[th], &status);
+    #else
+    if(ithread>0){retval=WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
+    if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+ithread-1){printf("Error waitformultipleobjects jsssend\n"); exit(EXIT_FAILURE); }
+    for(int th=0; th<ithread; th++)CloseHandle(threads[th]);}
+    #endif
+
+    for (ithread=0; ithread<NUM_THREADS; ithread++) {
+       delete uthrdat.ini[ithread];
+       delete uthrdat.testqs[ithread];
+       delete uthrdat.testspins[ithread];
+       delete uthrdat.physprop[ithread];
+       delete tin[ithread]; }
+    
+ #if defined  (__linux__) || defined (__APPLE__)
+  pthread_mutex_destroy(&mutex_filla);
+ #endif
+#endif
+if(verbose){fclose(fout);}  
 
 // remove all phonons from a before outputting it ...
 for(int n=a.cs.nofatoms;n>0;--n)
@@ -502,9 +732,6 @@ for(int n=a.cs.nofatoms;n>0;--n)
  }
 }
 }
-#ifdef _THREADS
-for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
-#endif
 
 }
 

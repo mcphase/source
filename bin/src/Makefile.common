@@ -17,7 +17,7 @@
 ###########################################################################
 
 #debug flag
-#DEBUG=debug
+# DEBUG=debug
 
 # uncomment next line and set NUM_THREADS in mcphas_htcalc.c and mcdisp.c
 # according to your machine if you want to use multiple processing to speed up

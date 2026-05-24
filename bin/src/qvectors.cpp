@@ -288,7 +288,7 @@ qvectors::qvectors (const qvectors & q)
   hchkn[k] = new int[sizeof(*q.hchkn[k])];
    if (hchkn[k] == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
    memcpy (hchkn[k], q.hchkn[k], sizeof (*hchkn[k])); 
-
+ }
   q0 = new Vector * [sizeof(*q.q0)];        
   n = new Vector * [sizeof(*q.n)];        
   nm = new Vector * [sizeof(*q.nm)];        
@@ -302,7 +302,7 @@ qvectors::qvectors (const qvectors & q)
    ph[k]=new Vector (1,nofcomponents*nofatoms); (*ph[k])=(*q.ph[k]);
   }
 
- }
+ 
 }
 
 //destruktor

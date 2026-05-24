@@ -130,11 +130,13 @@ testspincf::testspincf (const testspincf & p)
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
   configurations = new spincf * [maxn+1];
+if(n>maxn){fprintf(stderr,"Error testspin.cpp - internal inconsistent n=%i > maxn=%i\n",n,maxn);exit(EXIT_FAILURE);}
 
-
- for (i=1;i<n;++i)
+ for (i=1;i<=n;++i)
    {// declare configuration i (with j spins)
-    configurations[i]=new spincf(p.configurations[i]->n(),nofatoms,nofcomponents);  
+    configurations[i]=new spincf(p.configurations[i]->na(),
+                                  p.configurations[i]->nb(),
+                                   p.configurations[i]->nc(),nofatoms,nofcomponents);  
     (*configurations[i])=(*p.configurations[i]);
     }
 
