@@ -340,7 +340,7 @@ fprintf(fout, "#output file of program reduce_unitcell ");
    
             }
 // ---------------------------------
-fprintf(stderr,"# 1. computing elastic constants ....\n");
+fprintf(stderr,"\n# 1. computing elastic constants ....\n");
 // ---------------------------------
 // only keep phononic degrees of freedom in phon and
 // apply various stresses 
@@ -489,7 +489,7 @@ getU(U0,Happ,T,ini,pw,testqs,testspins,physprop,"U0-reference");
 if(verbose){fprintf(stderr,"\n U0=%12.12g\n",U0);}
  
 // ---------------------------------
-fprintf(stderr,"# 2. computing multipolar self interactions J(0 0 0) and magnetoelastic interaction Gcfph\n");
+fprintf(stderr,"\n# 2. computing multipolar self interactions J(0 0 0) and magnetoelastic interaction Gcfph\n");
 fprintf(stderr,"#a) zero eps_alpha=0 Ogamma(i)=fixed relax selfconsistently ui ---> Jgammagamma(ii)\n");
 fprintf(stderr,"#b) nonzero eps_alpha=fixed Ogamma(i)=fixed relax ui and compare to\n");
 fprintf(stderr,"#      energy of a) ----> Gcfph^alphagamma(i) \n");
@@ -563,7 +563,7 @@ physprop.sps.print(stderr);}
  }
 
 // ---------------------------------
-fprintf(stderr,"# 3. computing multipolar two ion interactions\n");
+fprintf(stderr,"\n# 3. computing multipolar two ion interactions\n");
 fprintf(stderr,"# zero eps nonzero Ogamma(i)=fixed Ogamma'(j)=fixed relax ui --->Jgammagamma'(ij)\n");
 // ---------------------------------
 

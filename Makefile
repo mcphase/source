@@ -34,6 +34,7 @@
 #$DVIPS = '/Library/TeX/texbin/dvips';   # dvips $DVIPNG = '/Library/TeX/texbin/dvipng'; # dvipng
 #$PDFTOCAIRO = '/opt/homebrew/bin/pdftocairo';   # pdf to svg converter $PS2PDF = '/opt/homebrew/bin/ps2pdf';   # ps to pdf converter
 #$PDFCROP = '/Library/TeX/texbin/pdfcrop';       # pdfcrop $GS = '/opt/homebrew/opt/ghostscript/bin/gs';   # GhostScript
+#                                       on MAC latex2html:  if preview.sty is missing ---> "sudo tlmgr install preview"
 #                                   --> this will create online manual in directory manual
 #                                       copy this manual to the webpage: mkdir manual  |   put -r manual     (puts all files recursively)
 #               .   outdated: push all changes to Kenai, e.g.
