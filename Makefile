@@ -80,7 +80,7 @@
 #                                           correct bugs in izpack2exe.py (format of config.txt errors)]
 #	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
 #				and then do: 
-#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/15.2.0_1/lib/gcc/current/
+#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/
 #           gfortran lSystem not found - then do:
 #                               export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
 #
@@ -248,7 +248,7 @@ windows:
 	unix2dos ./examples/upd3/calc.bat
 	unix2dos ./tutorial/07documentation_logbooks/calc.bat
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
-#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/zulu17.56.15-ca-jre17.0.14-win_x64 --output=$(HOME)/mcph.exe
+#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/zulu26.30.11-ca-jdk26.0.1-win_x64 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
 	make winno
 
@@ -296,7 +296,7 @@ tgz :
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
 	dot_clean -mv ./
-	cd ../;tar --exclude=mcphas/bin/zulu17.56.15-ca-jre17.0.14-win_x64/* \
+	cd ../;tar --exclude=mcphas/bin/zulu26.30.11-ca-jdk26.0.1-win_x64/* \
 		--exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \

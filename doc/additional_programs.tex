@@ -595,12 +595,13 @@ given by th parametrisation in file.sipf.
                          the exchange parameter tables
 \item[Option:  -ni ] forces output without indexchange  
 \item[Option: -delatoms 1,2,5,7 ]  instead of removing atoms connected by a lattice vector 
- 			remove atoms number 1,2,5 and 7 from the list and also all interactions with those 
-                        Note the following approximation is of limited use and NOT recommended, better 
-                       use -delatoms phon (see below) instead of -delatoms 1,2,\dots:
-                     {\tiny   In case the atoms to be removed have the phonon module, 
-                         effective interactions are introduced between the remaining atoms, in this way the 
-                        crystal field phonon interactions with 4f shells can be treated in an effective way:
+ 			remove atoms number 1,2,5 and 7 from the list and also all interactions with those.
+                        In case the atoms to be removed have the phonon module, 
+                         effective interactions are introduced between the remaining atoms
+                        ({\em Note: this  approximation is of limited use and NOT recommended, better 
+                       use -delatoms phon (see below) instead of -delatoms 1,2,\dots to treat
+                        crystal field phonon interactions with 4f shells  in an effective way}):
+                     {\tiny   
                         Minimizing the energy by setting zero the derivative of the Hamiltonian (\ref{Htot}) with respect to the phonon coordinate
                         $\hat u_i^{\alpha}$ and in the spirit of the Einstein model neglecting bilinear terms 
                         (i.e. $K_{\alpha\beta}(ij)$ with $i \neq j$\footnote{in princpiple it is possible
@@ -677,6 +678,32 @@ force is equal to the increase in electrostatic force.
              to the option -delatoms 1,2,5,7 the option -delatoms phon takes into account
                         the correlated displacements which arise when a stress is applied or a
                         magnetic atom charge density is changed by magnetic field or temperature.
+        Note that the effective multipolar interactions $\mathcal J^{\rm eff}_{\gamma\gamma'}(ij)$
+       obtained from the crystal field phonon interaction will always be symmetric, i.e.
+        $\mathcal J^{\rm eff}_{\gamma\gamma'}(ij)=\mathcal J^{\rm eff}_{\gamma\gamma'}(ji)$.
+       The proof is~\footnote{Proof:
+        We rewrite the total Hamiltonian~(\ref{Htot}) in vector notation for the displacements 
+        $\hat \mbf u = (\dots, \hat u^{\alpha}_i, \dots )$
+        \begin{eqnarray}\label{Htotvec}
+\hat H_{\rm tot} & = & \dots - \frac{1}{2}\sum_{\alpha\beta}  \hat \mbf u^{T\alpha} \V K_{\alpha\beta} \hat \mbf u^{\beta} 
+-\sum_{\alpha=1,2,3,\gamma} \hat \mbf u^{T\alpha} \V \Gamma^{\alpha\gamma} \mbf O_{\gamma}
+\nonumber \\
+&-&\sum_{i,\delta=1-6,\alpha=1,2,3}  \hat \mbf u^{T\alpha} \mbf G_{mix}^{\delta\alpha} \epsilon_{\delta} - \nonumber \\
+&-&\sum_{i,\alpha=1-6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_i) \nonumber
+ \end{eqnarray} 
+     and determine the equilibrium displacements by setting zero it's derivative with respect
+to the $\hat u^{\alpha}_i$:
+
+\begin{equation}
+\sum_{\beta}   \V K_{\alpha\beta} \hat \mbf u^{\beta} =-\sum_{\gamma}  \V \Gamma^{\alpha\gamma} \mbf O_{\gamma}-\sum_{i,\delta=1-6}   \mbf G_{mix}^{\delta\alpha} \epsilon_{\delta}
+\end{equation}
+
+       }
+       In order to get some antisymmetric terms, some other mechanism for multipolar interactions
+       has to be present, for example a coupling of phonons to conduction electrons with
+       relativistic corrections (spin orbit coupling of conduction electrons) such as described
+       for Tb metal in \cite{liu72-793}.
+        
                         The program will perform the following operations
 \begin{description}
  \item[Renormalisation of Elastic Constants] The relaxation of the lattice
@@ -783,28 +810,29 @@ to creat nice supercells) and (ii) this option {\prg -delatoms phone } ?
 \EE You are touching an important point, indeed, honourable \pp ! Let me try to
 explain on a simple example: (i) if we stay with the primitive unit cell and
 let the program build supercells by settings in the {\prg reduce\_unitell.ini } file,
-the program will for example calculate the quadrupolar $O_2^0-O_2^0$ interaction between
+the program will for example calculate the quadrupolar $O_2^0(\mbf J_1)O_2^0(\mbf J_2)$ interaction between
 atom 1 and atom 2 in the primitive unit cell by forcing 
-the expectation valu $\langle O_2^0 \rangle$ on all atoms 1 and atoms 2
-in the supercell to be  $\langle O_2^0 \rangle=I_6\equiv 1$ and
+the expectation values $\langle O_2^0(\mbf J_i) \rangle$ on all atoms 1 and atoms 2
+in each supercell of the superlattice to be  $\langle O_2^0 \rangle=I_6\equiv 1$ and
  relaxing the phonon coordinates
 of all atoms in the supercell. What we will get in this way is
 the sum of the $O_2^0$-interactions between atom 1 and all atoms 2, i.e.
-$sum_{n\in {\rm atom 2 sublattice}} J^{\rm eff}_{66}(\mbf R_n-\mbf R_{1})$.
+$\sum_{n\in {\rm atom 2 sublattice}} \mathcal J^{\rm eff}_{66}(\mbf R_n-\mbf R_{1})$.
  On the other hand, if we use the (ii) option {\prg -delatoms phone 3 3 3 2 2 2}
 the program will create a $3x3x3$ supercell before doing any calculation which
 use the {\prg reduce\_unitell.ini} file. If we set in {\prg reduce\_unitell.ini} 
 {\prg maxqperiod=1}, no super-supercells of this $3x3x3$ supercell will be created.
-The program will then  calculate the quadrupolar $O_2^0-O_2^0$ interaction between
+The program will then  calculate the quadrupolar $O_2^0(\mbf J_1)O_2^0(\mbf J_2)$ interaction between
 atom 1 and atom 2 in the primitive unit cell number $2 2 2$ (the central primitive cell in
 the supercell) by forcing $\langle O_2^0 \rangle$ on atoms 1 and atoms 2
-only in this central primitive unitcell to be  $\langle O_2^0 \rangle=I_6\equiv 1$
- (in all supercells of the crystal).
+only in this central primitive unitcell to be  $\langle O_2^0 \rangle=I_6\equiv 1$ and 
+$\langle O_2^0 \rangle=I_6\equiv 0$ in all other primitive unit cells of the supercell
+ (this is done in all supercells of the crystal).
 In this way the result will be the quadrupolar interaction between
-atom 1 and 2 (provided $O_2^0-O_2^0$ interactions to more distant atoms 2 sitting in
+atom 1 and 2 (provided $O_2^0 O_2^0$ interactions to more distant atoms 2 sitting in
 the central primitive unitcell of neighbouring supercells can be neglected)
  If we choose the supercell large enough
-we can hope to derive from such a calculation the individual $J^{\rm eff}_{66}(\mbf R_2-\mbf R_{1})$.
+we can hope to derive from such a calculation the individual $\mathcal J^{\rm eff}_{66}(\mbf R_2-\mbf R_{1})$.
 
 \OO Brilliant ! So why is option {\prg -delatoms phone 3 3 3 2 2 2} not the standard way
 of deriving a reduced model ? Why is this an option ?

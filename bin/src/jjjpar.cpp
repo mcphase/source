@@ -717,12 +717,12 @@ void jjjpar::save_sipf(FILE * fout)
 void jjjpar::print_interaction(FILE * fout,int & pi,int & prl,int & prh,int & pcl,int & pch)
                  //prints interaction tensor (rows prl-prh,columns pcl-pch) pi  to fout
 {if(pi>paranz){fprintf(stderr,"Error printing interaction - neighbour index %i > number of neighbours %i\n",pi,paranz);exit(EXIT_FAILURE);} 
- fprintf(fout,"Interaction number %i to neighbour at (%g a, %g b, %g c),sublattice %i\n",pi,dn[pi](1),dn[pi](2),dn[pi](3),sublattice[pi]);
+ fprintf(fout,"#Interaction number %i to neighbour at (%g a, %g b, %g c),sublattice %i\n",pi,dn[pi](1),dn[pi](2),dn[pi](3),sublattice[pi]);
  if(prl>nofcomponents){fprintf(stderr,"Error printing interaction - lower row index %i > nofcomponents=%i\n",prl,nofcomponents);exit(EXIT_FAILURE);} 
  if(prh>nofcomponents){fprintf(stderr,"Error printing interaction - higher row index %i > nofcomponents=%i\n",prh,nofcomponents);exit(EXIT_FAILURE);} 
  if(pcl>nofcomponents){fprintf(stderr,"Error printing interaction - lower column index %i > nofcomponents=%i\n",pcl,nofcomponents);exit(EXIT_FAILURE);} 
  if(pch>nofcomponents){fprintf(stderr,"Error printing interaction - higher column index %i > nofcomponents=%i\n",pch,nofcomponents);exit(EXIT_FAILURE);} 
- fprintf(fout,"rows %i - %i, columns %i - %i \n",prl,prh,pcl,pch);
+ fprintf(fout,"#rows %i - %i, columns %i - %i \n",prl,prh,pcl,pch);
  Matrix pp(jij[pi](prl,prh,pcl,pch));
  myPrintMatrix(fout,pp);
 

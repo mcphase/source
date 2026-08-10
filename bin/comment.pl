@@ -14,6 +14,10 @@ unless ($#ARGV >1)
  print "                          comment all lines which do not contain the text string\n";
  print "                comment -cc 8  string *.*\n";
  print "                          insert line containing string before any change of data in column 8\n";
+ print "                comment -b string *.*\n";
+ print "                          comment all lines before finding a match to string\n";
+ print "                comment -a string *.*\n";
+ print "                          comment all lines after finding a match to string\n";
  exit 0;}else{print STDERR "#* $0 *";}
 
 
@@ -25,14 +29,14 @@ if($row1=~/-cc/){$str=$ARGV[0];shift @ARGV;}
 
 @ARGV=map{glob($_)}@ARGV;
 
-      unless($row1=~/-t/||$row1=~/-n/)
+      unless($row1=~/-t/||$row1=~/-n/||$row1=~/-a/||$row1=~/-b/)
        { unless($row1=~/-cc/){$row1=~s/x/*/g;$row1=eval $row1;}
          $row2=~s/x/*/g;$row2=eval $row2;
            }
 
   foreach (@ARGV)
 
-  {
+  {$found=0;
 
    $file=$_;
 
@@ -54,6 +58,17 @@ if($row1=~/-cc/){$str=$ARGV[0];shift @ARGV;}
        {     if ($line=~/\Q$row2\E/||$line=~/^\s*#/) {print Fout $line;}
              else{print Fout "#".$line;}
        }
+      elsif($row1=~/-a/)
+       {    if($line=~/^\s*#/){print Fout $line;}
+            elsif($found==1){print Fout "#".$line;} else{print Fout $line;}
+            if ($line=~/\Q$row2\E/) {$found=1;}
+       }
+      elsif($row1=~/-b/)
+       {    if($line=~/^\s*#/){print Fout $line;}
+            elsif($found==0){print Fout "#".$line;} else{print Fout $line;}
+            if ($line=~/\Q$row2\E/) {$found=1;}
+       }
+ 
       elsif($row1=~/-cc/)
        {     if ($line=~/^\s*#/) {print Fout $line;}
              else{++$j;

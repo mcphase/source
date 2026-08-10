@@ -17,7 +17,11 @@ unless ($#ARGV >1)
         year month day hour min second  and the column with 
         second is replaced by a timestamp in seconds
    
- *.* .. filenname\n";
+ *.* .. filenname
+
+Example: fform 4 4 8.2f tabelle.dat
+
+\n";
 
  exit 0;}else{print STDERR "#* $0 *";}
 

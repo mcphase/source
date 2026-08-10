@@ -8,7 +8,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >0) 
 
 {print STDERR " program sumcol  used to sum columnx in a file, the result goes to the file and total sum to stdout\n";
- print STDERR " and is written to the environment variables MCPHASE_SUM, \n";
+ print STDERR " and is written to the environment variables MCPHASE_SUM,MCPHASE_NOFPTS \n";
  print STDERR " MCPHASE_STA,MCPHASE_STAPPOINT,MCPHASE_SUMABS,MCPHASE_SUMABSPPOINT\n";
  print STDERR " usage: sumcol colx *.*   \n colx=columnx \n *.* .. filenname\n";
 
@@ -115,6 +115,7 @@ close Fout;
 
  if ($^O=~/MSWin/){
 print  "set MCPHASE_SUM=$sum\n";
+print  "set MCPHASE_NOFPTS=$i\n";
 print  "set MCPHASE_STA=$sta\n";
 print  "set MCPHASE_STAPPOINT=$stappoint\n";
 print  "set MCPHASE_SUMABS=$abs\n";
@@ -123,6 +124,7 @@ print  "set MCPHASE_SUMABSPPOINT=$absppoint\n";
                  else
                   {
 print  "export MCPHASE_SUM=$sum\n";
+print  "export MCPHASE_NOFPTS=$i\n";
 print  "export MCPHASE_STA=$sta\n";
 print  "export MCPHASE_STAPPOINT=$stappoint\n";
 print  "export MCPHASE_SUMABS=$abs\n";

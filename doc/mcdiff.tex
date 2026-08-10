@@ -337,9 +337,11 @@ crystal directions and of some products of the moment components is given.
 
 \subsection{How to generate and view a powder diffraction profile}
 
+\PP So what to do about powder data ? 
 
-.. such a reflection list can be easily transformed into a diffraction pattern
-by convolution with the resolution function of a neutron diffractometer.
+\OO \pp, I believe, such a reflection list can be easily transformed into a diffraction pattern
+by convolution with the resolution function of a neutron diffractometer. In my notes
+from the last {\prg McPhase} workshop I found the following guidelines:
 
 \begin{itemize}
 \item
@@ -377,6 +379,44 @@ Calculated magnetic neutron powder diffraction pattern
 of NdCu$_2$~\cite{gratz91-9297} at T=2~K.
 [plot created by program {\prg mcdiff\index{mcdiff}+convolute\index{convolute}+display}]}
 \end{figure}
+
+\subsection{How to compare a magnetisation measured on a polycrystal to a magnetic moment derived from a fit of diffraction data ?}
+
+\OO In order to compare the magnetisation measured on a polycrystal to the  magnetic structure
+ determined by the neutron diffraction experiment at H=2 T we assume, that in both cases 
+the applied magnetic field is large enough to saturate the ferromagnetic component of 
+the moment and that this ferromagnetic component $M$ will be aligned along the easy 
+axis in each crystallite. By saturation we do not mean the free ion value of the magnetic moment,
+but we mean that the size of the Er moments in each crystallite is the same and
+variations due to the different orientation of the crystallites can be neglected.
+
+ In this case the magnetisation measurement will probe the projection 
+$M_{||\mbf H}$ of the magnetic moment of each crystallite on the direction of the applied field. 
+
+\begin{equation}
+M_{||\mbf H}=M \cos \theta
+\end{equation}
+
+Averaging this projection $M_{||\mbf H}$  over all directions of the crystallites and taking into account 
+that the angle $\theta$ between the easy axis and the direction of the applied magnetic field 
+can vary from $0$ to $\pi/2$ we obtain for the averaged projected moment $\overline M_{||\mbf H}$
+
+\begin{equation}
+\overline {M_{||\mbf H}}=\frac{1}{2\pi} \int_0^{\pi/2}  \sin(\theta) M_{||H} d\theta  \int_0^{2\pi} d\phi =
+M \int_0^{\pi/2} \sin(\theta)\cos(\theta)d\theta=\frac{M}{2}
+\end{equation}
+
+Thus the ferromagnetic  moment  $M$ determined from the neutron diffraction experiment should 
+correspond to twice the moment $\overline {M_{||\mbf H}}$ measured on a powder.
+
+My question now is, if the external field is not able to saturate the moment or if the 
+anisotropy is weak and the moments tilt - is there a possibility to calculate the magnetisation of
+a polycrystal ?
+
+\EE Well, \oo, such a calculation requires the knowledge of the anisotropy, in {\prg McPhase} this
+information is contained in the Hamiltonian (crystal field and two ion anisotropy) and you may use the
+program {\prg anisotropy} to do a numerical average. However, please keep in mind that you need to
+know more than the magnetic strucure - you need to know an apropriate Hamiltonian for the system.
 
 \subsection{How to calculate only specific reflections, azimuth dependence and fitting of neutron %%@
 intensities}

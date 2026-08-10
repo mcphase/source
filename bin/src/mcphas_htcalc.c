@@ -1,5 +1,103 @@
 // routines for mcphas for calculation of magnetic phases
 // htcalc.c
+void logfe(int j,int r, double sc,inipar & ini,par & inputpars,spincf & sps,int verbose,double fe,int thread_id)
+{ char outfilename[MAXNOFCHARINLINE];
+FILE * felog; // logfile for q dependence of fe
+
+                 ComplexVector a(1,3*inputpars.cs.nofatoms),b(1,3*inputpars.cs.nofatoms);
+                 ComplexVector b1(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+                 float inmax=0;int qh,qk,ql,l,nk=0;
+                 ComplexVector * mq;  
+                 int na=sps.na(),nb=sps.nb(),nc=sps.nc();
+                 mq = new ComplexVector [sps.in(na,nb,nc)+2];
+                 for(l=0;l<=sps.in(na,nb,nc)+1;++l){mq[l]=ComplexVector(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);}
+                 Vector sq2(1,3*inputpars.cs.nofatoms),qs(1,3),qt(1,3);float in;qs(1)=1000;
+                 sps.FT(mq); //Fourier trafo of spincf
+		 // get the main propagation vector by looking for the
+		 // biggest Fourier component of the magnetic moment arrangement 
+                 for(qh=0;qh<sps.na();++qh){for(qk=0;qk<sps.nb();++qk){for(ql=0;ql<sps.nc();++ql)
+                  {// get magnetic moment from momentum fouriercomponent into b 
+		   b=0;na=sps.na()-qh,nb=sps.nb()-qk,nc=sps.nc()-ql;
+		   b1 = mq[sps.in(na,nb,nc)];
+                   for(l=1;l<=inputpars.cs.nofatoms;++l)
+		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
+		    for (m1=1;m1<=m1max;++m1)
+		     {if((*inputpars.jjj[l]).gJ==0)
+		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.cs.nofcomponents*(l-1)+m1);}
+		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.cs.nofcomponents*(l-1)+m1);}
+		      }
+		      else
+		      {b(3*(l-1)+m1)=b1(inputpars.cs.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
+		      }
+		     }    
+		    }
+		   a = b.Conjugate();
+		   b1 = mq[sps.in(qh,qk,ql)];
+		   b=0;
+                   for(l=1;l<=inputpars.cs.nofatoms;++l)
+		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
+		    for (m1=1;m1<=m1max;++m1)
+		     {if((*inputpars.jjj[l]).gJ==0)
+		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.cs.nofcomponents*(l-1)+m1);}
+		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.cs.nofcomponents*(l-1)+m1);}
+		      }
+		      else
+		      {b(3*(l-1)+m1)=b1(inputpars.cs.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
+		      }
+		     }    
+		    }                   
+		   // inner product
+                   sq2=Abs(b+a)/(double)sps.n()/(double)inputpars.cs.nofatoms;
+                   Vector q(1,3);
+		   q(1)=1.0*qh/sps.na();
+	           q(2)=1.0*qk/sps.nb();
+                   q(3)=1.0*ql/sps.nc();
+                   qt=inputpars.rez.Transpose()*q;
+		   in=Norm(sq2)*Norm(sq2);
+	           if (in>inmax-0.001)
+                    {if(in<inmax+0.001){++nk;}else{nk=1;}
+                     inmax=in;qs=q;}
+                   }}}
+
+// inserted 26.11.2015 to get rec vector R such that R+q is smallest
+     // try different Q vectors corresponding to q !!
+    int i1,j1,k1;
+    double QQmin=1e10,QQ;
+// inserted 10.5.10 to make compatible with nonortholattices
+     Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
+        get_abc_in_ijk(abc_in_ijk,inputpars.cs.abc);
+     p=abc_in_ijk*inputpars.cs.r; // p is the primitive crystal unit cell in ijk coordinates
+     pstar=2*PI*p.Inverse().Transpose();
+     Vector nmin(1,3),nmax(1,3),hkl(1,3),hkls(1,3),Q(1,3),qeuklid(1,3);
+     nlimits_calc(nmin, nmax, ini.maxQ, pstar);
+     // problem: we want to find all lattice vectors Rn=ni*ai which are within a
+     // sphere of radius r from the origin (ai = column vectors of matrix a)
+     // this routine returns the maximum and minimum values of ni i=1,2,3
+     // by probing the corners of a cube
+              for (i1=(int)nmin(1);i1<=nmax(1);++i1){
+              for (j1=(int)nmin(2);j1<=nmax(2);++j1){
+              for (k1=(int)nmin(3);k1<=nmax(3);++k1){
+       Q(1)=qs(1)+i1;Q(2)=qs(2)+j1;Q(3)=qs(3)+k1;
+        //project back to big lattice
+       hkl=inputpars.rez.Transpose()*Q;
+
+      // qeuklid is Q in ijk coordinate system !
+      hkl2ijk(qeuklid,hkl,inputpars.cs.abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
+      QQ=Norm(qeuklid);if(QQ<QQmin){QQmin=QQ;hkls=hkl;}
+ }}}
+//------------------- end if insert 26.11.2015 -->> output is hkls with smallest |Q|
+
+                   strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
+                   strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
+                   felog=fopen_errchk(outfilename,"a");
+                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i fe=%10.6g\n#",inputpars.cs.nofatoms,inputpars.cs.nofcomponents,fe);}
+                    fprintf(felog,"%10.6g %10.6g %10.6g %3i %20.16g %3i %3i %3i %3i %i %10.6g %i\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,sc,thread_id);
+                   if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
+	           fclose(felog);
+                  delete []mq;
+                 }
+
+
 
 
 #ifdef _THREADS
@@ -123,7 +221,7 @@ int htcalc_iteration(int & j, double &femin, spincf &spsmin, Vector & Happ, doub
  Vector h1(1,inputpars.cs.nofcomponents),Happzero(1,Happ.Hi()),hkl(1,3);
  Happzero=0;
  char text[MAXNOFCHARINLINE];
- char outfilename[MAXNOFCHARINLINE];
+char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
  FILE * felog; // logfile for q dependence of fe
  FILE * fout;
@@ -302,103 +400,8 @@ if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(
  
 	    
   // log fe if required
-   if (ini.logfevsQ==1) {
-                 ComplexVector a(1,3*inputpars.cs.nofatoms),b(1,3*inputpars.cs.nofatoms);
-                 ComplexVector b1(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
-                 float inmax=0;int qh,qk,ql,l,nk=0;
-                 ComplexVector * mq;  
-                 int na=sps.na(),nb=sps.nb(),nc=sps.nc();
-                 mq = new ComplexVector [sps.in(na,nb,nc)+2];
-                 for(l=0;l<=sps.in(na,nb,nc)+1;++l){mq[l]=ComplexVector(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);}
-                 Vector sq2(1,3*inputpars.cs.nofatoms),qs(1,3),qt(1,3);float in;qs(1)=1000;
-                 sps.FT(mq); //Fourier trafo of spincf
-		 // get the main propagation vector by looking for the
-		 // biggest Fourier component of the magnetic moment arrangement 
-                 for(qh=0;qh<sps.na();++qh){for(qk=0;qk<sps.nb();++qk){for(ql=0;ql<sps.nc();++ql)
-                  {// get magnetic moment from momentum fouriercomponent into b 
-		   b=0;na=sps.na()-qh,nb=sps.nb()-qk,nc=sps.nc()-ql;
-		   b1 = mq[sps.in(na,nb,nc)];
-                   for(l=1;l<=inputpars.cs.nofatoms;++l)
-		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
-		    for (m1=1;m1<=m1max;++m1)
-		     {if((*inputpars.jjj[l]).gJ==0)
-		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.cs.nofcomponents*(l-1)+m1);}
-		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.cs.nofcomponents*(l-1)+m1);}
-		      }
-		      else
-		      {b(3*(l-1)+m1)=b1(inputpars.cs.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
-		      }
-		     }    
-		    }
-		   a = b.Conjugate();
-		   b1 = mq[sps.in(qh,qk,ql)];
-		   b=0;
-                   for(l=1;l<=inputpars.cs.nofatoms;++l)
-		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
-		    for (m1=1;m1<=m1max;++m1)
-		     {if((*inputpars.jjj[l]).gJ==0)
-		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.cs.nofcomponents*(l-1)+m1);}
-		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.cs.nofcomponents*(l-1)+m1);}
-		      }
-		      else
-		      {b(3*(l-1)+m1)=b1(inputpars.cs.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
-		      }
-		     }    
-		    }                   
-		   // inner product
-                   sq2=Abs(b+a)/(double)sps.n()/(double)inputpars.cs.nofatoms;
-                   Vector q(1,3);
-		   q(1)=1.0*qh/sps.na();
-	           q(2)=1.0*qk/sps.nb();
-                   q(3)=1.0*ql/sps.nc();
-                   qt=inputpars.rez.Transpose()*q;
-		   in=Norm(sq2)*Norm(sq2);
-	           if (in>inmax-0.001)
-                    {if(in<inmax+0.001){++nk;}else{nk=1;}
-                     inmax=in;qs=q;}
-                   }}}
+   if (ini.logfevsQ==1) logfe(j,r,sc,ini,inputpars,sps,verbose,fe,thread_id);
 
-// inserted 26.11.2015 to get rec vector R such that R+q is smallest
-     // try different Q vectors corresponding to q !!
-    int i1,j1,k1;
-    double QQmin=1e10,QQ;
-// inserted 10.5.10 to make compatible with nonortholattices
-     Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
-        get_abc_in_ijk(abc_in_ijk,inputpars.cs.abc);
-     p=abc_in_ijk*inputpars.cs.r; // p is the primitive crystal unit cell in ijk coordinates
-     pstar=2*PI*p.Inverse().Transpose();
-     Vector nmin(1,3),nmax(1,3),hkl(1,3),hkls(1,3),Q(1,3),qeuklid(1,3);
-     nlimits_calc(nmin, nmax, ini.maxQ, pstar);
-     // problem: we want to find all lattice vectors Rn=ni*ai which are within a
-     // sphere of radius r from the origin (ai = column vectors of matrix a)
-     // this routine returns the maximum and minimum values of ni i=1,2,3
-     // by probing the corners of a cube
-              for (i1=(int)nmin(1);i1<=nmax(1);++i1){
-              for (j1=(int)nmin(2);j1<=nmax(2);++j1){
-              for (k1=(int)nmin(3);k1<=nmax(3);++k1){
-       Q(1)=qs(1)+i1;Q(2)=qs(2)+j1;Q(3)=qs(3)+k1;
-        //project back to big lattice
-       hkl=inputpars.rez.Transpose()*Q;
-
-      // qeuklid is Q in ijk coordinate system !
-      hkl2ijk(qeuklid,hkl,inputpars.cs.abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
-      QQ=Norm(qeuklid);if(QQ<QQmin){QQmin=QQ;hkls=hkl;}
- }}}
-//------------------- end if insert 26.11.2015 -->> output is hkls with smallest |Q|
-
-                   strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
-                   strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
-                   felog=fopen_errchk(outfilename,"a");
-                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i fe=%10.6g\n#",inputpars.cs.nofatoms,inputpars.cs.nofcomponents,fe);}
-      #ifndef _THREADS
-                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i %i %10.6g 1\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,sc);
-      #else
-                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i %i %10.6g %i\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,sc,thread_id);
-      #endif	     
-                   if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
-	           fclose(felog);
-                  delete []mq;
-                 }
       }
 
 // if (verbose==1) {fprintf(stderr,"-");fflush(stderr);}
@@ -682,6 +685,7 @@ else // if yes ... then
   // now really calculate the physical properties
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
       physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,&physprops); 
+   if (ini.logfevsQ==1) logfe(physprops.j,r,sc,ini,inputpars,sps,verbose,physprops.fe,0);
 
       spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);

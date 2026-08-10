@@ -31,11 +31,15 @@ EXE=.exe
 STATIC=-static
 endif
 
+ifdef DARWIN
+LIBS=-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+endif
+
 all :  clean bfk.o 
 #../chibfk$(EXE) 
 
 bfk.o: bfk.f95
-	$(FC) $(STATIC) -lgfortran -std=legacy -o ../bfk $^ 
+	$(FC) $(STATIC) -lgfortran -std=legacy  $(LIBS) -o ../bfk $^ 
 
 #../chibfk$(EXE): chibfk.f95
 #	gfortran -static -lgfortran -o ../chibfk $^ 
