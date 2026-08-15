@@ -345,7 +345,7 @@ if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(
                     x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     snprintf(text,MAXNOFCHARINLINE,"fe=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,femin,T,Norm(Happ),Happ(1),Happ(2),Happ(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"fe=%g<femin=%g:T=%gK, |Hext|=%gT,Hexta=%gT, Hextb=%gT, Hextc=%gT,  %i spins",fe,femin,T,Norm(Happ),Happ(1),Happ(2),Happ(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fout = fopen_errchk (outfilename, "w");
@@ -477,7 +477,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
-               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Hi=%g Hj=%g Hk=%g\n",T,Happ(1),Happ(2),Happ(3));
+               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Hexti=%g Hextj=%g Hextk=%g\n",T,Happ(1),Happ(2),Happ(3));
                fclose(felog);
 	      }
  if (verbose==1)
@@ -704,7 +704,7 @@ else // if yes ... then
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     snprintf(text,MAXNOFCHARINLINE,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(Happ),Happ(1),Happ(2),Happ(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Hexta=%gT, Hextb=%gT, Hextc=%gT, %i spins",physprops.fe,femin,T,Norm(Happ),Happ(1),Happ(2),Happ(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fout = fopen_errchk (outfilename, "w");
@@ -734,14 +734,14 @@ else // if yes ... then
    if(thrdat.spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #endif
    
-   if(verbose){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
+   if(verbose){fprintf(stderr,"Warning htcalc.c: at T=%g K /  Hext= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                             T,Norm(Happ),femin,physprops.j,physprops.fe);
    fprintf(stderr,"recalculation converged after %i loops and initial and final spin structures are ",r);
    if(eq==1){fprintf(stderr,"equal\n");}else{fprintf(stderr,"not equal\n");}}
 if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
-               fprintf(felog,"#Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n# but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
+               fprintf(felog,"#Warning htcalc.c: at T=%g K /  Hext= %g Tfemin=%4.9g was calc.(conf no %i),\n# but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                 T,Norm(Happ),femin,physprops.j,physprops.fe);fprintf(felog,"#recalculation converged after %i loops and initial and final spin structures are ",r);
    if(eq==1){fprintf(felog,"equal\n");}else{fprintf(stderr,"not equal\n#initial values as converged from femin=%4.9g meV calculation:\n",femin);
 #ifndef _THREADS
