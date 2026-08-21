@@ -13,8 +13,14 @@ if test -f results/spins.1.jvx
   rm results/spins.1.jvx
 fi
 
+if test -f results/graphic_parameters.set
+ then
+ echo "# using preset graphic parameters from file results/graphic_parameters.set"
+ cp results/graphic_parameters.set results/.graphic_parameters.set
+ else
+ echo "# this is initial graphic parameters file" > results/graphic_parameters.set
+fi
 
-echo "# this is initial graphic parameters file" > results/graphic_parameters.set
 while test -f results/graphic_parameters.set
 do
  spins $*
@@ -55,4 +61,8 @@ else
   rm results/graphic_parameters.set
 fi
 done
+if test -f results/.graphic_parameters.set
+then
+cp results/.graphic_parameters.set results/graphic_parameters.set
+fi
 

@@ -99,7 +99,7 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
  results/spins*.eps (postscript), results/spins*.fst (fp_studio), \n\
  results/spins.out (ascii) and results/spins*.jvx (javaview)\n\n\
  the graphics output format can be fine tuned in .sps and .qev input files\n"
-" or results/graphics_parameters.set by show_abc_unitcell,\n"
+" or results/graphic_parameters.set by show_abc_unitcell,\n"
 " show_primitive_crystal_unitcell, spins_scale_moment, spins_wave_amplitude\n\
  show_magnetic_unitcell, show_atoms, scale_view_1,scale_view_2, scale_view_3 ...\n\n\
  jvx files can be viewed by:\n\
