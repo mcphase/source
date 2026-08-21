@@ -277,7 +277,7 @@ example 4: pointc file.sipf 0.2 4 1 5.3 0.1 0.3\n \
  # R(r)=sum_p Cp r^(Np-1) exp(-XIp r)(2 XIp)^(Np+0.5)/sqrt(2Np!)\n \
  #rare earth:Freeman&Watson PR127(1962)2058,Sovers J.Phys.Chem.Sol.28(1966)1073\n \
  #e.g. Co2+ is isoelectronic to Fe+, looking at page 422\n \
- #of Clemente & Roetti the parameters are \n \
+ #of Clemente & Roetti the parameters are (XIp in 1/a0)\n \
  N1=3 XI1=4.95296 C1=0.36301 \n \
  N2=3 XI2=12.2963 C2=0.02707 \n \
  N3=3 XI3=7.03565 C3=0.14777\n"

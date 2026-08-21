@@ -29,7 +29,7 @@ FILE * sipf_file;
 char instr[MAXNOFCHARINLINE];
 //float invalues[100];invalues[0]=99;
 // set stevens parameters and landefactor, J and <r^l> of ion
-
+parser ob; int verbose=0;
 
 // read create class object ionpars from iontype - sets J, gJ, Stevens factors from the
 // routine getpar in cfieldrout.c, thus takes the single ion parameters from
@@ -47,25 +47,26 @@ char instr[MAXNOFCHARINLINE];
                                     }
    
 //   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
+        parseline(instr,ob,verbose);
         extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE,1);
         
-        extract(instr,"N1",(*jjjps).Np(1));extract(instr,"XI1",(*jjjps).Xip(1));extract(instr,"C1",(*jjjps).Cp(1));
-        extract(instr,"N2",(*jjjps).Np(2));extract(instr,"XI2",(*jjjps).Xip(2));extract(instr,"C2",(*jjjps).Cp(2));
-        extract(instr,"N3",(*jjjps).Np(3));extract(instr,"XI3",(*jjjps).Xip(3));extract(instr,"C3",(*jjjps).Cp(3));
-        extract(instr,"N4",(*jjjps).Np(4));extract(instr,"XI4",(*jjjps).Xip(4));extract(instr,"C4",(*jjjps).Cp(4));
-        extract(instr,"N5",(*jjjps).Np(5));extract(instr,"XI5",(*jjjps).Xip(5));extract(instr,"C5",(*jjjps).Cp(5));
-        extract(instr,"N6",(*jjjps).Np(6));extract(instr,"XI6",(*jjjps).Xip(6));extract(instr,"C6",(*jjjps).Cp(6));
-        extract(instr,"N7",(*jjjps).Np(7));extract(instr,"XI7",(*jjjps).Xip(7));extract(instr,"C7",(*jjjps).Cp(7));
-        extract(instr,"N8",(*jjjps).Np(8));extract(instr,"XI8",(*jjjps).Xip(8));extract(instr,"C8",(*jjjps).Cp(8));
-        extract(instr,"N9",(*jjjps).Np(9));extract(instr,"XI9",(*jjjps).Xip(9));extract(instr,"C9",(*jjjps).Cp(9));
+        extract(instr,"N1",(*jjjps).Np(1),ob);extract(instr,"XI1",(*jjjps).Xip(1),ob);extract(instr,"C1",(*jjjps).Cp(1),ob);
+        extract(instr,"N2",(*jjjps).Np(2),ob);extract(instr,"XI2",(*jjjps).Xip(2),ob);extract(instr,"C2",(*jjjps).Cp(2),ob);
+        extract(instr,"N3",(*jjjps).Np(3),ob);extract(instr,"XI3",(*jjjps).Xip(3),ob);extract(instr,"C3",(*jjjps).Cp(3),ob);
+        extract(instr,"N4",(*jjjps).Np(4),ob);extract(instr,"XI4",(*jjjps).Xip(4),ob);extract(instr,"C4",(*jjjps).Cp(4),ob);
+        extract(instr,"N5",(*jjjps).Np(5),ob);extract(instr,"XI5",(*jjjps).Xip(5),ob);extract(instr,"C5",(*jjjps).Cp(5),ob);
+        extract(instr,"N6",(*jjjps).Np(6),ob);extract(instr,"XI6",(*jjjps).Xip(6),ob);extract(instr,"C6",(*jjjps).Cp(6),ob);
+        extract(instr,"N7",(*jjjps).Np(7),ob);extract(instr,"XI7",(*jjjps).Xip(7),ob);extract(instr,"C7",(*jjjps).Cp(7),ob);
+        extract(instr,"N8",(*jjjps).Np(8),ob);extract(instr,"XI8",(*jjjps).Xip(8),ob);extract(instr,"C8",(*jjjps).Cp(8),ob);
+        extract(instr,"N9",(*jjjps).Np(9),ob);extract(instr,"XI9",(*jjjps).Xip(9),ob);extract(instr,"C9",(*jjjps).Cp(9),ob);
 
-        extract(instr,"ALPHA",(*iops).alpha);
-        extract(instr,"BETA",(*iops).beta);
-        extract(instr,"GAMMA",(*iops).gamma);
+        extract(instr,"ALPHA",(*iops).alpha,ob);
+        extract(instr,"BETA",(*iops).beta,ob);
+        extract(instr,"GAMMA",(*iops).gamma,ob);
 
-//        extract(instr,"R2",  (*jjjps).r2);
-//        extract(instr,"R4",  (*jjjps).r4);
-//        extract(instr,"R6",  (*jjjps).r6);
+//        extract(instr,"R2",  (*jjjps).r2,ob);
+//        extract(instr,"R4",  (*jjjps).r4,ob);
+//        extract(instr,"R6",  (*jjjps).r6,ob);
 //        }
   }
       if((*jjjps).r2==0){(*jjjps).r2_from_radial_wavefunction();printf("#<r^2> from radial wavefunction  in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);}

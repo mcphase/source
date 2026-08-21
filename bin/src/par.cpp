@@ -52,9 +52,9 @@ par::par (const char *filejjj,int  verbose)
   char Celstr[6];
    for(i=1;i<=6;++i)for(j=1;j<=6;++j){
   snprintf(Celstr,6,"Cel%i%i",i,j);// printf("%s\n",Celstr);
-  extract(instr,Celstr,Cel(i,j));Cel(j,i)=Cel(i,j);}
+  extract(instr,Celstr,Cel(i,j),ob);Cel(j,i)=Cel(i,j);}
 
-   extract(instr,"nofatoms",cs.nofatoms);extract(instr,"nofcomponents",cs.nofcomponents); 
+   extract(instr,"nofatoms",cs.nofatoms,ob);extract(instr,"nofcomponents",cs.nofcomponents,ob); 
 		  if(feof(fin_coq)!=0)
                     {fprintf(stderr,"ERROR reading header of file %s: line '#! nofatoms=...' not found\n",filejjj);exit(EXIT_FAILURE);}
   }

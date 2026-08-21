@@ -906,7 +906,7 @@ void jjjpar::save_radial_wavefunction(const char * filename)
     fprintf(fout,"# the radial wave function is expanded as \n");
     fprintf(fout,"# R(r)=sum_p C_p R_Np,XIp(r)\n");
     fprintf(fout,"# R_Np,XIp(r)=r^(Np-1).exp(-XIp * r).(2 * XIp)^(Np+0.5)/sqrt(2Np!)\n");
-    fprintf(fout,"# radial wave function parameters Np XIp Cp values are\n");
+    fprintf(fout,"# radial wave function parameters Np XIp(1/a0) Cp values are\n");
     fprintf(fout,"# tabulated in clementi & roetti Atomic data and \n");
     fprintf(fout,"# nuclear data tables 14 (1974) 177-478 for the transition metals\n");
     fprintf(fout,"# for rare earth parameters can be found in Freeman and Watson PR 127 (1962) 2058\n");
