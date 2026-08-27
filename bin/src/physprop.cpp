@@ -4,9 +4,6 @@
  // *************************************************************************
  // ************************ physproperties *********************************
  // *************************************************************************
-
-
-
  
 //constructor
 physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,cryststruct & csin)
@@ -93,12 +90,8 @@ void physproperties::update_maxnofhkls(int & maxnofhkli)
 }
 
 
-
-
-
-  
    // 1.  puts header for fum file columns >8 into string header
-   // 2. sets or reads output column field nn -
+   // 2. sets or reads output column field nn ->
    //  if setnn true: for all i>8 up to input nofcols ... if nnerr[i]!=0 -> increase sta according to difference 
    //                 (and finally return sta) ... then ...
    //                 set  nn[i] from saved parameters fe,u,etc. and puts into nofcols the number of output columns
@@ -108,11 +101,11 @@ void physproperties::update_maxnofhkls(int & maxnofhkli)
 double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini, int & ortho,par & inputpars,int & verbose)
  {double sta=0;double * ptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';
-    int nofcolsin=0;if(!setnn){nofcolsin=nofcols; Pel=0;Pelabc=0;m=0;mabc=0;fe=0;u=0;sps.epsilon=0;}
+    int nofcolsin=nofcols;if(!setnn){ Pel=0;Pelabc=0;m=0;mabc=0;fe=0;u=0;sps.epsilon=0;}
     Vector Hext(1,3);Hext=Hint(1,3)+ini.N*mu0M();
      double Nm=Norm(m),mp=m*Hext/Norm(Hext);
     nofcols=15;for(int i=8;i<=nofcolsin||i<=nofcols;++i)
-    {ptr=NULL;
+    {ptr=NULL; 
           if(i<15){switch(i) {       case 8: ptr=&fe;
                                               if(ini.nofrndtries>=0)snprintf(hs,40,"free_energy_f[meV/ion]");
                                               else                  snprintf(hs,40,"energy_u[meV/ion]"); // for Monte Carlo
@@ -172,22 +165,25 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
            
                  }
     if(ptr==NULL)
-    {if(nnerr[i]>0&&i<=nofcolsin&&verbose==1)
+    {if(setnn&&nnerr[i]>0&&i<=nofcolsin&&verbose==1)
      fprintf(stdout,"sta_mcphas.fum warning: exp value %g cannot be fitted in column %i in file ./fit/mcphas.fum\n",nn[i],i);
     }
     else
     {
     if(setnn)
-        {
-      if(nnerr[i]>0&&i<=nofcolsin)
+        {if(nnerr[i]>0&&i<=nofcolsin)
             {
-//fprintf(stdout,"stacalc_mphas.fum: col %i line %i value %g err %g - calcvalue %g\n",i,j2,nn[i],nnerr[i],clc);
-             sta+=(nn[i]-(*ptr))*(nn[i]-(*ptr))/nnerr[i]/nnerr[i];
+             if(verbose)fprintf(stdout,"stacalc_mphas.fum: col %i  value %g err %g - calcvalue %g\n",i,nn[i],nnerr[i],(*ptr));
+             double d2=(nn[i]-(*ptr))*(nn[i]-(*ptr));double e2=nnerr[i]*nnerr[i];
+             sta+=d2/e2;
+             if(ini.do_chi2){fprintf(stdout,"#!fum sta= %g %g\n",d2,e2);}
              }
           nn[i]=(*ptr);
           if(i<=9)snprintf(num,40,"%8.8g ",nn[i]);else snprintf(num,40,"%4.4g ",nn[i]);
           snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE-strlen(outstr),"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
-        }else
+        
+        }
+        else
         {  (*ptr)=nn[i];
         }
      snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",hs);
@@ -211,7 +207,7 @@ return sta;
 double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int & verbose)
  {double sta=0;double * ptr;int * iptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';int nofa=sps.na(),nofb=sps.nb(),nofc=sps.nc();
-    int nofcolsin=0;if(!setnn){nofcolsin=nofcols;j=0;nofa=0;nofb=0;nofc=0;totalJ=0;}
+    int nofcolsin=nofcols;if(!setnn){j=0;nofa=0;nofb=0;nofc=0;totalJ=0;}
     nofcols=12+nofcomponents();for(int i=8;i<=nofcolsin||i<=nofcols;++i)
     {ptr=NULL;iptr=NULL;
        switch(i) {       case 8: iptr=&j;snprintf(hs,40,"phasnumber-j");break;
@@ -226,10 +222,14 @@ if(setnn){if(nnerr[i]>0&&i<=nofcolsin)
           {if(ptr==NULL&&iptr==NULL)
            {
  if(verbose==1)fprintf(stdout,"sta_mcphas.fum warning: exp value %g cannot be fitted in column %i in file ./fit/mcphas.fum\n",nn[i],i);
-           }else{
-//fprintf(stdout,"stacalc_mphas.fum: col %i line %i value %g err %g - calcvalue %g\n",i,j2,nn[i],nnerr[i],clc);
-            if(iptr==NULL)sta+=(nn[i]-(*ptr))*(nn[i]-(*ptr))/nnerr[i]/nnerr[i];
-            else          sta+=(nn[i]-(*iptr))*(nn[i]-(*iptr))/nnerr[i]/nnerr[i];
+           }else{double d2;double e2=nnerr[i]*nnerr[i];
+            if(iptr==NULL){d2=(nn[i]-(*ptr))*(nn[i]-(*ptr));
+                          if(verbose)fprintf(stdout,"stacalc_mphas.xyt: col %i  value %g err %g - calcvalue %g\n",i,nn[i],nnerr[i],(*ptr));}
+            else          {d2=(nn[i]-(*iptr))*(nn[i]-(*iptr));
+                           if(verbose)fprintf(stdout,"stacalc_mphas.xyt: col %i  value %g err %g - calcvalue %i\n",i,nn[i],nnerr[i],(*iptr));}
+             sta+=d2/e2;
+             if(ini.do_chi2){fprintf(stdout,"#!xyt sta= %g %g\n",d2,e2);}
+        
            }
           }
           if(iptr==NULL)nn[i]=(*ptr);else nn[i]=(*iptr);
@@ -240,7 +240,9 @@ if(setnn){if(nnerr[i]>0&&i<=nofcolsin)
                    }
           snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE-strlen(outstr),"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
          }else
-         {if(iptr==NULL)(*ptr)=nn[i]; else (*iptr)=nn[i];
+         {
+          if(ptr!=NULL)(*ptr)=nn[i]; 
+          else if (iptr!=NULL) (*iptr)=nn[i];
          }
      snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",hs);
     } // next i
@@ -278,10 +280,10 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
   int i,j2,l,i1,j1,nmax;
   Vector null(1,nofcomponents()*nofatoms());null=0;
   Vector null1(1,3);null1=0;
-  double sta=0;
+  double sta=-1;
 
-  float nn[200];nn[0]=199;
-  float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
+  float nn[200];nn[0]=199;int nofcols=nn[0];
+  float nnerr[200];nnerr[0]=199;
   int ortho=1;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
    {ortho=0;} 
@@ -301,7 +303,7 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
 
 //-----------------------------------mcphas.fum ----------------------------------------------------  
   errno = 0;char outfilename[MAXNOFCHARINLINE];
-  int nofcols;
+  for(int i=1;i<=nn[0];++i)nnerr[i]=0; // clear errorbars for new read
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.fum");
   if (verbose==1) printf("saving %s \n",outfilename);
@@ -348,10 +350,11 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
 
    if((fout=fopen("./fit/mcphas.fum","rb"))!=NULL)
     {// some measured data should be fitted
-    if(washere==0){fprintf(stdout,"#Mcphas- calculating standard deviation to ./fit/mcphas.fum - magnetisation ma mb mc (col 11,12,13)\n");}
+    if(washere==0){fprintf(stdout,"#Mcphas- calculating standard deviation to ./fit/mcphas.fum \n");}
      while(feof(fout)==0)
      {if ((l=inputline(fout,nn,nnerr))!=0)
-      {if(ini.checkTH(nn,T,Hint,inputpars.cs.abc)) // checks if T and Hint is in accordance with nn  
+      {
+       if(ini.checkTH(nn,T,Hint,inputpars.cs.abc)) // checks if T and Hint is in accordance with nn  
          {sta=fumcols(nn,nnerr,l,true,str,outstr,ini,ortho,inputpars,verbose);
           if(verbose==1){fprintf(stdout,"sta_mcphas.fum=%g\n",sta);}
 	 }
@@ -364,6 +367,7 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
 
 //--------------------------------------mcphas.xyt---------------------------------------------------  
   errno = 0;  
+  for(int i=1;i<=nn[0];++i)nnerr[i]=0; // clear errorbars for new read
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.xyt");
     if (verbose==1)printf("saving %s\n",outfilename);
@@ -389,7 +393,6 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
     if((fout=fopen("./fit/mcphas.xyt","rb"))!=NULL)
     {// some measured data should be fitted
      if (washere==0){fprintf(stderr,"Warning: Calculation of standard deviation using  ./fit/mcphas.xyt not implemented\n");}
-
      if(washere==0){fprintf(stdout,"#Mcphas- calculating standard deviation to ./fit/mcphas.xyt - <I>\n");}
      while(feof(fout)==0)
      {if ((l=inputline(fout,nn,nnerr))!=0)

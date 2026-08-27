@@ -73,6 +73,7 @@ printf (" [file] ... input file  with sets of x y T H Hi Hj Hk points \n");
 printf (" (format as output file mcphas.xyt)\n\n");
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
+printf ("          -chi    ... instead of sta calculate chi2\n");
 printf ("          -a     append output files (do not overwrite) \n");
 printf ("          -cd     add classical dipole  interaction using Ewald summation, \n");
 printf ("                  Bowden J.Phys.C:solid state phys. 14(1981) L827  \n");
@@ -95,7 +96,7 @@ printf (" 		    the x-y-T-Ha-Hb-Hc point is found and the calculation was stable
 printf ("                   (i.e. free energy in results/001mcphas.fum not zero do not \n");
 printf ("                   recalculate it but take results from this previous calculation\n");
 printf (" 		     and store those. Option to recalculate nonstable points only.\n");
-printf ("          -t  2    do not compare free energys, but instead trace teststructure number 2 from mcphas.tst \n");
+printf ("          -t  2    do not compare free energies, but instead trace teststructure number 2 from mcphas.tst \n");
 printf ("          -v     verbose mode: \n");
 printf ("                 * more information is printed to stdout, \n");
 printf (" 		  * the qvectors file mcphas.qom will contain \n");
@@ -111,7 +112,7 @@ printf (" 		   MCPHASE_NOFTHREADS or by the variable nofthreads in mpchas.ini\n"
       exit (EXIT_FAILURE);
 } 
 
-void inipar::finish_mcphas()
+    void inipar::finish_mcphas()
 {
 printf("RESULTS saved in directory ./results/  - files:\n");
    printf("#RESULTS saved in directory ./results/  - files:\n");
@@ -136,8 +137,10 @@ printf("RESULTS saved in directory ./results/  - files:\n");
    std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
    std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
 
+if(sta>=0&&!do_chi2){ //sta will be >0 if there has been some attempt (file in fit/directory) to do calculation of sta
 if(nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(nofstapoints+noffailedpoints)*sta/nofstapoints);}
 else { fprintf(stdout,"#! sta=1e10\n");}
+          }
 #ifdef _THREADS
 std::cout << "#! nofthreads= " << nofthreads << " threads were used in parallel processing " << std::endl;
 #else
@@ -1051,7 +1054,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   N=Matrix(1,3,1,3);N=0;
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;include_cd=false;
+  doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;include_cd=false;do_chi2=false;
   ipeps1=NULL;ipeps2=NULL;ipeps3=NULL;ipeps4=NULL;ipeps5=NULL;ipeps6=NULL;
   testqs=NULL;
   testspins=NULL;
@@ -1144,7 +1147,7 @@ inipar::inipar (const inipar & p)
   strcpy(savfilename,p.savfilename);
   prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,p.prefix);
-  doeps=p.doeps;outcolset=p.outcolset;include_cd=p.include_cd;
+  doeps=p.doeps;outcolset=p.outcolset;include_cd=p.include_cd;do_chi2=p.do_chi2;
   cel=p.cel;
   cv=p.cv;
   linepscf=p.linepscf;

@@ -32,7 +32,7 @@ class inipar
    char * program;
   double sta;
   int doeps,linepscf,linepsjj;
-  bool include_cd;
+  bool include_cd,do_chi2;
   double cel; // if not zero do elastic constants calculation
   double cv; // if not zero do specific heat calculation
   par * ipx;par * ipy;par * ipz; // storage for two ion interaction parameter derivatives (djdx djdy djdz files)

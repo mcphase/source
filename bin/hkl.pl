@@ -128,6 +128,7 @@ $nn,$_,$imax[$nn-1]
       if($n=~/,/){print $l "#Warning hkl: $y reflex not found in file $file\n";$r=$y;}
       else {$r=$v[$n];}
       # print column numbers
+      print $l "#";
       for($i=1;$i<8;++$i){print $l $i;$sp=$header[$i-1];$sp=~s/./ /g;print $l $sp;}
       print $l "     8             9\n";
       # print header

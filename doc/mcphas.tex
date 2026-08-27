@@ -616,15 +616,19 @@ In order that {\prg McPhase} can calculate the standard deviation between
  can be given in the subdirectory {\prg ./fit}. The filenames and the data-format
  are the same as the output files of {\prg McPhas}, e.g. {\prg mcphas.fum}, {\prg mcphas.hkl}
  etc. {\prg McPhase} looks into the directory {\prg ./fit} and if it finds any
- of these files, the standard deviation is increased correspondingly. 
+ of these files, the standard deviation is increased correspondingly (in case option {\prg -chi} is
+used the output contains deviation squared and error squared).
 
 What measurement data can be used to calculate a standard deviation ?
 
 \begin{description}
-\item[{\prg mcphas.fum}] In column 1-7 the file has to contain 
-            x y T(K) H(T) Hi(T) Hj(T) Hk(T)  with ijk coordinates 
-            defined by  $j||b$, $k||(a \times b)$ and i normal to k and j.
-            If given in column 8,9,10,.. in {\prg ./fit/mcphas.fum} the
+\item[{\prg mcphas.xyt}] 
+\item[{\prg mcphas.fum}] In column 1-7 the file has to contain the information about the 
+            external parameters (temperature, magnetic field, stress ..) either the default columns
+            (x y T(K) H(T) Hi(T) Hj(T) Hk(T)  with ijk coordinates 
+            defined by  $j||b$, $k||(a \times b)$ and i normal to k and j) or the user defined 
+            columns as specified by the settings in {\prg mcphas.ini}.
+            If given in column 8,9,10,.. in {\prg ./fit/mcphas.fum } the
             free energy $f$, the energy $u$, the magnetisation, the strain and electrical polarisation
              is used for calculation
 	    of the standard deviation sta. The standard deviation is calculated
@@ -632,7 +636,8 @@ What measurement data can be used to calculate a standard deviation ?
 	    A measured quantity is used for fitting only, if the experimental error ${\Delta m}_i^{meas}$ is given
             after the number ${m}_i^{meas}$ in the file {\prg ./fit/mcphas.fum} 
             using the notation: \begin{verbatim} 3.24+-0.2 \end{verbatim}
-
+            Similar, in {\prg  ./fit/mcphas.xyt} the expectation values $\rangle I_1 \langle,\rangle I_2 \langle,\rangle I_3 \langle, \dots $
+            can be specified with an ''experimental'' error.
 \end{description}
 
 Note that the measured data has to be given in those (H-T) points which are 
@@ -666,6 +671,10 @@ Options are
 \begin{description}
 \item[\prg   -h]  to  print help and version of {\prg McPhas}.
 \item[\prg   -stamax 14]  end mcphas\index{mcphas} if standard deviation exceeds 14.
+\item[\prg   -chi] output instead of sta the $\chi^2$ for each experimental data point, i.e. output
+               $\delta^2$ (deviation squared) and err$^2$ ( error squared) 
+               for each experimental data point so that the fitting programs ({\prg simannfit, searchspace}
+               can calculate $\chi^2$ and minimize it.
 \item[\prg   -a] avoid overwriting output files in results, append new results to existing files
 \item[\prg   -doeps] refine strain epsilon using elastic and magnetoelastic constants 
 see also section \ref{phonons} for how to enter these constants into {\prg mcphas.j}
