@@ -138,6 +138,7 @@ $nn,$_,$imax[$nn-1]
       {print $l (join(" ",@header[0,1,2,3,4,5,6])."  vs  REAL(m(Q)) vs IMAG(m(Q)) of ".$r." as read from file $file\n");}
       while(<$h>)
       {next if /^\s*#/;  
+      $xx=new PDL(split " ");
       $x=new PDL(split " ");
        if($n=~/,/)
        { # if reflection has not been found
@@ -151,11 +152,11 @@ $nn,$_,$imax[$nn-1]
         print $l ($out."\n");
        }
        else
-       { 
+       { $found=0;
        for ($k=7;$k<(($x->dims)[0]-1);$k+=4+$FT)
        {$y=$x->slice($k.":".($k+2));
         
-        if (sum(abs($y-$v[$n])<1e-5)==3){
+        if (sum(abs($y-$v[$n])<1e-5)==3){$found=1;
         #add xyz to piddle
         $y=$x->slice("0:6");
         if($FT==0)
@@ -173,6 +174,17 @@ $nn,$_,$imax[$nn-1]
         print $l ($out."\n");
         }
         }
+      if($found==0){
+       #add xyz to piddle
+        $y=$xx->slice("0:6");
+        $z=new PDL(0,0);
+        # push(@xlist,$y->append($z));
+        $out=(($y->append($z)));
+        $out=~s/\[/ /g;   
+        $out=~s/\]/ /g;   
+        print $l ($out."\n");
+         }
+
        }
       }
       close $h; close $l;
