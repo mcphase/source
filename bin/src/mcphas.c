@@ -74,7 +74,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   }	
   if(cel!=0.0&&doeps==0){fprintf(stderr,"Error mcphas - option -cel requires option -doeps\n");exit(EXIT_FAILURE);}
     inipars inip("mcphas.ini",prefix,"mcphasit");   
-   
+
     if(errexit==1)(*inip.inis[0]).errexit();
 // loop for different prefixes ...
    for(int ninis=0;ninis<inip.nofinis;++ninis)
@@ -99,7 +99,6 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
  if(strcmp(ini.prefix,readprefix)==0&&prefix[0]!='\0')filemode="a";
-
 
 
 // as class par load  parameters from file

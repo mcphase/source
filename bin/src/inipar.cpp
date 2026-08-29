@@ -159,9 +159,6 @@ if(ipeps6!=NULL)delete ipeps6;
 
 int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
-int colcod[]=    {-1,19,20,0,21,1,2,3}; // field to store code for assigning type of data to columns of output,
-                                           // set default values here (see list below for different types)
-                                           // using the out5 out6  ... commands in mcdisp.par these codes can be modified
 
 #define COLHEADDIM 36	
 // different output data for columns 1-7
@@ -206,7 +203,7 @@ const char * colhead []= {  "T [K]", //      0
  bool inipar::defaultcolcode(int col,int  colcode) // resets default columns if not set by user (outcolset==true)
 { bool ret=false;                                            // returns true if reset has been successful
  if(!outcolset)for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]==col)
- {colcod[i]=colcode;ret=true;}
+ {clcod[i]=colcode;ret=true;}
 return ret;
 }
 // calculate the value of different output data for user defined columns ...
@@ -293,8 +290,8 @@ void inipar::print_usrdefcolhead(FILE *fout,char * str)
 {fprintf(fout,"#");
  int i;char header [MAXNOFCHARINLINE];header[0]='\0';
  for(i=1;i<=usrdefcols[0];++i)
-  {for(int j=0;j<(int)strlen(colhead[colcod[i]]);++j)if(colhead[colcod[i]][j]!=' ')
-    snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%c",colhead[colcod[i]][j]); 
+  {for(int j=0;j<(int)strlen(colhead[clcod[i]]);++j)if(colhead[clcod[i]][j]!=' ')
+    snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%c",colhead[clcod[i]][j]); 
   snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header)," ");
   }
  snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",str);
@@ -380,7 +377,7 @@ bool inipar::calcTHfromnn(double & T,Vector & Hint,float * nn,cryststruct &cs)
  double xx=0,yy=0,NormH,NormE;T=0;Hint=0;
  Vector Habc(1,3),Eabc(1,3);Habc=0;Eabc=0;
 for(int i=1;i<=usrdefcols[0];++i)
-{ (*colvaluepointer(colcod[usrdefcols[i]],xx,yy,T,Hint,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
+{ (*colvaluepointer(clcod[usrdefcols[i]],xx,yy,T,Hint,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
 }
 // if Habc or Eabc are given - add these to Hint
 Vector abc(1,6),v(1,3); abc(1)=1; abc(2)=1; abc(3)=1; 
@@ -417,12 +414,12 @@ bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc,Vector & M
  v=N*P; for(int i=1;i<=3;++i)Hint(i+3)-=v(i);
  for(int i=1;i<=usrdefcols[0];++i)
  { // different output data for user defined columns ...
-  switch(colcod[i])
+  switch(clcod[i])
   {case 19: case 20:  d=0; break; // do not use x,y
-   default: d=calccolvalue(colcod[i],x,y, T,Hint, abc,M,P)-nn[i];
+   default: d=calccolvalue(clcod[i],x,y, T,Hint, abc,M,P)-nn[i];
   }
  
-  if(fabs(d)>0.001){//printf("%s %i %i d=%g  nn=%g |",colhead[colcod[i]],colcod[i],i,d,nn[i]);
+  if(fabs(d)>0.001){//printf("%s %i %i d=%g  nn=%g |",colhead[clcod[i]],clcod[i],i,d,nn[i]);
                     //      myPrintVector(M,"M");
                     //      myPrintVector(P,"Pel");
                           return false;}
@@ -434,16 +431,16 @@ bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc,Vector & M
 void inipar::print_usrdefcolcodes(FILE *fout)
 {fprintf(fout,"#!");
  for(int i=1;i<=usrdefcols[0];++i)
- fprintf(fout,"out%i=%s ",usrdefcols[i],colhead[colcod[i]]);
+ fprintf(fout,"out%i=%s ",usrdefcols[i],colhead[clcod[i]]);
 }
 // print user defined columns
 void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,Vector & M, Vector & P,bool withtext)
 {bool c[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i)c[i]=false;
  for(int i=1;i<=usrdefcols[0];++i)
- { double val=calccolvalue(colcod[i],x,y,T,Hext,abc,M,P);
-   if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[i]],myround(val));
-   else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? 0 :strlen(colhead[colcod[i]])-8 ),"",myround(val));
-   c[colcod[i]]=true;
+ { double val=calccolvalue(clcod[i],x,y,T,Hext,abc,M,P);
+   if(withtext)fprintf(fout,"%s=%4.4g ",colhead[clcod[i]],myround(val));
+   else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[clcod[i]])-8 < 0 ? 0 :strlen(colhead[clcod[i]])-8 ),"",myround(val));
+   c[clcod[i]]=true;
  }
 if(!withtext) // check output only in case withtext - in order to accommodate -cel option of mpchase where output of nonzero stress is not necessary
 {if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
@@ -673,15 +670,16 @@ int inipar::load (int & nofinis,char**lofpref)
 
        for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
-      if(0==extract_match( findnewmatch,nofinis,lofpref,instr,prefix, somestring,colcod[usrdefcols[j]]))outcolset=true;
+      if(0==extract_match( findnewmatch,nofinis,lofpref,instr,prefix, somestring,clcod[usrdefcols[j]]))outcolset=true;
      }
 
     }
    }
   fclose (fin);
  N(2,1)=N(1,2);N(3,1)=N(1,3);N(3,2)=N(2,3);
- for(int i=1;i<=usrdefcols[0];++i){if(colcod[i]>COLHEADDIM)
- {fprintf(stderr,"Error reading mcphas.ini - out%i = %i > %i not possible !\n",i,colcod[i],COLHEADDIM);exit(EXIT_FAILURE);}
+ for(int i=1;i<=usrdefcols[0];++i){
+if(clcod[i]>COLHEADDIM)
+ {fprintf(stderr,"Error reading mcphas.ini - out%i = %i > %i not possible !\n",i,clcod[i],COLHEADDIM);exit(EXIT_FAILURE);}
  }
 
 //if(nofinis>0)printf("prefix=%s Ha0=%g Hb0=%g Hc0=%g\n",lofpref[nofinis-1],zero(1),zero(2),zero(3));
@@ -975,7 +973,7 @@ void inipar::print (FILE * fout)
 
 
     fprintf(fout,"# out variables to control first columns of output files results/mcphas.*:\n");
-    for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],colcod[i]);
+    for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],clcod[i]);
     fprintf(fout,"#     ... in out*=n the numbers n have the following meaning:\n");
     for(int i=0;i<=COLHEADDIM;++i){
     fprintf(fout,"#            %i....%s\n",i,colhead[i]);
@@ -1039,10 +1037,16 @@ void inipar::print (FILE * fout)
     fprintf(fout,"#  maximum scattering vector |Q|[1/A] for calculated hkl's\n");
     fprintf(fout," maxQ=%g\n",maxQ);
 }
+ int colcod[]={-1,19,20,0,21,1,2,3}; // field to store code for assigning type of data to columns of output,
+                                           // set default values here (see list below for different types)
+                                           // using the out5 out6  ... commands in mcdisp.par these codes can be modified
 
 //constructor ... load initial parameters from file
 inipar::inipar (const char * file,char * pref,const char * prog)
 {  program= new char [strlen(prog)+1];
+  clcod=new int[8];
+   for(int i=0;i<8;++i){clcod[i]=colcod[i];}
+
    strcpy(program,prog);
    savfilename= new char [strlen(file)+strlen(pref)+1];
   if(pref[0]!='\0')strcpy(savfilename,pref);
@@ -1143,6 +1147,9 @@ printf("nofstapoints=%i\n",nofstapoints);
 inipar::inipar (const inipar & p)
 { program= new char [strlen(p.program)+1];
   strcpy(program,p.program);
+  clcod=new int[8];
+   for(int i=0;i<8;++i){clcod[i]=p.clcod[i];}
+
   savfilename= new char [strlen(p.savfilename)+1];
   strcpy(savfilename,p.savfilename);
   prefix = new char[MAXNOFCHARINLINE];
@@ -1213,7 +1220,8 @@ inipar::inipar (const inipar & p)
 
 //destruktor
 inipar::~inipar ()
-{//printf("hello destruktor inipar\n");  
+{delete []clcod;
+ //printf("hello destruktor inipar\n");  
  
 delete []savfilename;
 delete []prefix;
@@ -1230,14 +1238,14 @@ inipars::inipars (const char * file,char * pref,const char * prog)
 // here we have to load inis[1...nofinis] with different prefixes matching pref - until no new matching
 // prefix is found ...
   while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
-  {inis[nofinis]=new inipar(file,pref,prog);
-   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes);
+  {printf("nofinis=%i new inipar ...\n",nofinis);
+    inis[nofinis]=new inipar(file,pref,prog);
+   nofinisold=nofinis;(*inis[nofinisold]).load(nofinis,lofprefixes);    
   }
- 
-
 // remove last inis, because it does not contain a new prefix
 if(nofinis>0&&nofinis<MAXNOFINIS){delete inis[nofinis];} 
 if(nofinis==0)nofinis=1;
+
 }
 
 void inipars::saveexitzero()
