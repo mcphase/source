@@ -699,7 +699,7 @@ if(clcod[i]>COLHEADDIM)
   if(deltaq[2]==0){fprintf(stderr,"ERROR reading deltak=0: deltak must be >0\n");return 1;}
   if(deltaq[3]==0){fprintf(stderr,"ERROR reading deltal=0: deltal must be >0\n");return 1;}
   if(maxqperiod==0){fprintf(stderr,"Warning reading maxqperiod=0\n");}
-  if(nofrndtries==0){fprintf(stderr,"Warning reading nofrndtries=0\n");}
+  //if(nofrndtries==0){fprintf(stderr,"Warning reading nofrndtries=0\n");}
   if (maxnofspins==0){maxnofspins=maxqperiod*maxqperiod*maxqperiod;
                       fprintf(stderr,"warning ... reading maxnofspins=0: putting it to %i\n",maxnofspins);}
   if (maxnoftestspincf<1){fprintf(stderr,"ERROR maxnoftestspincf<1 not possible\n");return 1;}
@@ -714,7 +714,7 @@ if(clcod[i]>COLHEADDIM)
   if(bigstep==0){fprintf(stderr,"Error reading bigstep\n");return 1;}
   if(maxspinchange==0){fprintf(stderr,"Error reading maxspinschange\n");return 1;}
 
-  if(nofspincorrs==0){fprintf(stderr,"Warning reading nofspincorrs=0 - no spin correlation functions will be calculated\n");}
+  //if(nofspincorrs==0){fprintf(stderr,"Warning reading nofspincorrs=0 - no spin correlation functions will be calculated\n");}
   if(maxnofhkls==0){fprintf(stderr,"Warning reading maxnofhkls=0 - no magnetic neutron reflections  will be calculated\n");}
   if(maxQ==0){fprintf(stderr,"Warning reading maxQ=0:magnetic neutron reflections  will be calculated only in primitive cell of reciprocal lattice\n");}
 
