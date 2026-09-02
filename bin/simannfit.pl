@@ -222,6 +222,7 @@ if($sta>0)
                                else{mycopy("./calcsta",$sdir."/calcsta");}
                   push @sdirs, $sdir;
                   mkdir $sdir."/results";
+                  mkdir $sdir."/fit";
                  foreach(@ARGV){mycopy($_,$sdir."/");# my @stats = stat($_);
                                # my $mode = $stats[2];  # Get the mode (permissions)
                                # chmod $mode,$sdir."/calcsta.bat"
@@ -280,7 +281,7 @@ if($stps<11){
  print " .. calculating sta ..\n";
 
  $rnd=rand;
-    $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
+    $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($#ssta+1);
    ++$stepnumber;
     if($pt==0){    sta_calc();($sta)=sta_read();$stacurr=$sta; 
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set(">>$s0file");}
@@ -371,7 +372,7 @@ while (scalar @children) {
    if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])/2){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
                  else{$parstp[$i]=($parmax[$i]-$parmin[$i])/2;}
                 } # adapt parstp to be more bold in this direction
-   $hx=int(($p-$parminin[$i])/$parhistostp[$i]);
+   $hx=int(($p-$parminini[$i])/$parhistostp[$i]);
    ++$parhisto[($hx+$perlhistostart[$i])];
    if($hist>0){open(Fout,">./results/".$parnam[$i].".hst");
               print Fout "#{Histogram of parameter ".$parnam[$i]."\n# value vs. number of  occurrences in good solutions (sta decreased)}\n";
@@ -391,7 +392,7 @@ while (scalar @children) {
    print "best fit:\n";
    $i=0;foreach(@par){write STDOUT;++$i;}
    write_modified_par_to_files();
-   $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
+   $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($#ssta+1);
     sta_calc();
    ($sta)=sta_read(); # CALCULATE sta !!!!
     if($pt>0){foreach (@sdirs){print "removing ".$_."\n";
@@ -613,9 +614,9 @@ unless(open (Fin,"./".$sdir."/results/simannfit.sta")){ # this "unless" is to av
   $chisquared=sum($delta)/($#ssta+1); # this is chisquared
 if($dist>0){open(Fout1, ">results/simannfit.dst");
             print Fout1 "# ".($#ssta+1). " contributions to sta\n";
-            print Fout1 "# number  vs percentage vs chi2 vs d2 vs e2 \n";$i6=0;
+            print Fout1 "# number  vs percentage vs chi2 vs d2 vs err2 vs d vs err \n";$i6=0;
             foreach(@ssta){my $d=$_/$eerr[$i6];++$i6;
-                           print Fout1 sprintf("%i %6.2f %g %g %g\n",$i6,(100*$d/(($#ssta+1)*$chisquared)),$d,$_,$eerr[$i6-1]);
+                           print Fout1 sprintf("%i %6.2f %g %g %g %g %g\n",$i6,(100*$d/(($#ssta+1)*$chisquared)),$d,$_,$eerr[$i6-1],sqrt($_+1e-100),sqrt($eerr[$i6-1]));
                           }
             close Fout1;
             }

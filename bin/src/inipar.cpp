@@ -1068,11 +1068,11 @@ inipar::inipar (const char * file,char * pref,const char * prog)
                 if(load()!=0){fprintf(stderr,"# Warning: Cannot load file %s - using default values ! \n",savfilename); 
   // set default values
   xv=0;xv(0)=1;yv=0;yv(3)=1;xmin=1;xmax=1;ymin=0;ymax=0;xstep=1;ystep=1;
-  qmin=0;qmax=0;deltaq(1)=0.1;deltaq(2)=0.1;deltaq(3)=0.1;maxqperiod=1;maxnofspins=10;nofrndtries=0;
+  qmin=0;qmax=0;deltaq(1)=0.1;deltaq(2)=0.1;deltaq(3)=0.1;maxqperiod=1;maxnofspins=10;nofrndtries=0;nofMCsteps=0;
   minnr1=0;
   minnr2=0;
   minnr3=0;
-  maxnofmfloops=100;maxstamf=1e-3;bigstep=1;maxspinchange=100;zero=0;repeat=0;
+  maxnofmfloops=1000;maxstamf=1e-5;bigstep=1;maxspinchange=100;zero=0;repeat=0;
 nofthreads=0;getnofthread(nofthreads);
   nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;
   nofstapoints=0;

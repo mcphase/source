@@ -442,6 +442,8 @@ return pointer;
 //         n .... number of numbers read
 // if called with nnerr the function looks for expressions such as 3.5+-0.2 indicating a
 // number with an experimental error and stores the error in nnerr
+// error bars nnerr are multiplied by -1 for expressions suchas +-3.5+-0.2 indicating
+// that only the absolute value of the number nn is important and not it's sign
 
 int splitstring (char * instr, float*nn)
 {parser ob; return splitstring(instr,nn,NULL,ob);}
@@ -478,7 +480,9 @@ if(i>=(int)nn[0])
     
 //      nn[i] = strtod (token, NULL);
 if(nnerr!=NULL)
-  {ebar=mystrnstr(token,"+-",strcspn(token,delimiters));
+  {int sign=1;
+   if(token[0]=='+'&&token[1]=='-'){sign=-1;token++;}
+   ebar=mystrnstr(token,"+-",strcspn(token,delimiters));
    if (ebar!=NULL)*ebar=' ';
    nn[i] = (float)ob.eval_exp(token);
    if(i>=(int)nnerr[0])
@@ -491,7 +495,7 @@ if(nnerr!=NULL)
   if (ebar!=NULL){*ebar='+';
 //nnerr[i] = strtod (ebar+2, NULL);
 nnerr[i] = (float)ob.eval_exp(ebar+2);
-
+nnerr[i]*=sign;
 }
   }else
       nn[i] = (float)ob.eval_exp(token);

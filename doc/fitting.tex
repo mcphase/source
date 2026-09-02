@@ -154,7 +154,7 @@ if {\em sta=} is followed by two numbers $\delta_i^2$ and ${\rm err}^2$, the fir
 The second number ${\rm err}^2$  is interpreted as the squared errorbar of this 
 datapoint. If ${\rm err}^2$ is not given, the program minimizes the variance
 {\em sta}$=s^2=1/N\sum_i \delta_i^2$.
-If ${\rm err}^2$ is given, the program minimizes $\chi^2=1/N\sum_i \delta_i^2/{\rm err}^2$.
+If ${\rm err}^2$ is given, the program minimizes {\em sta}$=\chi^2=1/N\sum_i \delta_i^2/{\rm err}^2$.
 The error is used at the end of the fitting to calculate
 a covariance matrix, which can be used to estimate correlations
 and errors of the fitting parameters: $F_{ij}=\partial \delta_i / {\rm err}_i\partial {\rm par}_j$,
@@ -165,13 +165,27 @@ the required {\em sta= ...} statements is the program {\prg chi2}\index{chi2}.
 \item
  note, that the program {\prg simannfit\index{simannfit}} calls the user written program
 {\prg calcsta} with a number as argument, e.g. as {\prg calcsta 21.3}. This number
-(i.e. 21.3 in our example) denotes a maximum value of the standard deviation. The
+(i.e. 21.3 in our example) denotes a maximum value of the {\em sta}$\times N$, i.e. of either
+ $\sum_i \delta_i^2$ or (in case ${\rm err}^2$ is given)
+$\sum_i \delta_i^2/{\rm err}^2$ . The
 user written program may use this number and stop, when in the summation process
-to obtain standard deviation {\prg sta} reaches a value larger than this maximum
+to obtain standard deviation {\em sta}$\times N$ reaches a value larger than this maximum
 number. Using this option is advisable in complex fitting problems in order to
 optimise the time of the fitting procedure. Note, that the module {\prg mcphas}
 can be used with the option {\prg -stamax 21.3}, which leads to a stop when the value of 
-the standard deviation 21.3 is reached. 
+the standard deviation($\times N$) 21.3 is reached, here an example code from {\prg calcsta}:
+\begin{verbatim}
+if ! mcphasit -doeps -cd  -stamax $1 -chi mcphas.htp
+then
+echo "sta=1000 1"
+exit
+fi
+\end{verbatim}
+Note that in this code snippet the variable \$1 contains the argument of the calcsta call by
+{\prg simannfit} (i.e. the number corresponding to the maximum value of {\em sta}$\times N$, which when reached
+should stop the execution of calcsta). In case this limit is reached during the executiong of {\prg mcphasit}
+the program exits with error and the {\prg echo} statement will output a large $\delta_i^2=1000$ with
+error ${\rm err}^2=1$ (i.e. this snippet is for a calcsta which returns two numbers after ''sta='').
 \end{enumerate}
 
 \subsection{Starting a parameter space search}

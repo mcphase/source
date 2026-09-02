@@ -64,8 +64,8 @@ GetOptions("help"=>\$helpflag,
            "nonmagnetic|nm=s"=>\$nonmagnetic,
            "magnetic|m=s"=>\$magnetic,
            "so1ion"=>\$so1ion,
-           "ic1ion"=>\$ic1ion,
-           "icf1ion"=>\$icf1ion,
+           "ic1ion|ic"=>\$ic1ion,
+           "icf1ion|icf"=>\$icf1ion,
            "phonon"=>\$phonon,
            "outpos"=>\$checkpos);
 

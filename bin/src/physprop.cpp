@@ -165,16 +165,18 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
            
                  }
     if(ptr==NULL)
-    {if(setnn&&nnerr[i]>0&&i<=nofcolsin&&verbose==1)
+    {if(setnn&&nnerr[i]!=0&&i<=nofcolsin&&verbose==1)
      fprintf(stdout,"sta_mcphas.fum warning: exp value %g cannot be fitted in column %i in file ./fit/mcphas.fum\n",nn[i],i);
     }
     else
     {
     if(setnn)
-        {if(nnerr[i]>0&&i<=nofcolsin)
+        {if(nnerr[i]!=0&&i<=nofcolsin)
             {
              if(verbose)fprintf(stdout,"stacalc_mphas.fum: col %i  value %g err %g - calcvalue %g\n",i,nn[i],nnerr[i],(*ptr));
-             double d2=(nn[i]-(*ptr))*(nn[i]-(*ptr));double e2=nnerr[i]*nnerr[i];
+             double d2=nn[i]-(*ptr);double e2=nnerr[i]*nnerr[i];
+             if(nnerr[i]<0){d2=fabs(nn[i])-fabs((*ptr));}
+             d2*=d2;
              sta+=d2/e2;
              if(ini.do_chi2){fprintf(stdout,"#!fum sta= %g %g\n",d2,e2);}
              }
@@ -218,14 +220,16 @@ double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setn
                          default: ptr=&totalJ[i-12];snprintf(hs,40,"<I%i>",i-12);break;
                  }
 
-if(setnn){if(nnerr[i]>0&&i<=nofcolsin)
+if(setnn){if(nnerr[i]!=0&&i<=nofcolsin)
           {if(ptr==NULL&&iptr==NULL)
            {
  if(verbose==1)fprintf(stdout,"sta_mcphas.fum warning: exp value %g cannot be fitted in column %i in file ./fit/mcphas.fum\n",nn[i],i);
            }else{double d2;double e2=nnerr[i]*nnerr[i];
-            if(iptr==NULL){d2=(nn[i]-(*ptr))*(nn[i]-(*ptr));
+            if(iptr==NULL){d2=(nn[i]-(*ptr)); if(nnerr[i]<0)d2=fabs(nn[i])-fabs((*ptr));
+                           d2*=d2;
                           if(verbose)fprintf(stdout,"stacalc_mphas.xyt: col %i  value %g err %g - calcvalue %g\n",i,nn[i],nnerr[i],(*ptr));}
-            else          {d2=(nn[i]-(*iptr))*(nn[i]-(*iptr));
+            else          {d2=(nn[i]-(*iptr));if(nnerr[i]<0)d2=fabs(nn[i])-abs((*iptr));
+                            d2*=d2;
                            if(verbose)fprintf(stdout,"stacalc_mphas.xyt: col %i  value %g err %g - calcvalue %i\n",i,nn[i],nnerr[i],(*iptr));}
              sta+=d2/e2;
              if(ini.do_chi2){fprintf(stdout,"#!xyt sta= %g %g\n",d2,e2);}
@@ -280,7 +284,7 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
   int i,j2,l,i1,j1,nmax;
   Vector null(1,nofcomponents()*nofatoms());null=0;
   Vector null1(1,3);null1=0;
-  double sta=-1;
+  double sta=0;
 
   float nn[200];nn[0]=199;int nofcols=nn[0];
   float nnerr[200];nnerr[0]=199;
@@ -768,6 +772,7 @@ fprintf (fout, " %i %i %i ",
 //-----------------------------------------------------------------------------------------  
  
  washere=1;
+
 return sta;
  }
 

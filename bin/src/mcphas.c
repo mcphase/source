@@ -359,6 +359,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
             ini.print_usrdefcols(stdout,x,y,T,physprop.Hint,inputpars.cs.abc,M,P,true);printf("\n");}
    	    ++ini.nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
+            //else{fprintf(stdout,"#! stamax=%g sta=%g\n",stamax,sta);}
 	      break; 
          case 1:
          case 2:
@@ -392,6 +393,7 @@ for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
    fprintf(stderr,"          End of Program mcphas\n");
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(stderr,"**********************************************\n");
+if(sta>stamax){exit(EXIT_FAILURE);}
 return(0);
 }
 
