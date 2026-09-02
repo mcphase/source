@@ -223,7 +223,7 @@ if($sta>0)
                   push @sdirs, $sdir;
                   mkdir $sdir."/results";
                   mkdir $sdir."/fit";
-                 foreach(@ARGV){mycopy($_,$sdir."/");# my @stats = stat($_);
+                 foreach(@ARGV){mycopy($_,$sdir."/".$_);# my @stats = stat($_);
                                # my $mode = $stats[2];  # Get the mode (permissions)
                                # chmod $mode,$sdir."/calcsta.bat"
                                 }
