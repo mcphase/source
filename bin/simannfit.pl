@@ -612,26 +612,28 @@ unless(open (Fin,"./".$sdir."/results/simannfit.sta")){ # this "unless" is to av
  {my  $err=   PDL->new(@eerr);
   $delta=$delta/$err;
   $chisquared=sum($delta)/($#ssta+1); # this is chisquared
-if($dist>0){open(Fout1, ">results/simannfit.dst");
-            print Fout1 "# ".($#ssta+1). " contributions to sta\n";
+  # if we have errors present we rather minimize chi2
+  $sta=$chisquared;
+if($dist>0){open(Fout1, ">./".$sdir."/results/simannfit.dst");
+            print Fout1 "# ".($#ssta+1). " contributions to sta=$sta\n";
             print Fout1 "# number  vs percentage vs chi2 vs d2 vs err2 vs d vs err \n";$i6=0;
             foreach(@ssta){my $d=$_/$eerr[$i6];++$i6;
                            print Fout1 sprintf("%i %6.2f %g %g %g %g %g\n",$i6,(100*$d/(($#ssta+1)*$chisquared)),$d,$_,$eerr[$i6-1],sqrt($_+1e-100),sqrt($eerr[$i6-1]));
                           }
             close Fout1;
             }
-  # if we have errors present we rather minimize chi2
-  $sta=$chisquared;
+  
  }
- else {if($dist>0){open(Fout1, ">results/simannfit.dst");
+ else {$sta=$s2;
+       if($dist>0){open(Fout1, ">./".$sdir."/results/simannfit.dst");
             print Fout1 "# ".($#ssta+1). " contributions to sta\n";
-            print Fout1 "# number  vs percentage vs sta \n";$i6=0;
+            print Fout1 "# number  vs percentage vs sta=$sta \n";$i6=0;
             foreach(@ssta){++$i6;
                            print Fout1 sprintf("%i %6.2f %g\n",$i6,(100*$_/(($#ssta+1)*$s2)),$_);
                           }
             close Fout1;
             }
- $sta=$s2;
+ 
        }
 if($nof_calcsta_calls>0&&$#ssta+1!=$deltastore->getdim(1))
 {print STDERR "Warning: Simannfit found ".($#ssta+1)." occurences of sta= in output of calcsta which is different from previous runs of calcsta - there it found ".$deltastore->getdim(1)." occurrences. Continuing without storing this\n"; }
