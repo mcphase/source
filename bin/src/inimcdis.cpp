@@ -127,7 +127,7 @@ void inimcdis::helpexit() // type info and error exit
     printf (" -xaf  az      ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n"
             " -X[observable]... to calculate omega and Q dependent  susceptibility tensor X''(Q,omega) for an observable \n"
             "                   observable can be: M (magnetic moment) pel (electricalpolarisation)\n"
-            "                   (e.g. use -Xpel for RAMAN and inelastic X-ray scattering intensity on phonons). \n"
+            "                   (e.g. use -Xpel for infrared spectroscopy and inelastic X-ray scattering intensity on phonons). \n"
             "                      -XM for magnetic susceptibility e.g. to calculate EPR spectra \n"
             );
     printf (" -d            ... calculate intensities in dipole approximation only\n");
@@ -800,15 +800,14 @@ if (fin==NULL) { return 1;
 
               }
        fclose (fin);
-       // now read also the hkls in mcdisp.par
-   //   ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-   //   fin = fopen(parfile, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
-      if(nofhkls==0){++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
+            if(nofhkls==0){++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                 nofhkls=1;hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
                                      hkls[nofhkls][1]=1;
                                      hkls[nofhkls][2]=0;
-                                     hkls[nofhkls][3]=0;} 
+                                     hkls[nofhkls][3]=0;
+                       no_hkls=true;
+                     } 
   if(i+9<nofhkls){fprintf(stderr,"Error mcdisp: nofhkl =%i > estimate %i\n",nofhkls,i);exit(EXIT_FAILURE);}
      
 return 0;
@@ -830,7 +829,7 @@ inimcdis::inimcdis(const char * file,char * pref,char * mffile,
 {hkls=NULL;hklfile_start_index=NULL;Hext=Vector(1,HEXT_DIMENSION);Habc=Vector(1,3);Eabc=Vector(1,3);
  qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);mf=mfcf(1,1,1,nofat,nofcomp);
   include_cd=inc_cd;N=Matrix(1,3,1,3); for(int i=1;i<=3;++i)N(i,i)=1/3;  // initialize demagnetisation tensor with sphere
-  Qindex=0;
+  Qindex=0;no_hkls=false;
   parfile= new char [MAXNOFCHARINLINE]; 
   mf_file= new char [MAXNOFCHARINLINE]; 
   snprintf(parfile,MAXNOFCHARINLINE,"%s%s",pref,file);
@@ -852,7 +851,7 @@ save(parfile);
 
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
-{do_jqf=p.do_jqf;
+{do_jqf=p.do_jqf;no_hkls=p.no_hkls;
  include_cd=p.include_cd;
  parfile= new char [MAXNOFCHARINLINE];
   strcpy(parfile,p.parfile);

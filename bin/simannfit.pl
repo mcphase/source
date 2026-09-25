@@ -84,10 +84,22 @@ unless ($#ARGV >0)
    -s 132 ... gives maximal number of iteration steps 132 to be done
    -c     ... continue at end of program - do not ask for pressing enter 
 
+... EXAMPLES:
+    to fit exchange parameters as specified in mcphas.j.forfit (running mcphasit in calcsta)
+  simannfit 10 mcphas.j     
+
+    to probe parameter space using option -p10 -n1
+  simannfit 100  -p 10 -n 1  mcphas.j
+
+    to do the same with parallel processing using option -pt 10 (specifying all input files)
+  simannfit 100 -pt 10  -p 10 -n 1  calcsta mcphas.j sf.r mcphas.ini test_mcphas.htp TbPO4_mF.cif reduce_unitcell.ini bvk_springs.dat fit/mcphas.fum
+
 EOF
 #print " <Press enter to close>";$in=<STDIN>;
  exit 0;}else{print STDERR "#* $0 *\n";}
 
+# initialise errc and occurences of sta
+$errc=-1;$staanz=0;
 
 # extra version for dos because operating system commands are present:
 #system("alias 'copy'='cp -f'");
@@ -206,7 +218,7 @@ $rnd=1;$stasave=1e20;
  ($sta)=sta_read();$stps=1;$noofupdates=0;$stepnumber=0;$stastart=$sta;
   if($maxstep==1){open(Fout,">results/simannfit.status");
                   print Fout " maxstep=1 ... simannfit stopped after initial run of calcsta\n";
-                  print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+                  print Fout ($staanz)." contributions to sta found in output of calcsta ...\n";
                   print Fout "sta=$sta\n";
                   close Fout;
                   print " maxstep=1 ... simannfit stopped after initial run of calcsta\n";
@@ -281,9 +293,9 @@ if($stps<11){
  print " .. calculating sta ..\n";
 
  $rnd=rand;
-    $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($#ssta+1);
+    $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($staanz);
    ++$stepnumber;
-    if($pt==0){    sta_calc();($sta)=sta_read();$stacurr=$sta; 
+    if($pt==0){    sta_calc();($sta)=sta_read();$stacurr=$sta; $c2s=$chisquared;$s2s=$s2;
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set(">>$s0file");}
               }# CALCULATE sta  !!!!
     else {
@@ -323,13 +335,14 @@ while (scalar @children) {
          # evaluate sta from parallel calculations and take minimum value
        $sta=1e100;$pti=0;$stacurr="(";
        foreach(@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;if(($pti+1)%3==0){$stacurr.="\n";}
-                       if($s<$sta){$sta=$s;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
-                       ++$pti;
+                       if($s<$sta){$sta=$s;$c2s=$chisquared;$s2s=$s2;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_ptset(">>$s0file",$s,$pti);}
+                      ++$pti;
                       }$stacurr.=")min-> ".$sta;
          }
    
-   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in $s1file - $probe other sets to be found, continuing ...\n";write_set(">>$s1file");                      
+   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in $s1file - $probe other sets to be found, continuing ...\n";
+                                 $chisquared=$c2s;$s2=$s2s;write_set(">>$s1file");                      
                 last if ($probe==0);
                                 }
    print " ...  current sta=$stacurr, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
@@ -392,7 +405,7 @@ while (scalar @children) {
    print "best fit:\n";
    $i=0;foreach(@par){write STDOUT;++$i;}
    write_modified_par_to_files();
-   $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($#ssta+1);
+   $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($staanz);
     sta_calc();
    ($sta)=sta_read(); # CALCULATE sta !!!!
     if($pt>0){foreach (@sdirs){print "removing ".$_."\n";
@@ -445,7 +458,7 @@ print $delta;
 
    print "best fit:\n";
    $i=0;foreach(@par){write STDOUT;++$i;}
-  if($chisquared){print "      sta=chi2=$sta (=sum deviations^2/experrors^2)\n    variance s2=$s2 (=sum deviations^2)\n";
+  if($errc>0){print "      sta=chi2=$sta (=sum deviations^2/experrors^2)\n    variance s2=$s2 (=sum deviations^2)\n";
      print  "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
      }
           else {  print "      sta=variance=s2=$s2 (=sum deviations^2)\n";}
@@ -459,10 +472,10 @@ print $delta;
 #            #if(mycopy ($file.".par ",$file)){die "\n error copying $file.par \n";}
 # }
      open(Fout,">results/simannfit.status");print Fout cwd()." ... simannfit stopped\n";
-     print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+     print Fout ($staanz)." contributions to sta found in output of calcsta ...\n";
      print Fout "best fit:\n";
-  if($chisquared){print Fout "      sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n    variance s2=$s2 (=sum deviations^2/".($#ssta+1).")\n";}
-          else {  print Fout "      sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")\n";}
+  if($errc>0){print Fout "      sta=chi2=$sta (=sum deviations^2/(".($staanz)."*experrors^2))\n    variance s2=$s2 (=sum deviations^2/".($staanz).")\n";}
+          else {  print Fout "      sta=variance=s2=$s2 (=sum deviations^2/".($staanz).")\n";}
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
@@ -476,7 +489,7 @@ print $delta;
                                                                  }
                         print Fout "|";print Fout sprintf ("%s [%+e,%+e,%+e,%+e,%+e]\n",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
                    ++$i;}
-  if($chisquared){
+  if($errc>0){
      print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens  (you will get error=0) restart and try again):\n";
  $Fij=$delta x inv($V);
  $FtF=$Fij->xchg(0,1) x $Fij;
@@ -587,29 +600,34 @@ if(defined $sdir){chdir "..";}
 
 sub sta_read {#local $SIG{INT}='IGNORE';
  my ($sdir)=@_;
-my $sta;
-unless(open (Fin,"./".$sdir."/results/simannfit.sta")){ # this "unless" is to avoid stop if simannfit.sta is not existing ... 
+my $sta;my $stafile="./".$sdir."/results/simannfit.sta";
+unless(open (Fin,$stafile)){ # this "unless" is to avoid stop if simannfit.sta is not existing ... 
                                               # if it does not exist, just take old values and continue ...
   print STDERR "simannfit filesystem problem accessing simannfit.sta (output from calcsta command) - continuing with next parameter set\n";
- }else{
- $i6=0;$errc=1;
+ }else{$errs=$errc;
+ $i6=0;$errc=1;my @eerr;$#ssta=0;$#eerr=0;
  while($line=<Fin>){
            if($line=~/^(#!|[^#])*?\bsta\s*=/) {($staline)=($line=~m/(?:#!|[^#])*?\bsta\s*=\s*([\d.eEdD\Q-\E\Q+\E\s]+)/);
                                                $staline=~s/D/E/g;my @ssn=split(" ",$staline);
                                                $ssta[$i6]=$ssn[0];
-                                               if($errc==1){if ($#ssn>0){$eerr[$i6]=$ssn[1];}else{$errc=0;}}
+                                               if($errc==1){if ($#ssn>0){$eerr[$i6]=$ssn[1];}else{$errc=0;
+if($errs==1){++$i6;die "Error in output file $stafile of calcsta: in previous output there were always two numbers (delta^2 and error^2) after 'sta=' - now at the $i6 th occurence there is only one number: ".$line."\n";}
+}}
                                                ++$i6;
                                               }
                    }
  close Fin;
 # mydel ("./".$sdir."/results/simannfit.sta"); 
 # print @ssta;
- $delta= PDL->new(@ssta);
+ my $delta= PDL->new(@ssta);
  $c=PDL->new(@par);
 # print $delta;
+ if($#ssta+1>$staanz){$staanz=$#ssta+1;}
  $s2=sum($delta)/($#ssta+1); # this is s^2
  if($errc>0) #if errors are given we can minimize chisquared and calculate covariance matrix
- {my  $err=   PDL->new(@eerr);
+ {if($errs==0){die "Error in output file $stafile of calcsta: in previous output there were not always two numbers (delta^2 and error^2) after 'sta=' - now there are !\n";}
+
+  my  $err=   PDL->new(@eerr);
   $delta=$delta/$err;
   $chisquared=sum($delta)/($#ssta+1); # this is chisquared
   # if we have errors present we rather minimize chi2
@@ -632,11 +650,11 @@ if($dist>0){open(Fout1, ">./".$sdir."/results/simannfit.dst");
                            print Fout1 sprintf("%i %6.2f %g\n",$i6,(100*$_/(($#ssta+1)*$s2)),$_);
                           }
             close Fout1;
-            }
+                  }
  
        }
 if($nof_calcsta_calls>0&&$#ssta+1!=$deltastore->getdim(1))
-{print STDERR "Warning: Simannfit found ".($#ssta+1)." occurences of sta= in output of calcsta which is different from previous runs of calcsta - there it found ".$deltastore->getdim(1)." occurrences. Continuing without storing this\n"; }
+{print STDERR "Warning: Simannfit found ".($#ssta+1)." occurences of sta= in output of calcsta which is different from previous runs of calcsta - there it found ".$staanz." occurrences. Continuing without storing this\n"; }
 else
 {
  # $sta= ... sum of @ssta
@@ -688,8 +706,8 @@ sub mydel  { my ($file1)=@_;
     
 sub read_write_statusfile {
      open(Fout,">./results/simannfit.status");$i=0;
-     print Fout "#! working directory: ".cwd()."\n#! NS=".($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-     if($chisquared){print Fout "#! Current sta=chi2=$stacurr (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
+     print Fout "#! working directory: ".cwd()."\n#! NS=".($staanz)." contributions to sta found in output of calcsta ...\n";
+     if($errc>0){print Fout "#! Current sta=chi2=$stacurr (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
               else {print Fout "#! Current     sta=variance=s2=$stacurr (=sum deviations^2/".($#ssta+1).")  \n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
      print Fout "#----------------------------------------------------------------------------------------\n";
      print Fout "#! Statistical_Temperature=$stattemp      Step_Ratio=$stps\n";
@@ -733,7 +751,7 @@ sub write_set()
   unless(open(FH,$filename)){die "Error openening $filename\n";}
      my $dd=sprintf("%i.%i ",$stepnumber+$tableoffset,$index);print FH $dd;
         my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print FH $dd;++$ii} 
-        print FH $sta." ".$s2;if($chisquared){print FH " ".$chisquared;}print FH "\n";
+        print FH $sta." ".$s2;if($errc>0){print FH " ".$chisquared;}print FH "\n";
         if($sta<$jpglog){$dfile=sprintf("%i.%i.jpg",$stepnumber+$tableoffset,$index);                         
                          mycopy($jpgimagefile,"./results/".$dfile);
                          print FH '#<img src="'.$dfile.'">'."\n";

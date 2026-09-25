@@ -137,7 +137,7 @@ printf("RESULTS saved in directory ./results/  - files:\n");
    std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
    std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
 
-if(sta>=0&&!do_chi2){ //sta will be >0 if there has been some attempt (file in fit/directory) to do calculation of sta
+if(sta>0&&!do_chi2){//sta will be >0 if there has been some attempt (file in fit/directory) to do calculation of sta
 if(nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(nofstapoints+noffailedpoints)*sta/nofstapoints);}
 else { fprintf(stdout,"#! sta=1e10\n");}
           }

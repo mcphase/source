@@ -1956,8 +1956,8 @@ for (i=1;i<=argc-1;++i){
 // loop for different prefixes ...
    for(int ninis=0;ninis<inip.nofinis;++ninis)
 {inimcdis ini((*inip.inis[ninis]));
-  if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
-  if (ini.nofhkls==1)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
+  if(inip.nofinis>1)printf("# Running mcdisp with prefix %s\n",ini.prefix);
+  if (ini.no_hkls)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
   ini.save();
 
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
