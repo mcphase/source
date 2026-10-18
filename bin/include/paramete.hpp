@@ -39,7 +39,9 @@ class parameters
    int savjjj(FILE * file); // save exchange parameters to file (jjj format)
    int savcf(FILE * file); // save cf parameters to file (cf format)
    
-   parameters (char *file);	//konstruktor
+   void load (char *file);	//konstruktor load with filename
+   parameters (char *file);	//konstruktor with filename
+   parameters (const char *file,char * prefix);	//konstruktor with filename and prefix
    parameters (const parameters & pars);	// kopier-konstruktor
    ~parameters ();		//destruktor
 };

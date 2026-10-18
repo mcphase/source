@@ -27,7 +27,23 @@ par::par(Vector abc,int  nofci)
   jjj=new jjjpar * [cs.nofatoms+1];
 }
 
+par::par (const char *file,char * prefix)
+{ FILE * fj;
+ char mcphasjfilename[MAXNOFCHARINLINE];
+ strcpy(mcphasjfilename,"./");strcpy(mcphasjfilename+2,prefix); // try prefix filename
+  strcpy(mcphasjfilename+2+strlen(prefix),file);fj = fopen(mcphasjfilename, "rb");
+ if(fj==NULL){strcpy(mcphasjfilename,"./results/");strcpy(mcphasjfilename+10,prefix); // try prefix filename
+              strcpy(mcphasjfilename+10+strlen(prefix),file);fj = fopen(mcphasjfilename, "rb");
+   if(fj==NULL){strcpy(mcphasjfilename+2,file);fj = fopen_errchk(mcphasjfilename, "rb");}
+              }
+ fclose(fj);
+fprintf(stderr,"# loading crystal structure from %s ... \n",mcphasjfilename);fflush(stderr);
+load(mcphasjfilename,0);
+}   
+
 par::par (const char *filejjj,int  verbose)
+{load(filejjj,verbose);}
+void par::load (const char *filejjj,int  verbose)
 { int i,j,n,l;
   FILE *fin_coq;
   char instr[MAXNOFCHARINLINE];

@@ -95,7 +95,8 @@ int parameters::save(FILE *file)
 }
 
 //constructor
-parameters::parameters (char *file)
+parameters::parameters (char *file){load(file);}
+void parameters::load (char *file)
 {
   FILE *fin_coq;
   char instr[MAXNOFCHARINLINE];
@@ -225,6 +226,20 @@ parameters::parameters (char *file)
       } 
 }
 
+//konstruktor with filename and prefix
+parameters::parameters (const char *file,char * prefix)
+{ FILE * fj;
+ char mcphasjfilename[MAXNOFCHARINLINE];
+ strcpy(mcphasjfilename,"./");strcpy(mcphasjfilename+2,prefix); // try prefix filename
+  strcpy(mcphasjfilename+2+strlen(prefix),file);fj = fopen(mcphasjfilename, "rb");
+ if(fj==NULL){strcpy(mcphasjfilename,"./results/");strcpy(mcphasjfilename+10,prefix); // try prefix filename
+              strcpy(mcphasjfilename+10+strlen(prefix),file);fj = fopen(mcphasjfilename, "rb");
+   if(fj==NULL){strcpy(mcphasjfilename+2,file);fj = fopen_errchk(mcphasjfilename, "rb");}
+              }
+ fclose(fj);
+fprintf(stderr,"# loading crystal structure from %s ... \n",mcphasjfilename);fflush(stderr);
+load(mcphasjfilename);
+}   
 //kopier-konstruktor
 parameters::parameters (const parameters & p)
 { int i;

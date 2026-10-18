@@ -446,7 +446,7 @@ strained. To relax atomic positions and compute effective elastic constants use
 option -cel of program {\prg mcphasit})}:
 
 \begin{eqnarray}\label{elconst}
-c^{\alpha\beta\gamma\delta} &= &
+C^{\alpha\beta\gamma\delta} &= &
 \frac{\partial^2E_{\rm elastic}}{\partial a_{\alpha\beta} \partial a_{\gamma\delta}} \\
 &=& \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
@@ -480,7 +480,7 @@ the linear transformation $\bar a$ can be written as $\bar a=\bar \epsilon + \ba
 it is possible to rewrite the elastic energy in the well known fashion
 
 \begin{eqnarray}\label{Eelconst}
-E_{\rm elastic} &=& \frac{1}{2}\sum_{\alpha\beta\gamma\delta} c^{\alpha\beta\gamma\delta} \epsilon_{\alpha\beta}\epsilon_{\gamma\delta}
+E_{\rm elastic} &=& \frac{1}{2}\sum_{\alpha\beta\gamma\delta} C^{\alpha\beta\gamma\delta} \epsilon_{\alpha\beta}\epsilon_{\gamma\delta}
 \end{eqnarray}
 
 
@@ -508,7 +508,7 @@ strain tensor is symmetric:
 
 {\color{blue}
 \begin{eqnarray}\label{elconstsymm}
-c^{\alpha\beta\gamma\delta} &= &
+C^{\alpha\beta\gamma\delta} &= &
  \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
  \nonumber \\
@@ -528,7 +528,7 @@ With the help of elastic constants we can rewrite the derivative of the elastic 
 
 \begin{eqnarray}\label{Eelderivelconst}
 \frac{\partial E_{\rm elastic}}{\partial \epsilon_{\alpha\beta}}&=&
-\sum_{\gamma\delta=1,2,3} c^{\alpha\beta\gamma\delta} \epsilon_{\gamma\delta}
+\sum_{\gamma\delta=1,2,3} C^{\alpha\beta\gamma\delta} \epsilon_{\gamma\delta}
 \end{eqnarray}
 
 
@@ -546,19 +546,19 @@ To easy the indexing we apply the notation of Voigt
 
 Note the elastic constants do not contain any prefactor in Voigt notation, i.e.
 \begin{eqnarray}\label{voigtel}
-c^{11}&=&c^{1111} \\
-c^{44}&=&c^{2323} \nonumber \\
+C^{11}&=&C^{1111} \\
+C^{44}&=&C^{2323} \nonumber \\
 \end{eqnarray}
 
-There are 21 independent elastic constants, $c^{\alpha\beta}$ with $\beta=1,...,6$ and
+There are 21 independent elastic constants, $C^{\alpha\beta}$ with $\beta=1,...,6$ and
 $\alpha \le \beta$ (or less, see  http://koski.ucdavis.edu/BRILLOUIN/CRYSTALS/Elasticities.html). The other 60 elastic constants 
-can be obtained from the symmetry relations $c^{\alpha\beta}=c^{\beta\alpha}$, 
-$c^{\alpha\beta\gamma\delta}=c^{\beta\alpha\gamma\delta}=c^{\alpha\beta\delta\gamma}$.
+can be obtained from the symmetry relations $C^{\alpha\beta}=C^{\beta\alpha}$, 
+$C^{\alpha\beta\gamma\delta}=C^{\beta\alpha\gamma\delta}=C^{\alpha\beta\delta\gamma}$.
 
 The elastic energy in Voigt notation is given by
 
 \begin{eqnarray}\label{Eelconstvoigt}
-E_{\rm elastic} &=& \frac{1}{2}\sum_{\alpha\gamma=1,..,6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma}
+E_{\rm elastic} &=& \frac{1}{2}\sum_{\alpha\gamma=1,..,6} C^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma}
 \end{eqnarray}
 
 \subsection{External Stress}
@@ -571,8 +571,10 @@ of Jahn-Teller transitions and excitations, this has been programmed.
 If the system is subject to external stress $\sigma_{\alpha}$, the corresponding energy can be written as
 
 \begin{equation}
-E_{\rm stress}= -\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha}
+E_{\rm stress}= -V\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha}
 \end{equation}
+
+Here $V$ denotes the volume of the sample.
 
 \subsection{Mixing term $H_{mix}$}
 
@@ -751,7 +753,7 @@ $\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 {\color{blue}
 \begin{eqnarray}\label{Htot}
 \hat H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) - \sum_i g_{J_i} \mu_B \hat \mbf J_i \mbf H+ \\
-&+&\sum_{i} \hat H_{\rm E}(i) + \frac{1}{2}\sum_{\alpha\gamma=1-6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} -\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha} -\nonumber \\
+&+&\sum_{i} \hat H_{\rm E}(i) + \frac{1}{2}\sum_{\alpha\gamma=1-6} C^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} -V\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha} -\nonumber \\
 &-&\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) \hat u_{i}^{\alpha}\hat u_{j}^{\beta} 
 -\sum_{i<j,\alpha=1,2,3,\gamma}\Gamma^{\alpha\gamma}(ij) \hat u^{\alpha}_i O_{\gamma}(\hat \mbf J_j)
 \nonumber \\
@@ -804,7 +806,7 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
 
 
 \begin{eqnarray}\label{zeroeps}
-\sum_{\beta=1,..6}  c^{\alpha\beta} \epsilon_{\beta} &=&\sigma_{\alpha}+
+\sum_{\beta=1,..6}  C^{\alpha\beta} \epsilon_{\beta} &=&V\sigma_{\alpha}+
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle \hat u_{i}^{\delta} \rangle  \\
  &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber
 \end{eqnarray}
@@ -864,7 +866,7 @@ Equation (\ref{zeroeps}) is extended for the case of exchange striction:
 
 {\color{blue}
 \begin{eqnarray}\label{zeroepsex}
-\sum_{\beta=1,..,6}  c^{\alpha\beta} \epsilon_{\beta} &=&\sigma_{\alpha}+
+\sum_{\beta=1,..,6}  C^{\alpha\beta} \epsilon_{\beta} &=&V\sigma_{\alpha}+
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
  &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber \\
  &+& \frac{1}{2}\sum_{ii',\delta,\delta'\alpha'}

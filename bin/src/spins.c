@@ -11,23 +11,32 @@
 #include "densities_func.c"
 #include "elements.c"
 
+#define MAXDEG 100    // maximal degeneracy
 void help_and_exit()
     { printf ("\n\
 program spins - popout spin/exchange field configuration\n"
 "              - and/or display 3d animation of spin/moment/densities and animations\n\n\
-use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
+use as\n\
+  1) file-mode\n\
+        spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps x y\n\
     or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps out1 out2 out3 out4 out5 out6 out7\n\
     or: spins -f[c 1 13 3 0.1] [-n 2] mcphas.tst n\n\
+  2) table-mode \n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
     or: spins -tL2 4.5 [-prefix 001] T Ha Hb Hc \n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
+  3) graphic-mode\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [ h k l E]\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [[-prefix 020]h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [[-prefix 020] h k l E]\n\
                     \n\
-1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n\
+  4) eigenvector-mode\n\
+    or: spins [-symop|-symoa [-]3 cryststruc.cif] -q mcdisp.qep h k l [E]\n\
+                    \n\
+1) file-mode:\n\
+   a) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n\
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n\
    is read and extracted from this file and printed on screen (stdout),\n\
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>),\n\
@@ -36,24 +45,25 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
          (may have different meaning if out3 out5 out6 out7 is set in mcphas.ini)\n\
          - out1,...,out7 refers to column 1-7 in mcphas.* output files\n\
   \n\
-2) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,\n\
+   b) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,\n\
    the spin configuration at a given x,y point is read and extracted from this file ,\n\
    and printed on screen (stdout) etc. as 1)\n\
    Note: x y stands for the 1st and 2nd column in mcphas.* output files\n\
          (may have different meaning if out1 or out2 is set in mcphas.ini)\n\
-3) if used with -f filen n,  this file has to be a mcphas.tst file,\n\
+   c) if used with -f filen n,  this file has to be a mcphas.tst file,\n\
    the spin configuration number n\n\
    is read and extracted from this file and printed on screen (stdout),\n\
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>)\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
-1&2&3) - if used with -fc min max n lim a human readable format is output for spin components with index \n\
+a&b&c) - if used with -fc min max n lim a human readable format is output for spin components with index \n\
    from min to max, only n numbers exceeding  \n\
    absolute value of lim, e.g. -fc 1 13 3 0.1 outputs I1,I2,...,I13, however only at maximum 3 numbers \n\
    for each atom which are all larger (absolute value) than 0.1. \n\
       - if option -n 5 ist present only I1,..,I5 are output (mind 5<=nofcomponents)\n\
  \n\
-4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
+2) table mode \n\
+   if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and tables or 3d graphical animations are created.\n\
    for table the options are:\n\
        -tMSL ... output to stdout a table with T Ha Hb Hc atom positions and with \n\
@@ -64,6 +74,7 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
        -tL2 4.5  ... a table with average squared longitudinal bond elongations up to bond\n\
                      length 4.5 Angstroem, only atoms with phonon degrees of freedom are considered\n\
                      (useful for estimating elastic energy contributions of different bonds)\n\
+3) graphic / excitation mode \n\
    for graphical animations the options are: \n\
          -c ... calculate chargedensity\n\
          -s ... calculate spindensity\n\
@@ -82,18 +93,60 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
          -eps ... create eps (postscript) files in addition to jvx (javaview) output\n\
          -fst ... create fst (fullprof viewer) files in addition to jvx (javaview) output\n\
 \n\
-         note, that in order to animate changes in the above quantities, the corresponding\n\
+         Note, that in order to animate changes in the above quantities, the corresponding\n\
          switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion\n\
-         modules have to be capable of calculating the corresponding observables. \n\
+         modules have to be capable of calculating the corresponding observables. In this\n\
+         case mcdisp produces files results/mcdisp.qev .pev .sev etc. which contain the \n\
+         correlation function for the observable (for displacements this corresponds to \n\
+         the phonon eigenvector for phonon displacements in results/mcdisp.qep; for magnetic\n\
+         moments this corresponds to the spinwave eigenvector  in results/mcdisp.qem, ... )\n\
 \n\
          -prefix 001 ... use input file(s) results/001mc* instead of results/mc*\n\
  \n\
-     example:\n\
+4) eigenvector mode:\n\
+         for files containing the eigenvectors corresponding to correlation functions of\n\
+         observables (see manual Evaluating results - Graphical Visualisation of Spin and Charge \n\
+         Oscillations of Excitations) can be evaluated using the eigenvector mode.\n\
+         The filename corresponding to the observable (e.g. for magnetic moment, phonon displacement \n\
+         it is mcdisp.qem, mcdisp.qep, respectively) and the propagation\n\
+         vector q=(hkl) and the energy have to be given and the program looks for the \n\
+         closest match and prints out the eigenvector as stored in the file and also \n\
+         in human readable form.\n\
+         Using option -symop the symmetry operations in a .cif file under the tag\n\
+          loop_\n\
+          _space_group_symop_id\n\
+          _space_group_symop_operation_xyz\n\
+          1 'y+1/4, x+3/4, -z+1/4'\n\
+          2 'y+1/4, -x+3/4, -z+1/4'\n\
+         are read and spins outputs the eigenvector after applying the specified symmetry operation assuming\n\
+         that the observable is a polar vector, e.g. phonon displacememnts. Use option -symoa for axial \n\
+         vectors such as the magnetic moment.\n\
+         If a negative sign is specified for the symmetry operation (e.g. -3), all symmetry operations\n\
+         are employed and characters are output (provided that the eigenvector is invariant).\n\
+         If in the .cif file the character table of the point group is provided, then \n\
+         the irreducible representation is identified. The .cif file has to contain a character table\n\
+         as follows:\n\
+         _point_group_name D4h\n\
+         _point_group_classes                   'E  EI C42 C42I 2C4 2C4I 2C2 2C2I 2C2d 2C2dI '\n\
+         _point_group_space_symmetry_operations '16 8  11  3    13  5    1   9    6    14'\n\
+         loop_\n\
+         _irrep_point_group\n\
+         _character_point_group\n\
+         A1g ' 1  1  1  1  1  1  1  1  1  1'\n\
+         A1u ' 1 -1  1 -1  1 -1  1 -1  1 -1'\n\
+         If energy is omitted, then all energies in the qep file for the wave vectors are\n\
+         scanned and the characters are output and  the  irrep are determined.\n\
+\n\
+\n\
+     examples:\n\
         spins -c 2 0 0 1\n\
-        ...calculates the charge density at T=2K and H=(0,0,1) Tesla\n\
+        ...calculates the charge density at T=2K and H=(0,0,1) Tesla and produces jvx file to view\n\
         spins -tI 2 0 0 1 \n\
         ... outputs a table with atomic positions and expectations values <I> \n\
-\n\
+        spins -M 2 0 0 1   0.5 0  0  23\n\
+        ...calculates the magnetic moment precession  at T=2K and H=(0,0,1) Tesla for an excitation at\n\
+          (hkl)=(0.5 0 0) at 23 meV - produces a jvx file with animation\n\
+        \n\
  This program outputs a magnetic structure (and magnetic excitation)\n\
  graphic/movie in the output files of different format:\n\
  results/spins*.eps (postscript), results/spins*.fst (fp_studio), \n\
@@ -203,9 +256,245 @@ void L2_calc(double & tL2,int i0, int j0, int k0, int ii0,FILE * fout, char * ou
   }
 fprintf(fout,"#\n"); // comment line after each atom
 }
+                  
+void print_eigenvector_human_legible(par & p,spincf & ev_r,spincf & ev_i,char * outhklstr)
+{printf("%s\n#sipf-file at (da[a] db[b] dc[c]) eigenvector\n",outhklstr);
+ 
+  for(int ii=1;ii<=p.cs.nofatoms;++ii)
+   for(int i=1;i<=ev_r.na();++i)
+   for(int j=1;j<=ev_r.nb();++j)
+   for(int k=1;k<=ev_r.nc();++k) //loop supercells
+ { Vector dd3(1,3),dd4(1,3);
+    dd3=ev_r.pos_dabc(i,j,k,ii, p.cs);
+    dd4=ev_r.pos_dr123(i,j,k,ii, p.cs);
+    printf("# %s at dabc=(%5.3f %5.3f %5.3f) dr1r2r3=(%5.3f %5.3f %5.3f) [ ",(*p.jjj[ii]).sipffilename,dd3(1),dd3(2),dd3(3),dd4(1),dd4(2),dd4(3));
+    for(int a=1;a<=ev_r.nofcomponents;++a) {if( ev_r.m(i,j,k)((ii-1)*ev_r.nofcomponents+a)!=0.0||
+                                                ev_i.m(i,j,k)((ii-1)*ev_r.nofcomponents+a)==0.0)
+                                            printf("%5.4f",ev_r.m(i,j,k)((ii-1)*ev_r.nofcomponents+a)); 
+                                           if( ev_i.m(i,j,k)((ii-1)*ev_r.nofcomponents+a)!=0.0)
+                                            printf("%+5.4fi",ev_i.m(i,j,k)((ii-1)*ev_i.nofcomponents+a));
+                                           printf(" ");
+                                         }     
+    printf("]\n");  
+ }  
+}
+
+// apply symmetry operation sn from ciffile  and return character
+// if verbose=true: print eigenvectors
+complex<double> symop(par & p,spincf * scr,spincf * sci,int deg,char * outhklstr,char * sn,char * ciffile, bool polar,bool verbose)
+{FILE * fin; fin = fopen_errchk (ciffile,"rb");
+ char instr[MAXNOFCHARINLINE];bool found=false,begin=false;
+ while(feof(fin)==false&&found==false)
+ {fgets(instr, MAXNOFCHARINLINE, fin);
+  if(instr[strspn(instr," \t")]!='#')
+  {if(begin==true)
+    {if(strncmp(sn,instr,strlen(sn))==0)found=true;
+    }
+   if(strncmp(instr,"_space_group_symop_operation_xyz",32)==0)begin=true;
+  }
+ }
+ fclose(fin);
+if(found==false){fprintf(stderr,"Error program spins: symmetry operation %s not found\n",sn);exit(EXIT_FAILURE); }
+
+if(verbose)printf("#Applying symmetry operation %s\n",instr);
+  
+parser ob;
+char * xd=mystrnstr(instr,"'",MAXNOFCHARINLINE);++xd;
+char * yd=mystrnstr(xd,",",MAXNOFCHARINLINE);*yd='\0';++yd;
+char * zd=mystrnstr(yd,",",MAXNOFCHARINLINE);*zd='\0';++zd;
+char * d=mystrnstr(zd,"'",MAXNOFCHARINLINE);*d='\0';
+//printf("%s\n%s\n%s\n",xd,yd,zd);
+char f[MAXNOFCHARINLINE];
+Vector t(1,3);
+snprintf(f,MAXNOFCHARINLINE,"x=%g y=%g z=%g xd=%s yd=%s zd=%s",0.0,0.0,0.0,xd,yd,zd);
+parseline(f,ob);extract(f,"xd",t(1),ob);extract(f,"yd",t(2),ob);extract(f,"zd",t(3),ob);
+if(verbose)myPrintVector(t,"corresponding to x'=A*x+t and ev'=B*ev\n# translation t:");
+Matrix A(1,3,1,3);
+snprintf(f,MAXNOFCHARINLINE,"x=%g y=%g z=%g xd=%s yd=%s zd=%s",1.0,0.0,0.0,xd,yd,zd);
+parseline(f,ob);extract(f,"xd",A(1,1),ob);extract(f,"yd",A(2,1),ob);extract(f,"zd",A(3,1),ob);
+                A(1,1)-=t(1);A(2,1)-=t(2);A(3,1)-=t(3);
+snprintf(f,MAXNOFCHARINLINE,"x=%g y=%g z=%g xd=%s yd=%s zd=%s",0.0,1.0,0.0,xd,yd,zd);
+parseline(f,ob);extract(f,"xd",A(1,2),ob);extract(f,"yd",A(2,2),ob);extract(f,"zd",A(3,2),ob);
+                A(1,2)-=t(1);A(2,2)-=t(2);A(3,2)-=t(3);
+snprintf(f,MAXNOFCHARINLINE,"x=%g y=%g z=%g xd=%s yd=%s zd=%s",0.0,0.0,1.0,xd,yd,zd);
+parseline(f,ob);extract(f,"xd",A(1,3),ob);extract(f,"yd",A(2,3),ob);extract(f,"zd",A(3,3),ob);
+                A(1,3)-=t(1);A(2,3)-=t(2);A(3,3)-=t(3);
+if(verbose)myPrintMatrix(A,"Roto(inversion) Matrix A:");
+// determine transformation matrix for vectors (and pseudovectors) from
+// spatial transformation matrix A: B should transform eigenvectors like a spatial vector
+// in ijk coordinates.
+// dabcd=A*dabc  
+// dijk=abc_in_ijk*dabc 
+// dijkd=abc_in_ijk*dabcd 
+//  --> dijkd=abc_in_ijk*A*abc_in_ijk.Inverse()*dijk
+// -->
+Matrix B(1,3,1,3);Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,p.cs.abc);
+B=abc_in_ijk*A*abc_in_ijk.Inverse(); 
+if(polar==false&&Det(B)<0){B=-B;} // for axial vectors ignore the inversion symmetry operation
+if(verbose)myPrintMatrix(B,"Observable transformation Matrix B:");
+
+// go through all degenerate configurations, transform them and store original and transformed
+// vectors in matrices evm and evm'
+int dim=scr[1].nofcomponents*scr[1].nofatoms*scr[1].n();
+ComplexMatrix evm(1,dim,1,deg),evmd(1,dim,1,deg);
+for(int dg=1;dg<=deg;++dg)
+{if(scr[dg].nofcomponents!=3){fprintf(stderr,"Error spins: nofcomponents=%i symmetry operations can currently only be performed for vector observables with nofcomponents=3\n",scr[dg].nofcomponents);exit(EXIT_FAILURE);}
+spincf evd_r=scr[dg].symop(A,t,B,p.cs);
+spincf evd_i=sci[dg].symop(A,t,B,p.cs);
+if(verbose)print_eigenvector_human_legible(p,scr[dg],sci[dg],outhklstr);
+if(verbose)print_eigenvector_human_legible(p,evd_r,evd_i,outhklstr);
+// store as vector in order to determine character of representation ...
+Vector vr=scr[dg].asVector();
+Vector vi=sci[dg].asVector();
+ComplexVector v(vr,vi);for(int i=v.Lo();i<=v.Hi();++i)evm(i,dg)=v(i);
+
+Vector vdr=evd_r.asVector();
+Vector vdi=evd_i.asVector();
+ComplexVector vd(vdr,vdi);for(int i=vd.Lo();i<=vd.Hi();++i)evmd(i,dg)=vd(i);
+}
+// linear regression to determine deg x deg transformation matrix T
+// evmd=evm*T
+// evm.Transpose * evmd= evm.Transpose * evm * T = C * T
+// T=C.inverse * evm.Transpose * evmd
+ComplexMatrix C(1,deg,1,deg); C=evm.Hermitean()*evm;
+ComplexMatrix T(1,deg,1,deg); T=C.Inverse()*(evm.Hermitean()*evmd);
+
+complex<double> ch=Trace(T);
+// detect how good is linear regression in order to see if something is odd
+// evmd=evm*T should be tue. 
+// evm*T-evmd=0 should be true - check it
+if(double e=NormFro(evm*T-evmd)>0.001) {fprintf(stderr,"Error: spin configuration not inveriant to symmetry operation %s |s-s'|=%g\n",instr,e);exit(EXIT_FAILURE); }
+
+if(verbose)printf("ch%s=%5.3f%+5.3fi ",sn,ch.real(),ch.imag());
+return ch;
+}
+
+
+bool identify_irrep(complex<double> * ch,int nofsymop,char * ciffile)
+// look if cif file contains point group character table and if yes find out irrep
+//_point_group_name D4h
+//_point_group_classes                   'E  EI C42 C42I 2C4 2C4I 2C2 2C2I 2C2d 2C2dI '
+//_point_group_space_symmetry_operations '16 8  11  3    13  5    1   9    6    14'
+//loop_
+//_irrep_point_group
+//_character_point_group
+// A1g ' 1  1  1  1  1  1  1  1  1  1'
+// A1u ' 1 -1  1 -1  1 -1  1 -1  1 -1'
+{FILE * fin; fin = fopen_errchk (ciffile,"rb");
+ char instr[MAXNOFCHARINLINE];
+ char pointgroup[MAXNOFCHARINLINE];
+ char classes[MAXNOFCHARINLINE];
+ float pso[nofsymop+1];pso[0]=nofsymop;
+ bool found=false,begin=false,eot=false;int nofc=0,nd=0;char * irrep;
+ while(feof(fin)==false&&found==false&&eot==false)
+ {fgets(instr, MAXNOFCHARINLINE, fin);
+  if(instr[strspn(instr," \t")]!='#')
+  {char * t=instr+strspn(instr," \t");
+   if(strncmp(t,"_point_group_name",17)==0)snprintf(pointgroup,MAXNOFCHARINLINE,"%s",t+18);
+   if(strncmp(t,"_point_group_classes",20)==0)snprintf(classes,MAXNOFCHARINLINE,"%s",t+20);
+   if(strncmp(t,"_point_group_space_symmetry_operations",38)==0)
+       {t+=38;t+=strspn(t," \t'");
+        if((nofc=splitstring(t,pso))>nofsymop){fprintf(stderr,"Error spins reading %s: _point_group_space_symmetry_operations > number of symmetry operations read %i\n",ciffile,nofsymop);exit(EXIT_FAILURE); }
+       }
+   if(begin==true) // we are in the table - compare irrep characters with irreps
+    {if(instr[strspn(instr," \t")]=='_'||strncmp(instr+strspn(instr," \t"),"loop_",5)==0)eot=true;
+     else{
+     irrep=1+mystrnstr(instr,"'",MAXNOFCHARINLINE);
+     float irrepch[nofsymop+1];irrepch[0]=nofsymop;
+     int nofd=splitstring(irrep,irrepch);
+     if(nofc!=nofd){fprintf(stderr,"Error - irrep contains %i characters not equal to %i in tag _point_group_space_symmetry_operations \n",nofc,nofd);exit(EXIT_FAILURE);}
+     int i=0;
+     while(i<nofc&&fabs(irrepch[i+1]-ch[(int)pso[i+1]].real())<1e-4){++i;//printf("%4.2f ",irrepch[i]);
+      }
+     //printf("\n");
+     if(i==nofc)found=true;
+     //else printf("i=%i table: %8.6f  calc: %8.6f\n",(int)pso[i+1],irrepch[i+1],ch[(int)pso[i+1]].real());
+     }}
+   if(strncmp(instr,"_character_point_group",22)==0)begin=true;
+   }
+ ++nd;
+ }
+ fclose(fin);
+ if(found==true){printf("irrep=%s",instr);return true;}
+ else {printf("irrep not found in %s\n",ciffile);return false;}
+}
+                   
+
+/**********************************************************************/
+// programm fuer option -q (koennte auch eigenstaendig compiliert werden)
+/**********************************************************************/
+int spins_q(int argc,char **argv)
+{FILE * fin;int os=0;
+ 
+ graphic_parameters gp;bool deg=true;
+ char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
+ par inputpars("mcphas.j",prefix); 
+ spincf spinconf(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+ spincf spinconfev_real(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+ spincf spinconfev_imag(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+ Vector Hext(1,HEXT_DIMENSION);Hext=0;
+ char outstr[MAXNOFCHARINLINE];
+ char outhklstr[MAXNOFCHARINLINE];
+ char * ciffile;ciffile=NULL;
+ Vector hkl(1,3);double E;double T=0;char * sn=NULL;
+ bool polar=true;
+if(strncmp(argv[os+1],"-symo",5)==0){if(argv[os+1][5]=='a')polar=false;
+                                     sn=argv[os+2];// label of symoperation in table
+                                     ciffile=argv[os+3];
+                                     os+=3;// here we could enter some function to select desired symop from file                                  
+                                    } 
+os-=2;
+spincf  scr[MAXDEG];
+spincf  sci[MAXDEG];
+double Etable[MAXDEG];
+Etable[0]=1;
+if(argc==os+8) // no energy is given - probe all energies
+{fin = fopen_errchk (argv[os+4], "rb");
+ char instr[MAXNOFCHARINLINE];instr[0]='#';
+ while (feof(fin)==0)
+ {fgets(instr,MAXNOFCHARINLINE,fin);
+   if (instr[strspn(instr," \t")]!='#') // pointer to 'ltrimstring' 
+    {if(0==extract(instr,"E",Etable[(int)Etable[0]]))Etable[0]++;
+    }
+ }Etable[0]--;
+ fclose(fin);
+}
+printf("#* program spins ... reading from file %s\n",argv[os+4]); 
+for(int ie=1;ie<=Etable[0];++ie)
+{E=Etable[ie];T=0;deg=true;
+while(deg){fin = fopen_errchk (argv[os+4], "rb");  
+ deg=check_for_best_excitation_and_close(fin,gp,"ddd",spinconf,spinconfev_real,spinconfev_imag,
+                          0,0,T,Hext,outstr,outhklstr,"best",hkl,E,argc,argv,os,
+                          inputpars.cs.abc,inputpars.cs.nofatoms,0,0.0,0.0,0.0,0); 
+ T--;
+ if(argc>os+8)print_eigenvector_human_legible(inputpars,spinconfev_real,spinconfev_imag,outhklstr);
+ scr[-(int)T]=spincf(spinconfev_real);
+ sci[-(int)T]=spincf(spinconfev_imag);
+ }
+
+ if(ciffile!=NULL){if(sn[0]=='-')
+                   {char snn[10];int nofsymop=(int)strtod(sn+1,NULL);
+                    complex<double> ch[nofsymop+1];
+                    for(int i=1;i<=nofsymop;++i)
+                    {snprintf(snn,10,"%i",i);
+                     ch[i]=symop(inputpars,scr,sci,(int)-T,outhklstr,snn,ciffile,polar,false);
+                    }
+                    printf("E=%g ",E);
+                   // look if cif file contains point group character table and if yes find out irrep
+                   if(identify_irrep(ch,nofsymop,ciffile)==false)
+                    {for(int i=1;i<=nofsymop;++i)printf("ch%i=%5.3f%+5.3fi ",i,ch[i].real(),ch[i].imag());
+                     printf("\n");
+                    }
+                   }
+                   else symop(inputpars,scr,sci,(int)-T,outhklstr,sn,ciffile,polar,true);
+                  }
+} 
+ return 0; 
+}
           
 /**********************************************************************/
 // hauptprogramm
+/**********************************************************************/
 int main (int argc, char **argv)
 { 
 fprintf(stderr,"# ***********************************************************\n");
@@ -222,7 +511,6 @@ fprintf(stderr,"# ***********************************************************\n"
  char outstr[MAXNOFCHARINLINE];
  char tstr[MAXNOFCHARINLINE];
  char infilename[MAXNOFCHARINLINE];
- char mcphasjfilename[MAXNOFCHARINLINE];
 
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
  Vector nmin(1,3),nmax(1,3);
@@ -245,14 +533,17 @@ snprintf(gp.title,MAXNOFCHARINLINE,"output of program spins");
  // check command line
  if (argc < 2){help_and_exit();}
 // first: options without graphics just screendump <I> or exchange field configuration at given HT
- if (strcmp(argv[1],"-f")==0||strcmp(argv[1],"-fc")==0)
- { os=2;if (strcmp(argv[1],"-fc")==0){os=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
+if (strncmp(argv[os+1],"-symo",5)==0) {os+=3;// here we could enter some function to select desired symop from file
+                                    }
+ if (strcmp(argv[os+1],"-q")==0) {if(argc>5+os){return spins_q(argc,argv);}else{fprintf(stderr,"Error spins: too few arguments for opiont -q\n");exit(EXIT_FAILURE);}}
+ else if (strcmp(argv[os+1],"-f")==0||strcmp(argv[1],"-fc")==0)
+ { os=2;if (strcmp(argv[os+1],"-fc")==0){os+=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
                                       maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
                                      }
    if (strncmp(argv[os],"-n",2)==0){nofcomp=(int)strtod(argv[os+1],NULL);os+=2;}
    fin = fopen_errchk (argv[os], "rb");printf("#* program spins ... reading from file %s\n",argv[os]);   
  }
- else { if (strncmp(argv[1],"-t",2)==0){os=1;fout=stdout;
+ else { if (strncmp(argv[os+1],"-t",2)==0){os+=1;fout=stdout;
                           if (strncmp(argv[1],"-tL2",4)==0){os=2;tL2=strtod(argv[2],NULL);}
                                        }
        else  // second ... other options with graphics !!
@@ -360,16 +651,7 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
 
 // --------------------- load crystal structure information from mcphas.j for further processing  -----------------
 //   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)
- FILE * fj;
- strcpy(mcphasjfilename,"./");strcpy(mcphasjfilename+2,prefix); // try prefix filename
-  strcpy(mcphasjfilename+2+strlen(prefix),"mcphas.j");fj = fopen(mcphasjfilename, "rb");
- if(fj==NULL){strcpy(mcphasjfilename,"./results/");strcpy(mcphasjfilename+10,prefix); // try prefix filename
-              strcpy(mcphasjfilename+10+strlen(prefix),"mcphas.j");fj = fopen(mcphasjfilename, "rb");
-   if(fj==NULL){strcpy(mcphasjfilename+2,"mcphas.j");fj = fopen_errchk(mcphasjfilename, "rb");}
-              }
- fclose(fj);
-fprintf(stderr,"# loading crystal structure from %s ... \n",mcphasjfilename);fflush(stderr);
- par inputpars(mcphasjfilename);
+ par inputpars("mcphas.j",prefix);
 
 char *out[NOF_USERDEF_MCPHAS_COLS+1];
 for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){out[col]=new char[20];}
@@ -878,7 +1160,7 @@ if(fst==1){
      spinconf.fstprim(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,spinconf);
     fclose (fin);
           }
-             Vector hkl(1,3);hkl=0;
+             Vector hkl(1,3);hkl=0;double E;E=0;
              Vector gjmbHxc(1,3);gjmbHxc=0;
              spincf densityev_real(densitycf*0.0);
              spincf densityev_imag(densitycf*0.0);
@@ -951,8 +1233,6 @@ if (argc-1==8+os){
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
              gp.phonon_wave_amplitude=1.0;gp.phonon_scale_static_displacements=1.0;
 //----------------------------------------------------------------------------------------------------------
-           Vector thkl(1,3);
-                
            if(arrow>0){
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
              switch(arrow)
@@ -974,7 +1254,7 @@ if (argc-1==8+os){
                       break;                   
              }
              check_for_best_excitation_and_close(fin,gp,"qev",spinconf,spinconfev_real,spinconfev_imag,
-                          x,y,T,Hext,outstr,outhklstr,"moment oscillation",thkl,hkl,argv,os,
+                          x,y,T,Hext,outstr,outhklstr,"moment oscillation",hkl,E,argc,argv,os,
                           inputpars.cs.abc,inputpars.cs.nofatoms,doijk, xx,yy,zz,dim);
 
              }//arrow
@@ -985,7 +1265,7 @@ if (argc-1==8+os){
              strcpy(infilename+10+strlen(prefix),"mcdisp.qep");fin = fopen(infilename, "rb");
                       if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qep", "rb");
              check_for_best_excitation_and_close(fin,gp,"qep",spinconf,spinconfpev_real,spinconfpev_imag,
-                          x,y,T,Hext,outstr,outhklstr,"phonon oscillation",thkl,hkl,argv,os,
+                          x,y,T,Hext,outstr,outhklstr,"phonon oscillation",hkl,E,argc,argv,os,
                           inputpars.cs.abc,inputpars.cs.nofatoms,doijk, xx,yy,zz,dim);
 
              }//phonon
@@ -1009,7 +1289,7 @@ if (argc-1==8+os){
                            break;
                 }
              check_for_best_excitation_and_close(fin,gp,"qee/qsd/qod",densitycf,densityev_real,densityev_imag,
-          x,y,T,Hext,outstr,outhklstr,"density oscillation",thkl,hkl,argv,os,
+          x,y,T,Hext,outstr,outhklstr,"density oscillation",hkl,E,argc,argv,os,
           inputpars.cs.abc,inputpars.cs.nofatoms,doijk, xx,yy,zz,dim);
 
              }//gp.show_density

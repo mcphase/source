@@ -631,7 +631,7 @@ phonon interaction $\Gamma^{\alpha\gamma}(ij) $ and the mixing term $G_{mix}^{\g
   {\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j) \langle O_{\gamma'}(\hat \mbf J_{j'}) \rangle + \nonumber\\
   \dots&+&\sum_{\stackrel{i\neq j,\alpha'\beta\beta'}{\alpha=1-6,\gamma=1,\dots}} \frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij) G_{mix}^{\alpha\beta'}(i) }
   {\Omega_{\alpha'\alpha'}(ii)} \epsilon_{\alpha}O_{\gamma}(\hat \mbf J_j)
-+ \frac{1}{2}\sum_{\alpha\gamma=1-6}c_{\rm eff}^{\alpha\gamma}\epsilon_{\alpha}\epsilon_{\gamma}
++ \frac{1}{2}\sum_{\alpha\gamma=1-6}C_{\rm eff}^{\alpha\gamma}\epsilon_{\alpha}\epsilon_{\gamma}
  \end{eqnarray}   
 Moreover, the terms quadratic in the strain $\epsilon$ lead to a renormalisation of the
 elastic constants, which become softer because of the relaxation of atomic positions
@@ -639,7 +639,7 @@ in the unit cell when the crystal is strained (an effect which is not included
 in the elastic constants in equations (\ref{elconst}))
 
 \begin{equation}\label{elconsteff}
-c_{\rm eff}^{\alpha\gamma}=c^{\alpha\gamma}+\sum_{\alpha'\beta\beta'} 
+C_{\rm eff}^{\alpha\gamma}=C^{\alpha\gamma}+\sum_{i\alpha'\beta\beta'} 
 \frac{G_{mix}^{\alpha\alpha'}(i)S_{\alpha'\beta'}S_{\beta\beta'}G_{mix}^{\gamma\beta}(i)}{\Omega_{\beta'\beta'}(ii)}
 \end{equation}
 
@@ -649,11 +649,15 @@ has to be positive and corresponds to a phonon induced quadrupolar self interact
 $\frac{1}{2}\sum_{\alpha'\beta\beta',i \neq j}\frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij)}
 {\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j) O_{\gamma}(\hat \mbf J_{j})$.
 Note that this term actually is a sum of 
+
 $\sum_{\alpha'\beta\beta',i \neq j}\frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij)}
 {\Omega_{\alpha'\alpha'}(ii)} O_{\gamma}(\hat \mbf J_j)\langle O_{\gamma}(\hat \mbf J_{j})\rangle$.
+
 and
+
 $-\frac{1}{2}\sum_{\alpha'\beta\beta',i \neq j}\frac{S_{\beta\alpha'}S_{\beta'\alpha'}\Gamma^{\beta\gamma}(ij)\Gamma^{\beta'\gamma'}(ij)}
 {\Omega_{\alpha'\alpha'}(ii)}\langle O_{\gamma}(\hat \mbf J_j) \rangle\langle O_{\gamma}(\hat \mbf J_{j})\rangle$.
+
 Thus the mean field (\ref{meanfield}) is computed without the $1/2$ prefactor and the second term is considered in the energy 
 correction term (\ref{Ecorrterm}) after the end of the mean field loop. The self interactions
  is always ferroquadrupolar (note that by definition $\Omega_{\alpha'\alpha'}(ii)<0$) and thus enhances the 
@@ -669,7 +673,7 @@ force is equal to the increase in electrostatic force.
 
 \begin{eqnarray}\label{Hreduced}
 \hat H_{\rm red} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) - \sum_i g_{J_i} \mu_B \hat \mbf J_i \mbf H+ \\
-&+&\frac{1}{2}\sum_{\alpha\gamma=1-6} c_{\rm eff}^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} -\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha} -\nonumber \\
+&+&\frac{1}{2}\sum_{\alpha\gamma=1-6} C_{\rm eff}^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} -V\sum_{\alpha=1,..,6} \sigma_{\alpha} \epsilon_{\alpha} -\nonumber \\
 &-&\sum_{i,\alpha=1-6,\gamma=1,...} G_{\rm cfph-eff}^{\alpha\gamma}(i) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_i) \nonumber \\
 &-&\frac{1}{2}\sum_{ij\gamma\gamma'}\mathcal J^{\rm eff}_{\gamma\gamma'}(ij) O_{\gamma}(\hat \mbf J_i) O_{\gamma'}(\hat \mbf J_{j})
  \end{eqnarray}
@@ -719,7 +723,7 @@ to the $\hat u^{\alpha}_i$:
  unit cell as given in the input file.
  The elastic compliance matrix \cite{barron80-609} is obtained by 
  dividing the computed strain by the stress of 0.01 GPa. 
- The elastic constants $c_{\rm eff}^{\alpha\gamma}$ 
+ The elastic constants $C_{\rm eff}^{\alpha\gamma}$ 
  are computed by inverting the matrix of the compliances.
  \item[Calculation of effective phonon induced  Quadrupolar Self Interaction]
  A similar self consistent mean field procedure using (\ref{Htot}) is adopted to calculate the phonon induced
@@ -757,7 +761,7 @@ to the $\hat u^{\alpha}_i$:
    self consistently. The phonon induced magnetoelastic interaction 
      $G^{1\gamma}_{\rm phon-induced-cfph}(n)$ is computed
    using the energy difference $U''-U'$ and the effective elastic energy 
-   $E_{el}=\frac{1}{2}c_{\rm eff}^{11}\epsilon_{1}\epsilon_{1}$
+   $E_{el}=\frac{1}{2}C_{\rm eff}^{11}\epsilon_{1}\epsilon_{1}$
    by
 
    \begin{equation}

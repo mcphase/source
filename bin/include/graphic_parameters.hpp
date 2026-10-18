@@ -3,7 +3,7 @@
 
 #include<martin.h>
 #include <fstream>
-
+#define MAXLINES 100
 class graphic_parameters
 { public:
 //POINTCHARGES
@@ -14,6 +14,8 @@ double scale_pointcharges;
 double show_abc_unitcell,show_primitive_crystal_unitcell,show_magnetic_unitcell;
 double show_atoms,scale_view_1,scale_view_2,scale_view_3;
 int showprim;
+int * linefrom; //list of atoms beginning
+int * lineto;  // list of atoms ending
 
 //MOMENTS
 double spins_scale_moment;

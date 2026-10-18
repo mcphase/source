@@ -28,6 +28,7 @@ fprintf(fout,"<jvx-model>\n");
 fprintf(fout,"  <title>%s</title>\n",text);
 fprintf(fout,"  <geometries>\n");
 
+
 if(gp.show_abc_unitcell>0)jvx_show_abc_unitcell(fout,gp,abc_in_ijk);
 
 if(gp.show_primitive_crystal_unitcell>0)jvx_show_primitive_crystal_unitcell(fout,gp,cs);
@@ -35,6 +36,8 @@ if(gp.show_primitive_crystal_unitcell>0)jvx_show_primitive_crystal_unitcell(fout
 if(gp.show_magnetic_unitcell>0)jvx_show_magnetic_unitcell(fout,gp,cs);
 
 if(gp.show_atoms>0)jvx_show_atoms(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,phase,phonon,pev_real,pev_imag,pl);
+
+ if(gp.linefrom[0]>0)jvx_show_lines(fout,gp,cs,ijkmin,ijkmax,maxv,minv,abc_in_ijk_Inverse);
 
 if(gp.spins_scale_moment>0)jvx_show_magnetic_moments(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
                             phase,magmom,magmomev_real,magmomev_imag,phonon,pev_real,pev_imag,pl);
@@ -246,6 +249,31 @@ fprintf(fout,"          <thickness>%g</thickness>\n",gp.show_magnetic_unitcell);
 fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
+}
+
+// creates lines between atoms  ********************************************************************
+void spincf::jvx_show_lines(FILE * fout,graphic_parameters &gp,cryststruct & cs,Vector & ijkmin,Vector & ijkmax,
+Vector & maxv,Vector & minv,Matrix &abc_in_ijk_Inverse)
+{fprintf(fout,"    <geometry name=\"ions\">\n");
+fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
+fprintf(fout,"        <points>\n");
+Vector dd(1,3);
+for(int l=1;(l<=nofatoms);++l)
+	 {int i=1,j=1,k=1;dd=pos(i,j,k,l,cs);
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
+         }
+fprintf(fout,"          <thickness>3.0</thickness>\n");
+fprintf(fout,"        </points>\n");
+fprintf(fout,"      </pointSet>\n");
+fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
+fprintf(fout,"        <lines>\n");
+  for(int i=1;i<gp.linefrom[0];++i)fprintf(fout,"          <l>%i %i</l>\n",gp.linefrom[i]-1,gp.lineto[i]-1);
+fprintf(fout,"          <thickness>2.0</thickness>\n");
+fprintf(fout,"          <colorTag type=\"rgb\">255 0 255</colorTag>\n");
+fprintf(fout,"        </lines>\n");
+fprintf(fout,"      </lineSet>\n");
+fprintf(fout,"    </geometry>\n");
+
 }
 
 // creates points at atom positions ********************************************************************

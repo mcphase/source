@@ -1,10 +1,12 @@
 #include "graphic_parameters.hpp"
 
-graphic_parameters::~graphic_parameters(){}
+graphic_parameters::~graphic_parameters(){delete []linefrom;delete []lineto;}
 
 
 graphic_parameters::graphic_parameters()
-{
+{linefrom=new int[MAXLINES+1];linefrom[0]=0;
+ lineto=new int[MAXLINES+1];lineto[0]=0;
+
 snprintf(title,MAXNOFCHARINLINE,"chargedensity");
 show_pointcharges=0;scale_pointcharges=1;
 showprim=0;
@@ -36,10 +38,10 @@ read();
 }
 
 int graphic_parameters::read()
-{FILE * fin;
+{FILE * fin;float nn[2*MAXLINES+1];nn[0]=2*MAXLINES;
 fin=fopen("results/graphic_parameters.set","rb");
 if (fin==NULL) return 0;
-
+char lstr[MAXNOFCHARINLINE];
 //std::fstream FILEIN; FILEIN.open("results/graphic_parameters.set", std::fstream::in);
 //std::string strline;
 //if(FILEIN.fail()==true) return 0;
@@ -77,6 +79,11 @@ extract(instr,"spins_show_oscillation",spins_show_oscillation);
 extract(instr,"phonon_wave_amplitude",phonon_wave_amplitude);
 extract(instr,"phonon_scale_static_displacements",phonon_scale_static_displacements);
 extract(instr,"density_threshhold",threshhold);
+if(extract(instr,"lines",lstr,MAXNOFCHARINLINE,200000)==0)
+  {int j;j=splitstring(lstr,nn);
+   for(int i=1;i<j;i+=2){++linefrom[0];linefrom[linefrom[0]]=nn[i];
+                         ++lineto[0];lineto[lineto[0]]=nn[i+1];}
+  }
 }
 else
 {*instr='\0';}

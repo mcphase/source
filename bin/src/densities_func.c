@@ -59,8 +59,8 @@ bool check_dd(double tcdd,char * outhklstr,char * outstr)
 // determines how good are xyT Hext h k l E to loaded string parameters  
 // returns also tcdd: distance of xyT Hext only (without hklE). returns extracted hkl E
 double distance_of_str_to_xyTHext_hklE(char * str,double & tcdd,double & x,double & y,double & T,Vector & Hext,
-                     double  h,double  k,double l,double  E,Vector & abc)
-{ double d,dd,tx=1e10,ty=1e10,tT,tE;Vector tHext(1,Hext.Hi()),thkl(1,3);
+                     double  h,double  k,double l,double  E,Vector & abc,Vector & thkl,double &tE)
+{ double d,dd,tx=1e10,ty=1e10,tT;Vector tHext(1,Hext.Hi());
   extract_xyTHext(str,tx,ty,tT,tHext,abc);
   extract(str,"h",thkl(1)); 
   extract(str,"k",thkl(2)); 
@@ -224,18 +224,43 @@ return n;
 }
 
 
-void check_for_best_excitation_and_close(FILE *fin,graphic_parameters & gp,const char * ext,
+bool check_for_best_excitation_and_close(FILE *fin,graphic_parameters & gp,const char * ext,
  spincf & spinconf,spincf & spinconfev_real,spincf & spinconfev_imag,
-double & x, double & y, double & T,
-Vector & Hext,char*outstr,char*outhklstr,const char * oscill_type,Vector & thkl,Vector & hkl,
-char **argv, int & os, Vector & abc, int nofatoms, int doijk,double xx, double yy, double zz,int dim
+double x, double  y, double  T,
+Vector & Hext,char*outstr,char*outhklstr,const char * oscill_type,Vector & hkl,double &E,
+int argc,char **argv, int os, Vector & abc, int nofatoms, int doijk,double xx, double yy, double zz,int dim
 )
 {// loads eigenvectors from handle fin and check which one is nearest -------------------------------
- // to x y T Hext, store in spinconfev_real/spinconfev_imag
+ // to x y T Hext,
+ // 1) hkl store in spinconfev_real/spinconfev_imag,
+ // 2) checks if xyTHex agrees with information loaded from handle fin (if T>0)
+ // 3) if T<=0: store -Tth degenerate eigenvector in spinconfev  
  //  and then closes file handle fin
+ // input:
+ // fin           file handle
+ // gp            graphic parameters
+ // ext           extention (any value, will trigger density projection storage if equal to "qee/qsd/qod")
+ // spinconf      spinconfiguration of supercell - only dimension of supercell will be used here (.na .nb .nc .nofatoms) 
+  // x,y,T        x,y, Temperature,
+  // Hext         external field,
+ // outstr        string describing the x y T Hext  --> all as read from mcphas.mf
+  // argv(os+5,..,os+7) hkl to look for
+ // argv(os+8)    Energy to look for (optional), if not take E and look for it
+ // doijk,xx,yy,zz,dim for densities-projection parameters
+ // oscill_type   string describing the oscillation type (for printout on screen only)
+ // output:
+ // spinconfev_real, spinconfev_imag
+ //               to store eigenvector
+ // hkl           best matching hkl
+ // E             best matching energy E
+ // outhklstr     information string with best matching T Hext hkl 
+ // true          degeneracy found
 // input file header ------------------------------------------------------------------
 char instr[MAXNOFCHARINLINE],dumstr[MAXNOFCHARINLINE];long int pos=0,jj;int i,j,k;
+Vector thkl(1,3);double tE;int deg=0;
 double delta,tcdd,checkdd=1e7,dd;             int extended_eigenvector_dimension;
+double Edesired;
+       if(argc==os+8){Edesired=E;}else{Edesired=strtod(argv[8+os],NULL);}
              instr[0]='#';
               while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
               { pos=ftell(fin); 
@@ -260,11 +285,14 @@ double delta,tcdd,checkdd=1e7,dd;             int extended_eigenvector_dimension
                  {spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,extended_eigenvector_dimension);
                   spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,extended_eigenvector_dimension);
                  ev_real.load(fin);ev_imag.load(fin);
+                 
                  dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
                         strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
-                        strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),abc);
-                 if (dd<delta)
-                 {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
+                        strtod(argv[7+os],NULL),Edesired,abc,thkl,tE);
+                 if(dd==delta){deg++;}
+                 if (dd<delta||(dd==delta&&deg<-T+1))
+                 {if(dd<delta)deg=0;
+                  delta=dd;checkdd=tcdd;hkl=thkl;E=tE;
                   snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
           
           if(doijk==3&&strcmp("qee/qsd/qod",ext)==0
@@ -289,11 +317,12 @@ double delta,tcdd,checkdd=1e7,dd;             int extended_eigenvector_dimension
                  jj=fseek(fin,pos,SEEK_SET);
                }}
               fclose (fin);
-              check_dd(checkdd,outhklstr,outstr); // check if .mf and .ext agree
-                fprintf(stdout,"#%s - %s - eigenvector\n",outstr,oscill_type);
+              if(T>0)check_dd(checkdd,outhklstr,outstr); // check if .mf and .ext agree
+               if(argc>os+8){ fprintf(stdout,"#%s - %s - eigenvector\n",outhklstr,oscill_type);
               fprintf(stdout,"#real\n");
               spinconfev_real.print(stdout);
               fprintf(stdout,"#imag\n");
-              spinconfev_imag.print(stdout);
+              spinconfev_imag.print(stdout);}
+if(deg>-T)return true; else return false;
 
 }

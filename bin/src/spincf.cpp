@@ -411,12 +411,16 @@ if(l>nofatoms){fprintf(stderr,"Error spincf.cpp::pos - index l > nofatoms\n");ex
          dd+=p.Column(1)*((double)(i-1)/nofa)+p.Column(2)*((double)(j-1)/nofb)+p.Column(3)*((double)(k-1)/nofc);
 return dd;
 }
+
 Vector spincf::pos(int & i, int & j, int & k, int & l,cryststruct & cs)
+//returns position of atom l at lattice site (i j k) (Angstrom)
+                      // as vector components in Euclidean ijk coordinate system
+                      // defined by  j||b, k||(a x b) and i normal to k and j
 {if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos nofatoms=%i not equal to cs.nofatoms=%i\n",nofatoms,cs.nofatoms);exit(1);}
 return pos(i,j,k,l,cs.abc,cs.r,cs.x,cs.y,cs.z);
 
 }
-    
+
 Vector spincf::pos_dabc(int & i, int & j, int & k, int & l,cryststruct & cs)
                       //returns position of atom l at lattice site (i j k) 
                       // as vector components  refering to lattice vectors abc
@@ -445,6 +449,74 @@ if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos_dr123 nofatoms n
          dd0=p.Inverse()*dd;dd0(1)*=nofa;dd0(2)*=nofb;dd0(3)*=nofc;
 return dd0;
 }
+
+Vector spincf::asVector()
+ // returns spincf as a n-component vector 
+{Vector ret(1,n()*nofcomponents*nofatoms);
+ int i=0;
+  for (int rra=1;rra<=nofa;++rra)
+     for (int rrb=1;rrb<=nofb;++rrb)
+        for (int rrc=1;rrc<=nofc;++rrc)
+             	for(int l=1;l<=nofcomponents*nofatoms;++l)
+	          {++i; ret(i)=m(rra,rrb,rrc)(l);}
+ return ret;
+}
+
+spincf spincf::symop(Matrix & A,Vector & t,Matrix & B,cryststruct & cs)
+// perform symmetry operation as specified by 
+   //  1) dabc'(j)=A*dabc(i)+t 
+   //             dabc' must match another atom j in the supercell
+   //             for all atoms i=1,...,n (3x3 Matrx A and translation Vector t)
+   //  2) moment'(j)=B*moment(i)
+   // returns a new spinfconf with transformed
+   // moments, yields error  if applying this transformation
+   // does not create a match onto the supercell (i.e. the transformation
+   // is not a symmetry operation of the crystal super structure)
+  {spincf copy=*this;Vector dr123(1,3),dabcd(1,3),dabc(1,3),dr123d(1,3),dd(1,3),md(1,nofcomponents);
+       copy*=0;
+        Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
+        Matrix p(1,3,1,3); calc_prim_mag_unitcell(p,cs.abc,cs.r);
+   for (int i=1;i<=nofa;++i)
+    for (int j=1;j<=nofb;++j)
+     for (int k=1;k<=nofc;++k)
+      for (int l=1;l<=nofatoms;++l)
+     {dabc=pos_dabc(i,j,k,l,cs);
+      dabcd=A*dabc+t;bool found=false;md=B*moment(i,j,k,l);
+      // check if difference between dabc and dabcd is a lattice vector of the 
+        // superlattice
+        // a) transform  dabcd into primitive lattice
+         dd=abc_in_ijk*dabcd; // transforms to ijk ortholattice in units of A
+         dr123d=p.Inverse()*dd; // dr123d are already primitive lattice coordinates 
+                                // divided by nofa nofb nofc
+        // b) go through all original atoms and ...
+      for (int i2=1;i2<=nofa&&found==false;++i2)
+       for (int j2=1;j2<=nofb&&found==false;++j2)
+       for (int k2=1;k2<=nofc&&found==false;++k2)
+       for(int l2=1;l2<=nofatoms&&found==false;++l2)
+       {dr123=pos_dr123(i2,j2,k2,l2,cs);
+           //  ... divide also dr123 by supercell dimension na nb nc
+        dr123(1)/=nofa;
+        dr123(2)/=nofb;
+        dr123(3)/=nofc;
+        // c) take difference modulo 1
+       if(fabs(remainder(dr123(1)-dr123d(1),1))+
+          fabs(remainder(dr123(2)-dr123d(2),1))+
+          fabs(remainder(dr123(3)-dr123d(3),1))<0.0001)
+        {found=true;
+         //copy.moment(i2,j2,k2,l2)=md;
+        for(int m=1;m<=nofcomponents;++m){copy.m(i2,j2,k2)(nofcomponents*(l2-1)+m)=md(m);} 
+        }
+       }
+       if(found==false)
+        {dr123=pos_dr123(i,j,k,l,cs);
+         fprintf(stderr,"Error: no matching atom found for atom at (%g,%g,%g)-->(%g,%g,%g)\n\
+            supercell coordinates: (%g,%g,%g)-->(%g,%g,%g)\n",
+         dabc(1),dabc(2),dabc(3),dabcd(1),dabcd(2),dabcd(3),
+          dr123(1),dr123(2),dr123(3),dr123d(1),dr123d(2),dr123d(3));exit(EXIT_FAILURE);}
+     }
+   return copy;
+  }
+   
 /**************************************************************************/
 
 //zuweisung

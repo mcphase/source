@@ -47,6 +47,9 @@ public:
      void jvx_show_atoms(FILE * fout,graphic_parameters & gp,cryststruct & cs,Vector & ijkmin, Vector & ijkmax,
           Vector & hkl,Vector &maxv,Vector &minv,Matrix & abc_in_ijk_Inverse,
           double & phase,spincf & phonon,spincf & pev_real,spincf & pev_imag,int * pl);
+     // creates lines between atoms as specified in graphic mparameters gp
+     void jvx_show_lines(FILE * fout,graphic_parameters &gp,cryststruct & cs,Vector & ijkmin,Vector & ijkmax,
+          Vector & maxv,Vector & minv,Matrix &abc_in_ijk_Inverse);
 
      // creates arrows corresponding to magnetic moments (or ...)
      void jvx_show_magnetic_moments(FILE * fout,graphic_parameters & gp,cryststruct & cs,cryststruct & cs4,Vector & ijkmin, Vector & ijkmax,
@@ -94,10 +97,22 @@ public:
   void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
                 spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);
 
-    void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, spincf & magmom);
+   void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, spincf & magmom);
    // calculate primitive magnetic unit cell basis vectors in euclidean ijk coordinate system
    // as columns of  p
-    void calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r);
+   void calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r);
+
+   // perform symmetry operation as specified by 
+   //  1) dabc'(j)=A*dabc(i)+t 
+   //             dabc' must match another atom j in the supercell
+   //             for all atoms i=1,...,n (3x3 Matrx A and translation Vector t)
+   //  2) moment'(j)=B*moment(i)
+   // returns a new spinfconf with transformed
+   // moments, yields error  if applying this transformation
+   // does not create a match onto the supercell (i.e. the transformation
+   // is not a symmetry operation of the crystal super structure)
+   spincf symop(Matrix & A,Vector & t,Matrix & B,cryststruct & cs);
+   Vector asVector(); // returns spincf as a n-component vector 
 
 private:
  // frame of display
@@ -176,7 +191,7 @@ private:
     spincf & operator *= (const double factor); 
     spincf & operator= (const spincf & op2); // zuweisung
     int operator== (spincf & op2); // vergleich
-
+    
    
 spincf (int n1=1,int n2=1,int n3=1,int nofatoms=1,int nofcomponents=3);
                                    //konstruktor mit initialisierung (wenn noetig)

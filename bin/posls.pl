@@ -29,7 +29,7 @@ Options:
 
 -w cw           read weight from column cw, a negative value indicates an antipeak - i.e.
                 a position where no peak is observed 
--i 0.001        take into account calculated energy only if it is larger than Imin=0.001 (default Imin=0)
+-i 0.001        take into account calculated energy only if intensity it is larger than Imin=0.001 (default Imin=0)
 -s 1              output to stdout sta=sta (default)
 -s 2              output to stdout sta=sta_without_antipeaks
 -s 3              output to stdout sta=sta_without_weights
@@ -39,7 +39,7 @@ Options:
              2 sta_without_antipeaks             = 1/N sum_i weight(nearestexp)*[Pcalc(i) - nearestPexp_with_weight>0]^2
              3 sta_without_weights               = 1/N sum_i [Pcalc(i) - nearestPexp]^[2*sign(weight(i))]
              4 sta_without_antipeaks_weights     = 1/N sum_i [Pcalc(i) - nearestPexp_with_weight>0]^2
-
+-v             verbose
 	          \n";
  exit 0;}else{print STDERR "#* $0 *\n";}
 
@@ -48,7 +48,8 @@ $Imin=0;
 die "exiting" unless GetOptions("w=s"=>\$cw,
                                 "i=s"=>\$Imin,
                                 "s=s"=>\$s,
-                                "r"=>\$r
+                                "r"=>\$r,
+                                "v"=>\$v
                                );
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$cp=eval $ARGV[0];shift @ARGV;
@@ -58,17 +59,19 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$cI=eval $ARGV[0
 $calcfile=$ARGV[0];shift @ARGV;
 
 $ii=0;$i=1;
-      unless (open (Fin1, $calcfile)){die "\n error:unable to open $calcfile\n";}   
+      unless (open (Fin1, $calcfile)){die "\n error:unable to open $calcfile\n";} 
+if($v){print "reading $calcfile columns $cpos vs $cI Imin=$Imin\n";}  
 while($line1=<Fin1>)
      {
        if ($line1=~/^\s*#/) {;}
        else{$line1=~s/D/E/g;@numbers1=split(" ",$line1);
-	if($#numbers1>=$cp){
+	if($#numbers1>=$cpos&&$#numbers1>=$cI){
       #store calc pos int values
      if($numbers1[$cI-1]>$Imin)
 	{++$ii;
 	$PC[$ii]=$numbers1[$cpos-1];
-	$IC[$ii]=$numbers1[$cI-1];	
+	$IC[$ii]=$numbers1[$cI-1];
+if($v){print $PC[$ii]." ".$IC[$ii]."\n";}  	
         }
 	                   }    
            }
@@ -78,6 +81,7 @@ while($line1=<Fin1>)
 
 $ii1=0;
       unless (open (Fin1, $datafile)){die "\n error:unable to open $datafile\n";}   
+if($v){print "reading $datafile\n";}  
 
 while($line1=<Fin1>)
      {
@@ -89,16 +93,20 @@ while($line1=<Fin1>)
 	if(defined $cw){unless(($s==2||$s==4)&&$numbers1[$cw-1]<0)
                          {# only keep exp peak if needed
                             $PE[$ii1]=$numbers1[$cp-1];
-                            $w[$ii1]=$numbers1[$cw-1];++$ii1;
+                            $w[$ii1]=$numbers1[$cw-1];
+                         if($v){print $PE[$ii1]." ".$w[$ii1]."\n";}  	
+                            ++$ii1;
                          } 
                        }	
         else
-         {$PE[$ii1]=$numbers1[$cp-1];$w[$ii1]=1;++$ii1;}
+         {$PE[$ii1]=$numbers1[$cp-1];$w[$ii1]=1;
+          if($v){print $PE[$ii1]." ".$w[$ii1]."\n";}  
+          ++$ii1;}
 	
 	}
             }
      }
-   close Fin1;     
+   close Fin1;  
 
 $sta=0;$ii1=0;$N=0;
 unless($r)

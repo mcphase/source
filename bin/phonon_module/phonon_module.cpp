@@ -385,23 +385,6 @@ int phonon_module::dpel1(int & tn,double & T,Vector & Fxc, Vector & Hext,
  return noft;
 }
 
-/**************************************************************************/
-// for mcdisp RAMAN spectroscopy  this routine is needed
-
-int phonon_module::dRAMAN1(int & tn,double & T,Vector & Fxc, Vector & Hext,
-                       double & g_J,Vector & MODPAR, char * sipffilename,
-                       ComplexVector & pel1,float & maxE,ComplexMatrix & est)
-{int n,nd;
-// ????? to be programmed similar to du1calc nbut for RAMAN operator xx yy zz xz yz xy
-// du1calc(tn,T,Fxc,Hext,g_J,MODPAR,sipffilename,pel1,maxE,n,nd,est);
-
- double a0=52.19; // Bohr radius in pm ( A=0.1nm=100pm)
- // calculate from position^2 (xx yy zz xz yz xy) the polarisation^2 in units of e^2 A^2
- pel1*=a0*charge*a0*charge;
- // phonon function has 3 effective transitions
-return 3;
-
-}
 
 
 bool phonon_module::mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,double & gJ,

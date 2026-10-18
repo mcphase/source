@@ -36,7 +36,9 @@ class par
 
   //jjjpar 
    
+   void load(const char *filejjj,int verbose);	//konstruktor
    par (const char *filejjj,int verbose=0);	//konstruktor
+   par (const char *filejjj,char * pref);	//konstruktor
    par (Vector abc,int  nofcompi); // simple contructor: needed in clusterize
    par (const par & pars);	// kopier-konstruktor
    
