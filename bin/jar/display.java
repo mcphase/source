@@ -814,16 +814,16 @@ protected static void reload_data(int i){    try{
              if(clyerr.startsWith("b")){clyerr=clyerr.substring(1);bubbles=true;}
              
              if(clx.contains("c")){// parse expression
-              try { pclx = Parser.parse(clx.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+              try { pclx = Parser.parse(clx.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain());try{ pclx = Parser.parse("0");}catch(SyntaxException f){System.exit(1);}  }
                                  }
              if(cly.contains("c")){// parse expression
-              try { pcly = Parser.parse(cly.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+              try { pcly = Parser.parse(cly.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); try{ pcly = Parser.parse("0");}catch(SyntaxException f){System.exit(1);}  }
                                  }
              if(clxerr.contains("c")){// parse expression
-              try { pclxerr = Parser.parse(clxerr.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+              try { pclxerr = Parser.parse(clxerr.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); try{ pclxerr = Parser.parse("0");}catch(SyntaxException f){System.exit(1);}  }
                                  }
              if(clyerr.contains("c")){// parse expression
-              try { pclyerr = Parser.parse(clyerr.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); System.exit(1); }
+              try { pclyerr = Parser.parse(clyerr.replace("x","*").replace("e*p","exp")); } catch (SyntaxException e) { System.err.println(e.explain()); try{ pclyerr = Parser.parse("0");}catch(SyntaxException f){System.exit(1);}  }
                                  }
 
              //Auslesen der Datei
@@ -879,7 +879,7 @@ try{
                                  cv=cv.replace("+-"," ");cv=SF.NthWord(cv,1);cv=cv.replace('D','E');
                                  cv=cv.replaceAll("[a-d,f-z,A-D,F-Z]"," ");cv=SF.NthWord(cv,1);
 //System.out.println("c"+ii+"  "+cv);
-                              c[ii].setValue(p.parseDouble(cv));
+                              try{c[ii].setValue(p.parseDouble(cv));}catch(NumberFormatException f){c[ii].setValue(0.0);}
                            }
                                }
                 //System.out.println(expr.value());
@@ -912,37 +912,38 @@ try{
                     sxerr=sxerr.replace('D','E');
                     syerr=syerr.replace('D','E');
                     if(bubbles)
-                   {bdata[1][j]=p.parseDouble(sx);
+                   {try{bdata[1][j]=p.parseDouble(sx);}catch(NumberFormatException f){bdata[1][j]=0.0;}
                      if (detxmin&bdata[1][j]<xmin){xmin=bdata[1][j];}
                      if (detxmax&bdata[1][j]>xmax){xmax=bdata[1][j];}
-                    bdata[0][j]=p.parseDouble(sy);
+                    try{bdata[0][j]=p.parseDouble(sy);}catch(NumberFormatException f){bdata[0][j]=0.0;}
                      if (detymin&bdata[0][j]<ymin){ymin=bdata[0][j];}
                      if (detymax&bdata[0][j]>ymax){ymax=bdata[0][j];}
-                    bdata[2][j]=p.parseDouble(syerr);
+                    try{bdata[2][j]=p.parseDouble(syerr);}catch(NumberFormatException f){bdata[2][j]=0.0;}
                     if (bdata[2][j]<0){bdata[2][j]=0;}
-                    bdata[2][j]=scale*Math.sqrt(bdata[2][j]);
+                    try{bdata[2][j]=scale*Math.sqrt(bdata[2][j]);}catch(NumberFormatException f){bdata[2][j]=0.0;}
                   }else
                   {if(clxerr=="0"){sxerr="0";}
                      if(clyerr=="0"){syerr="0";}
-                     data[0][j]=p.parseDouble(sy);
+                     try{data[0][j]=p.parseDouble(sy);}catch(NumberFormatException f){data[0][j]=0.0;}
                       if (detymin&data[0][j]<ymin){ymin=data[0][j];}
                       if (detymax&data[0][j]>ymax){ymax=data[0][j];}
-                     data[1][j]=p.parseDouble(sy)+p.parseDouble(syerr);
+                     try{data[1][j]=p.parseDouble(sy)+p.parseDouble(syerr);}catch(NumberFormatException f){data[1][j]=0.0;}
                       if (detymax&data[1][j]>ymax){ymax=data[1][j];}
-                     data[2][j]=p.parseDouble(sy)-p.parseDouble(syerr);
+                     try{data[2][j]=p.parseDouble(sy)-p.parseDouble(syerr);}catch(NumberFormatException f){data[2][j]=0.0;}
                       if (detymin&data[2][j]<ymin){ymin=data[2][j];}
-                     data[3][j]=p.parseDouble(sx);
+                     try{data[3][j]=p.parseDouble(sx);}catch(NumberFormatException f){data[3][j]=0.0;}
                       if (detxmin&data[3][j]<xmin){xmin=data[3][j];}
                       if (detxmax&data[3][j]>xmax){xmax=data[3][j];}
-                     data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);;
+                     try{data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);}catch(NumberFormatException f){data[4][j]=0.0;}
                       if (detxmax&data[4][j]>xmax){xmax=data[4][j];}
-                     data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
+                     try{data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);}catch(NumberFormatException f){data[5][j]=0.0;}
                       if (detxmin&data[5][j]<xmin){xmin=data[5][j];}
                    }
                     ++j;
                    }
 }
-                   catch(NumberFormatException e){if(j>0){--j;}System.exit(1);
+                   catch(NumberFormatException e){if(j>0){--j;}
+                                                  System.out.println("Number format exception");
                                                   }
                                                           
                }          //         System.out.println(ymin+" "+ymax);

@@ -341,8 +341,8 @@ for(int dg=1;dg<=deg;++dg)
 {if(scr[dg].nofcomponents!=3){fprintf(stderr,"Error spins: nofcomponents=%i symmetry operations can currently only be performed for vector observables with nofcomponents=3\n",scr[dg].nofcomponents);exit(EXIT_FAILURE);}
 spincf evd_r=scr[dg].symop(A,t,B,p.cs);
 spincf evd_i=sci[dg].symop(A,t,B,p.cs);
-if(verbose)print_eigenvector_human_legible(p,scr[dg],sci[dg],outhklstr);
-if(verbose)print_eigenvector_human_legible(p,evd_r,evd_i,outhklstr);
+if(verbose){printf("# Original eigenvector:\n");print_eigenvector_human_legible(p,scr[dg],sci[dg],outhklstr);}
+if(verbose){printf("# Transformed eigenvector:\n");print_eigenvector_human_legible(p,evd_r,evd_i,outhklstr);}
 // store as vector in order to determine character of representation ...
 Vector vr=scr[dg].asVector();
 Vector vi=sci[dg].asVector();
@@ -363,7 +363,11 @@ complex<double> ch=Trace(T);
 // detect how good is linear regression in order to see if something is odd
 // evmd=evm*T should be tue. 
 // evm*T-evmd=0 should be true - check it
-if(double e=NormFro(evm*T-evmd)>0.001) {fprintf(stderr,"Error: spin configuration not inveriant to symmetry operation %s |s-s'|=%g\n",instr,e);exit(EXIT_FAILURE); }
+double e=NormFro(evm*T-evmd)/dim/deg;
+if(e>0.0001) {myPrintMatrix(evmd,"Matrix of transformed eigenvectors:");evmd=evm*T-evmd;
+             myPrintMatrix(evmd,"Difference Matrix to Matrix of best fitting linear combination of original eigenvectors:");
+             fprintf(stderr,"Error: spin configuration not invariant to symmetry operation %s |s-s'|=%g\n",instr,e);
+             exit(EXIT_FAILURE); }
 
 if(verbose)printf("ch%s=%5.3f%+5.3fi ",sn,ch.real(),ch.imag());
 return ch;
@@ -404,7 +408,7 @@ bool identify_irrep(complex<double> * ch,int nofsymop,char * ciffile)
      int nofd=splitstring(irrep,irrepch);
      if(nofc!=nofd){fprintf(stderr,"Error - irrep contains %i characters not equal to %i in tag _point_group_space_symmetry_operations \n",nofc,nofd);exit(EXIT_FAILURE);}
      int i=0;
-     while(i<nofc&&fabs(irrepch[i+1]-ch[(int)pso[i+1]].real())<1e-4){++i;//printf("%4.2f ",irrepch[i]);
+     while(i<nofc&&fabs(irrepch[i+1]-ch[(int)pso[i+1]].real())<1e-3){++i;//printf("%8.6f=%8.6f ",irrepch[i],ch[(int)pso[i]].real());
       }
      //printf("\n");
      if(i==nofc)found=true;

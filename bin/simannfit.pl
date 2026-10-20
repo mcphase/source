@@ -58,8 +58,13 @@ unless ($#ARGV >0)
     -pt 3 ... use 3 parallel threads: create directories sim1 sim2 sim3 and
             copy calcsta and input files to these and run in parallel in these
             directories 3 instances of calcsta, collect results and use that with
-            the smallest sta to proceed with the algorithm. Delete directories 
-            sim1 ... sim3 at the end of simannfit (-pt not available on windows)
+            the smallest sta to proceed with the algorithm.  Delete directories 
+            sim1 ... sim3 at the end of simannfit and rund final calculation in
+            main directory. If you wish to update the main results directory with the 
+            best current sta in each successful step (for convenient
+            inspection) use a negative value of threads, e.g. -pt -3.
+            (option -pt not available on windows)
+                        
 
  ... LOGGING 
      -n 50  ... specifies that every 50 steps the parameters should be
@@ -229,7 +234,7 @@ if($tablestep!=0){ write_set(">>$s0file");}
 if($sta>0)
 {print "initial sta=$sta ... starting fit\n";
  $SIG{INT} = \&catch_zap;
-    if($pt>0){for($i=1;$i<=$pt;++$i){$sdir="./sim".$i;mkdir $sdir;
+    if(abs($pt)>0){for($i=1;$i<=abs($pt);++$i){$sdir="./sim".$i;mkdir $sdir;
                   if ($^O=~/MSWin/){mycopy("./calcsta.bat",$sdir."/calcsta.bat");}
                                else{mycopy("./calcsta",$sdir."/calcsta");}
                   push @sdirs, $sdir;
@@ -249,7 +254,7 @@ if($sta>0)
 
  # HERE WE SHOULD GENERATE $pt sets of new parameters and start sta_calc() in the corresponding 
  # directories ...
- for($pti=0;$pti<$pt||$pti==0;++$pti)
+ for($pti=0;$pti<abs($pt)||$pti==0;++$pti)
  {@par=@parsav;$dmin=0;
  while($dmin<$#par+1&&$stps<11.0)
  {$i=0;
@@ -334,11 +339,15 @@ while (scalar @children) {
 
          # evaluate sta from parallel calculations and take minimum value
        $sta=1e100;$pti=0;$stacurr="(";
-       foreach(@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;if(($pti+1)%3==0){$stacurr.="\n";}
-                       if($s<$sta){$sta=$s;$c2s=$chisquared;$s2s=$s2;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
+       foreach  (@sdirs){my ($s)=sta_read($_);$stacurr.=" ".$s;if(($pti+1)%3==0){$stacurr.="\n";}
+                       if($s<$sta){$sta=$s;$bestsdir=$_;$c2s=$chisquared;$s2s=$s2;@par=@{$ptpar[$pti]};write_modified_par_to_files(); }
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_ptset(">>$s0file",$s,$pti);}
                       ++$pti;
-                      }$stacurr.=")min-> ".$sta;
+                      }$stacurr.=")min-> ".$sta;if($pt<0){mycopy($bestsdir."/results/*","./results/");
+                                                          mycopy($bestsdir."/*","./");
+                                                          #system("rsync -u ".$bestsdir."/results/ ./results/");
+                                                          #system("rsync -u ".$bestsdir."/ ./");
+                                                         }
          }
    
    if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in $s1file - $probe other sets to be found, continuing ...\n";
@@ -408,7 +417,7 @@ while (scalar @children) {
    $staboundary=($stasave-log($rnd+1e-10)*$stattemp)*($staanz);
     sta_calc();
    ($sta)=sta_read(); # CALCULATE sta !!!!
-    if($pt>0){foreach (@sdirs){print "removing ".$_."\n";
+    if(abs($pt)>0){foreach (@sdirs){print "removing ".$_."\n";
                                     system ("rm -r ".$_."*");}
                  }
 
