@@ -110,8 +110,11 @@ unless ($#ARGV >=0)
 
  In order to create a latex output use script2html -latex.
 
- options: -fromline 3 ..........  only part of the file is html coded starting at line 3
+ options (have to be entered in the following sequence):
+          -fromline 3 ..........  only part of the file is html coded starting at line 3
           -toline   10 .........  only part of the file is html coded (until line 10)
+          -table    ............  create a html (or latex) table(s) from the input file(s)
+                                  (comments will be placed in the table caption)
 
  Many html commands such as <h1> HEADER </h1> can be used in
  script commments to structure the text. Latex formulas are accepted by enclosing it 
@@ -129,6 +132,7 @@ unless ($#ARGV >=0)
  REM <figure> <figcaption> This graph shows ... 
  REM </figcaption> <img src="figure.jpg"> </figure>
  REM <pre> Text to be formatted exactly as written,  verbatim in latex</pre>
+ REM <script2html file.txt>  to include some text file
  
 
  example:
@@ -402,6 +406,7 @@ EOF
 @ARGV=map{glob($_)}@ARGV;$i=0;$ii=0;
 @BB=@ARGV;while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
                      if($BB[0]=~/-toline/){shift @BB;shift @BB;}
+                     if($BB[0]=~/-table/){shift @BB;}
                      if(!defined $l){print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';}
                       shift @BB;
                     } 
@@ -411,6 +416,7 @@ while (@ARGV)
 {$linetext="";
  $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV;$ARGV[0]=~s/x/*/g; $fromline=eval $ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
  $toline=1e10;if($ARGV[0]=~/-toline/){shift @ARGV; $ARGV[0]=~s/x/*/g;$toline=eval $ARGV[0];shift @ARGV;$linetext=$linetext." up to line $toline";}
+ $table=0;if($ARGV[0]=~/-table/){$table=1;shift @ARGV;}
  $file=$ARGV[0];shift @ARGV; $i=$ii+1;$ii=$i;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    # get path from filename
@@ -430,7 +436,10 @@ while (@ARGV)
 # *****************************************************************************
 # Process lines 
 # *****************************************************************************
-
+# 1) for -table option
+  if($table==1){table_option();}
+   else {
+# 2) 
    while(($line=<Fin>)&&$lnr<$toline)
    {++$lnr;if($lnr>=$fromline){
     if ($line=~/^\s*#/||$line=~/^\s*[rR][eE][mM]/)
@@ -687,7 +696,7 @@ if($l) {if($line=~/\S/&&$verbatim==0){$verbatim=1;$line="\\begin\{spverbatim\} "
 close Fin; 
 if($verbatim==1){$verbatim=0;print "\\end\{spverbatim\}";}
        
-} 
+} }
 close Fout;
 if($l){
 
@@ -750,3 +759,23 @@ sub mycopy { my ($file1,$file2)=@_;
                               }
 
            }
+
+sub table_option {
+ my $theader=1;
+if($l){print "\\begin{table}\\caption{";}
+   while(($line=<Fin>)&&$lnr<$toline)
+ {++$lnr;if($lnr>=$fromline){
+ if ($line=~/^\s*#/||$line=~/^\s*[rR][eE][mM]/)
+  {if($theader==1){$line=~s/#//g;print $line;}
+  }
+  else
+  {@cols=split(" ",$line);
+   if($theader==1){if($l){print "}\n\\begin{tabular}{*{50}{l}}\n";}else{print "<table>\n" ;}}
+   $theader=0;
+   if($l){print join(" & ",@cols)."\\\\ \n";}
+   else {print "<tr><td>".join( "</td> <td>",@cols)."</td></tr>\n"; }
+
+    }
+ }}
+if($l){print "\\end{tabular}\\end{table}";}else{print "</table>\n" ;}
+}
