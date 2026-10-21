@@ -147,7 +147,7 @@ if($ARGV[0]=~/-latex/){$l="-latex";shift @ARGV;}
 if($l){print STDERR "#* Latex Output *\n";}else{print STDERR "#* Html Output *\n";}
  $date=localtime( time);$dir=getcwd;
 
-if($l){$dir=~s/_/\\_/g;@DD=@ARGV;foreach(@DD){$_=~s/_/\\_/g;}
+if($l){$dir=~s/_/\\_/g;@DD=[@ARGV];foreach(@DD){$_=~s/_/\\_/g;}
 open (Fout, ">spverbatim.sty");
 print Fout << "EOF";
 %%
@@ -404,7 +404,7 @@ body { font-family:'Times',monospace;font-style=italic; }
 EOF
 }
 @ARGV=map{glob($_)}@ARGV;$i=0;$ii=0;
-@BB=@ARGV;while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
+@BB=[@ARGV];while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
                      if($BB[0]=~/-toline/){shift @BB;shift @BB;}
                      if($BB[0]=~/-table/){shift @BB;}
                      if(!defined $l){print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';}
@@ -493,8 +493,10 @@ while (@ARGV)
           foreach(@arg){$a=$_;
                         next if($a=~/-fromline/);
                         next if($a=~/-toline/);
+                        next if($a=~/-table/);
                         next if($aa=~/-fromline/);
                         next if($aa=~/-toline/);
+                        next if($aa=~/-table/);
                         # put directory name in front of filenames
                         $_=$dir."/".$_;
                        } continue {
@@ -517,7 +519,7 @@ while (@ARGV)
                                  else
                                  {$line1=~s/\<hr\>Source File\s*/\<hr\>Source File $ii\./;}
                                  print $line1;}}
-        close Fin1;unlink($arg[$#arg].".htm");
+        close Fin1; unlink($arg[$#arg].".htm");
                                  if($l){print "\\subsection*{continuing Source File $i $linetext $file}\n";}
                                   else {print '<hr>Continuing Source File '.$i.' '.$linetext.':<h1>'.$file.'</h1>';print "\n";} 
                                     }
@@ -595,31 +597,10 @@ while (@ARGV)
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
         }
        if($l)
-       { 
+       {
 # *****************************************************************************
  #unless we are in an equation treat _ & ^ | < > # $ symbols
-# ...  first remove all normal brackets except \( \) \[ \]
-$line=~s/(?<!\\)\[/myleftrectangularbracket/g;
-$line=~s/(?<!\\)\]/myrightrectangularbracket/g;
-$line=~s/(?<!\\)\(/myleftangularbracket/g;
-$line=~s/(?<!\\)\)/myrightangularbracket/g;
-             # substitute underscore with \_ for latex - use lookahead to exclude being between () []
-             #  brackets \( \) or \[ \]  math mode of latex
-             $line=~s/_(?![^\[\]\(\)]*\\[\]\)])/\\_/g; # s/_/\\_/g;
-             # substitute & with \& for latex
-             $line=~s/\&(?![^\[\]\(\)]*\\[\]\)])/\\\&/g; # ~s/\&/\\\&/g;
-             # substitute ^ with \^ for latex
-             $line=~s/\^(?![^\[\]\(\)]*\\[\]\)])/\\\^/g; # ~s/\^/\\\^/g;
-             # substitute | with $|$ for latex
-             $line=~s/\|(?![^\[\]\(\)]*\\[\]\)])/\$\|\$/g; # ~s/\|/\$\|\$/g;
-             # substitute <> with $<$ $>$ for latex
-             $line=~s/>(?![^\[\]\(\)]*\\[\]\)])/\$\>\$ /g;
-             $line=~s/<(?![^\[\]\(\)]*\\[\]\)])/\$\<\$ /g;
-$line=~s/myleftrectangularbracket/\[/g; # substitute back all brackets
-$line=~s/myrightrectangularbracket/\]/g;
-$line=~s/myleftangularbracket/\(/g;
-$line=~s/myrightangularbracket/\)/g;
-
+ treat_latex_special_symbols();
 $line=~s/mytablespacer/&/g;
 
            #do substitution to get in latex an equation\( \) \[ \] should become $ and begin equation ...
@@ -764,12 +745,13 @@ sub table_option {
  my $theader=1;
 if($l){print "\\begin{table}\\caption{";}
    while(($line=<Fin>)&&$lnr<$toline)
- {++$lnr;if($lnr>=$fromline){
+ {++$lnr;if($lnr>=$fromline){if($l){treat_latex_special_symbols();}
  if ($line=~/^\s*#/||$line=~/^\s*[rR][eE][mM]/)
   {if($theader==1){$line=~s/#//g;print $line;}
   }
   else
-  {@cols=split(" ",$line);
+  {
+   @cols=split(" ",$line);
    if($theader==1){if($l){print "}\n\\begin{tabular}{*{50}{l}}\n";}else{print "<table>\n" ;}}
    $theader=0;
    if($l){print join(" & ",@cols)."\\\\ \n";}
@@ -777,5 +759,31 @@ if($l){print "\\begin{table}\\caption{";}
 
     }
  }}
-if($l){print "\\end{tabular}\\end{table}";}else{print "</table>\n" ;}
+if($l){print "\\end{tabular}\\end{table}\n";}else{print "</table>\n" ;}
+}
+
+sub treat_latex_special_symbols()
+{# *****************************************************************************
+ #unless we are in an equation treat _ & ^ | < > # $ symbols
+# ...  first remove all normal brackets except \( \) \[ \]
+$line=~s/(?<!\\)\[/myleftrectangularbracket/g;
+$line=~s/(?<!\\)\]/myrightrectangularbracket/g;
+$line=~s/(?<!\\)\(/myleftangularbracket/g;
+$line=~s/(?<!\\)\)/myrightangularbracket/g;
+             # substitute underscore with \_ for latex - use lookahead to exclude being between () []
+             #  brackets \( \) or \[ \]  math mode of latex
+             $line=~s/_(?![^\[\]\(\)]*\\[\]\)])/\\_/g; # s/_/\\_/g;
+             # substitute & with \& for latex
+             $line=~s/\&(?![^\[\]\(\)]*\\[\]\)])/\\\&/g; # ~s/\&/\\\&/g;
+             # substitute ^ with \^ for latex
+             $line=~s/\^(?![^\[\]\(\)]*\\[\]\)])/\\\^/g; # ~s/\^/\\\^/g;
+             # substitute | with $|$ for latex
+             $line=~s/\|(?![^\[\]\(\)]*\\[\]\)])/\$\|\$/g; # ~s/\|/\$\|\$/g;
+             # substitute <> with $<$ $>$ for latex
+             $line=~s/>(?![^\[\]\(\)]*\\[\]\)])/\$\>\$ /g;
+             $line=~s/<(?![^\[\]\(\)]*\\[\]\)])/\$\<\$ /g;
+$line=~s/myleftrectangularbracket/\[/g; # substitute back all brackets
+$line=~s/myrightrectangularbracket/\]/g;
+$line=~s/myleftangularbracket/\(/g;
+$line=~s/myrightangularbracket/\)/g;
 }
