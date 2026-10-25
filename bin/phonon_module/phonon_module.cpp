@@ -106,12 +106,12 @@ bool phonon_module::Icalc(Vector &u0, double & T, Vector &  Fxc,Vector & Hext,do
 
 Vector F(1,3);
 // electric field E in kV/mm=MV/m
-// F [meV] is term -F.u in harmonic osciallator with dimensionless u=x/a0
-// i.e. Felectric=charge x E x a0 
-double a0=0.5219e-10; // Bohr radius in meter
-F(1)=Fxc(1)+Hext(4)*charge*a0*1e9; // factor 1e9 to convert MeV to meV 
-F(2)=Fxc(2)+Hext(5)*charge*a0*1e9;
-F(3)=Fxc(3)+Hext(6)*charge*a0*1e9;
+// F [meV] is term -F.u in harmonic oscillator with dimensionless u=x/A0
+// i.e. Felectric=charge x E x A0 
+// A0 ...Bohr radius in meter
+F(1)=Fxc(1)+Hext(4)*charge*A0*1e9; // factor 1e9 to convert MeV to meV 
+F(2)=Fxc(2)+Hext(5)*charge*A0*1e9;
+F(3)=Fxc(3)+Hext(6)*charge*A0*1e9;
 
  if(MODPAR.Hi()<9)
    {fprintf(stderr,"Error loadable module phonon.so:  MODPAR1 .. MODPAR9 all have to be set in sipf file\n");
@@ -155,13 +155,13 @@ K*=factor;
 Omega/=factor; 
 // hbar=1.054572e-34 Js=6582e-16meVs
 // 1meV=1.6022e-22 J
-// Omegai=m a0^2 (Deltai/hbar)^2
+// Omegai=m A0^2 (Deltai/hbar)^2
 // 
 double Delta1,Delta2,Delta3,KBT,X,Y,Z;
 
-Delta1=sqrt(-Omega(1)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
-Delta2=sqrt(-Omega(2)*1.6022e-22/m/a0/a0)*6582e-16;
-Delta3=sqrt(-Omega(3)*1.6022e-22/m/a0/a0)*6582e-16;
+Delta1=sqrt(-Omega(1)*MEV2J/m/A0/A0)*HBAR; // phonon einstein frequencies (meV) 
+Delta2=sqrt(-Omega(2)*MEV2J/m/A0/A0)*HBAR;
+Delta3=sqrt(-Omega(3)*MEV2J/m/A0/A0)*HBAR;
 //printf("Icalc phonon Om= %g %g %g\n",Omega[1],Omega[2],Omega[3]);
 //printf("Icalc phonon Delta= %g %g %g\n",Delta1,Delta2,Delta3);
 if(isnan((Delta1))){fprintf (stderr, "phonon: Delta1=nan Omega(1)=%g m=%g\n",Omega(1),m);exit (EXIT_FAILURE);}
@@ -267,7 +267,7 @@ bool phonon_module::pcalc(Vector & u0,double & T, Vector &Fxc, Vector & Hext,dou
 {double lnZ,U;
 
  Icalc(u0,T,Fxc,Hext,g_J,MODPAR,sipffilename,lnZ,U);
- double a0=0.5219; // Bohr radius in A
+ double a0=A0*1e10; // Bohr radius in A
  u0*=a0;
  return true;
 }
@@ -278,7 +278,7 @@ bool phonon_module::pcalc(Vector & u0,double & T, Vector &Fxc, Vector & Hext,dou
 bool phonon_module::pelcalc(Vector & pel,double & T, Vector &Fxc, Vector & Hext,double & g_J, Vector & MODPAR,char * sipffilename) 
 {double lnZ,U;
  Icalc(pel,T,Fxc,Hext,g_J,MODPAR,sipffilename,lnZ,U);
- double a0=52.19; // Bohr radius in pm ( A=0.1nm=100pm)
+ double a0=A0*1e12; // Bohr radius in pm ( A=0.1nm=100pm)
  pel*=a0*charge;
  return true;
 }
@@ -321,8 +321,7 @@ int pr;
    {fprintf(stderr,"Error loadable module phonon.so:  MODPAR1 .. MODPAR9 all have to be set in sipf file\n");
     exit(EXIT_FAILURE);}
 
- double m=MODPAR[1]*1.660539e-27; // mass of einstein oscillator in kg
- double a0=0.5219e-10; // Bohr radius in meter
+ double m=MODPAR[1]*M0; // mass of einstein oscillator in kg
  Matrix K(1,3,1,3);K=0;
  //Matric Sr(1,3,1,3),Si(1,3,1,3);
  Vector Omega(1,3);
@@ -338,20 +337,20 @@ EigenSystemSymmetric (K,Omega,sort,maxiter);
 //printf("du1calc phonon Om= %g %g %g\n",Omega[1],Omega[2],Omega[3]);
 
  
-// hbar=1.054572e-34 Js=6582e-16meVs
-double hbar=6582e-16;
-// 1meV=1.6022e-22 J
-double mev2J=1.6022e-22;
-// Omegai=m a0^2 (Deltai/hbar)^2
-// 
-delta=sqrt(-Omega(tn)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
+// hbar=1.054572e-34 Js=6582.119569e-16meVs
 
+// 1meV= 1.6021766339999e-22 J
+//double mev2J= 1.6021766339999e-22;
+// Omegai=m A0^2 (Deltai/hbar)^2
+// 
+delta=sqrt(-Omega(tn)* MEV2J/m/A0/A0)*HBAR+SMALLENERGYOFFSET_PHONON; // phonon einstein frequencies (meV) 
+                   // MR 24.10.2026 added SMALLENERGYOFFSET_PHONON meV in order to prevent negative definite matrix Ac
 u1=0;
 for(int i=1;i<=3;++i)
 {//u1(i)=complex <double> (Sr(i,tn),Si(i,tn));
 u1(i)=complex <double> (K(i,tn),0.0);
 }
-u1*=sqrt(mev2J*hbar*hbar/2/m/a0/a0/delta); // multiply by factor and convert into [1] units (u: unit is 1)
+u1*=sqrt(MEV2J*HBAR*HBAR/2/m/A0/A0/delta); // multiply by factor and convert into [1] units (u: unit is 1)
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
 
 // phonon function has 3 effective transitions
@@ -366,7 +365,7 @@ int phonon_module::dP1(int & tn,double & T,Vector & Fxc, Vector & Hext,
                        ComplexVector & P1,float & maxE,ComplexMatrix & est)
 {int n,nd;
  int noft=du1calc(tn,T,Fxc,Hext,g_J,MODPAR,sipffilename,P1,maxE,n,nd,est);
- double a0=0.5219; // Bohr radius in A
+ double a0=A0*1e10; // Bohr radius in A
  P1*=a0;
  return noft;
 }
@@ -379,7 +378,7 @@ int phonon_module::dpel1(int & tn,double & T,Vector & Fxc, Vector & Hext,
                        ComplexVector & pel1,float & maxE,ComplexMatrix & est)
 {int n,nd;
  int noft=du1calc(tn,T,Fxc,Hext,g_J,MODPAR,sipffilename,pel1,maxE,n,nd,est);
- double a0=52.19; // Bohr radius in pm ( A=0.1nm=100pm)
+ double a0=A0*1e12; // Bohr radius in pm ( A=0.1nm=100pm)
  // calculate from position in units of a0 the polarisation in |e|A
  pel1*=a0*charge;
  return noft;

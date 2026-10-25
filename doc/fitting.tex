@@ -295,6 +295,15 @@ $d>N $(=number of parameters)
 \begin{description}\item[-s0 filename] instead of results/simannfit.n use filename to store/read 
 \item[-s1 filename] instead of results/simannfit.p use filename to store/read 
 \item[-i 23] for storing in results/simannfit.* use index .23 instead of .0 as suffix 
+\item[-pt 3] use 3 parallel threads: create directories sim1 sim2 sim3 and
+            copy calcsta and input files to these and run in parallel in these
+            directories 3 instances of calcsta, collect results and use that with
+            the smallest sta to proceed with the algorithm.  Delete directories 
+            sim1 ... sim3 at the end of simannfit and rund final calculation in
+            main directory. If you wish to update the main results directory with the 
+            best current sta in each successful step (for convenient
+            inspection) use a negative value of threads, e.g. -pt -3.
+            (option -pt not available on windows)
 \end{description}
 \item LOGGING 
 \begin{description}
@@ -325,6 +334,22 @@ directory where {\prg simannfit\index{simannfit}} is started from.
 The program generates for each parameter a histogram file showing the number of occurrences
 of a certain parameter value in solutions, where sta decreased.
 
+\subsubsection{Examples}
+
+\begin{itemize}
+\item    to fit exchange parameters as specified in mcphas.j.forfit (running mcphasit in calcsta)
+  
+simannfit 10 mcphas.j     
+
+\item    to probe parameter space using option -p10 -n1
+
+ {\prg simannfit 100  -p 10 -n 1  mcphas.j}
+
+\item     to do the same with parallel processing using option -pt 10 (specifying all input files)
+  
+ {\prg simannfit 100 -pt 10  -p 10 -n 1  calcsta mcphas.j sf.r mcphas.ini test\_mcphas.htp TbPO4\_mF.cif reduce\_unitcell.ini bvk\_springs.dat fit/mcphas.fum}
+
+\end{itemize}
 \subsection{Stopping a fit/parameter space search}
 
 The fitting procedure should be stopped by changing the program {\prg calcsta}, so that it

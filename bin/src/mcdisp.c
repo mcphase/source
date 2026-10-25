@@ -1946,13 +1946,15 @@ for (i=1;i<=argc-1;++i){
               	       else{strcpy(mffile,argv[i]);}
                           
    } // for i in args
+if(errexit==1){inimcdis ini; 
+               ini.helpexit();}
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
  
 
   inimdpars inip("mcdisp.par",prefix,mffile,do_jqfile,include_cd,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms,do_verbose); 
   //ini.load("mcdisp.par",mffile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
-  if(errexit==1)(*inip.inis[0]).helpexit();
+  
 // loop for different prefixes ...
    for(int ninis=0;ninis<inip.nofinis;++ninis)
 {inimcdis ini((*inip.inis[ninis]));

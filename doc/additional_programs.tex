@@ -1793,8 +1793,11 @@ just the text
 
 In order to create a latex output use script2html -latex.
 
- options: -fromline 3 ..........  only part of the file is html coded starting at line 3
+ option (have to be entered in the following sequence):
+          -fromline 3 ..........  only part of the file is html coded starting at line 3
           -toline   10 .........  only part of the file is html coded (until line 10)
+          -table    ............  create a html (or latex) table(s) from the input file(s)
+                                  (comments will be placed in the table caption)
 
  Many html commands such as <h1> HEADER </h1> can be used in
  script commments to structure the text. Latex formulas are accepted by enclosing it 

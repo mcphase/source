@@ -147,7 +147,7 @@ if($ARGV[0]=~/-latex/){$l="-latex";shift @ARGV;}
 if($l){print STDERR "#* Latex Output *\n";}else{print STDERR "#* Html Output *\n";}
  $date=localtime( time);$dir=getcwd;
 
-if($l){$dir=~s/_/\\_/g;@DD=[@ARGV];foreach(@DD){$_=~s/_/\\_/g;}
+if($l){$dir=~s/_/\\_/g;@DD=@{ARGV};foreach(@DD){$_=~s/_/\\_/g;}
 open (Fout, ">spverbatim.sty");
 print Fout << "EOF";
 %%
@@ -404,7 +404,7 @@ body { font-family:'Times',monospace;font-style=italic; }
 EOF
 }
 @ARGV=map{glob($_)}@ARGV;$i=0;$ii=0;
-@BB=[@ARGV];while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
+@BB=@{ARGV};while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
                      if($BB[0]=~/-toline/){shift @BB;shift @BB;}
                      if($BB[0]=~/-table/){shift @BB;}
                      if(!defined $l){print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';}

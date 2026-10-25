@@ -404,7 +404,15 @@ scale\_view\_1,
 scale\_view\_2, scale\_view\_3},  
 {\prg spins\_wave\_amplitude, spins\_show\_ellipses, spins\_show\_direction\_of\_static\_moment}.
 {\prg show\_abc\_unitcell, show\_primitive\_crystal\_unitcell, show\_magnetic\_unitcell, show\_atoms, %%@
- show\_density}...
+ show\_density}, {\prg lines}...
+To preset these parameters, create the file {\prg results/graphic\_parameters.set}, for example
+it could look like
+\begin{verbatim}
+#
+phonon_wave_amplitude=200
+# draw lines between atoms 5-8 and 5-10 and 5-11 and 8-10 ...
+lines= 5 8 5 10 5 11 8 10 8 11 10 11   6 7 6 9 6 12 7 9 7 12 9 12
+\end{verbatim}
 
 Technical information: the program {\prg display\_densities}\index{display\_densities} 
 is actually a script which

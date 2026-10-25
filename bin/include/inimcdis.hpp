@@ -71,6 +71,7 @@ int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char 
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var,parser & ob);
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int  m);
 
+  inimcdis();
   inimcdis(const char * file,char * prefix,char * mffile,
              int & do_jqfile,bool inc_cd,Vector & abc,
              int & nofcomponents,int & nofatoms);

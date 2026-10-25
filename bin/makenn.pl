@@ -16,6 +16,14 @@ print "#********************************************************\n";
 $PI=3.14159265358979323846;
  $bvkA=25;
  $bvkalpha=1/9; # changed in mcphase 6.0 - because 3*3=9 ... i.e. easier to publish than sqrt(10) ...
+ $a0 = 5.29177210903e-11;#(m)
+ $a0A=1e10*$a0; # (A)
+ $J2meV=1/1.6021766339999e-22; #1 millielectron volt = 1.6021766339999e-22 joules
+ $a02J2meV=$a0*$a0*$J2meV;
+   # convert N/m in  meV/A^2: Nm=Joule  m=10^10A meV=1.6021766339999. 10-22 joules
+   # 1 N/m= 1 J/m^2 = meV /1.6021766339999e-2 A 
+   $NpmtomeVpA=1e20*$J2meV ;
+
  $SMALLdabc=0.00001; # small difference in da , db or dc ...
  $SMALLdr=0.00001; # small difference in distance so that program believes when
                 #  comparing table values that this is the same bond
@@ -1106,9 +1114,7 @@ sub getinteraction {
  if($bvk==1)
  { # here do the Born von Karman calculation using spring constants
    # $long_spring and $trans_spring are the spring constants in N/m
-  $a0 = .5292e-10;#(m)
-  $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 . 10-22 joules
-  $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
+   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
   for($n=1;$n<=$nof_springs;++$n){$a1=$atom_m[$n];$a2=$atom_n[$n];
          if(abs($r-$bondlength[$n])<$SMALLdr
             &&(($sipffilethis=~/(results\/)?$a2/&&$sipffile=~/(results\/)?$a1/)
@@ -1116,8 +1122,8 @@ sub getinteraction {
               )
             )
              {# bond found - do something
-  $kL=$long_spring[$n]*$a0*$a0*$J2meV; 
-  $kT=$trans_spring[$n]*$a0*$a0*$J2meV; 
+  $kL=$long_spring[$n]* $a02J2meV;
+  $kT=$trans_spring[$n]*$a02J2meV; 
   $Kxx= -(( $kL-$kT)* $rx * $rx + $kT* $r *$r)  /$r /$r;$jaa-=$Kxx;
   $Kyy= -(( $kL-$kT)* $ry * $ry + $kT* $r *$r)  /$r /$r;$jbb-=$Kyy;
   $Kzz= -(( $kL-$kT)* $rz * $rz + $kT* $r *$r)  /$r /$r;$jcc-=$Kzz;
@@ -1131,86 +1137,89 @@ sub getinteraction {
    addK($sipffilethis);
    addK($sipffile);
    # increase elastic constant $cel according to this bond
-   # convert N/m in  meV/A^2: Nm=Joule  m=10^10A meV=1.60217646 . 10-22 joules
-   # 1 N/m= 1 J/m^2 = meV /1.60217646e-2 A 
-   $cL=$long_spring[$n]/1.60217646e-2;
-   $cT=$trans_spring[$n]/1.60217646e-2;
+   $cL=$long_spring[$n]*$NpmtomeVpA;
+   $cT=$trans_spring[$n]*$NpmtomeVpA;
+   $cLmcT=$cL-$cT;
+   $rx2=$rx*$rx;
+   $ry2=$ry*$ry;
+   $rz2=$rz*$rz;
+   $r2=$r*$r;
 # factor of 0.5 inserted, because each bond is called twice
 # here when running makenn
-   $Cel->slice('1,1')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$rx/$r/$r+$cT*$rx*$rx);
-   $Cel->slice('2,2')+=0.5*(($cL-$cT)*$ry*$ry*$ry*$ry/$r/$r+$cT*$ry*$ry);
-   $Cel->slice('3,3')+=0.5*(($cL-$cT)*$rz*$rz*$rz*$rz/$r/$r+$cT*$rz*$rz);
-   $Cel->slice('4,4')+=0.5*(($cL-$cT)*$ry*$rz*$ry*$rz/$r/$r+0.25*$cT*($ry*$ry+$rz*$rz));
-   $Cel->slice('5,5')+=0.5*(($cL-$cT)*$rx*$rz*$rx*$rz/$r/$r+0.25*$cT*($rx*$rx+$rz*$rz));
-   $Cel->slice('6,6')+=0.5*(($cL-$cT)*$rx*$ry*$rx*$ry/$r/$r+0.25*$cT*($ry*$ry+$rx*$rx));
+   $Cel->slice('1,1')+=0.5*($cLmcT*$rx2*$rx2/$r2+$cT*$rx2);
+   $Cel->slice('2,2')+=0.5*($cLmcT*$ry2*$ry2/$r2+$cT*$ry2);
+   $Cel->slice('3,3')+=0.5*($cLmcT*$rz2*$rz2/$r2+$cT*$rz2);
+   $Cel->slice('4,4')+=0.5*($cLmcT*$ry2*$rz2/$r2+0.25*$cT*($ry2+$rz2));
+   $Cel->slice('5,5')+=0.5*($cLmcT*$rx2*$rz2/$r2+0.25*$cT*($rx2+$rz2));
+   $Cel->slice('6,6')+=0.5*($cLmcT*$rx2*$ry2/$r2+0.25*$cT*($ry2+$rx2));
 
-   $Cel->slice('1,2')+=0.5*(($cL-$cT)*$rx*$rx*$ry*$ry/$r/$r);
+   $Cel->slice('1,2')+=0.5*($cLmcT*$rx2*$ry2/$r2);
 
-   $Cel->slice('1,3')+=0.5*(($cL-$cT)*$rx*$rx*$rz*$rz/$r/$r);
-   $Cel->slice('2,3')+=0.5*(($cL-$cT)*$ry*$ry*$rz*$rz/$r/$r);
+   $Cel->slice('1,3')+=0.5*($cLmcT*$rx2*$rz2/$r2);
+   $Cel->slice('2,3')+=0.5*($cLmcT*$ry2*$rz2/$r2);
 
-   $Cel->slice('1,4')+=0.5*(($cL-$cT)*$rx*$rx*$ry*$rz/$r/$r);
-   $Cel->slice('2,5')+=0.5*(($cL-$cT)*$ry*$ry*$rx*$rz/$r/$r);
-   $Cel->slice('3,6')+=0.5*(($cL-$cT)*$rz*$rz*$rx*$ry/$r/$r);
+   $Cel->slice('1,4')+=0.5*($cLmcT*$rx2*$ry*$rz/$r2);
+   $Cel->slice('2,5')+=0.5*($cLmcT*$ry2*$rx*$rz/$r2);
+   $Cel->slice('3,6')+=0.5*($cLmcT*$rz2*$rx*$ry/$r2);
    
-   $Cel->slice('1,5')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$rz/$r/$r+0.5*$cT*$rx*$rz);
-   $Cel->slice('1,6')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$ry/$r/$r+0.5*$cT*$rx*$ry);
+   $Cel->slice('1,5')+=0.5*($cLmcT*$rx2*$rx*$rz/$r2+0.5*$cT*$rx*$rz);
+   $Cel->slice('1,6')+=0.5*($cLmcT*$rx2*$rx*$ry/$r2+0.5*$cT*$rx*$ry);
 
-   $Cel->slice('2,4')+=0.5*(($cL-$cT)*$ry*$ry*$ry*$rz/$r/$r+0.5*$cT*$ry*$rz);
-   $Cel->slice('2,6')+=0.5*(($cL-$cT)*$ry*$ry*$rx*$ry/$r/$r+0.5*$cT*$ry*$rx);
+   $Cel->slice('2,4')+=0.5*($cLmcT*$ry2*$ry*$rz/$r2+0.5*$cT*$ry*$rz);
+   $Cel->slice('2,6')+=0.5*($cLmcT*$ry2*$rx*$ry/$r2+0.5*$cT*$ry*$rx);
 
-   $Cel->slice('3,4')+=0.5*(($cL-$cT)*$rz*$rz*$ry*$rz/$r/$r+0.5*$cT*$rz*$ry);
-   $Cel->slice('3,5')+=0.5*(($cL-$cT)*$rz*$rz*$rx*$rz/$r/$r+0.5*$cT*$rz*$rx);
+   $Cel->slice('3,4')+=0.5*($cLmcT*$rz2*$ry*$rz/$r2+0.5*$cT*$rz*$ry);
+   $Cel->slice('3,5')+=0.5*($cLmcT*$rz2*$rx*$rz/$r2+0.5*$cT*$rz*$rx);
 
-   $Cel->slice('4,5')+=0.5*(($cL-$cT)*$ry*$rz*$rx*$rz/$r/$r+0.25*$cT*$rx*$ry);
-   $Cel->slice('4,6')+=0.5*(($cL-$cT)*$ry*$rz*$rx*$ry/$r/$r+0.25*$cT*$rx*$rz);
-   $Cel->slice('5,6')+=0.5*(($cL-$cT)*$rx*$rz*$rx*$ry/$r/$r+0.25*$cT*$rz*$ry);
+   $Cel->slice('4,5')+=0.5*($cLmcT*$ry*$rx*$rz2/$r2+0.25*$cT*$rx*$ry);
+   $Cel->slice('4,6')+=0.5*($cLmcT*$rz*$rx*$ry2/$r2+0.25*$cT*$rx*$rz);
+   $Cel->slice('5,6')+=0.5*($cLmcT*$rz*$rx2*$ry/$r2+0.25*$cT*$rz*$ry);
              
  # now deal with the mixing term phonon-strain interaction constants Gmix
  # units should be meV (because in the phonon module the interaction operators 
- # I1=P1/a0 I2=P2/a0 I3=P3/a0 with a0=.5292e-10m=0.5292A
+ # I1=P1/a0 I2=P2/a0 I3=P3/a0 with a0=5.29177210903e-11m=0.529177210903A
  # $cL and $cT above have units mev/A^2, i.e. we add a factor of 0.5292
-   $cL=$long_spring[$n]*0.5292/1.60217646e-2;
-   $cT=$trans_spring[$n]*0.5292/1.60217646e-2;
+   $cL=$long_spring[$n]*$a0A*$NpmtomeVpA;
+   $cT=$trans_spring[$n]*$a0A*$NpmtomeVpA;
    # Voigt notation in first slot Gmix(11)1 
-   $Gmix->slice('1,1')+=0.5*(-2*($cL-$cT)*$rx*$rx*$rx/$r/$r-$cT*($rx+$rx));
+   $Gmix->slice('1,1')+=0.5*(-2*$cLmcT*$rx2*$rx/$r2-$cT*($rx+$rx));
    # Gmix(11)2
-   $Gmix->slice('1,2')+=0.5*(-2*($cL-$cT)*$rx*$rx*$ry/$r/$r);
+   $Gmix->slice('1,2')+=0.5*(-2*$cLmcT*$rx2*$ry/$r2);
    # Gmix(11)3
-   $Gmix->slice('1,3')+=0.5*(-2*($cL-$cT)*$rx*$rx*$rz/$r/$r);
+   $Gmix->slice('1,3')+=0.5*(-2*$cLmcT*$rx2*$rz/$r2);
    # Gmix(22)1
-   $Gmix->slice('2,1')+=0.5*(-2*($cL-$cT)*$ry*$ry*$rx/$r/$r);
+   $Gmix->slice('2,1')+=0.5*(-2*$cLmcT*$ry2*$rx/$r2);
    # Gmix(22)2
-   $Gmix->slice('2,2')+=0.5*(-2*($cL-$cT)*$ry*$ry*$ry/$r/$r-$cT*($ry+$ry));
+   $Gmix->slice('2,2')+=0.5*(-2*$cLmcT*$ry2*$ry/$r2-$cT*($ry+$ry));
    # Gmix(22)3
-   $Gmix->slice('2,3')+=0.5*(-2*($cL-$cT)*$ry*$ry*$rz/$r/$r);
+   $Gmix->slice('2,3')+=0.5*(-2*$cLmcT*$ry2*$rz/$r2);
    # Gmix(33)1
-   $Gmix->slice('3,1')+=0.5*(-2*($cL-$cT)*$rz*$rz*$rx/$r/$r);
+   $Gmix->slice('3,1')+=0.5*(-2*$cLmcT*$rz2*$rx/$r2);
    # Gmix(33)2
-   $Gmix->slice('3,2')+=0.5*(-2*($cL-$cT)*$rz*$rz*$ry/$r/$r);
+   $Gmix->slice('3,2')+=0.5*(-2*$cLmcT*$rz2*$ry/$r2);
    # Gmix(33)3
-   $Gmix->slice('3,3')+=0.5*(-2*($cL-$cT)*$rz*$rz*$rz/$r/$r-$cT*($rz+$rz));
+   $Gmix->slice('3,3')+=0.5*(-2*$cLmcT*$rz2*$rz/$r2-$cT*($rz+$rz));
 
    # Gmix(23)1
-   $Gmix->slice('4,1')+=0.5*(-2*($cL-$cT)*$ry*$rz*$rx/$r/$r);
+   $Gmix->slice('4,1')+=0.5*(-2*$cLmcT*$ry*$rz*$rx/$r2);
    # Gmix(23)2
-   $Gmix->slice('4,2')+=0.5*(-2*($cL-$cT)*$ry*$rz*$ry/$r/$r-$cT*$rz);
+   $Gmix->slice('4,2')+=0.5*(-2*$cLmcT*$ry*$rz*$ry/$r2-$cT*$rz);
    # Gmix(23)3
-   $Gmix->slice('4,3')+=0.5*(-2*($cL-$cT)*$ry*$rz*$rz/$r/$r-$cT*$ry);
+   $Gmix->slice('4,3')+=0.5*(-2*$cLmcT*$ry*$rz2/$r2-$cT*$ry);
 
    # Gmix(13)1
-   $Gmix->slice('5,1')+=0.5*(-2*($cL-$cT)*$rx*$rz*$rx/$r/$r-$cT*$rz);
+   $Gmix->slice('5,1')+=0.5*(-2*$cLmcT*$rx*$rz*$rx/$r2-$cT*$rz);
    # Gmix(13)2
-   $Gmix->slice('5,2')+=0.5*(-2*($cL-$cT)*$rx*$rz*$ry/$r/$r);
+   $Gmix->slice('5,2')+=0.5*(-2*$cLmcT*$rx*$rz*$ry/$r2);
    # Gmix(13)3
-   $Gmix->slice('5,3')+=0.5*(-2*($cL-$cT)*$rx*$rz*$rz/$r/$r-$cT*$rx);
+   $Gmix->slice('5,3')+=0.5*(-2*$cLmcT*$rx*$rz2/$r2-$cT*$rx);
 
    # Gmix(12)1
-   $Gmix->slice('6,1')+=0.5*(-2*($cL-$cT)*$rx*$ry*$rx/$r/$r-$cT*$ry);
+   $Gmix->slice('6,1')+=0.5*(-2*$cLmcT*$rx*$ry*$rx/$r2-$cT*$ry);
    # Gmix(12)2
-   $Gmix->slice('6,2')+=0.5*(-2*($cL-$cT)*$rx*$ry*$ry/$r/$r-$cT*$rx);
+   $Gmix->slice('6,2')+=0.5*(-2*$cLmcT*$rx*$ry2/$r2-$cT*$rx);
    # Gmix(12)3
-   $Gmix->slice('6,3')+=0.5*(-2*($cL-$cT)*$rx*$ry*$rz/$r/$r);
+   $Gmix->slice('6,3')+=0.5*(-2*$cLmcT*$rx*$ry*$rz/$r2);
      }
                                }
    $jba=$jab;   $jcb=$jbc;   $jca=$jac;

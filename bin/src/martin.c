@@ -264,8 +264,8 @@ void rtrim(char str[]) {
 int extract(char * instr,const char * parameter,double & var,parser & ob)
 { //const char delimiters[] = " =:\n";
   char *token,*td,*te;
-  char expression[MAXNOFCHARSINLINE];
-  char ptrim[MAXNOFCHARSINLINE];
+  char expression[MAXNOFCHARINLINE];
+  char ptrim[MAXNOFCHARINLINE];
 // check if line is comment line -> if yes return 1
 if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1; //removed 26.5.02 in order to be able to place parameters in comment lines
                                  // inserted again 27.8.09 to be able to have real comment lines ignored
@@ -289,9 +289,9 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
 
   if (strstr(token,"=")!=token) return extract(token++,parameter,var,ob); // there are other characters than tab or spaces between parameter and =
   ++token;
-  snprintf(ptrim,MAXNOFCHARSINLINE,"%s",parameter);
+  snprintf(ptrim,MAXNOFCHARINLINE,"%s",parameter);
   rtrim(ptrim);
-  snprintf(expression,MAXNOFCHARSINLINE,"%s=%s",ptrim,token);
+  snprintf(expression,MAXNOFCHARINLINE,"%s=%s",ptrim,token);
 
 
 //  var = strtod (token, NULL);

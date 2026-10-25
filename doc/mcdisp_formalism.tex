@@ -968,7 +968,7 @@ for different $t$ in $s=(ijklt)$
 (refering to different single ion transitions at the same ion $ijkl$)
  are summed up.
 
-I order to visualize a charge density the eigenvector $e^s_{r\alpha}$
+In order to visualize a charge density the eigenvector $e^s_{r\alpha}$
  indices $\alpha= 1,...,28$ refer to observables given by equation
 (\ref{chargedensity_coefficients}) with $l$ even, which are used
 to calculate the chargedensity according to equation (\ref{chargedensity_operator2})
@@ -981,7 +981,7 @@ $\Delta \langle \hat \mathcal O^n_{\alpha = (lm)}\rangle
  can be directly inserted into
 (\ref{chargedensity2}) in order to evaluate the charge density oscillations. 
 This is done by program
-{\prg spins} with option {\prg -c},
+{\prg spins}\index{spins} with option {\prg -c},
  the commands are {\prg spins -c -M T Ha Hb Hc h k l E} and {\prg java javaview 
 model=results/spins.*.jvx Animation.LastKey=16}. 
 Fig.~\ref{animationAF1} shows a snapshot of the result of such an 
@@ -1013,6 +1013,57 @@ H=0 and T=1.5~K [plot created by program
 {\prg display\_densities}\index{display\_densities}]
 }\label{animationAF1}
 \end{figure}
+
+\subsection{Symmetry analysis of an eigenvector - e.g. for Infrared and Raman scattering}
+\label{symmetryofev}
+
+Program {\prg spins}\index{spins} can be used to analyse the symmetry of an eigenvector 
+$e^s_{r\alpha}$, e.g. by the command
+
+{\prg spins -symop -32 TbPO4.cif  -q results/raman\_mcdisp.qep 0 0 0}
+
+The option {\prg -symop} indicates, that the observable is a polar vector, i.e. changes
+direction upon inversion. For observables corresponding to axial vectors (pseudovectors)
+use option {\prg -symoa}. These options are followed by a number 32, which indicates
+that symmetry operation number 32 from file TbPO4.cif should be applied and it's
+effect on eigenvectors for excitations
+with propagation $q=(hkl)=(0 0 0)$ in file results/raman\_mcdisp.qep should be investigated.
+If the Miller indices are followed by an energy in meV, then only one excitation with 
+this energy will be investigated. 
+
+For this procedure to work, the cif file has to contain a list of symmetry operations
+in the format
+\begin{verbatim}
+  loop_
+          _space_group_symop_id
+          _space_group_symop_operation_xyz
+          1 'y+1/4, x+3/4, -z+1/4'
+          2 'y+1/4, -x+3/4, -z+1/4'
+\end{verbatim}
+
+ If a negative sign is specified for the symmetry operation (in the above example -32), all symmetry operations
+         are employed and characters are output (provided that the eigenvector is invariant).
+
+         If in the .cif file the character table of the point group is provided, then 
+         the irreducible representation is identified. The .cif file has to contain a character table
+         as follows:
+\begin{verbatim}
+         _point_group_name D4h
+         _point_group_classes                   'E  EI C42 C42I 2C4 2C4I 2C2 2C2I 2C2d 2C2dI '
+         _point_group_space_symmetry_operations '16 8  11  3    13  5    1   9    6    14'
+         loop_
+         _irrep_point_group
+         _character_point_group
+         A1g ' 1  1  1  1  1  1  1  1  1  1'
+         A1u ' 1 -1  1 -1  1 -1  1 -1  1 -1'
+\end{verbatim}
+
+
+
+
+
+
+
 
 \subsection{Application to Neutron scattering}
 \label{neutronformalism}

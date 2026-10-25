@@ -19,11 +19,8 @@
 #include<vector.h>
 #include "sparsecomplex.hpp"
 #include "mathparser.hpp"
+#include "constants.h"
 
-#define MAXNOFCHARSINLINE 1024
-#define HEXT_DIMENSION  12  // dimension of external field Hext (Hi Hj Hk Ei Ej Ek s1 s2 s3 s4 s5 s6)
-#define NOF_USERDEF_MCPHAS_COLS 7  // number of user defined columns in mcphas.ini -> mcphas.* outpus files
-#define SMALL_FIELD 1e-6     // nonzero value of external field E or H
 
 #define NOFOBS  12
 enum ob    { I=0, M=1, pel=2, P=3, L=4, S=5, sx=6,  sy=7,  sz=8,  lx=9,  ly=10,  lz=11, MQ=12,U=13 } ;

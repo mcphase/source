@@ -823,6 +823,8 @@ return load(n,lp,mffile,pref,do_jqfile, abc,nofcomp,nofat,0);
 
 
 //constructor ... load initial parameters from file
+inimcdis::inimcdis ()
+{}
 inimcdis::inimcdis(const char * file,char * pref,char * mffile,
                    int & do_jqfile,bool inc_cd,Vector & abc,
                    int & nofcomp,int & nofat)
@@ -923,6 +925,7 @@ if(hkls!=NULL)
 
 //***************************************************************
 //constructor ... load initial parameters from file
+
 inimdpars::inimdpars (const char * file,char * pref,char * mffile,
              int & do_jqfile,bool inc_cd,Vector & abc,
              int & nofcomponents,int & nofatoms, int & verbose)
