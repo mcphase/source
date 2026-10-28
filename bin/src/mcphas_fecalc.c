@@ -245,7 +245,6 @@ if(ll>0){int lm1m3=inputpars.cs.nofcomponents*(ll-1);
  }
     }}}
   if(ini.doeps&&ini.linepscf==0){m+=sps.epsilon*GG;}
-
 }
 
 void calc_spsijk(Vector & m,mfcf & mf,int & i,int & j,int & k,par & inputpars,double & T,Vector & Hint,
@@ -721,8 +720,8 @@ start = time(0);
   
   calc_mfijk(mf.mf(i,j,k),sps,i,j,k,exstr,ini,sdim,GG,JS,inputpars,diagonalexchange);
 
-
   diff=mf.mf(i,j,k)-mfold.mf(i,j,k);sta+=diff*diff;
+
  // dE-=0.5*diff*(const Vector&)sps.m(i,j,k); // here we tried to calculate dE - energy difference for the step
   diff*=stepratio;mf.mf(i,j,k)=mfold.mf(i,j,k)+diff;//step gently ... i.e. scale change of MF with stepratio
   

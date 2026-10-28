@@ -41,7 +41,7 @@ copy mcdispph.mf mcdisp.mf
 call mcdispit -prefix 001
 
 range 7 0.49 0.51 results/001mcdisp.qei
-getvalue.pl -c 0.000234  9 12 11.5574       0    results/001mcdisp.qei
+getvalue.pl -c 0.000238  9 12 11.3981       0    results/001mcdisp.qei
 
 REM <h2> DMD Method for CF PHONON INTERACTION PROBLEM </h2>
 
@@ -64,9 +64,9 @@ call setup_mcdisp_mf 20  0 0 0
 call mcdispit -prefix test_ -pinit 0.1
 
 range 7 0.49 0.51 results/test_mcdisp.qei
-getvalue.pl -c 0.000529  9 12 12.9345     0    results/test_mcdisp.qei
-getvalue.pl -c 0.01147  9 11 12.9345      0    results/test_mcdisp.qei
-getvalue.pl -c 0.01149   9 10 12.9345      0    results/test_mcdisp.qei
+getvalue.pl -c 0.000534  9 12 12.758     0    results/test_mcdisp.qei
+getvalue.pl -c 0.01181  9 11 12.758     0    results/test_mcdisp.qei
+getvalue.pl -c 0.01184   9 10 12.758      0    results/test_mcdisp.qei
  
 REM  <h2> diffraction pattern </h2>
 
@@ -79,6 +79,6 @@ call setvariable lorentz 2 mcdiff.in
 call setvariable thetamax 30 mcdiff.in
 call mcdiff
 average -av -dmin=0.001 6 results/mcdiff.out
-getvalue.pl -c 0.01028  6 7 39.715     0    results/mcdiff.out
+getvalue.pl -c 0.01038  6 7 39.722     0    results/mcdiff.out
 
 cd ../../demo

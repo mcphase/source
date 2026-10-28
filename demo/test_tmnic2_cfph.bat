@@ -57,7 +57,7 @@ reduce_unitcell -delatoms 5,6,7,8,9,10,11,12,13,14,15,16,17 mcphas_all_atoms.j >
 cp results/makenn.j mcphasph.j
 
 
-getvalue.pl -c +2.698873023e+02 0 4 1 0 mcphasph.j
+getvalue.pl -c 269.86403 0 4 1 0 mcphasph.j
 
 # <h3> Sum Phonon and CF Phonon interaction parameters and calculate physical properties </h3>
 #  sum of Born v Karman model parameters (as listed in mcphasph.j)
@@ -71,7 +71,7 @@ getvalue.pl -c +2.698873023e+02 0 4 1 0 mcphasph.j
 # second with cf-Phonon interaction parameters 
  addj  mcphasph.j mnn.j > mcphas.j
  mcphasit -v -doeps  -prefix test_ 
-getvalue.pl -c 52.85719 0 9 1 0 results/test_mcphas.fum
+getvalue.pl -c 48.42492 0 9 1 0 results/test_mcphas.fum
 
 # <h2> Magnetic Scattering </h2>
 
@@ -79,9 +79,9 @@ getvalue.pl -c 52.85719 0 9 1 0 results/test_mcphas.fum
  mcdispit -prefix test_ -pinit 0.1
 
 range 7 0.2 0.4 results/test_mcdisp.qei
-getvalue.pl -c 0.005594 9 10 13.9967 0 results/test_mcdisp.qei
-getvalue.pl -c 0.005568 9 11 13.9967 0 results/test_mcdisp.qei
-getvalue.pl -c 0.000816 9 12 13.9967 0 results/test_mcdisp.qei
+getvalue.pl -c 0.001353 9 10 14.1954 0 results/test_mcdisp.qei
+getvalue.pl -c 0.001350 9 11 14.1954 0 results/test_mcdisp.qei
+getvalue.pl -c 0.001062 9 12 14.1954 0 results/test_mcdisp.qei
   
 
 cd ../../demo

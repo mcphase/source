@@ -22,7 +22,7 @@ $PI=3.14159265358979323846;
  $a02J2meV=$a0*$a0*$J2meV;
    # convert N/m in  meV/A^2: Nm=Joule  m=10^10A meV=1.6021766339999. 10-22 joules
    # 1 N/m= 1 J/m^2 = meV /1.6021766339999e-2 A 
-   $NpmtomeVpA=1e20*$J2meV ;
+   $NpmtomeVpA=1e-20*$J2meV ;
 
  $SMALLdabc=0.00001; # small difference in da , db or dc ...
  $SMALLdr=0.00001; # small difference in distance so that program believes when

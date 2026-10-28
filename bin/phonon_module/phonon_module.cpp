@@ -113,6 +113,8 @@ F(1)=Fxc(1)+Hext(4)*charge*A0*1e9; // factor 1e9 to convert MeV to meV
 F(2)=Fxc(2)+Hext(5)*charge*A0*1e9;
 F(3)=Fxc(3)+Hext(6)*charge*A0*1e9;
 
+//printf("Icalc phonon F(1)=%g Fxc(1)=%g Hext(4)=%g charge=%g\n",F(1),Fxc(1),Hext(4),charge);
+
  if(MODPAR.Hi()<9)
    {fprintf(stderr,"Error loadable module phonon.so:  MODPAR1 .. MODPAR9 all have to be set in sipf file\n");
     exit(EXIT_FAILURE);}

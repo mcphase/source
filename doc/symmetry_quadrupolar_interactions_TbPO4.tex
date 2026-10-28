@@ -1,0 +1,1501 @@
+\section{Symmetry of Quadrupolar Interactions between Tb$^{3+}$ ions in TbPO$_4$}
+
+The symmetry of quadrupolar interactions between Tb$^{3+}$ ions in TbPO$_4$ is investigated
+up to the third nearest neighbour using group theory.
+ For the first and second nearest neighbour
+13 independent terms are allowed, while for the third nearest neighbour  25 independent terms
+are possible. 
+
+In order to calculate the dispersion of excitations in $TbPO_4$ a careful analysis
+of the symmetry of the quadrupolar interactions is necessary. In this report I attempt
+to apply group theory in order to derive the allowed quadrupolar terms for interactions
+up to the third nearest neighbour.
+The general form of a quadrupolar interaction 
+in the Hamiltonian is 
+
+\begin{equation}
+H_Q=-\frac{1}{2}\sum_{abmm'}K(ambm') O_{2m}(\mbf J_a)O_{2m'}(\mbf J_b)
+\end{equation}
+
+Here
+$O_{lm}(\mbf J_a)$ corresponds to the Stevens Operator~\cite{hutchings64-227}
+for the Tb atom $a$ with total angular momentum $\mbf J_a$. Quadrupolar terms with
+$m=m'$ will contribute to the $K^{\mu}$
+ in equation (4) in Forino et al.2026:
+
+\begin{equation}
+K^{\mu}=\sum_b K(ambm) \qquad (\mu=\alpha,\gamma,\delta)
+\end{equation}
+
+where $m=0,2,-2$ for $\mu=\alpha,\gamma,\delta$, respectively and
+
+\begin{equation}
+K^{\epsilon}=\sum_{b,m=1,-1} K(ambm)
+\end{equation}
+
+We will show, that also $K(ambm')$ with $m\neq m'$ can be nonzero. However
+these will not contribute to $K^{\mu}$, because contributions from 
+the various neighbours cancel each other. These interactions
+ with $m\neq m'$ cannot be seen in bulk properties of $TbPO_4$, because
+$TbPO_4$ exhibits ferroquadrupolar order. Therefore I call these
+interactions ''hidden'' interactions. Hidden quadrupolar interactions
+may influence the dispersion of excitations. For sake of simplicity,
+we have (up to now) not considered these interactions.
+
+The types of Tb-neighbours of Tb at $(0,3/4,1/8)$ are given in table~\ref{nn}. In the 
+following sections the symmetry relations of quadrupolar interactions
+will be derived based on the numbering in this table. 
+
+In section \ref{13ind} the 13 independent terms in the nearest and second
+nearest neighbour interactions are listed, in section \ref{25ind} the
+25 independent terms in the third nearst neighbour interactions are given.
+The interactions with $m=m'=0,2,-2$ are boring, these are equal for equivalent 
+neighbours. However, looking at $m=m'=\pm1$ yields an important
+ result: the relations of $K(a1b1)$ and
+$K(a,-1,b,-1)$ for the various neighbours,  see equations
+(\ref{nn211}),(\ref{nn121}),(\ref{nnn211}),(\ref{nnn121}).
+
+
+\begin{table}
+\caption{Types of Tb-neighbours in $TbPO_4$, when neighbours for the 
+two Tb  sites differ, the upper sign refers to neighbours of Tb at
+$(0,3/4,1/8)$  and the lower sign refers to neighbours of Tb at $(1/2,3/4,3/8)$}
+\label{nn}\begin{tabular}{c|cc}
+type & b & relative coordinates \\
+\hline
+nearest  & 1 & $(+1/2,0,\pm1/4)$ \\
+neighbour & 2 & $(-1/2,0,\pm1/4)$ \\
+          & 3 & $(0,+1/2,\mp1/4)$ \\
+          & 4 & $(0,-1/2,\mp1/4)$ \\
+\hline
+next   & 1 & $(+1/2,0,\mp3/4)$ \\
+nearest & 2 & $(-1/2,0,\mp3/4)$ \\
+neighbour & 3 & $(0,+1/2,\pm3/4)$ \\
+          & 4 & $(0,-1/2,\pm3/4)$ \\
+\hline
+third     & 1  & $(+1/2,+1/2,+1/2)$ \\
+nearest   & 2  & $(+1/2,+1/2,-1/2)$ \\
+neighbour & 3  & $(+1/2,-1/2,+1/2)$ \\
+          & 4  & $(+1/2,-1/2,-1/2)$ \\
+          & 5  & $(-1/2,+1/2,+1/2)$ \\
+          & 6  & $(-1/2,+1/2,-1/2)$ \\
+          & 7  & $(-1/2,-1/2,+1/2)$ \\
+          & 8  & $(-1/2,-1/2,-1/2)$ \\
+\end{tabular}
+\end{table}
+
+\subsection{Point Group of Tb in TbPO$_4$}
+
+The tetragonal space group of TbPO$_4$ is $I 4_1/amd$ ($D_{4h}^{19}$, number 141 in international 
+tables). With origin choice 2 the Tb occupies the $4a$ sites at $(0,3/4,1/8)$ and
+$(1/2,3/4,3/8)$. The point group symmetry on the Tb site is 
+ $\bar 4 m 2 $ ($D_{2d}$). This point group has 8 elements. The character table
+of the irreducible representations is given in table~\ref{char}.
+
+\begin{table}
+\caption{Character table of irreducible representations of point group $\bar 4 m 2 $ ($D_{2d}$).}
+\label{char}\begin{tabular}{c|ccccc}
+$D_{2d}$ & $E$ & $C_2$ & $2S_4$ & $ 2C'_2$ & $2\sigma_d$ \\
+\hline
+$A_1$    &  1  & 1     & 1      & 1        &   1   \\
+$A_2$    &  1  & 1     & 1      & -1        &   -1   \\
+$B_1$    &  1  & 1     & -1      & 1        &   1   \\
+$B_2$    &  1  & 1     & -1      & -1        &   1   \\
+$E$      &  2  & -2    & 0       & 0         &   0 \\
+\end{tabular}
+\end{table}
+
+
+
+
+
+% ------------------------------------------------------------------------------
+
+
+\subsection{The reducible representation $T^1(G)$ for nearest  and next nearest Tb-Tb neighbours}
+
+The nearest and next nearest neighbour interactions transform according to the
+same reducible representation $T^1(G)$. We will construct this reducible representation 
+and use it's characters $\chi_p^{T^1}$ to determine how often the irreducible unit representation
+$A_1$ occurs in it's reduction. Moreover we will construct the projection operator
+$P^{A_1}$ to find the basis vectors of the corresponding irreducible subspaces. 
+These basis vectors correspond to the independent terms in the quadrupolar Hamiltonian.
+
+Without considering symmetry a general term in the quadrupolar Tb-Tb interaction
+will have the form $O_{2m}(\mbf J)O_{2m'}(\mbf J_b))$. Here $\mbf J$ denotes the
+total angular momentum at the first Tb site, and $\mbf J_b$ the total angular
+momentum on it's neighbour number $b$ according to the table~\ref{nn}. 
+In order to apply group theory to find symmetry allowed interactions we
+can think of this general term as on of the basis vectors
+ for a representation $T^1(G)$ of the point groupo $\bar 4 m 2 $. We will
+use the notation $|mm'b\rangle$ to denote $O_{2m}(\mbf J)O_{2m'}(\mbf J_b)$.
+We will in the following sections determine the representation matrices 
+$T^1_{m_1m_2b,m'_1m'_2b'}(G)$ which describe the transformation
+of the state $|m_1m_2b\rangle$ when applying a point symmetry 
+operation $G$:
+
+\begin{equation}
+|m_1m_2b\rangle \stackrel{G}{\rightarrow} \sum_{m'_1m'_2b'} T^1_{m_1m_2b,m'_1m'_2b'}(G)|m'_1m'_2b'\rangle
+\end{equation}
+% ------------------------------------------------------------------------------
+
+\subsubsection{The group element $E$}
+ 
+For the identity $E$ the representation 
+
+\begin{equation}
+T^1_{m_1m_2b,m'_1m'_2b'}(E)=\delta_{m_1,m'_1}\delta_{m_2,m'_2}\delta_{bb'}
+\end{equation}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{equation}\label{E}
+T^1_{m_1m_2,m'_1m'_2}(E)=\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 
+\end{array} \right )
+\end{equation}
+
+
+The character is given by
+
+\begin{equation}
+\chi^{T^1}(E)=\Trace{T^1(E)}=5\times5\times4=100
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The group element $C_2$}
+
+$C_2$ is a two fold axis along $z$, this corresponds to 
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{C_2}{\rightarrow}& (-x,-y,z) \nn
+(J_x,J_y,J_z) &\stackrel{C_2}{\rightarrow}&  (-J_x,-J_y,J_z) \nn
+J_\pm &\stackrel{C_2}{\rightarrow}& - J_\pm \nn
+\end{eqnarray}
+
+We will use the definition of Stevens Operators:
+
+\begin{eqnarray}
+O^s_{22}=O_{2-2}&=&\frac{-i}{2}[J_+^2-J_-^2]=J_xJ´_y+J_yJ_x=2P_{xy}=I_4 \nn
+O^s_{21}=O_{2-1}&=&\frac{-i}{4}[J_z(J_+-J_-)+(J_+-J_-)J_z]=\frac{1}{2}[J_yJ_z+J_zJ_y]=P_{yz}=I_5 \nn
+O_{20}&=&[3J_z^2-X]=I_6 \nn
+O_{21}&=&\frac{1}{4}[J_z(J_++J_-)+(J_++J_-)J_z]=\frac{1}{2}[J_xJ_z+J_zJ_x]=P_{xz}=I_7 \nn
+O_{22}&=&\frac{1}{2}[J_+^2+J_-^2]=J_x^2-J_y^2 =I_8\nn
+\end{eqnarray}
+
+Thus 
+\begin{eqnarray}
+O_{2-2}&\stackrel{C_2}{\rightarrow}&O_{2-2} \nn
+O_{2-1}&\stackrel{C_2}{\rightarrow}&-O_{2-1} \nn
+O_{20}&\stackrel{C_2}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{C_2}{\rightarrow}&-O_{21}\nn
+O_{22}&\stackrel{C_2}{\rightarrow}&O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{C_2}{\rightarrow} (-1)^m O_{2m} 
+\end{equation}
+
+and 
+
+\begin{equation}
+T^1_{m_1m_2b,m'_1m'_2b'}(C_2)=(-1)^{m_1+m_2}\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+(\delta_{b1}\delta_{b'2}+\delta_{b2}\delta_{b'1}+\delta_{b3}\delta_{b'4}+\delta_{b4}\delta_{b'3})
+\end{equation}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{equation}\label{C2}
+T^1_{m_1m_2,m'_1m'_2}(C_2)=(-1)^{m_1+m_2}\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{cccc}
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 
+\end{array} \right )
+\end{equation}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(C_2)=\Trace{T^1(C_2)}=0
+\end{equation}
+% ------------------------------------------------------------------------------
+
+\subsubsection{The clockwise mirror rotation $S_4$}
+
+ The clockwise mirror rotation $S_4$ can be written as $S_4=\sigma C_4=IC_2C_4$ ($\sigma$ is 
+a horizontal mirror plane).
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{S_4}{\rightarrow}& (y,-x,-z) \nn
+(J_x,J_y,J_z) &\stackrel{S_4}{\rightarrow}&  (-J_y,J_x,J_z) \nn
+J_\pm &\stackrel{S_4}{\rightarrow}& \pm iJ_\pm \nn
+\end{eqnarray}
+
+
+\begin{eqnarray}
+´O_{2-2}&\stackrel{S_4}{\rightarrow}&-O_{2-2} \nn
+O_{2-1}&\stackrel{S_4}{\rightarrow}&O_{21} \nn
+O_{20}&\stackrel{S_4}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{S_4}{\rightarrow}&-O_{2-1}\nn
+O_{22}&\stackrel{S_4}{\rightarrow}&-O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{S_4}{\rightarrow} 
+(\delta_{m0}-\delta_{m1}+\delta_{m,-1}-\delta_{m2}-\delta_{m,-2})
+ O_{2,(-1)^mm} 
+\end{equation}
+
+and 
+
+\begin{eqnarray}
+T^1_{m_1m_2b,m'_1m'_2b'}(S_4)&=&
+(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&(\delta_{b1}\delta_{b'4}+\delta_{b2}\delta_{b'3}+\delta_{b3}\delta_{b'1}+\delta_{b4}\delta_{b'2})
+\end{eqnarray}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{eqnarray}\label{S4}
+T^1_{m_1m_2,m'_1m'_2}(S_4)&=&(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(S_4)=\Trace{T^1(S_4)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The counter-clockwise mirror rotation $\bar S_4$}
+
+ The counterclockwise mirror rotation $\bar S_4$ can be written as $\bar S_4=\sigma \bar C_4=I\bar C_2 \bar C_4$ ($\sigma$ is 
+a horizontal mirror plane).
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{\bar S_4}{\rightarrow}& (-y,x,-z) \nn
+(J_x,J_y,J_z) &\stackrel{\bar S_4}{\rightarrow}&  (J_y,-J_x,J_z) \nn
+J_\pm &\stackrel{\bar S_4}{\rightarrow}& \mp iJ_\pm \nn
+\end{eqnarray}
+
+\begin{eqnarray}
+´O_{2-2}&\stackrel{\bar S_4}{\rightarrow}&-O_{2-2} \nn
+O_{2-1}&\stackrel{\bar S_4}{\rightarrow}&-O_{21} \nn
+O_{20}&\stackrel{\bar S_4}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{\bar S_4}{\rightarrow}&O_{2-1}\nn
+O_{22}&\stackrel{\bar S_4}{\rightarrow}&-O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{\bar S_4}{\rightarrow} 
+\{(i)^m [1-(m \bmod 2)] +m(m \bmod 2) \} 
+(\delta_{m0}-\delta_{m1}+\delta_{m,-1}-\delta_{m2}-\delta_{m,-2})
+O_{2,(-1)^mm} 
+\end{equation}
+
+and 
+
+\begin{eqnarray}
+T^1_{m_1m_2b,m'_1m'_2b'}(\bar S_4)&=&
+(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&(\delta_{b1}\delta_{b'3}+\delta_{b2}\delta_{b'4}+\delta_{b3}\delta_{b'2}+\delta_{b4}\delta_{b'1})
+\end{eqnarray}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{eqnarray}\label{bS4}
+T^1_{m_1m_2,m'_1m'_2}(\bar S_4)&=&
+(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(\bar S_4)=\Trace{T^1(\bar S_4)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The two fold horizontal [110]-axis  $C'_2$}
+
+ The    [110]-axis is a two fold axis $C'_2$ and the transformation is given by
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{C'_2}{\rightarrow}& (y,x,-z) \nn
+(J_x,J_y,J_z) &\stackrel{C'_2}{\rightarrow}&  (J_y,J_x,-J_z) \nn
+J_\pm &\stackrel{C'_2}{\rightarrow}& \pm i J_\mp \nn
+\end{eqnarray}
+
+\begin{eqnarray}
+´O_{2-2}&\stackrel{C'_2}{\rightarrow}&O_{2-2} \nn
+O_{2-1}&\stackrel{C'_2}{\rightarrow}&-O_{21} \nn
+O_{20}&\stackrel{C'_2}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{C'_2}{\rightarrow}&-O_{2-1}\nn
+O_{22}&\stackrel{C'_2}{\rightarrow}&-O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{C'_2}{\rightarrow} (\delta_{m0}-\delta_{m1}-\delta_{m,-1}-\delta_{m2}+\delta_{m,-2}) O_{2,(-1)^mm} 
+\end{equation}
+
+and 
+
+\begin{eqnarray}
+T^1_{m_1m_2b,m'_1m'_2b'}(C'_2)&=&(\delta_{m_10}-\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&(\delta_{b1}\delta_{b'3}+\delta_{b2}\delta_{b'4}+\delta_{b3}\delta_{b'1}+\delta_{b4}\delta_{b'2})
+\end{eqnarray}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{eqnarray}\label{Cd2}
+T^1_{m_1m_2,m'_1m'_2}(C'_2)&=&(\delta_{m_10}-\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(C'_2)=\Trace{T^1(C'_2)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The two fold horizontal $[1\bar 10]$-axis  $C''_2$}
+
+ The    $[1\bar 10]$-axis is a two fold axis $C''_2$ and the transformation is given by
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{C''_2}{\rightarrow}& (-y,-x,-z) \nn
+(J_x,J_y,J_z) &\stackrel{C''_2}{\rightarrow}&  (-J_y,-J_x,-J_z) \nn
+J_\pm &\stackrel{C''_2}{\rightarrow}& \mp i J_\mp \nn
+\end{eqnarray}
+
+\begin{eqnarray}
+´O_{2-2}&\stackrel{C''_2}{\rightarrow}&O_{2-2} \nn
+O_{2-1}&\stackrel{C''_2}{\rightarrow}&O_{21} \nn
+O_{20}&\stackrel{C''_2}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{C''_2}{\rightarrow}&O_{2-1}\nn
+O_{22}&\stackrel{C''_2}{\rightarrow}&-O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{C''_2}{\rightarrow} (\delta_{m0}+\delta_{m1}+\delta_{m,-1}-\delta_{m2}+\delta_{m,-2}) O_{2,(-1)^mm} 
+\end{equation}
+
+and 
+
+\begin{eqnarray}
+T^1_{m_1m_2b,m'_1m'_2b'}(C''_2)&=&(\delta_{m_10}+\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&(\delta_{b1}\delta_{b'4}+\delta_{b2}\delta_{b'3}+\delta_{b3}\delta_{b'2}+\delta_{b4}\delta_{b'1})
+\end{eqnarray}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{eqnarray}\label{Cdd2}
+T^1_{m_1m_2,m'_1m'_2}(C''_2)&=&(\delta_{m_10}+\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(C''_2)=\Trace{T^1(C''_2)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The yz mirror plane  $\sigma_d$}
+
+For the yz mirror plane $\sigma_d$ the transformation is given by
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{\sigma_d}{\rightarrow}& (-x,y,z) \nn
+(J_x,J_y,J_z) &\stackrel{\sigma_d}{\rightarrow}&  (J_x,-J_y,-J_z) \nn
+J_\pm &\stackrel{\sigma_d}{\rightarrow}&  J_\mp \nn
+\end{eqnarray}
+
+\begin{eqnarray}
+´O_{2-2}&\stackrel{\sigma_d}{\rightarrow}&-O_{2-2} \nn
+O_{2-1}&\stackrel{\sigma_d}{\rightarrow}&O_{2-1} \nn
+O_{20}&\stackrel{\sigma_d}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{\sigma_d}{\rightarrow}&-O_{21}\nn
+O_{22}&\stackrel{\sigma_d}{\rightarrow}&O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{\sigma_d}{\rightarrow} (\delta_{m0}-\delta_{m1}+\delta_{m,-1}+\delta_{m2}-\delta_{m,-2}) O_{2,m} 
+\end{equation}
+
+and 
+
+\begin{eqnarray}
+T^1_{m_1m_2b,m'_1m'_2b'}(\sigma_d)&=&(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&(\delta_{b1}\delta_{b'2}+\delta_{b2}\delta_{b'1}+\delta_{b3}\delta_{b'3}+\delta_{b4}\delta_{b'4})
+\end{eqnarray}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{eqnarray}\label{sd}
+T^1_{m_1m_2,m'_1m'_2}(\sigma_d)&=&(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is 
+
+\begin{equation}
+\chi^{T^1}(\sigma_d)=\Trace{T^1(\sigma_d)}=2
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The xz mirror plane  $\sigma'_d$}
+
+For the xz mirror plane $\sigma'_d$ the transformation is given by
+
+\begin{eqnarray}
+(x,y,z) &\stackrel{\sigma'_d}{\rightarrow}& (x,-y,z) \nn
+(J_x,J_y,J_z) &\stackrel{\sigma'_d}{\rightarrow}&  (-J_x,J_y,-J_z) \nn
+J_\pm &\stackrel{\sigma'_d}{\rightarrow}& - J_\mp \nn
+\end{eqnarray}
+
+\begin{eqnarray}
+´O_{2-2}&\stackrel{\sigma'_d}{\rightarrow}&-O_{2-2} \nn
+O_{2-1}&\stackrel{\sigma'_d}{\rightarrow}&-O_{2-1} \nn
+O_{20}&\stackrel{\sigma'_d}{\rightarrow}&O_{20} \nn
+O_{21}&\stackrel{\sigma'_d}{\rightarrow}&O_{21}\nn
+O_{22}&\stackrel{\sigma'_d}{\rightarrow}&O_{22}\nn
+\end{eqnarray}
+
+or in summary
+\begin{equation}
+O_{2m}\stackrel{\sigma'_d}{\rightarrow} (\delta_{m0}+\delta_{m1}-\delta_{m,-1}+\delta_{m2}-\delta_{m,-2}) O_{2,m} 
+\end{equation}
+
+and 
+
+\begin{eqnarray}
+T^1_{m_1m_2b,m'_1m'_2b'}(\sigma'_d)&=&(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&(\delta_{b1}\delta_{b'1}+\delta_{b2}\delta_{b'2}+\delta_{b3}\delta_{b'4}+\delta_{b4}\delta_{b'3})
+\end{eqnarray}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{eqnarray}\label{sdd}
+T^1_{m_1m_2,m'_1m'_2}(\sigma'_d)&=&(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is 
+
+\begin{equation}
+\chi^{T^1}(\sigma'_d)=\Trace{T^1(\sigma'_d)}=2
+\end{equation}
+
+
+% PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+
+
+\subsubsection{The Projection Operator}
+The projection operator $P^{A_1}$ is given by equation (4.51) in~\cite{elliott79-1}.
+
+\begin{equation}
+P^{A_1}=\frac{1}{g} \sum_G \chi^{A_1}(G) T^1(G)
+\end{equation}
+
+Here $g=8$ denotes the number of symmetry elements in the point group $\bar 4 m 2$ and
+$\chi^{A_1}(G)=1$, because $A_1$ is the unit representation.
+Inserting equations (\ref{E}),(\ref{C2}),(\ref{S4}),(\ref{bS4}),\dots we get
+
+\begin{eqnarray}\label{P}
+P^{A_1}_{m_1m_2,m'_1m'_2}&=&\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 
+\end{array} \right )\nn
+&&+(-1)^{m_1+m_2}\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{cccc}
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 
+\end{array} \right )\nn
+&&+(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 
+\end{array} \right ) \nn
+&&+(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 
+\end{array} \right )\nn
+&&+(\delta_{m_10}-\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 
+\end{array} \right )\nn
+&&+(\delta_{m_10}+\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 
+\end{array} \right )\nn
+&&+(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 
+\end{array} \right )\nn
+&&+(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 
+\end{array} \right )
+\end{eqnarray}
+
+
+
+\subsubsection{The 13 independent terms in the NN and NNN quadrupolar Hamiltonian}\label{13ind}
+
+The number of independent terms $m_{A_1}$ in the NN and NNN quadrupolar Hamiltonian can be
+determined by the formula (4.28) in \cite{elliott79-1}:
+
+\begin{equation}
+m_{A_1}=\frac{1}{g}\sum_p c_p \chi^{(A_1)\star}_p \chi^{(T^1)}_p = \frac{1}{8} (100+2\times2)=13
+\end{equation}
+
+In order to determine the form of the interaction, we apply the projection operator
+(\ref{P}) to some basis vectors $|mm'b\rangle$ ($=O_{2m}(\mbf J)O_{2m'}(\mbf J_b)$)
+choosing various combinations of $m,m',b$ until all 13 terms have been found.
+
+Not all terms are visible in the bulk properties of $TbPO_4$, because for some
+terms the quadrupolar mean fields will sum up to zero. Nevertheless these so called 
+''hidden'' terms may leave a trace in the dispersion of modes.
+In the following we list all visible terms followed by the hidden terms in the
+Hamiltonian:
+
+
+\subparagraph{The $K^{\alpha}$ term}
+
+Applying $P^{A_1}$ to $|001\rangle$ yields the $O_{20}$ interaction, which
+corresponds to the $K^{\alpha}$ term in the model of Morin/Jens.
+
+\begin{equation}
+|001\rangle+|002\rangle+|003\rangle+|004\rangle =O_{20}(\mbf J)\sum_{b=1,2,3,4}O_{20}(\mbf J_b)
+\end{equation}
+
+\subparagraph{The $K^{\epsilon}$ or $O_{2\pm1}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|111\rangle$ yields 
+
+\begin{equation}
+|111\rangle+|112\rangle+|-1-13\rangle+|-1-14\rangle =
+O_{21}(\mbf J)[O_{21}(\mbf J_1)+O_{21}(\mbf J_2)]+O_{2-1}(\mbf J)[O_{2-1}(\mbf J_3)+O_{2-1}(\mbf J_4)]
+\end{equation}
+
+\subparagraph{The $K^{\epsilon'}$ or $O_{2\pm1}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|-1-11\rangle$ yields 
+
+\begin{equation}
+|-1-11\rangle+|-1-12\rangle+|113\rangle+|114\rangle =
+O_{2-1}(\mbf J)[O_{2-1}(\mbf J_1)+O_{2-1}(\mbf J_2)]+O_{21}(\mbf J)[O_{21}(\mbf J_3)+O_{21}(\mbf J_4)]
+\end{equation}
+
+
+\subparagraph{The $K^{\gamma}$ or $O_{22}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|221\rangle$ yields 
+
+\begin{equation}
+|221\rangle+|222\rangle+|223\rangle+|224\rangle =
+O_{22}(\mbf J)[O_{22}(\mbf J_1)+O_{22}(\mbf J_2)+O_{22}(\mbf J_3)+O_{22}(\mbf J_4)]
+\end{equation}
+
+
+\subparagraph{The $K^{\delta}$ or $O_{2-2}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|-2-21\rangle$ yields 
+
+\begin{equation}
+|-2-21\rangle+|-2-22\rangle+|-2-23\rangle+|-2-24\rangle =
+O_{2-2}(\mbf J)[O_{2-2}(\mbf J_1)+O_{2-2}(\mbf J_2)+O_{2-2}(\mbf J_3)+O_{2-2}(\mbf J_4)]
+\end{equation}
+
+\subparagraph{The hidden $O_{22}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|211\rangle$ yields 
+
+\begin{equation}\label{nn211}
+|211\rangle-|212\rangle+|2-13\rangle-|2-14\rangle =
+O_{22}(\mbf J)[O_{21}(\mbf J_1)-O_{21}(\mbf J_2)+O_{2-1}(\mbf J_3)-O_{2-1}(\mbf J_4)]
+\end{equation}
+   
+
+\subparagraph{The hidden $O_{2\pm1}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|121\rangle$ yields 
+
+\begin{equation}\label{nn121}
+|121\rangle-|122\rangle+|-123\rangle-|-124\rangle =
+O_{21}(\mbf J)[O_{22}(\mbf J_1)-O_{22}(\mbf J_2)]+O_{2-1}(\mbf J)[O_{22}(\mbf J_3)-O_{22}(\mbf J_4)]
+\end{equation}
+   
+\subparagraph{The hidden $O_{2-2}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|-2-11\rangle$ yields 
+
+\begin{equation}
+|-2-11\rangle-|-2-12\rangle-|-213\rangle+|-214\rangle =
+O_{2-2}(\mbf J)[O_{2-1}(\mbf J_1)-O_{2-1}(\mbf J_2)-O_{21}(\mbf J_3)+O_{21}(\mbf J_4)]
+\end{equation}
+ 
+
+\subparagraph{The hidden $O_{2\pm1}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|-1-21\rangle$ yields 
+
+\begin{equation}
+|-1-21\rangle-|-1-22\rangle-|1-23\rangle+|1-24\rangle =
+O_{2-1}(\mbf J)[O_{2-2}(\mbf J_1)-O_{2-2}(\mbf J_2)]-O_{21}(\mbf J)[O_{2-2}(\mbf J_3)-O_{2-2}(\mbf J_4)]
+\end{equation}
+   
+
+
+  \subparagraph{The hidden $O_{20}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|021\rangle$ yields 
+
+\begin{equation}
+|021\rangle+|022\rangle-|023\rangle-|024\rangle =
+O_{20}(\mbf J)[O_{22}(\mbf J_1)+O_{22}(\mbf J_2)-O_{22}(\mbf J_3)-O_{22}(\mbf J_4)]
+\end{equation}
+   
+
+\subparagraph{The hidden $O_{20}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|011\rangle$ yields 
+
+\begin{equation}
+|011\rangle-|012\rangle-|0-13\rangle+|0-14\rangle =
+O_{20}(\mbf J)[O_{21}(\mbf J_1)-O_{21}(\mbf J_2)-O_{2-1}(\mbf J_3)+O_{2-1}(\mbf J_4)]
+\end{equation}
+    
+
+\subparagraph{The hidden $O_{22}O_{20}$ term}
+
+Applying $P^{A_1}$ to $|201\rangle$ yields 
+
+\begin{equation}
+|201\rangle+|202\rangle-|203\rangle-|204\rangle =
+O_{22}(\mbf J)[O_{20}(\mbf J_1)+O_{20}(\mbf J_2)-O_{20}(\mbf J_3)-O_{20}(\mbf J_4)]
+\end{equation}
+
+
+\subparagraph{The hidden $O_{2\pm1}O_{20}$ term}
+
+Applying $P^{A_1}$ to $|101\rangle$ yields 
+
+\begin{equation}
+|101\rangle-|102\rangle -|-103\rangle+|-104\rangle =
+O_{21}(\mbf J)[O_{20}(\mbf J_1)-O_{20}(\mbf J_2)]-
+O_{2-1}(\mbf J)[O_{20}(\mbf J_3)-O_{20}(\mbf J_4)]
+\end{equation}
+
+\subsection{The reducible representation $T^3(G)$ for third nearest Tb-Tb neighbours}
+
+The third nearest neighbour interactions transform according to the
+same reducible representation $T^3(G)$. Similar to $T^1(G)$
+we will in the following sections determine the representation matrices 
+$T^3_{m_1m_2b,m'_1m'_2b'}(G)$ which describe the transformation
+of the state $|m_1m_2b\rangle$ when applying a point symmetry 
+operation $G$:
+
+\begin{equation}
+|m_1m_2b\rangle \stackrel{G}{\rightarrow} \sum_{m'_1m'_2b'} T^3_{m_1m_2b,m'_1m'_2b'}(G)|m'_1m'_2b'\rangle
+\end{equation}
+% ------------------------------------------------------------------------------
+
+\subsubsection{The group element $E$}
+ 
+For the identity $E$ the representation 
+
+\begin{equation}
+T^3_{m_1m_2b,m'_1m'_2b'}(E)=\delta_{m_1,m'_1}\delta_{m_2,m'_2}\delta_{bb'}
+\end{equation}
+
+Writing the $bb'$-dependence in Matrix notation we get
+
+\begin{equation}\label{E3}
+T^1_{m_1m_2,m'_1m'_2}(E)=\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{ccccccccc}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\ 
+\end{array} \right )
+\end{equation}
+
+
+The character is given by
+
+\begin{equation}
+\chi^{T^1}(E)=\Trace{T^1(E)}=5\times5\times8=200
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The group element $C_2$}
+
+We get
+
+\begin{equation}\label{C23}
+T^3_{m_1m_2,m'_1m'_2}(C_2)=(-1)^{m_1+m_2}\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\ 
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\ 
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+\end{array} \right )
+\end{equation}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^3}(C_2)=\Trace{T^3(C_2)}=0
+\end{equation}
+% ------------------------------------------------------------------------------
+
+\subsubsection{The clockwise mirror rotation $S_4$}
+
+% (y,-x,-z)
+ We get
+
+\begin{eqnarray}\label{S43}
+T^3_{m_1m_2,m'_1m'_2}(S_4)&=&(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\ 
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\ 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^3}(S_4)=\Trace{T^1(S_4)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The counter-clockwise mirror rotation $\bar S_4$}
+
+% (-y,x,-z) \nn
+
+We get
+
+\begin{eqnarray}\label{bS43}
+T^3_{m_1m_2,m'_1m'_2}(\bar S_4)&=&
+(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\ 
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\ 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(\bar S_4)=\Trace{T^1(\bar S_4)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The two fold horizontal [110]-axis  $C'_2$}
+
+%(y,x,-z) 
+
+We get
+
+\begin{eqnarray}\label{bCd23}
+T^3_{m_1m_2,m'_1m'_2}(C'_2)&=&(\delta_{m_10}-\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\ 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^1}(C'_2)=\Trace{T^1(C'_2)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The two fold horizontal $[1\bar 10]$-axis  $C''_2$}
+
+% (-y,-x,-z) 
+We get
+
+\begin{eqnarray}\label{bCdd23}
+T^3_{m_1m_2,m'_1m'_2}(C''_2)&=&(\delta_{m_10}+\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\ 
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^3}(C''_2)=\Trace{T^3(C''_2)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The yz mirror plane  $\sigma_d$}
+
+% (-x,y,z)
+
+We get
+
+\begin{eqnarray}\label{sd3}
+T^3_{m_1m_2,m'_1m'_2}(\sigma_d)&=&(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\ 
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\ 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^3}(\sigma_d)=\Trace{T^3(\sigma_d)}=0
+\end{equation}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{The xz mirror plane  $\sigma'_d$}
+
+%(x,-y,z) 
+We get
+
+\begin{eqnarray}\label{sdd3}
+T^3_{m_1m_2,m'_1m'_2}(\sigma'_d)&=&(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\ 
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\ 
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\ 
+\end{array} \right )
+\end{eqnarray}
+
+The character is given by the trace and is zero
+
+\begin{equation}
+\chi^{T^3}(\sigma'_d)=\Trace{T^3(\sigma'_d)}=0
+\end{equation}
+
+
+% PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+
+
+\subsubsection{The Projection Operator}
+The projection operator $P^{A_1}$ is given by equation (4.51) in~\cite{elliott79-1}.
+
+\begin{equation}
+P^{A_1}=\frac{1}{g} \sum_G \chi^{A_1}(G) T^3(G)
+\end{equation}
+
+Here $g=8$ denotes the number of symmetry elements in the point group $\bar 4 m 2$ and
+$\chi^{A_1}(G)=1$, because $A_1$ is the unit representation.
+Inserting equations (\ref{E3}),(\ref{C23}),(\ref{S43}),(\ref{bS43}),\dots we get
+
+\begin{eqnarray}\label{P3}
+P^{A_1}_{m_1m_2,m'_1m'_2}&=&\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{ccccccccc}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\dots 
+\end{array} \right )\nn
+&&+(\delta_{m_10}-\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+\dots
+\end{array} \right )\nn
+&&+(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+\dots 
+\end{array} \right )\nn
+&&+(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+\dots 
+\end{array} \right ) \nn
+&&+(\delta_{m_10}-\delta_{m_11}+\delta_{m_1,-1}+\delta_{m_12}-\delta_{m_1,-2})
+\delta_{m_1,m'_1}\nn
+&&(\delta_{m_20}-\delta_{m_21}+\delta_{m_2,-1}+\delta_{m_22}-\delta_{m_2,-2})
+\delta_{m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+\dots 
+\end{array} \right )\nn
+&&+(\delta_{m_10}+\delta_{m_11}-\delta_{m_1,-1}-\delta_{m_12}-\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1} \nn
+&&
+(\delta_{m_20}+\delta_{m_21}-\delta_{m_2,-1}-\delta_{m_22}-\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2} \nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+\dots 
+\end{array} \right )\nn
+&&+(-1)^{m_1+m_2}\delta_{m_1,m'_1}\delta_{m_2,m'_2}
+\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+\dots 
+\end{array} \right )\nn
+&&+(\delta_{m_10}+\delta_{m_11}+\delta_{m_1,-1}-\delta_{m_12}+\delta_{m_1,-2})
+\delta_{(-1)^{m_1}m_1,m'_1}\nn
+&&(\delta_{m_20}+\delta_{m_21}+\delta_{m_2,-1}-\delta_{m_22}+\delta_{m_2,-2})
+\delta_{(-1)^{m_2}m_2,m'_2}\nn
+&&\left (
+\begin{array}{ccccccccc}
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+\dots 
+\end{array} \right )
+\end{eqnarray}
+
+
+\subsubsection{The 25 independent terms in the third neighbour quadrupolar Hamiltonian}\label{25ind}
+
+The number of independent terms $m_{A_1}$ in the third neighbour quadrupolar Hamiltonian can be
+determined by the formula (4.28) in \cite{elliott79-1}:
+
+\begin{equation}
+m_{A_1}=\frac{1}{g}\sum_p c_p \chi^{(A_1)\star}_p \chi^{(T^3)}_p = \frac{1}{8} 200=25
+\end{equation}
+
+\subparagraph{The $K^{\alpha}$ term}
+
+Applying $P^{A_1}$ to $|001\rangle$ yields the $O_{20}$ interaction, which
+corresponds to the $K^{\alpha}$ term in the model of Morin/Jens.
+
+\begin{equation}
+O_{20}(\mbf J)\sum_{b=1,\dots,8}O_{20}(\mbf J_b)
+\end{equation}
+
+\subparagraph{The $K^{\epsilon}$ or $O_{2\pm1}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|111\rangle$ yields 
+
+\begin{equation}
+|111\rangle+|-1-12\rangle+|113\rangle+|-1-14\rangle+
+|115\rangle+|-1-16\rangle+|117\rangle+|-1-18\rangle=
+O_{21}(\mbf J)\sum_{b=1,3,5,7} O_{21}(\mbf J_b)+O_{2-1}(\mbf J)\sum_{b=2,4,6,8}O_{2-1}(\mbf J_b)
+\end{equation}
+
+\subparagraph{The $K^{\epsilon'}$ or $O_{2\pm1}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|-1-11\rangle$ yields 
+
+\begin{equation}
+|-1-11\rangle+|112\rangle+|-1-13\rangle+|114\rangle +
+|-1-15\rangle+|116\rangle+|-1-17\rangle+|118\rangle =
+O_{2-1}(\mbf J)\sum_{b=1,3,5,7} O_{2-1}(\mbf J_b)+O_{21}(\mbf J)\sum_{b=2,4,6,8}O_{21}(\mbf J_b)
+\end{equation}
+
+
+\subparagraph{The $K^{\gamma}$ or $O_{22}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|221\rangle$ yields 
+
+\begin{equation}
+|221\rangle+|222\rangle+|223\rangle+|224\rangle + \dots =
+O_{22}(\mbf J)\sum_{b=1,\dots,8}O_{22}(\mbf J_b)
+\end{equation}
+
+
+\subparagraph{The $K^{\delta}$ or $O_{2-2}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|-2-21\rangle$ yields 
+
+\begin{equation}
+|-2-21\rangle+|-2-22\rangle+|-2-23\rangle+|-2-24\rangle + \dots=
+O_{2-2}(\mbf J)\sum_{b=1,\dots,8}O_{2-2}(\mbf J_b)
+\end{equation}
+
+
+% ----------- hidden terms without m=1,-1 ---------------------
+
+ \subparagraph{The hidden $O_{20}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|021\rangle$ yields 
+
+\begin{eqnarray}
+|021\rangle-|022\rangle+|023\rangle-|024\rangle
++|025\rangle-|026\rangle+|027\rangle-|028\rangle  =&& \nn
+O_{20}(\mbf J)\sum_{b=1,...,8} (-1)^{b+1}O_{22}(\mbf J_b)&&
+\end{eqnarray}
+   
+
+\subparagraph{The hidden $O_{22}O_{20}$ term}
+
+Applying $P^{A_1}$ to $|201\rangle$ yields 
+
+\begin{eqnarray}
+|201\rangle-|202\rangle+|203\rangle-|204\rangle 
+|205\rangle-|206\rangle+|207\rangle-|208\rangle 
+=&&\nn
+O_{22}(\mbf J)\sum_{b=1,...,8} (-1)^{b+1}O_{20}(\mbf J_b)&&
+\end{eqnarray}
+
+ \subparagraph{The hidden $O_{20}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|0-21\rangle$ yields 
+
+\begin{eqnarray}
+|0-21\rangle+|0-22\rangle-|0-23\rangle-|0-24\rangle
+-|0-25\rangle-|0-26\rangle+|0-27\rangle+|0-28\rangle  =&& \nn
+O_{20}(\mbf J)[
+ O_{2-2}(\mbf J_1)+O_{2-2}(\mbf J_2)-O_{2-2}(\mbf J_3)-O_{2-2}(\mbf J_4)
+-O_{2-2}(\mbf J_5)-O_{2-2}(\mbf J_6)+O_{2-2}(\mbf J_7)+O_{2-2}(\mbf J_8)
+]&&
+\end{eqnarray}
+ 
+
+ \subparagraph{The hidden $O_{2-2}O_{20}$ term}
+
+Applying $P^{A_1}$ to $|-201\rangle$ yields 
+
+\begin{eqnarray}
+|-201\rangle+|-202\rangle-|-203\rangle-|-204\rangle
+-|-205\rangle-|-206\rangle+|-207\rangle+|-208\rangle  =&& \nn
+O_{2-2}(\mbf J)[
+ O_{20}(\mbf J_1)+O_{20}(\mbf J_2)-O_{20}(\mbf J_3)-O_{20}(\mbf J_4)
+-O_{20}(\mbf J_5)-O_{20}(\mbf J_6)+O_{20}(\mbf J_7)+O_{20}(\mbf J_8)
+]&&
+\end{eqnarray}
+
+
+ \subparagraph{The hidden $O_{2-2}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|-221\rangle$ yields 
+
+\begin{eqnarray}
+|-221\rangle-|-222\rangle-|-223\rangle+|-224\rangle
+-|-225\rangle+|-226\rangle+|-227\rangle-|-228\rangle  =&& \nn
+O_{2-2}(\mbf J)[
+ O_{22}(\mbf J_1)-O_{22}(\mbf J_2)-O_{22}(\mbf J_3)+O_{22}(\mbf J_4)
+-O_{22}(\mbf J_5)+O_{22}(\mbf J_6)+O_{22}(\mbf J_7)-O_{22}(\mbf J_8)
+]&&
+\end{eqnarray}
+
+ \subparagraph{The hidden $O_{22}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|2-21\rangle$ yields 
+
+\begin{eqnarray}
+|2-21\rangle-|2-22\rangle-|2-23\rangle+|2-24\rangle
+-|2-25\rangle+|2-26\rangle+|2-27\rangle-|2-28\rangle  =&& \nn
+O_{22}(\mbf J)[
+ O_{2-2}(\mbf J_1)-O_{2-2}(\mbf J_2)-O_{2-2}(\mbf J_3)+O_{2-2}(\mbf J_4)
+-O_{2-2}(\mbf J_5)+O_{2-2}(\mbf J_6)+O_{2-2}(\mbf J_7)-O_{2-2}(\mbf J_8)
+]&&
+\end{eqnarray}
+
+
+% ----------- hidden terms with m=1,-1 ---------------------
+
+\subparagraph{The hidden $O_{2\pm1}O_{2\mp1}$ term}
+
+Applying $P^{A_1}$ to $|1-11\rangle$ yields 
+
+\begin{eqnarray}
+|1-111\rangle+|-112\rangle-|1-13\rangle-|-114\rangle
+-|1-15\rangle-|-116\rangle+|1-17\rangle+|-118\rangle =&&\nn
+O_{21}(\mbf J)
+[O_{2-1}(\mbf J_1)-O_{2-1}(\mbf J_3)-O_{2-1}(\mbf J_5)+O_{2-1}(\mbf J_7)]
++O_{2-1}(\mbf J)
+[O_{21}(\mbf J_2)-O_{21}(\mbf J_4)-O_{21}(\mbf J_6)+O_{21}(\mbf J_8)]&&
+\end{eqnarray}
+
+\subparagraph{The hidden $O_{2\mp1}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|-111\rangle$ yields 
+
+\begin{eqnarray}
+|-1111\rangle+|1-12\rangle-|-113\rangle-|1-14\rangle
+-|-115\rangle-|1-16\rangle+|-117\rangle+|1-18\rangle =&&\nn
+O_{2-1}(\mbf J)
+[O_{21}(\mbf J_1)-O_{21}(\mbf J_3)-O_{21}(\mbf J_5)+O_{21}(\mbf J_7)]
++O_{21}(\mbf J)
+[O_{2-1}(\mbf J_2)-O_{2-1}(\mbf J_4)-O_{2-1}(\mbf J_6)+O_{2-1}(\mbf J_8)]&&
+\end{eqnarray}
+
+\subparagraph{The hidden $O_{20}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|011\rangle$ yields 
+
+\begin{eqnarray}
+|011\rangle-|0-12\rangle+|013\rangle-|0-14\rangle
+-|015\rangle+|0-16\rangle-|017\rangle+|0-18\rangle =&&\nn
+O_{20}(\mbf J)[
+ O_{21}(\mbf J_1)-O_{2-1}(\mbf J_2)+O_{21}(\mbf J_3)-O_{2-1}(\mbf J_4)
+-O_{21}(\mbf J_5)+O_{2-1}(\mbf J_6)-O_{21}(\mbf J_7)+O_{2-1}(\mbf J_8)
+]&&
+\end{eqnarray}
+
+\subparagraph{The hidden $O_{2\pm1}O_{20}$ term}
+
+Applying $P^{A_1}$ to $|101\rangle$ yields 
+
+\begin{eqnarray}
+ |101\rangle-|-102\rangle +|103\rangle-|-104\rangle 
+-|105\rangle+|-106\rangle -|107\rangle+|-108\rangle 
+=&&\nn
+O_{21}(\mbf J)[O_{20}(\mbf J_1)+O_{20}(\mbf J_3)-O_{20}(\mbf J_5)-O_{20}(\mbf J_7)]-
+O_{2-1}(\mbf J)[-O_{20}(\mbf J_2)-O_{20}(\mbf J_4)+O_{20}(\mbf J_6)+O_{20}(\mbf J_8)]&&
+\end{eqnarray}
+
+
+\subparagraph{The hidden $O_{20}O_{2\mp1}$ term}
+
+Applying $P^{A_1}$ to $|0-11\rangle$ yields 
+
+\begin{eqnarray}
+|0-11\rangle-|012\rangle-|0-13\rangle+|014\rangle
++|0-15\rangle-|016\rangle-|0-17\rangle+|018\rangle =&&\nn
+O_{20}(\mbf J)[
+ O_{2-1}(\mbf J_1)-O_{21}(\mbf J_2)-O_{2-1}(\mbf J_3)+O_{21}(\mbf J_4)
++O_{2-1}(\mbf J_5)-O_{21}(\mbf J_6)-O_{2-1}(\mbf J_7)+O_{21}(\mbf J_8)
+]&&
+\end{eqnarray}
+
+\subparagraph{The hidden $O_{2\mp1}O_{20}$ term}
+
+Applying $P^{A_1}$ to $|-101\rangle$ yields 
+
+\begin{eqnarray}
+ |-101\rangle-|102\rangle -|-103\rangle+|104\rangle 
++|-105\rangle-|106\rangle -|-107\rangle+|108\rangle 
+=&&\nn
+O_{2-1}(\mbf J)[O_{20}(\mbf J_1)-O_{20}(\mbf J_3)+O_{20}(\mbf J_5)-O_{20}(\mbf J_7)]-
+O_{21}(\mbf J) [O_{20}(\mbf J_2)-O_{20}(\mbf J_4)+O_{20}(\mbf J_6)-O_{20}(\mbf J_8)]&&
+\end{eqnarray}
+
+
+
+\subparagraph{The hidden $O_{22}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|211\rangle$ yields 
+
+\begin{eqnarray}\label{nnn211}
+|211\rangle+|2-12\rangle+|213\rangle+|2-14\rangle-
+|215\rangle-|2-16\rangle-|217\rangle-|2-18\rangle&=& \nn
+O_{22}(\mbf J)[O_{21}(\mbf J_1)+O_{2-1}(\mbf J_2)+O_{21}(\mbf J_3)+O_{2-1}(\mbf J_4)-
+O_{21}(\mbf J_5)-O_{2-1}(\mbf J_6)-O_{21}(\mbf J_7)-O_{2-1}(\mbf J_8)]&&
+\end{eqnarray}
+   
+
+\subparagraph{The hidden $O_{2\pm1}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|121\rangle$ yields 
+
+\begin{eqnarray}\label{nnn121}
+|121\rangle+|-122\rangle+|123\rangle+|-124\rangle 
+-|125\rangle-|-126\rangle-|127\rangle-|-128\rangle=&& \nn
+O_{21}(\mbf J)[O_{22}(\mbf J_1)+O_{22}(\mbf J_3)-O_{22}(\mbf J_5)-O_{22}(\mbf J_7)]+
+O_{2-1}(\mbf J)[O_{22}(\mbf J_2)+O_{22}(\mbf J_4)-O_{22}(\mbf J_6)-O_{22}(\mbf J_8)]&&
+\end{eqnarray}
+   
+\subparagraph{The hidden $O_{22}O_{2\mp1}$ term}
+
+Applying $P^{A_1}$ to $|2-11\rangle$ yields 
+
+\begin{eqnarray}
+ |2-11\rangle+|212\rangle-|2-13\rangle-|214\rangle
++|2-15\rangle+|216\rangle-|2-17\rangle-|218\rangle&=& \nn
+O_{22}(\mbf J)[O_{2-1}(\mbf J_1)+O_{21}(\mbf J_2)-O_{2-1}(\mbf J_3)-O_{21}(\mbf J_4)
++O_{2-1}(\mbf J_5)+O_{21}(\mbf J_6)-O_{2-1}(\mbf J_7)-O_{21}(\mbf J_8)]&&
+\end{eqnarray}
+   
+\subparagraph{The hidden $O_{2\mp1}O_{22}$ term}
+
+Applying $P^{A_1}$ to $|-121\rangle$ yields 
+
+\begin{eqnarray}
+|-121\rangle+|122\rangle-|-123\rangle-|124\rangle 
++|-125\rangle+|126\rangle-|-127\rangle-|128\rangle=&& \nn
+O_{2-1}(\mbf J)[O_{22}(\mbf J_1)-O_{22}(\mbf J_3)+O_{22}(\mbf J_5)-O_{22}(\mbf J_7)]+
+O_{21}(\mbf J)[O_{22}(\mbf J_2)-O_{22}(\mbf J_4)+O_{22}(\mbf J_6)-O_{22}(\mbf J_8)]&&
+\end{eqnarray}
+
+\subparagraph{The hidden $O_{2-2}O_{2\pm1}$ term}
+
+Applying $P^{A_1}$ to $|-211\rangle$ yields 
+
+\begin{eqnarray}
+|-211\rangle-|-2-12\rangle-|-213\rangle+|-2-14\rangle 
++|-215\rangle-|-2-16\rangle-|-217\rangle+|-2-18\rangle =&& \nn
+O_{2-2}(\mbf J)[O_{21}(\mbf J_1)-O_{2-1}(\mbf J_2)-O_{21}(\mbf J_3)+O_{2-1}(\mbf J_4)
++O_{21}(\mbf J_5)-O_{2-1}(\mbf J_6)-O_{21}(\mbf J_7)+O_{2-1}(\mbf J_8)]&&
+\end{eqnarray}
+ 
+\subparagraph{The hidden $O_{2\pm1}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|1-21\rangle$ yields 
+
+\begin{eqnarray}
+|1-21\rangle-|-1-22\rangle-|1-23\rangle+|-1-24\rangle 
++|1-25\rangle-|-1-26\rangle-|1-27\rangle+|-1-28\rangle =&& \nn
+O_{21}(\mbf J)[O_{22}(\mbf J_1)-O_{22}(\mbf J_3)+O_{22}(\mbf J_5)-O_{22}(\mbf J_7)]
+-O_{2-1}(\mbf J)[O_{22}(\mbf J_2)-O_{22}(\mbf J_4)+O_{22}(\mbf J_6)-O_{22}(\mbf J_8)]&&
+\end{eqnarray}
+ 
+
+\subparagraph{The hidden $O_{2-2}O_{2\mp1}$ term}
+
+Applying $P^{A_1}$ to $|-2-11\rangle$ yields 
+
+\begin{eqnarray}
+|-2-11\rangle-|-212\rangle+|-2-13\rangle-|-214\rangle 
+-|-2-15\rangle+|-216\rangle-|-2-17\rangle+|-218\rangle =&& \nn
+O_{2-2}(\mbf J)[O_{2-1}(\mbf J_1)-O_{21}(\mbf J_2)+O_{2-1}(\mbf J_3)-O_{21}(\mbf J_4)
+-O_{2-1}(\mbf J_5)+O_{21}(\mbf J_6)-O_{2-1}(\mbf J_7)+O_{21}(\mbf J_8)]&&
+\end{eqnarray}
+ 
+
+\subparagraph{The hidden $O_{2\mp1}O_{2-2}$ term}
+
+Applying $P^{A_1}$ to $|-1-21\rangle$ yields 
+
+\begin{eqnarray}
+|-1-21\rangle-|1-22\rangle+|-1-23\rangle-|1-24\rangle 
+-|-1-25\rangle+|1-26\rangle-|-1-27\rangle+|1-28\rangle =&&\nn
+O_{2-1}(\mbf J)[O_{2-2}(\mbf J_1)+O_{2-2}(\mbf J_3)-O_{2-2}(\mbf J_5)-O_{2-2}(\mbf J_7)]
+-O_{21}(\mbf J)[O_{2-2}(\mbf J_2)+O_{2-2}(\mbf J_4)-O_{2-2}(\mbf J_6)-O_{2-2}(\mbf J_8)]&&
+\end{eqnarray}
+   
+
+

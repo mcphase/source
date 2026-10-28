@@ -21,7 +21,7 @@
                    // also for module kramer - to trigger numerical limited calculation 
                     // also for adding jjpar sets to see what is difference in position or what is equal
                     // also for checking jjj parameters if values are equal 
-#define SMALLENERGYOFFSET_PHONON 1e-4 // a small offset in calculating the single ion excitations
+#define SMALLENERGYOFFSET_PHONON 0.0 // a small offset in calculating the single ion excitations
                     // gap delta in the phonon module  to avoid numerical proiblems at q=0
 #define SMALLPOSITIONDEVIATION 1e-4  // used in mcdiff mcphas to see if a lattice atom position matches or not
 #define HUGE_EXP   200   // huge value of E/kT in exp(E/kT)
