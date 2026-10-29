@@ -697,20 +697,33 @@ void par::savelattice (FILE *file)
   fprintf(file,"#! r1b=%4.12g r2b=%4.12g r3b=%4.12g   primitive lattice vectors [a][b][c]\n",cs.r[2][1],cs.r[2][2],cs.r[2][3]);
   fprintf(file,"#! r1c=%4.12g r2c=%4.12g r3c=%4.12g\n",cs.r[3][1],cs.r[3][2],cs.r[3][3]);
 
- // save elastic constants
-fprintf(file,"#\n# Nonzero Elastic constants   in meV per primitive unit cell in Voigt notation only first index<=second index has to be given\n");
+ saveCel(file,false);
+
+  fprintf(file,"#\n#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",cs.nofatoms,cs.nofcomponents);
+//  fprintf(file,"%s",rems[3]);// changed 8.09 - I believe here should be only line with stars
+  fprintf(file,"#*********************************************************************\n");
+}
+
+void par::saveCel(FILE * file,bool inGPa)
+{double fact=1;
+// save elastic constants
+fprintf(file,"#\n# Nonzero Elastic constants   in ");
+if(inGPa){fprintf(file,"GPa");
+// MEV2J=1.6021766339999e-22;
+//  1 A= 1e-10 m
+//  1meV/pVol=1.60218e-22 J/A^3 x  A^3/pVol = 1.60218e+8  J/m^3 x  A^3/pVol = 1.60218e-1 GPa x  A^3/pVol
+fact=0.1e22*MEV2J/cs.pVol();
+}
+else{fprintf(file,"meV per primitive unit cell");}
+fprintf(file,"in Voigt notation only first index<=second index has to be given\n");
 fprintf(file,"# because the constants are symmetric Celij=Celji\n");
 fprintf(file,"# Elastic constants refer to the Euclidean coordinate system ijk defined\n");
 fprintf(file,"# with respect to abc as j||b, k||(a x b) and i normal to k and j\n");
 int i1=0,i,j;fprintf(file,"#! ");
  for(i=1;i<=6;++i){if(i1>0){i1=0;fprintf(file,"#! ");}
-  for(j=i;j<=6;++j){if(fabs(Cel(i,j))>SMALL){++i1;fprintf(file," Cel%i%i=%+10.9g",i,j,Cel(i,j));}}
+  for(j=i;j<=6;++j){if(fabs(Cel(i,j))>SMALL){++i1;fprintf(file," Cel%i%i=%+10.9g",i,j,fact*Cel(i,j));}}
 if(i1>0)fprintf(file,"\n"); }
 if(i1==0)fprintf(file,"\n");
-
-  fprintf(file,"#\n#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",cs.nofatoms,cs.nofcomponents);
-//  fprintf(file,"%s",rems[3]);// changed 8.09 - I believe here should be only line with stars
-  fprintf(file,"#*********************************************************************\n");
 }
 
 void par::saveatoms (FILE * file)

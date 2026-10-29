@@ -77,6 +77,7 @@ void print_G(FILE * fout);
                   // prints magnetoelastic interaction parameters to Fout
 void save(const char * filename,int  noindexchange); // save lattice, atoms and exchange parameters to file
 void savelattice(FILE *fout);// save lattice to file
+void saveCel(FILE * file,bool inGPa); // save elastic constants to file in meV or GPa 
 void saveatoms(FILE *fout);// save atom positions and properties  to file
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
 void save_mcdiff_in (const char * program); // save structure in mcdiff.in program is program name calling this

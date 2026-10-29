@@ -1181,6 +1181,7 @@ sub getinteraction {
  # $cL and $cT above have units mev/A^2, i.e. we add a factor of 0.5292
    $cL=$long_spring[$n]*$a0A*$NpmtomeVpA;
    $cT=$trans_spring[$n]*$a0A*$NpmtomeVpA;
+   $cLmcT=$cL-$cT;
    # Voigt notation in first slot Gmix(11)1 
    $Gmix->slice('1,1')+=0.5*(-2*$cLmcT*$rx2*$rx/$r2-$cT*($rx+$rx));
    # Gmix(11)2
@@ -1614,9 +1615,10 @@ if($i1==0){print $l "\n";}
 
 # 1GPa=1e+9Pa=1e+9J/m^3
 # 1meV= 1.60218e-22 J
+# $J2meV=1/1.6021766339999e-22;
 # 1 A= 1e-10 m
 # 1meV/pVol=1.60218e-22 J/A^3 x  A^3/pVol = 1.60218e+8  J/m^3 x  A^3/pVol = 1.60218e-1 GPa x  A^3/pVol
-$confact=0.1*1.60218/$pVolume;
+$confact=0.1e22/$J2meV/$pVolume;
 print $l "#! unit conversion:  1 meV/Primitive Unit Cell Volume =".$confact." GPa\n";
 }
 

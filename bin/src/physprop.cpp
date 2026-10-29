@@ -491,6 +491,11 @@ if(ini.cel!=0.0)
    fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
+   fprintf(fout,"# Elastic Constants from input file (note these cannot be compared to experiment because\n"); 
+   fprintf(fout,"# they do not take into account that the atomic positions / moments etc relax when the crystal is strained\n",ini.prefix);
+   inputpars.saveCel(fout,false);
+   inputpars.saveCel(fout,true);
+   
    fprintf(fout,"# Elastic Constants computed by applying stress of %g GPa and calculating strain\n",ini.cel);
    fprintf(fout,"# - note, these elastic constants can be compared to experimental data\n");
       str[0]='\0';
