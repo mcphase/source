@@ -628,6 +628,8 @@ doc.getDocumentElement().normalize();
 
         Model scene = new Model();
 scene.name = path.getFileName().toString();
+scene.showPoints = false;
+
 NodeList geometries=doc.getElementsByTagName("geometry");
         for(int gi=0;gi<geometries.getLength();gi++) {
             Element geo=(Element)geometries.item(gi);

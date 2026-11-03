@@ -262,7 +262,7 @@ for(int l=1;(l<=nofatoms);++l)
 	 {int i=1,j=1,k=1;dd=pos(i,j,k,l,cs);
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
          }
-fprintf(fout,"          <thickness>3.0</thickness>\n");
+fprintf(fout,"          <thickness>0.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
@@ -340,7 +340,7 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),
 	  }
        }}}
   }}}
-fprintf(fout,"          <thickness>3.0</thickness>\n");
+//fprintf(fout,"          <thickness>3.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"        <colors type=\"rgb\">\n");n=0;
   for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<NOMORE);++i1){
@@ -474,7 +474,7 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*g
 	  }
        }}}
   }}}
-fprintf(fout,"          <thickness>6.0</thickness>\n");
+fprintf(fout,"          <thickness>0.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"show\" line=\"show\">\n");
@@ -535,7 +535,7 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*g
 	  }
        }}}
   }}}
-fprintf(fout,"          <thickness>6.0</thickness>\n");
+fprintf(fout,"          <thickness>0.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
@@ -592,7 +592,7 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*g
 	  }
        }}}
   }}}
-fprintf(fout,"          <thickness>6.0</thickness>\n");
+fprintf(fout,"          <thickness>0.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
@@ -660,7 +660,7 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dx+cd.rtf(ii)(
     ++ctr; }
    }}}
   }
-fprintf(fout,"          <thickness>6.0</thickness>\n");
+fprintf(fout,"          <thickness>0.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"show\" line=\"show\" color=\"show\">\n");
