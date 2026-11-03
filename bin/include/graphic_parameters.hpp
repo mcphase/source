@@ -36,6 +36,9 @@ double density_dtheta,density_dfi;
 double threshhold;
 int gridi,gridj,gridk;
 
+// ANIMATION
+int nof_frames;
+
 char title[MAXNOFCHARINLINE];
 
 ~graphic_parameters();

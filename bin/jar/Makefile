@@ -19,7 +19,7 @@ OBJS = IniConfigurator.java IniFile.java IniItem.java IniKey.java display.java \
        displaytext.java FileListener.java FileMonitor.java searchspacestatus.java \
        simannfitstatus.java Viewer.java ToolTipManager.java graphic_parameters_configurator.java \
        VerticalFlowLayout.java myStringfunc.java  displayhtml.java \
-       PostscriptViewer.java  
+       PostscriptViewer.java JvxAnimator.java 
 
 compile : $(OBJS)
 	javac -source 15 -target 15 $^ 

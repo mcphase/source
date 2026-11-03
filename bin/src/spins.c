@@ -156,8 +156,8 @@ a&b&c) - if used with -fc min max n lim a human readable format is output for sp
 " show_primitive_crystal_unitcell, spins_scale_moment, spins_wave_amplitude\n\
  show_magnetic_unitcell, show_atoms, scale_view_1,scale_view_2, scale_view_3 ...\n\n\
  jvx files can be viewed by:\n\
- java javaview results/spins.jvx \n\
- java javaview \"model=results/spins.*.jvx\" Animation.LastKey=16 background=\"255 255 255\" \n"
+ java JvxAnimator results/spins.jvx \n\
+ java JvxAnimator \"results/spins.*.jvx\" \n"
 " gif images stored by javaview can be connected to animated gif by ImageMagick \n"
 " magick -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif\n"
 " ppm images stored by javaveiw can be connected to mpeg video by ppmtompeg (part of netpbm package)\n"
@@ -1185,7 +1185,7 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
            charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
   // if we can determine from sipffilename the element --> put r g b information
     
-  unsigned int r,g,b; char element []  ="E\0";
+  unsigned int r,g,b; char element []  ="E\0";double radius=0.3333;
    element[0]=toupper((*inputpars.jjj[ii]).sipffilename[0]);
    if(isalpha((*inputpars.jjj[ii]).sipffilename[1]))
    element[1]=tolower((*inputpars.jjj[ii]).sipffilename[1]);
@@ -1194,8 +1194,9 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 r=(unsigned int)(unsigned char)elstr[i][2];
 g=(unsigned int)(unsigned char)elstr[i][3];
 b=(unsigned int)(unsigned char)elstr[i][4];
+radius=strtod(elstr[i]+5,NULL);
    snprintf(cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g %s r=%i g=%i b=%i",
-           charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333),
+           charge,gp.scale_pointcharges*radius*signum(charge)*pow((double)fabs(charge),0.3333),
            element,r,g,b);}
    // printf("%s\n",cs.sipffilenames[ii]);
 
@@ -1306,18 +1307,18 @@ if (argc-1==8+os){
               // omega t= phase
               double phase;
              // complex <double> im(0,1);
-              for(i=0;i<16;++i)
-              {phase=2*3.1415*i/15;
+              for(i=0;i<gp.nof_frames;++i)
+              {phase=2*3.1415*i/(gp.nof_frames-1);
                printf("\n********************************************\n");
-               printf(" calculating movie sequence %i(16)\n",i+1);
+               printf(" calculating movie sequence %i(%i)\n",i+1,gp.nof_frames);
                printf("********************************************\n");
                char filename[MAXNOFCHARINLINE];
-               snprintf(filename,MAXNOFCHARINLINE,"./results/spins.%i.jvx",i+1);
+               snprintf(filename,MAXNOFCHARINLINE,"./results/spins.%02d.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
                      densitycf.jvx_cd(fin,outhklstr,cs,gp,
                                   phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
                fclose (fin);
-               snprintf(filename,MAXNOFCHARINLINE,"./results/spins_prim.%i.jvx",i+1);
+               snprintf(filename,MAXNOFCHARINLINE,"./results/spins_prim.%02d.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
                      densitycf.jvx_cd(fin,outhklstr,cs,gp,
                                   phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
@@ -1332,8 +1333,7 @@ fprintf(stderr,"# * Reference: M. Rotter PRB 79 (2009) 140405R\n");
 fprintf(stderr,"# * \n");
 fprintf(stderr,"# * view jvx file by:\n");
 fprintf(stderr,"# * javaview results/spins.jvx\n");
-fprintf(stderr,"# * java javaview \"model=results/spins.*.jvx\" Animation.LastKey=16 background=\"255 255 255\" \n");
-fprintf(stderr,"# * saved density mesh in results/spins.grid\n");
+fprintf(stderr,"# * java JvxAnimator \"results/spins.*.jvx\" \n");
 fprintf(stderr,"# ************************************************************************\n");
 
   for(i=1;i<=cs.nofatoms;++i){  delete cs.sipffilenames[i];}

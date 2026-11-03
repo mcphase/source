@@ -34,6 +34,7 @@ density_dfi=0.2;
 gridi=30;
 gridj=30;
 gridk=30;
+nof_frames=16;
 read();
 }
 
@@ -79,6 +80,8 @@ extract(instr,"spins_show_oscillation",spins_show_oscillation);
 extract(instr,"phonon_wave_amplitude",phonon_wave_amplitude);
 extract(instr,"phonon_scale_static_displacements",phonon_scale_static_displacements);
 extract(instr,"density_threshhold",threshhold);
+extract(instr,"nof_frames",nof_frames);
+
 if(extract(instr,"lines",lstr,MAXNOFCHARINLINE,200000)==0)
   {int j;j=splitstring(lstr,nn);
    for(int i=1;i<j;i+=2){++linefrom[0];linefrom[linefrom[0]]=nn[i];

@@ -15,7 +15,7 @@ do
   densplt $*
 if test -f results/densplt.jvx
 then
- java javaview results/densplt.jvx &
+ java JvxAnimator results/densplt.jvx &
 rem1=$!
 java displaycontour 2 3 4 results/densplti.grid &
 rem2=$!

@@ -20,6 +20,7 @@ public class graphic_parameters_configurator extends JPanel
   String CONST_SPINS_MOMENTS = "SPINS MOMENTS";
   String CONST_DENSITY = "DENSITY";
   String CONST_PHONON = "PHONON";	
+  String CONST_ANIMATION = "ANIMATION";	
   // Member variables		
   String strWorkingDir;					// contains the working directory of the program
   String strFileSeparator;
@@ -117,7 +118,7 @@ public class graphic_parameters_configurator extends JPanel
 	JTextField txdensity_gridk = new JTextField();
 
   // 5. Tab		
-  JPanel panPhonon = new JPanel();	// DENSITY
+  JPanel panPhonon = new JPanel();	// Phonons
 	// Labels
 	JLabel labphonon_scale_static_displacements = new JLabel();
 	JLabel labphonon_wave_amplitude = new JLabel();
@@ -125,6 +126,11 @@ public class graphic_parameters_configurator extends JPanel
 	JTextField txphonon_scale_static_displacements = new JTextField();
 	JTextField txphonon_wave_amplitude = new JTextField();
 
+  // 6. Tab		
+  JPanel panAnimation = new JPanel();	// ANimation
+        JLabel labnof_frames = new JLabel();
+	JTextField txnof_frames = new JTextField();
+	
 
   // Helper Panels for display on the Tab-panles
   JPanel jPanel1 = new JPanel();
@@ -156,6 +162,8 @@ public class graphic_parameters_configurator extends JPanel
   JPanel jPanel18b = new JPanel();
   JPanel jPanel19 = new JPanel();
   JPanel jPanel20 = new JPanel();
+  JPanel jPanel21 = new JPanel();
+  JPanel jPanel22 = new JPanel();
   
   // Layouts
   FlowLayout flowLayout1 = new FlowLayout();
@@ -186,6 +194,9 @@ public class graphic_parameters_configurator extends JPanel
   FlowLayout flowLayout6 = new FlowLayout();
   VerticalFlowLayout verticalFlowLayout19 = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout20 = new VerticalFlowLayout();
+  FlowLayout flowLayout7 = new FlowLayout();
+VerticalFlowLayout verticalFlowLayout21 = new VerticalFlowLayout();
+  VerticalFlowLayout verticalFlowLayout22 = new VerticalFlowLayout();
 
 
   /***************************************************************
@@ -326,6 +337,14 @@ public class graphic_parameters_configurator extends JPanel
 	InitTextfield(txphonon_scale_static_displacements, "scale factor for static lattice displacements (by mean fields)", 50, 19);
 	InitTextfield(txphonon_wave_amplitude, "scale factor for oscillation of lattice positions", 50, 19);
 
+         /***********************************
+	 * Sixth tab-panel
+	 ***********************************/
+	// Labels
+	InitLabel(labnof_frames, "nof_frames:", 170, 19);
+	// textfields
+	InitTextfield(txnof_frames, "Number of frames in animation", 50, 19);
+	
 
 	this.add(panMain, BorderLayout.NORTH);
 		panMain.setPreferredSize(new Dimension(790,120));
@@ -451,6 +470,14 @@ public class graphic_parameters_configurator extends JPanel
 					jPanel20.add(txphonon_scale_static_displacements, null);
 					jPanel20.add(txphonon_wave_amplitude, null);
 
+                     panMain.addTab("ANIMATION", panAnimation);
+		    panAnimation.setLayout(flowLayout7);
+			panAnimation.add(jPanel21, null);
+				jPanel21.setLayout(verticalFlowLayout21);
+					jPanel21.add(labnof_frames, null);
+			panAnimation.add(jPanel22, null);
+				jPanel22.setLayout(verticalFlowLayout22);
+					jPanel22.add(txnof_frames, null);
 
 			
 	//this.add(txStatus, BorderLayout.CENTER);
@@ -598,6 +625,8 @@ public class graphic_parameters_configurator extends JPanel
     txphonon_wave_amplitude.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_wave_amplitude"));
     txphonon_scale_static_displacements.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_scale_static_displacements"));
 
+    txnof_frames.setText(m_IniFile.GetValue(CONST_ANIMATION, "nof_frames"));
+
   }
 
   void WriteCommand()
@@ -670,6 +699,8 @@ public class graphic_parameters_configurator extends JPanel
 
     m_IniFile.SetValue(CONST_PHONON, "phonon_wave_amplitude", txphonon_wave_amplitude.getText(), " ");
     m_IniFile.SetValue(CONST_PHONON, "phonon_scale_static_displacements", txphonon_scale_static_displacements.getText(), " ");
+
+    m_IniFile.SetValue(CONST_ANIMATION, "nof_frames", txnof_frames.getText(), " ");
 
 	m_IniFile.Write();
         System.exit(0);

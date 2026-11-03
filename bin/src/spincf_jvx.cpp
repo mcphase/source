@@ -254,7 +254,7 @@ fprintf(fout,"    </geometry>\n");
 // creates lines between atoms  ********************************************************************
 void spincf::jvx_show_lines(FILE * fout,graphic_parameters &gp,cryststruct & cs,Vector & ijkmin,Vector & ijkmax,
 Vector & maxv,Vector & minv,Matrix &abc_in_ijk_Inverse)
-{fprintf(fout,"    <geometry name=\"ions\">\n");
+{fprintf(fout,"    <geometry name=\"lines\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
 Vector dd(1,3);
@@ -283,8 +283,8 @@ Vector & hkl,Vector &maxv,Vector &minv,Matrix & abc_in_ijk_Inverse,
  { Matrix p(1,3,1,3); calc_prim_mag_unitcell(p,cs.abc,cs.r);
 int n=0,ctr=0; // limits the  number of atoms to be plotted   
  // plot atoms in region xmin to xmax (quader)
-fprintf(fout,"    <geometry name=\"ions\">\n");
-fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
+fprintf(fout,"    <geometry name=\"atoms\">\n");
+fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\" thicknesses=\"show\">\n");
 fprintf(fout,"        <points>\n");
  int i1,j1,k1,i,j,k,l; Vector dd(1,3),dd0(1,3);
   for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<NOMORE);++i1){
@@ -377,6 +377,38 @@ fprintf(fout,"          <c>  %i       %i       %i </c>\n",r,g,b);
        }}}
   }}}
 fprintf(fout,"        </colors>\n");
+fprintf(fout,"        <thicknesses>\n");n=0;
+  for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<NOMORE);++i1){
+   for (j1=int(ijkmin(2)-1.0);(j1<=int(ijkmax(2)+1))&(n<NOMORE);++j1){
+    for (k1=int(ijkmin(3)-1.0);(k1<=int(ijkmax(3)+1))&(n<NOMORE);++k1){
+   dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
+      for (i=1;(i<=nofa)&(n<NOMORE);++i){for (j=1;(j<=nofb)&(n<NOMORE);++j){for (k=1;(k<=nofc)&(n<NOMORE);++k){
+         for(l=1;(l<=nofatoms)&(n<NOMORE);++l)
+	   {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+            // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
+            // and refer to the same atom
+         for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
+            if(Norm(dd-ddd)<0.15&&ll!=l){ double radius=0;extract(cs.sipffilenames[ll],"radius",radius);
+                                         if(radius!=0){radius=0;
+                                         extract(cs.sipffilenames[l],"radius",radius);
+                                         if(radius==0){
+                                          showdd=0;}}
+        }
+            }
+         dd+=dd0;
+            if(showdd==1)if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
+             (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
+            {
+double radius=0.1;
+ extract(cs.sipffilenames[l],"radius",radius);
+fprintf(fout,"          <th>  %f </th>\n",10*fabs(radius));
+// here should be size of the ion !!
+fprintf(fout,"          <th>  %f </th>\n",10*fabs(radius));
+	     }
+	  }
+       }}}
+  }}}
+fprintf(fout,"        </thicknesses>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
 fprintf(fout,"        <lines>\n");
