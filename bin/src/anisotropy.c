@@ -129,19 +129,19 @@ if(poly==0){
 fprintf(fout,
 "# output file of program: anisotropy @command\n"
 "#! displayxtext=azimuth(deg) in plane perpendicular to [%g %g %g] direction\n"
-"#! displayytext=M||H(mub)\n"
+"#! displayytext=M||H(mub/ion)\n"
 "#! displaytitle= Anisotropy plot T=%g az=0 corresponds to [%g %g %g]\n"
-"#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
-"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",direction(1),direction(2),direction(3),T(1),r1(1),r1(2),r1(3));
+"#1         2          3    4      5     6     7      8           9	      10          11          12          13\n"
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB/ion] Mx[muB/ion] My[muB/ion] Mz[muB/ion] MparallelH[muB/ion]\n",direction(1),direction(2),direction(3),T(1),r1(1),r1(2),r1(3));
 }else{
 
 fprintf(fout,
 "# output file of program: anisotropy @command\n"
 "#! displayxtext=theta(deg)\n"
-"#! displayytext=M||H(mub)\n"
+"#! displayytext=M||H(mub/ion)\n"
 "#! displaytitle= Polycrystal Calculation Results - T=%g dependence on polar angle theta\n"
-"#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
-"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",T(1));
+"#1         2          3    4      5     6     7      8           9	      10          11          12          13\n"
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB/ion] Mx[muB/ion] My[muB/ion] Mz[muB/ion] MparallelH[muB/ion]\n",T(1));
 }
 // ***********************************************
 if(do_sipffile){
@@ -322,7 +322,7 @@ print_time_estimate_until_end(16/(ct*dtheta*dtheta)-1);
        
 }
  }} 
- mpoly/=ct;fprintf(stdout,"#\n#1      2            3 \n#T(K) H(Tesla) Mpolycrystal(muB) \n");
+ mpoly/=ct;fprintf(stdout,"#\n#1      2            3 \n#T(K) H(Tesla) Mpolycrystal(muB/ion) \n");
 for(int Ti=1;Ti<=Tsteps;++Ti){
 fprintf(stdout," %6.3f %6.3f %6.3f \n",T(Ti),H,mpoly(Ti));
 fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T(Ti),H,mpoly(Ti));

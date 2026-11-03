@@ -4,7 +4,7 @@
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.applet.*;
+//import java.applet.*;
 
 //import com.sun.java.swing.*;
 import javax.swing.*;

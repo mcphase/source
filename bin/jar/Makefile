@@ -17,10 +17,12 @@ all : pack
 OBJS = IniConfigurator.java IniFile.java IniItem.java IniKey.java display.java \
        displaycontour.java displaydsigma.java displaymag.java \
        displaytext.java FileListener.java FileMonitor.java searchspacestatus.java \
-       simannfitstatus.java Viewer.java ToolTipManager.java graphic_parameters_configurator.java
+       simannfitstatus.java Viewer.java ToolTipManager.java graphic_parameters_configurator.java \
+       VerticalFlowLayout.java myStringfunc.java  displayhtml.java \
+       PostscriptViewer.java  
 
 compile : $(OBJS)
-	javac -source 15 -target 15 ./*.java
+	javac -source 15 -target 15 $^ 
 #	gcj ./*.java
 
 pack    : compile

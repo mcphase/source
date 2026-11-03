@@ -33,7 +33,7 @@ import interpreter.*;
  * @version @(#)PostscriptViewer.java	1.3	98/12/17
  * @author Uwe Hoffmann
  */
-public class PostscriptViewer extends JApplet implements ActionListener, Runnable {
+public class PostscriptViewer extends JFrame implements ActionListener, Runnable {
 
     static String [] PostscriptFiles;
     static JComboBox combo;
@@ -181,7 +181,7 @@ public class PostscriptViewer extends JApplet implements ActionListener, Runnabl
         } 
     } // End Demo class
 
-
+/*
     public static void main(String s[]) {
 	final PostscriptViewer demo = new PostscriptViewer();
         demo.init(s);
@@ -199,5 +199,24 @@ public class PostscriptViewer extends JApplet implements ActionListener, Runnabl
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         f.setLocation(screenSize.width/2 - w/2, screenSize.height/2 - h/2);
 	f.show();
+    } */
+public static void main(String[] args) {
+    if (args.length == 0) {
+        System.err.println("Usage: java PostscriptViewer <file.ps> [file2.ps ...]");
+        return;
     }
+
+    SwingUtilities.invokeLater(() -> {
+        PostscriptViewer viewer = new PostscriptViewer();
+        viewer.setTitle("Postscript Viewer");
+        viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        viewer.init(args);
+        viewer.addOpenButton();
+        viewer.setSize(390, 440);
+        viewer.setLocationRelativeTo(null);
+        viewer.setVisible(true);
+    });
+}
+
+
 }
