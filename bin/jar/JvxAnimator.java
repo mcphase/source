@@ -159,11 +159,14 @@ void calculateSceneBounds() {
 
     public static void main(String[] args) throws Exception {
         boolean rotate = false;
+        boolean commandLineGif = false;
 int initialFps = 10;
 List<String> inputFiles = new ArrayList<>();
 
-for (int i = 0; i < args.length; i++) {
-    if (args[i].equals("-r")) {
+/* for (int i = 0; i < args.length; i++) {
+if (args[i].equals("-c")) {
+    commandLineGif = true;
+} else if (args[i].equals("-r")) {
         rotate = true;
     } else if (args[i].equals("-s")) {
         if (i + 1 >= args.length) {
@@ -177,12 +180,36 @@ for (int i = 0; i < args.length; i++) {
         inputFiles.add(args[i]);
     }
 }
+*/
+for (int i = 0; i < args.length; i++) {
+    String arg = args[i];
 
+    if (arg.equals("-c")) {
+        commandLineGif = true;
+    } else if (arg.equals("-r")) {
+        rotate = true;
+    } else if (arg.equals("-s")) {
+        if (i + 1 >= args.length) {
+            throw new IllegalArgumentException("Missing Frames Per Second after -s");
+        }
+        initialFps  = Integer.parseInt(args[++i]);
+        if (initialFps  < 1 || initialFps  > 60) {
+            throw new IllegalArgumentException("FPS must be from 1 to 60");
+        }
+    } else {
+for (Path path : expandInput(arg)) {
+    inputFiles.add(path.toString());
+}
+        
+    }
+}
 
 if (inputFiles.isEmpty()) {
-    System.err.println("Usage: java JvxAnimator [-r] [-s fps] file1.jvx ...");
-System.exit(2);
+    System.err.println("Usage: java JvxAnimator [-c][-r] [-s fps] file1.jvx ...");
+    throw new IllegalArgumentException("No JVX input files specified");
 }
+
+
 
 List<Model> models = new ArrayList<>();
 for (String arg : inputFiles) {
@@ -194,12 +221,19 @@ for (String arg : inputFiles) {
 
 
         if (models.isEmpty()) throw new IOException("No geometry found in input files.");
+
   boolean startRotation = rotate;
 int startFps = initialFps;
 
-SwingUtilities.invokeLater(
-        () -> new JvxAnimator(models, startRotation, startFps).show()
-);
+    JvxAnimator animator = new JvxAnimator(models, startRotation, startFps);
+
+if (commandLineGif) {
+    Path output = Path.of(System.getProperty("user.dir"), "animation.gif");
+    animator.export(output); // Use the same exporter as the Export GIF button.
+    return;             // Do not open the UI.
+}
+
+SwingUtilities.invokeLater(animator::show);
 
   }
 
