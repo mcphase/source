@@ -1,0 +1,54 @@
+own written windows installer
+
+1) compile iss_files here
+
+clang++ -std=c++17 -Wall -Wextra -O2 iss_files.cpp -o iss_files
+
+2) collect files in mcphase directory run
+
+./Output/iss/iss_files innosetup_mac.iss Output/iss/files-manifest.tsv
+
+ - filenames will be stored by iss_files in Output/iss/files-manifest.tsv
+
+3) compile package here
+
+clang++ -std=c++17 -Wall -Wextra -O2 \                          
+  -I./miniz \
+  package.cpp \
+  ./miniz/miniz.c \
+  ./miniz/miniz_tdef.c \
+  ./miniz/miniz_tinfl.c \
+  -o package
+
+
+4) pack files : in mcphase directory run
+
+./Output/iss/package Output/iss/files-manifest.tsv Output/iss/payload.mcp
+
+
+5) compiler uninstaller here
+
+x86_64-w64-mingw32-g++ -std=c++17 -O2 \
+  -static -static-libgcc -static-libstdc++ \
+  -DMCPHASE_VERSION=\"6.1\" \
+  uninstaller_stub.cpp \
+  -lole32 -lshell32 -luuid \
+  -o uninstaller.exe
+    
+6) 
+
+x86_64-w64-mingw32-windres payload.rc -O coff -o payload_res.o
+
+7) compile McPhaseSetup here
+
+x86_64-w64-mingw32-g++ -std=c++17 -O2 \
+  -static -static-libgcc -static-libstdc++ \
+  -DMCPHASE_VERSION=\"6.1\" \
+  -I./miniz \
+  installer_stub.cpp \
+  ./miniz/miniz.c \
+  ./miniz/miniz_tdef.c \
+  ./miniz/miniz_tinfl.c \
+  payload_res.o \
+  -lole32 -lshell32 -luuid \
+  -o McPhaseSetup.exe

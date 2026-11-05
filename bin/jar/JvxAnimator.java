@@ -20,7 +20,9 @@ public class JvxAnimator {
     static final int FRAME_DELAY_CS = 10; // 10 centiseconds = 100 ms
     boolean depthShading = true;
     boolean showLabels = true;
-    int frameDelayMs = 100; // Default: 10 frames per second
+    boolean autoRotate;
+    int frameDelayMs=100; // Default: 10 frames per second
+
 Vec sceneCenter;
 double sceneRadius;
 
@@ -145,28 +147,61 @@ void calculateSceneBounds() {
     Preview preview;
     javax.swing.Timer timer;
 
-    
-JvxAnimator(List<Model> models) {
+   // Constructor
+    JvxAnimator(List<Model> models, boolean autoRotate, int initialFps) {
     this.models = models;
+    this.autoRotate = autoRotate;
+    this.frameDelayMs = 1000 / initialFps;
     calculateSceneBounds();
 }
 
-    public static void main(String[] args) throws Exception {
-        if (args.length == 0) {
-            System.err.println("Usage: java JvxAnimator file1.jvx file2.jvx ...");
-            System.exit(2);
-        }
 
-        List<Model> models = new ArrayList<>();
-for (String arg : args) {
+
+    public static void main(String[] args) throws Exception {
+        boolean rotate = false;
+int initialFps = 10;
+List<String> inputFiles = new ArrayList<>();
+
+for (int i = 0; i < args.length; i++) {
+    if (args[i].equals("-r")) {
+        rotate = true;
+    } else if (args[i].equals("-s")) {
+        if (i + 1 >= args.length) {
+            throw new IllegalArgumentException("-s requires an FPS value from 1 to 60");
+        }
+        initialFps = Integer.parseInt(args[++i]);
+        if (initialFps < 1 || initialFps > 60) {
+            throw new IllegalArgumentException("FPS must be from 1 to 60");
+        }
+    } else {
+        inputFiles.add(args[i]);
+    }
+}
+
+
+if (inputFiles.isEmpty()) {
+    System.err.println("Usage: java JvxAnimator [-r] [-s fps] file1.jvx ...");
+System.exit(2);
+}
+
+List<Model> models = new ArrayList<>();
+for (String arg : inputFiles) {
     for (Path file : expandInput(arg)) {
         models.addAll(readJvx(file));
     }
 }
 
+
+
         if (models.isEmpty()) throw new IOException("No geometry found in input files.");
-        SwingUtilities.invokeLater(() -> new JvxAnimator(models).show());
-    }
+  boolean startRotation = rotate;
+int startFps = initialFps;
+
+SwingUtilities.invokeLater(
+        () -> new JvxAnimator(models, startRotation, startFps).show()
+);
+
+  }
 
     void show() {
         window = new JFrame("JVX Animation");
@@ -185,12 +220,13 @@ labelsButton.addActionListener(e -> {
     preview.repaint();
 });
 
-JSlider speed = new JSlider(1, 60, 10); // Frames per second
+JSlider speed = new JSlider(1, 60, 1000 / this.frameDelayMs);
 speed.setToolTipText("Animation speed (frames per second)");
 speed.addChangeListener(e -> {
-    frameDelayMs = 1000 / speed.getValue();
-    if (timer != null) {
-        timer.setDelay(frameDelayMs);
+    int fps = speed.getValue();
+    this.frameDelayMs = Math.max(1, 1000 / fps);
+    if (this.timer != null) {
+        this.timer.setDelay(this.frameDelayMs);
     }
 });
 
@@ -269,7 +305,11 @@ window.setLocationByPlatform(true);
         
         timer = new javax.swing.Timer(frameDelayMs, e -> {
             frameIndex = (frameIndex + 1) % models.size();
-            preview.repaint();
+if (autoRotate) {
+    camera.yaw += 0.015;
+}
+preview.repaint();
+
         });
         timer.start();
     }
@@ -494,6 +534,35 @@ if (showLabels) {
             if(i==0) cone.moveTo(q.getX(),q.getY());
             else cone.lineTo(q.getX(),q.getY());
         }
+
+Point2D[] ringPoints = new Point2D[sides];
+
+for (int i = 0; i < sides; i++) {
+    double t = 2 * Math.PI * i / sides;
+    Vec ring = base.add(u.mul(Math.cos(t) * headRadius))
+                   .add(v.mul(Math.sin(t) * headRadius));
+    ringPoints[i] = screen(ring, width, height, scale);
+}
+
+for (int i = 0; i < sides; i++) {
+    int next = (i + 1) % sides;
+
+    Path2D triangle = new Path2D.Double();
+    triangle.moveTo(pb.getX(), pb.getY()); // Arrow tip
+    triangle.lineTo(ringPoints[i].getX(), ringPoints[i].getY());
+    triangle.lineTo(ringPoints[next].getX(), ringPoints[next].getY());
+    triangle.closePath();
+
+    // Alternate light and dark facets to make the 3D head more visible.
+    g.setColor(i % 2 == 0 ? line.color.brighter() : line.color.darker());
+    g.fill(triangle);
+
+    g.setColor(line.color.darker());
+    g.draw(triangle);
+}
+
+
+        
         cone.closePath();
         g.setColor(line.color);
         g.fill(cone);

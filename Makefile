@@ -120,6 +120,12 @@ include bin/src/Makefile.common
 
 gitdir = Output/mcphase~mcphase
 
+# Extract the numeric version from a line such as:
+#   #define MCPHASVERSION "mcphas 6.1"
+VERSION := $(shell sed -nE \
+	's/.*MCPHASVERSION[[:space:]]+"[^"]*([0-9]+\.[0-9]+)".*/\1/p' \
+	"version" | head -n 1)
+VERSION_TAG := $(subst .,_,$(VERSION))
 
 
 all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan 
@@ -254,8 +260,9 @@ windows:
 
 winno:
 	dot_clean -mv ./
-	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
-	mv Output/mysetup.exe $(HOME)/mcph.exe
+#	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
+	cd bin/iss ; make clean ; make ; make clean
+	mv Output/McPhaseSetup*.exe $(HOME)/
 
 tgz : 
 	make manual cleanexe clean all 
@@ -296,12 +303,13 @@ tgz :
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
 	dot_clean -mv ./
-	cd ../;tar --exclude=mcphas/bin/zulu26.30.11-ca-jdk26.0.1-win_x64/* \
+	cd ../;tar --exclude='./mcphas/bin/zulu*' \
 		--exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \
+		;tar -rvf $(HOME)/mcph.tar mcphas/bin/zulu25.38.109-ca-jdk25.0.5.0.3-linux_x64/* \
 		;cd ./mcphas  
-	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz mcph.tgz
+	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz McPhaseSetup$(VERSION_TAG).tgz
 
 clean:
 	rm -f ./Makefile.sav

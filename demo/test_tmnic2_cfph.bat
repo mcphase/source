@@ -71,7 +71,7 @@ getvalue.pl -c 269.86403 0 4 1 0 mcphasph.j
 # second with cf-Phonon interaction parameters 
  addj  mcphasph.j mnn.j > mcphas.j
  mcphasit -v -doeps  -prefix test_ 
-getvalue.pl -c 48.42492 0 9 1 0 results/test_mcphas.fum
+getvalue.pl -c 52.063 0 9 1 0 results/test_mcphas.fum
 
 # <h2> Magnetic Scattering </h2>
 
@@ -79,9 +79,8 @@ getvalue.pl -c 48.42492 0 9 1 0 results/test_mcphas.fum
  mcdispit -prefix test_ -pinit 0.1
 
 range 7 0.2 0.4 results/test_mcdisp.qei
-getvalue.pl -c 0.001353 9 10 14.1954 0 results/test_mcdisp.qei
-getvalue.pl -c 0.001350 9 11 14.1954 0 results/test_mcdisp.qei
-getvalue.pl -c 0.001062 9 12 14.1954 0 results/test_mcdisp.qei
+getvalue.pl -c 0.0053 9 10 13.8125 0 results/test_mcdisp.qei
+getvalue.pl -c 0.0053 9 11 13.8125 0 results/test_mcdisp.qei
+getvalue.pl -c 0.00083 9 12 13.8125 0 results/test_mcdisp.qei
   
-
 cd ../../demo

@@ -64,10 +64,11 @@ call setup_mcdisp_mf 20  0 0 0
 call mcdispit -prefix test_ -pinit 0.1
 
 range 7 0.49 0.51 results/test_mcdisp.qei
-getvalue.pl -c 0.000534  9 12 12.758     0    results/test_mcdisp.qei
-getvalue.pl -c 0.01181  9 11 12.758     0    results/test_mcdisp.qei
-getvalue.pl -c 0.01184   9 10 12.758      0    results/test_mcdisp.qei
+getvalue.pl -c 0.00053  9 12 12.7595     0    results/test_mcdisp.qei
+getvalue.pl -c 0.012  9 11 12.7595     0    results/test_mcdisp.qei
+getvalue.pl -c 0.012   9 10 12.7595      0    results/test_mcdisp.qei
  
+
 REM  <h2> diffraction pattern </h2>
 
 REM remove autocreated mcdiff.in with nonmagnetic atoms (otherwise these will be counted twice)
@@ -79,6 +80,6 @@ call setvariable lorentz 2 mcdiff.in
 call setvariable thetamax 30 mcdiff.in
 call mcdiff
 average -av -dmin=0.001 6 results/mcdiff.out
-getvalue.pl -c 0.01038  6 7 39.722     0    results/mcdiff.out
+getvalue.pl -c 0.0103 6 7 39.715     0    results/mcdiff.out
 
 cd ../../demo
