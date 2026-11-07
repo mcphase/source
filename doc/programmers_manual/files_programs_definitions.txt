@@ -1,6 +1,6 @@
 
 
-- für jeden der folgenden filetypen sollte dasselbe icon angezeigt werden
+- fr jeden der folgenden filetypen sollte dasselbe icon angezeigt werden
 
 - popup text sollte dass command sein, damit der benutzer sieht, was er startet durch doppelklicks
 
@@ -24,7 +24,7 @@ filetype     command
 
 java based
 
-*.jvx     java javaview *.jvx
+*.jvx     java JvxAnimator *.jvx
 *.ps      java PostscriptViewer *.ps
 *.eps     java PostscriptViewer *.eps
 *.jpg     java Viewer *.jpg  

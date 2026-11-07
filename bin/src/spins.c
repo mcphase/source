@@ -1197,8 +1197,11 @@ b=(unsigned int)(unsigned char)elstr[i][4];
 radius=strtod(elstr[i]+5,NULL);
    snprintf(cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g %s r=%i g=%i b=%i",
            charge,gp.scale_pointcharges*radius*signum(charge)*pow((double)fabs(charge),0.3333),
-           element,r,g,b);}
-   // printf("%s\n",cs.sipffilenames[ii]);
+           element,r,g,b);
+//    printf("%s scale=%g radius=%g charge=%g sig(charge)=%g pow=%g  estr=%s\n",cs.sipffilenames[ii],
+//gp.scale_pointcharges,radius,charge,signum(charge),pow((double)fabs(charge),0.3333),elstr[i]+5);
+
+}
 
 // printf("#! atom %i %s displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,cs.sipffilenames[ii],ii,pos(1),ii,pos(2),ii,pos(3));
   printf("#! atom %i  displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,ii,pos(1),ii,pos(2),ii,pos(3));

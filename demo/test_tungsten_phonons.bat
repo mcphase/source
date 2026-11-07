@@ -16,9 +16,11 @@ getvalue.pl -c 0.000119 6 12 10 0 d.clc
 
 singleion -r W2p1.sipf -HE -pel 2 0 0 0 10 0 0   0 0 0 > d.clc
 getvalue.pl -c 0.02372 6 12 10 0 d.clc
-getvalue.pl -c 23.222 0 13 3 0 results/W2p1.sipf.trs
-getvalue.pl -c 17.812 0 11 1 0 results/W2p1.sipf.trs
-getvalue.pl -c 5.411 0 12 1 0 results/W2p1.sipf.trs
+# we do not test the following 3 lines - because W Einstein oscillator is isotropic and
+# this degeneracy will lead to mixing of eigenstates and thus P1 P2 P3 can be arbitrary
+# getvalue.pl -c 23.222 0 13 3 0 results/W2p1.sipf.trs
+# getvalue.pl -c 17.812 0 11 1 0 results/W2p1.sipf.trs
+# getvalue.pl -c 5.411 0 12 1 0 results/W2p1.sipf.trs
 
 
 singleion -r W2p1.sipf -pel -HE  2 0 0 0 0 0 1  0 0 0 > d.clc

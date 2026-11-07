@@ -307,7 +307,8 @@ tgz :
 		--exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \
-		;tar -rvf $(HOME)/mcph.tar mcphas/bin/zulu25.38.109-ca-jdk25.0.5.0.3-linux_x64/* \
+		;tar -rvf $(HOME)/mcph.tar mcphas/bin/zulu27.30.109-ca-jdk27.0.1.0.3-macosx_aarch64-runtime/* \
+		;tar -rvf $(HOME)/mcph.tar mcphas/bin/zulu25.38.109-ca-jdk25.0.5.0.3-linux_x64-runtime/* \
 		;cd ./mcphas  
 	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz McPhaseSetup$(VERSION_TAG).tgz
 

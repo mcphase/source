@@ -248,7 +248,7 @@ programs are called:
 
 Note on javaview: You can create also several plots (for instance for different temperatures) and store these
 in a sequence such as densplt.1.jvx, densplt.2.jvx, ... animate
-the view of 4 jvx files by typing: java javaview model=densplt.*.jvx Animation.LastKey=4 
+the view of 4 jvx files by typing: javaview densplt.*.jvx 
 
 
 \subsection{Programs {\prg display\_densities}\index{display\_densities}  - display of the superstructure
@@ -376,15 +376,15 @@ Output files:
   \item the text file {\prg results/spins.out} is created, which is useful to produce input files for
               the diffraction program {\prg mcdiff\index{mcdiff}} (done in the script {\prg setup\_mcdiff\_in})
   \item the graphics files {\prg results/spins.jvx} and {\prg results/spins\_prim.jvx}, which can be displayed
-         by the program {\prg javaview}, e.g. by the command {\prg java javaview spin\_prim.jvx}.
+         by the program {\prg javaview}, e.g. by the command {\prg javaview spin\_prim.jvx}.
   \item if {\prg spins} is used with arguments {\prg h k l E(meV)}, it takes the eigenvectors of magnetic 
 excitations
         from files {\prg results/mcdisp.q*}  created by {\prg mcdisp}) and produces a graphical
         animation of the spin osciallation which is associated with this magnetic mode. The output is a series
         of files {\prg results/spins.*.jvx} and {\prg results/spins\_prim.*.jvx} which can be viewed by program
-        {\prg javaview}, e.g. by the command {\prg java javaview "model=results/spins\_prim.*.jvx" 
-        Animation.LastKey=16 background="255 255 255"}.  {\prg javaview} is also able to produce a sequence
-		of gif files (press c in the animation window), which can then be processed by an animation editor
+        {\prg javaview}, e.g. by the command {\prg javaview results/spins\_prim.*.jvx}.  {\prg javaview} 
+               is also able to produce a sequence
+		of gif files (press button in the animation window), which can then be processed by an animation editor
 		to generate an animation, which can be inserted in presentations. For example, you can use
  {\prg  Imagemagick} graphics package (has to be installed separately!)
         to create an animation. The following command will issue a proper gif animation, which you can include in 
@@ -425,10 +425,28 @@ the parameter file {\prg results/graphic\_parameters.set}
 .... in  order to display the results graphically the following java
 programs are called:
 \begin{verbatim}
-  java javaview results/spins.jvx
-  java javaview "model=results/spins.*.jvx" Animation.LastKey=16 background="255 255 255"
+  javaview results/spins.jvx
+  javaview results/spins.*.jvx
 \end{verbatim}
 
+\subsection{Program {\prg javaview\index{javaview}}}
+
+The program javaview is frequently used to display and animate 3 dimensional objects,
+most important by {\prg display\_densities},{\prg display\_density} 
+(see sections~\ref{displaydensities} and ~\ref{displaydensity}) and after running
+{\prg mcphas2jvx}. It is actually a script which calls {\prg java JvxAnimator} and
+with the following syntax:
+
+\begin{verbatim}
+Usage: java JvxAnimator [-c][-r] [-s fps] file1.jvx ...
+\end{verbatim}
+
+The options are:
+\begin{description}
+\item[-c] do not show anything - just create a .gif animation and a .mp4 file
+\item[-r] rotate the scene 
+\item[-s fps] for more than one .jvx file the speed of animation in frames per second
+\end{description}
 
 
 \subsection{Program {\prg hkl\index{hkl}}, {\prg hkl2d\index{hkl2d}} and {\prg mcdiff\index{mcdiff}} - graphical %%@
