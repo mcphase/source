@@ -232,7 +232,9 @@ if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - ch
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
 #endif
-fin=NULL; if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
+fin=NULL; if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");
+                              printf("reading HT points from %s\n",argv[argc-1]);
+                             }   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
  { //begin initialize display file
@@ -253,7 +255,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
    if (ini.ymin>ini.ymax){dumm=ini.ymin;ini.ymin=ini.ymax;ini.ymax=dumm;}
    
    if(argc>options+1)  //should T-H values be read from file ?
-   {while (feof(fin)==0&&(0==inputline(fin,nn)||ini.calcTHfromnn(T,h,nn,inputpars.cs)==false)){;}  // if yes -> input them
+   {while (feof(fin)==0&&(0==inputline(fin,nn)||ini.calcTHfromnn(x,y,T,h,nn,inputpars.cs)==false)){;}  // if yes -> input them
     if (feof(fin)!=0) goto endproper;
     //x=nn[1];y=nn[2];T=nn[3];h=0;h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
     // column 5 6 7 are the direction of h given by its components in i j k coordinates

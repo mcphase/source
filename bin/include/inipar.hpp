@@ -122,8 +122,8 @@ double * colvaluepointer(int & i,double & x, double & y,double& T,Vector & Hext,
                  Vector & Eabc,double & NormH, double & NormE);
 public:
  // set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
- // returns true if successful  (NormH NormE x y are not used)
-bool calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs);
+ // returns true if successful  (NormH NormE are not used)
+bool calcTHfromnn(float & x, float & y,double & T,Vector & Hext,float * nn,cryststruct &cs);
 
  // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
  // if yes, returns true ... 

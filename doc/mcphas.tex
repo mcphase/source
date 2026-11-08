@@ -658,18 +658,30 @@ input files {\prg mcphas.ini, mcphas.j, etc. } and type
 %script2html_begin{mcphasit} 
 
 \begin{description}
-\item[\prg mcphas] to run the program generating stepwise $H-T$ values 
+\item[\prg mcphas [options] [file.htp]] to run the program generating stepwise $H-T$ values 
               in a loop given by {\prg mcphas.ini\index{mcphas.ini}} (you can also press the
-              symbol in the {\prg McPhase - Explorer} window). The complete syntax of the command is actually
-\item[\prg mcphas\index{mcphas}[options] [file]] Adding the name of a file will run the program with an input file --   
-             {\prg file} contains T(K) Hi(T) Hj(T) Hk(T) values to be calculated  in columns 
-             3, 5, 6, 7, respectively (ijk coordinates defined by  $j||b$, $k||(a \times b)$ and $i$ normal to $k$ and $j$ )
-             if [file] is not given, xmin xmax xstep (xT xHa xHb xHc)
-             ymin ymax ystep (yT yHa yHb yHc) is read from file {\prg mcphas.ini\index{mcphas.ini}}
-	     and phase diagram is calculated
+              symbol in the {\prg McPhase - Explorer} window). 
+             If a .htp file is not given,then  xmin xmax xstep (xT xHa xHb xHc)
+             ymin ymax ystep (yT yHa yHb yHc) are read from {\prg mcphas.ini\index{mcphas.ini}}
+	     and physical properties are  calculated for these external parameters.
 \end{description}
 
-Options are
+              Adding the name of a .htp  file will run the program with an input file --   
+             {\prg file.htp} contains external parameters such as temperature, fields, stress,
+             e.g. T(K) Hi(T) Hj(T) Hk(T) \dots
+             values to be calculated in columns 1-7, respectively. 
+            (ijk coordinates defined by  $j||b$, $k||(a \times b)$ and $i$ normal to $k$ and $j$ )
+
+Rules when reading a .htp file:
+\begin{enumerate}
+\item column meanings as defined in mcphas.ini by out* (file format as output file mcphas.xyt)
+\item if both internal and external fields are given only that with the higher column number is used and
+      treated as internal/external dependent on the dmag switch in mcphas.ini
+\item x and y columns are read and also written into output files, but are ignored for determination of
+             temperature/fields/stresses
+\end{enumerate}
+
+Options are:
 \begin{description}
 \item[\prg   -h]  to  print help and version of {\prg McPhas}.
 \item[\prg   -stamax 14]  end mcphas\index{mcphas} if standard deviation exceeds 14.

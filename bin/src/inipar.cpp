@@ -69,8 +69,12 @@ if(Norm(x)>0.00001){ // normalize Vector x to unit length
 void inipar::errexit() // type info and error exit 
 {     printf (" \n%s \n",MCPHASVERSION);
 printf (" use as: mcphas [options] [file]\n");
-printf (" [file] ... input file  with sets of x y T H Hi Hj Hk points \n");
-printf (" (format as output file mcphas.xyt)\n\n");
+printf (" [file] ... input file  with sets of x y T H Hi Hj Hk ... points \n");
+printf ("            file format output file mcphas.xyt,column meanings as defined in mcphas.ini by out*\n");
+printf ("            rules: 1) if both internal and external fields are given only that with the higher column number is used and\n");
+printf ("                      treated as internal/external dependent on the dmag switch in mcphas.ini\n");
+printf ("                   2) x and y columns are read and also output in output files, but are ignored for determination of\n");
+printf ("                      temperature/fields/stresses\n");   
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
 printf ("          -chi    ... instead of sta calculate chi2\n");
@@ -370,15 +374,22 @@ void inipar::calcTHfromxy(double & T,Vector & h,double x, double y,cryststruct &
 }
 
 // set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
- // returns true if successful (NormH NormE x y are not used)
-bool inipar::calcTHfromnn(double & T,Vector & Hint,float * nn,cryststruct &cs)
+//file format output file mcphas.xyt,column meanings as defined in mcphas.ini by out*\n");
+//rules: 1) if both internal and external fields are given only that with the higher column number is used and\n");
+//          treated as internal/external dependent on the dmag switch in mcphas.ini\n");
+//       2) x and y columns are read and also output in output files, but are ignored for determination of\n");
+//          temperature/fields/stresses\n";   
+ // returns true if successful (NormH NormE are not used)
+bool inipar::calcTHfromnn(float &  x,float & y,double & T,Vector & Hint,float * nn,cryststruct &cs)
 {int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
  if(nn[0]<maxcol)return false; // array too small, not enough parameters in line
  double xx=0,yy=0,NormH,NormE;T=0;Hint=0;
  Vector Habc(1,3),Eabc(1,3);Habc=0;Eabc=0;
 for(int i=1;i<=usrdefcols[0];++i)
 { (*colvaluepointer(clcod[usrdefcols[i]],xx,yy,T,Hint,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
+//printf("nn[%i]=%g colcod=%i ",usrdefcols[i],nn[usrdefcols[i]],clcod[usrdefcols[i]]);
 }
+//myPrintVector(Hint,"Hint:");
 // if Habc or Eabc are given - add these to Hint
 Vector abc(1,6),v(1,3); abc(1)=1; abc(2)=1; abc(3)=1; 
                   abc(4)=cs.alpha(); abc(5)=cs.beta(); abc(6)=cs.gamma();
@@ -390,7 +401,8 @@ dadbdc2ijk(v,Eabc,abc);
 Hint(4)+=v(1);
 Hint(5)+=v(2);
 Hint(6)+=v(3);
-
+//myPrintVector(Hint,"Hint:");
+x=xx;y=yy;
  return true;
 }
 
