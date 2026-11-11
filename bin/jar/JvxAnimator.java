@@ -424,7 +424,11 @@ double radius = sceneRadius;
         double scale=Math.min(width,height)*0.502*camera.zoom/radius;
         Vec[] rotated=new Vec[m.points.size()];
         for (int i=0;i<m.points.size();i++) {
-            Vec p=m.points.get(i).sub(center);
+            //Vec p=m.points.get(i).sub(center);
+Vec original = m.points.get(i).sub(center);
+
+// Convert Z-up model coordinates to this renderer's Y-up coordinates.
+Vec p = new Vec(original.x, original.z, -original.y);
             double cy=Math.cos(camera.yaw), sy=Math.sin(camera.yaw);
             double x=cy*p.x+sy*p.z, z=-sy*p.x+cy*p.z;
             double cp=Math.cos(camera.pitch), sp=Math.sin(camera.pitch);
