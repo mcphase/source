@@ -150,6 +150,8 @@ Furthermore, we thank the participants of McPhase Workshops for installing and
 testing the new McPhase software suite before the official release:
 
 \begin{description}
+\item[McPhase 6.1]
+   2027: Andreas Doenni
 \item[McPhase 6.0]
    2026: Victor Mecoli, Tobias Weber, Zumair Muhammed, Yash Rajesh Tijare, 
    2025: Sungkyun Choi, Justus Grumbach
@@ -196,7 +198,18 @@ Without the enthusiastic support of the neutron scattering
 community this program would not have come into existence. 
 
 \section*{What is New ?}
-
+\subsection*{ ... in version 6.1 ...}
+\begin{itemize}
+\item program {\prg  posls} to compute sta = goodness of peak positions 
+\item program {\prg spins} extended to include symmetry analysis for eigenvectors of Raman
+\item {\prg script2html} gets a -table option
+\item physical constants in phonon module made more accurate
+\item {\prg maxcol} program to find maxima in datafiles
+\item {\prg delEstr} as additional tool for running {\prg reduce\_unitcell} and removing bonding charges
+\item removed bugs from {\prg  ic1ion} p-electron calculation, {\prg  spinsfromq, spins, cpso1ion}
+\item removed dependence on deprecated Java Applets so McPhase runs on modern Java
+\item multithreading in programs {\prg  anisotropy} and {\prg reduce\_unitcell} improved
+\end{itemize}
 \subsection*{ ... in version 6.0 ...}
 \begin{itemize}
 \item    External Stress / Pressure
@@ -267,20 +280,6 @@ u= umax * tanh (u/umax) ... this avoids uniform shifts of the crystal
 \item {\prg spins} changed to produce for option -f spins\_prim.jvx graphics output
 \item  {\prg spinsfromq} phases correctly introduced for double and triple q structure
 \end{itemize}
-
-\subsection*{ \dots in version 5.4 \dots}
-\begin{itemize}
-\item    {\prg bcfph} and a DMD method for Crystal Field - Phonon interaction
-\item  {\prg makenn} option for Dzyalosinsky Moriya interaction created
-\item .trs file format changed to include number of initial and final level
-\item   {\prg powdermagnon} sampling q dependence improved
-\item option -read introduced to {\prg mcphas}
-\item   program {\prg substitute} option -f introduced
-\item   Slatec removed from PDL routines to make installation easier
-\item {\prg cpso1ion} bug (for more than 10 levels) found and removed
-\item bug in {\prg makenn} options ignore\_neihgbours\_behind=1 and bvk found and removed
-\end{itemize}
-
 
 
 \newpage

@@ -339,13 +339,16 @@ std::wcout << L"Install directory [" << installText << L"]? ";
         if (!input.empty()) installText = input;
 
         const fs::path installDir(installText);
-        std::wcout << L"Create desktop shortcuts? (y/N) ";
+        std::wcout << L"Create desktop shortcuts? [y] ";
         std::getline(std::wcin, input);
         const bool desktopIcons =
-            !input.empty() && (input[0] == L'y' || input[0] == L'Y');
+            input.empty() || (input[0] == L'y' || input[0] == L'Y');
 
         std::wcout << L"Installing to " << installDir << L"...\n";
+        std::wcout << L"Extracting files...\n";
         install_entries(entries, installDir);
+         std::wcout << L"... complete.\n";
+        std::wcout << L"Creating Uninstaller ...\n";
 
 write_uninstall_manifest(entries, installDir);
 
@@ -377,6 +380,8 @@ uninstallerOut.write(
 if (!uninstallerOut)
     throw std::runtime_error("Failed writing uninstall.exe.");
 
+          std::wcout << L"... complete.\n";
+        std::wcout << L"Creating Shortcuts ...\n";
 
 
         const std::wstring appName = app_name();
@@ -403,8 +408,10 @@ create_shortcut(
     installDir,
     installDir / L"mcphas.ico");
 
+  std::wcout << L"... complete.\n";
 
         if (desktopIcons) {
+        std::wcout << L"Creating Desktop Icons ...\n";
             const fs::path desktop = known_folder(FOLDERID_Desktop);
 
             create_shortcut(
@@ -418,22 +425,21 @@ create_shortcut(
                 installDir / L"demo" / L"demo.bat",
                 installDir / L"demo",
                 installDir / L"demo" / L"demo.ico");
-        }
+     std::wcout << L"... complete.\n";
+   }
 
-        std::wcout << L"Installation complete.\n";
-        std::wcout << L"Finish installation ? (y/N) ";
-        std::getline(std::wcin, input);
-
-        if (!input.empty() && (input[0] == L'y' || input[0] == L'Y')) {
-            const std::wstring params = installDir.wstring();
+        std::wcout << L"Setting up startup by running makedos.bat ... ";
+          const std::wstring params = installDir.wstring();
             ShellExecuteW(nullptr, L"open",
                           (installDir / L"makedos.bat").c_str(),
                           params.c_str(), installDir.c_str(), SW_SHOWNORMAL);
-        }
+           std::wcout << L"... complete.\n";
+  
 
-        std::wcout << L"Install McPhase screensaver? (y/N) ";
+        std::wcout << L"Install McPhase screensaver? [y] ";
         std::getline(std::wcin, input);
-        if (!input.empty() && (input[0] == L'y' || input[0] == L'Y')) {
+        if (input.empty() || (input[0] == L'y' || input[0] == L'Y')) {
+          std::wcout << L"Installing McPhase Screensaver ...\n";
             const fs::path screensaver =
                 installDir / L"demo" / L"McPhase_screensaver.scr";
             const std::wstring params =
@@ -441,13 +447,17 @@ create_shortcut(
                 screensaver.wstring() + L"\"";
             ShellExecuteW(nullptr, L"open", L"rundll32.exe",
                           params.c_str(), nullptr, SW_SHOWNORMAL);
+           std::wcout << L"... complete.\n";
+  
         }
     } catch (const std::exception& e) {
         std::cerr << "Installation failed: " << e.what() << '\n';
         if (comResult == S_OK || comResult == S_FALSE) CoUninitialize();
         return 1;
     }
-
+  
     if (comResult == S_OK || comResult == S_FALSE) CoUninitialize();
+    std::wcout << L"McPhase Installation complete.\n";
+
     return 0;
 }

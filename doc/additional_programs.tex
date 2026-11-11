@@ -227,6 +227,54 @@ so1ion (no file.levels.cef required, takes values from so1ion.out) .
 ic1ion (no file.levels.cef required, takes values from ic1ion.out) .
 \item[\prg cpicf1ion 10 100 1 {[options]}:] same as {\prg cpsingleion} but for output of program
 icf1ion (no file.levels.cef required, takes values from icf1ion.out) .
+%script2html_begin{delEstr} \begin{description}					  
+\item [\prg delEstr\index{delEstr}\label{delEstr}  {[-v]}  ETbO=0.4,0.3,0.3  'ETbC*=0.5,0.5' :]\addcontentsline{toc}{subsubsection}{\prg delEstr}	        
+ program to create a string for the {\prg reduce\_unitcell -delatoms} option
+to remove bonding charges from {\prg makenn.j} file after running {\prg makenn -cfph}. 
+It reads {\prg results/makenn.j} and {\prg results/makenn.a*.pc} and {\prg .sipf} files.
+
+Bonding Charges are distributed on nearest and next nearest and third nearest
+phonon type neighbours and so on (.sipf file names of these phonon type neighbours 
+must not start with E+uppercase character and must have the phonon module).
+ The coefficients of distributing the bonding charge onto neighbours
+are given as command line parameters:
+
+Usage Windows:
+\begin{verbatim}
+ delEstr  [-v] ENAME=value[,value...] [ENAME=value[,value...] ...]
+\end{verbatim}
+
+Usage Linux:
+\begin{verbatim}
+.  delEstr  [-v] ENAME=value[,value...] [ENAME=value[,value...] ...]
+source delEstr  [-v] ENAME=value[,value...] [ENAME=value[,value...] ...]
+\end{verbatim}
+
+ENAME matches a  bonding charge .sipf filename ; for example, ETbO* matches ETbO1.sipf.
+
+Environmental variable {\prg MCPHASE\_DELESTR} is set to contain the distribution string to be
+passed to {\prg reduce\_unitcell}, e.g. in the form of
+\begin{verbatim}
+  reduce_unitcell -delatoms $MCPHASE_DELESTR results/makenn.j > mnn.j
+\end{verbatim}
+
+Example:
+\begin{verbatim}
+ . delEstr -v ETbO*=0.5,0.5
+\end{verbatim}
+
+creates the output
+
+\begin{verbatim}
+ETbO1_1.sipf  --> .5 * O1_1.sipf .5 * Tb1_1.sipf
+ETbO1_2.sipf  --> .5 * O1_2.sipf .5 * Tb1_2.sipf
+13:5+--.5:1+--.5,14:6+--.5:2+--.5
+\end{verbatim}
+
+and the environment variable 
+{\prg MCPHASE\_DELESTR} is set to {\prg 13:5+--.5:1+--.5,14:6+--.5:2+--.5}
+
+%script2html_end{delEstr} \end{description}
 %script2html_begin{epsdebye} \begin{description}					  
 \item [\prg epsdebye\index{epsdebye}\label{epsdebye} Tmax dT Tdebye scale {[d1 d2 datafile]}:]\addcontentsline{toc}{subsubsection}{\prg epsdebye}	        
 		    calculates the phonon induced strain $\epsilon$ using the debye model
@@ -667,8 +715,11 @@ increases the electrostatic force between the point charge and the magnetic ion 
 this movement leads to a further increase of the crystal field. The movement continues until the restoring elastic 
 force is equal to the increase in electrostatic force.
 }
-\item[Option: -delatoms phon ] instead of removing atoms connected by a lattice vector 
- 			remove atoms which have a phonon module. This option is recommended to
+\item[Option: -delatoms gt 12] gt means greater than, same as -delatoms 13,14,15,\dots 
+\item[Option: -delatoms phon0 ] instead of removing atoms connected by a lattice vector 
+ 			remove atoms which have a phonon module. Change no other interactions.
+\item[Option: -delatoms phon ] same as option -delatoms phon0 but recalculate some interactions between remaining atoms.
+                        This option is recommended to
                         obtain a reduced model containing only magnetic ions of the form
 
 \begin{eqnarray}\label{Hreduced}
@@ -801,6 +852,7 @@ interaction operator expectation values are set to zero
   interactions only for a specific subcell $2 2 2$ of this supercell to save
   computation time. After deleting phononic atoms in this way, output
   file with the computed interactions. 
+
 %script2html_end{reduce_unitcell} \end{description} \end{description}
 \OO This is all fine, yet I prefer the simple formula in the small text above 
 based on the Einstein model approach !
@@ -1607,9 +1659,16 @@ The results go to stdout and environment variables MCPHASE\_INT\_MU\_1,
 \item [\prg lorentzcol\index{lorentzcol}\label{lorentzcol} col position fwhm area:] \addcontentsline{toc}{subsubsection}{\prg lorentzcol}calculate a lorentzian from
 a column with x values, the formula for a Lorentz curve is: 
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+(x-{\rm position})^2/fwhm^2)}$
+%script2html_end{lorentzcol} \end{description}
+%script2html_begin{maxcol} \begin{description}
+\item [\prg maxcol\index{maxcol}  col file:]\addcontentsline{toc}{subsubsection}{\prg maxcol} is used to find local maxima in data file
+the program scans the file line by line and if a maximum is found 
+ in column col, the line is output to stdout
+%script2html_end{maxcol} \end{description}
+%script2html_begin{multcol} \begin{description}
 \item [\prg multcol\index{multcol}  colx coly file:]\addcontentsline{toc}{subsubsection}{\prg multcol} multiplies column x and column y of file, %%@
 result is stored in col y
-%script2html_end{lorentzcol} \end{description}
+%script2html_end{multcol} \end{description}
 %script2html_begin{newcol} \begin{description}
 \item [\prg newcol\index{newcol}\label{newcol} col {[options]} file:]\addcontentsline{toc}{subsubsection}{\prg newcol} creates a new column col in file containing the line numbe. option: -c 12.3  ... instead of line number put constant 12.3 into the new column
 %script2html_end{newcol} \end{description}

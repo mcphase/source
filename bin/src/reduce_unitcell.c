@@ -261,18 +261,25 @@ return true;
 
 // ***************************************************************************
 // routine for the case of removing phononic degrees of freedom and
+// if renorm == true:
 // - renormalising elastic constants
 // - calculating (phonon induced) magnetoelastic and quadrupolar interactions
 // ... interactions will be calculated for the first nprim atoms in unit cell par a
 // ... if na<nprim, then interactions will be calculated for the first na magnetic atoms
 // ... interactions will be calculated for interaction operators Igmin,...,Inofcomponents only
 // ***************************************************************************
-void delphonons(par & a,bool symmetrize, int noindexchange,int nprim,int na, int gmin)
+void delphonons(par & a,bool symmetrize, bool renorm,int noindexchange,int nprim,int na, int gmin)
 {
-
+  Vector h1(1,a.cs.nofcomponents);
+Vector Happ(1,HEXT_DIMENSION);Happ=0;
+double T=1;
+Vector u0(1,3),Hxc(1,3),Hext(1,6);
+Matrix dis(1,1,1,1);dis=0;dis(1,1)=1;
 
 
 fprintf(stderr,"# deleting phonons");
+if(renorm)
+{
 // 1. renormalise elastic constants using only phonon degrees of freedom
 //   and calling htcalc with doeps for various applied external stresses ...
 double U; double r; 
@@ -284,9 +291,6 @@ time_t curtime;
 
  phon.set_nofcomponents(3);
 // remove nonphononic degrees of freedom from phon
-Vector u0(1,3),Hxc(1,3),Hext(1,6);double T=1;
-Vector Happ(1,HEXT_DIMENSION);Happ=0;
-Matrix dis(1,1,1,1);dis=0;dis(1,1)=1;
 
 Vector h1_phon(1,phon.cs.nofcomponents);
 for(int n=phon.cs.nofatoms;n>0;--n)
@@ -452,7 +456,6 @@ physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,pw.cs);
  testspincf testspins (ini.maxnoftestspincf,"reduce_unitcell.tst",outfilename,pw.cs.nofatoms,pw.cs.nofcomponents);
   Vector Imax(1,pw.cs.nofatoms*pw.cs.nofcomponents);
   Vector Imom(1,pw.cs.nofcomponents);
-  Vector h1(1,pw.cs.nofcomponents);
 
 
 for(int n=pw.cs.nofatoms;n>0;--n)
@@ -703,7 +706,7 @@ for(int n=nlim;n>0;--n)// go through all magnetic ions
  #endif
 #endif
 if(verbose){fclose(fout);}  
-
+}
 // remove all phonons from a before outputting it ...
 for(int n=a.cs.nofatoms;n>0;--n)
 {h1=0;(*a.jjj[n]).Icalc_parameter_storage_init(h1,Happ,T); // initialize eigenstate matrix
@@ -762,9 +765,11 @@ int main (int argc, char **argv)
 			 removed,   for 2 5 7 all the interactions with other atoms are removed\n \
                          a +-- separator  triggers in the -delatoms mode that charges are transferred resetting\n \
                           CHARGE variablein sipf files (sipf files are rewritten with modified charge)\n   \
-                        -delatoms phon\n   \
+                        -delatoms phon0\n   \
                          remove all atoms which have a single ion module with the \n   \
-                         pcalc function (phonon degrees of freedom), renormalize elastic\n   \
+                         pcalc function (phonon degrees of freedom)\n \
+                        -delatoms phon\n   \
+                         same as -delatoms phon, but renormalize elastic\n   \
                          constants by applying different components of the stress tensor and computing\n   \
                          self consistent strain, furthermore compute phonon induced magnetoelastic and \n   \
                          quadrupolar interactions by self consistent mean field calculations for various \n   \
@@ -788,12 +793,13 @@ int main (int argc, char **argv)
       exit (1);
     } else { fprintf (stderr,"#* reduce_unitcell 250123 *\n"); }
 
-int ow=1,i=0; int n=0,noindexchange=0,mcdiff=0,n1=1,n2=1,n3=1,s1=1,s2=1,s3=1,gmin=1,na=10000;bool delphon=false,symmetrize,extend=false;
+int ow=1,i=0; int n=0,noindexchange=0,mcdiff=0,n1=1,n2=1,n3=1,s1=1,s2=1,s3=1,gmin=1,na=10000;
+bool delphon=false,symmetrize,extend=false,renorm=false;
 char * token;
 char *substr[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];
 float ns[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];ns[0]=MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL;
 float nscoeff[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];nscoeff[0]=MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL;
-
+int greaterthan=0;
  while(argv[ow][0]=='-'){
  if(strcmp(argv[ow],"-nofcomponents")==0){ow+=1;
  // option setting nofcomponents
@@ -801,11 +807,13 @@ float nscoeff[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL+1];nscoeff[0]=MAX_NOF_AT
  if(n<1){fprintf(stderr,"Error program add option nofcomponents=%i is less than 1\n",n);exit(1);}
                                         }
 if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
- if(strcmp(argv[ow],"phon")==0){delphon=true;symmetrize=false;}
+ if(strcmp(argv[ow],"phon0")==0){delphon=true;}
  else
- if(strcmp(argv[ow],"phons")==0){delphon=true;symmetrize=true;}
+ if(strcmp(argv[ow],"phon")==0){delphon=true;symmetrize=false;renorm=true;}
  else
- if(strcmp(argv[ow],"phone")==0){delphon=true;symmetrize=false;extend=true;
+ if(strcmp(argv[ow],"phons")==0){delphon=true;symmetrize=true;renorm=true;}
+ else
+ if(strcmp(argv[ow],"phone")==0){delphon=true;symmetrize=false;renorm=true;extend=true;
                                  ++ow; n1=atoi(argv[ow]);
                                  ++ow; n2=atoi(argv[ow]);
                                  ++ow; n3=atoi(argv[ow]);
@@ -815,6 +823,10 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
                                  ++ow; na=atoi(argv[ow]); // nof atoms to do computations for
                                  ++ow; gmin=atoi(argv[ow]); // minimum index Ig
                                 }
+ else
+ if(strcmp(argv[ow],"gt")==0){++ow; greaterthan=atoi(argv[ow]);
+                              if(greaterthan<1){fprintf(stderr,"Error reduce_unitcell: option -deltatoms gt must be followed by a number  > 1 \n");exit(EXIT_FAILURE);}
+                             }
  else{
  // substitute all commma with spaces
   while ((token=strrchr(argv[ow],','))!=NULL){++i;substr[i]=token+1;*token='\0';}
@@ -829,13 +841,13 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
  if(strcmp(argv[ow],"-mcdiff")==0){mcdiff=1;}
  ++ow;}
 
- par a(argv[ow]);
+ par a(argv[ow]);if(greaterthan>0){i=a.cs.nofatoms-greaterthan;if(i<1){fprintf(stderr,"Error reduce_unitcell: option -deltatoms gt must be followed by a number   less than number of atoms\n");exit(EXIT_FAILURE);}}
 
 if(n>0){a.set_nofcomponents(n);if(verbose){fprintf(stderr,"Setting nofcomponents=%i\n",n);}}
 
 if(delphon){Matrix p(1,3,1,3);int nprim=a.cs.nofatoms;p=a.cs.r;// remember primitive lattice
   if(extend){a.extend_unitcell(n1,n2,n3,s1,s2,s3);}
- delphonons(a,symmetrize,noindexchange,nprim,na,gmin);
+ delphonons(a,symmetrize,renorm,noindexchange,nprim,na,gmin);
   if(extend){a.cs.r=p;a.reduce_unitcell(verbose);} // go back to original primitive lattice 
 }
 else
@@ -843,13 +855,18 @@ if(i==0){
  a.reduce_unitcell(verbose);  
 }else{
 for(n=1;n<=i;++n)
-  {// substitute all : with ' ' in substr[n]
+  {int nn;
+ if(greaterthan==0)
+{ // substitute all : with ' ' in substr[n]
  while ((token=strchr(substr[n],':'))!=NULL){*token=' ';}
 //fprintf(stderr,"string is %s\n",substr[n]);
 // use splitstring to read atom numbers and as "error+-" the nscoeff
- int nn=splitstring(substr[n],ns,nscoeff); // nn-1= number of neighbours onto which to be distributed
- int dim=1;if(nn>1){dim=nn-1;}
-   Matrix dis(1,dim,1,2);int an=ns[1];
+  nn=splitstring(substr[n],ns,nscoeff); // nn-1= number of neighbours onto which to be distributed
+} else {nn=1;} 
+int dim=1;if(nn>1){dim=nn-1;}
+   Matrix dis(1,dim,1,2);int an;
+if(greaterthan==0){ 
+  an=ns[1];
  for(int ii=2;ii<=nn;++ii){
 // do not use next line, but take care of already deleted atoms from previous loops (renumbering of atoms) ...
 //dis(ii-1,1)=ns[ii];
@@ -862,6 +879,7 @@ dis(ii-1,1)=nnew;
 dis(ii-1,2)=nscoeff[ii];
                           }
    if(n<i){int anp1=strtod (substr[n+1], NULL);if((int)an<=(int)anp1){fprintf(stderr,"Error program reduce_unitcell option -delatoms atom numbers have to be given in ascending order\n");exit(1);}}
+} else {an=greaterthan+1;}
 if(nn>1){ int ian=(int)an;  a.delatom(ian,dis,verbose); // distribute onto neighbours
 }
 else  
