@@ -718,7 +718,7 @@ void spincf::print(FILE * fout,int & nofcomp) //print spinconfiguration to strea
 //  numeric output of spinconfiguration to file with comments and only large spin-coponents
 // components in interval [min,max] are shown
 
-void spincf::print_commented(FILE * fout,const char * string,int & min, int & max, int & maxnofpars, double & absvallimit)
+void spincf::print_commented(FILE * fout,const char * string,int & min, int & max, int & maxnofpars, double & absvallimit,int minl, int maxl)
 {int i,j,k,l;div_t result;
  if (maxnofpars<1){fprintf(stderr,"Error spincf print_commented: maxnofpars <1\n");exit(1);}
  else
@@ -749,6 +749,7 @@ void spincf::print_commented(FILE * fout,const char * string,int & min, int & ma
        //myPrintVector(stdout,mmom);
     for (int p=maxnofpars-pout+1;p<=maxnofpars;++p)
     {result=div((int)ml(p)-1,nofcomponents); 
+     if(result.quot+1<=maxl&&result.quot+1>=minl)
      fprintf(fout,"#!    atom %i: %s%i=%s_%i_%i_%i_%i_%i=%4.4f\n",result.quot+1,string,result.rem+1,string,i,j,k,result.quot+1,result.rem+1,myround(1e-5,mmom(p)));
     }
       

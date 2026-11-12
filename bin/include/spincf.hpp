@@ -85,7 +85,7 @@ public:
     void print(FILE * fout);
     void print(FILE * fout, int & nofcomp);
   //print list of atoms + positions + moments
-    void print_commented(FILE * fout,const char * string,int & min, int  & max, int & maxnofpars, double & absvallimit);
+    void print_commented(FILE * fout,const char * string,int & min, int  & max, int & maxnofpars, double & absvallimit, int minl, int maxl);
   
     void eps(FILE * fout);
     void eps(FILE * fout,const char * text);

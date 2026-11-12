@@ -79,26 +79,26 @@ double distance_of_str_to_xyTHext_hklE(char * str,double & tcdd,double & x,doubl
   return d;
 }
 
-int check_for_best(FILE *fin_coq,double * aa, spincf & savmf,double & x, double & y, double & T,Vector & Hext,char*outstr,char **out,Vector & abc)
+int check_for_best(FILE *fin_coq,double * aa, spincf & savmf,double & x, double & y, double & T,Vector & Hext,char*outstr,char **out,Vector & abc,int nomorethanthis)
 {// load mfconfigurations and check which one is nearest -------------------------------
 // returns 0 if ok, 1 if no stable configuration was found
 // spinconfigurations are (loaded from File handle fin_coq
 // aa[0]==0: "nearest" means take the list of doubles stored in field aa and
 // look in the first line of a mf configuration and compare numbers in this line
 // and remembers in savmf and outstr the best match
-// aa[0]>0: "nearest" means load exactly a[0] configurations and return the last in savmf and outstr
+// aa[0]>0: "nearest" means load exactly aa[0] configurations and return the last in savmf and outstr
 int n,j;
    double dd,delta;
  float numbers[21];numbers[9]=1;numbers[10]=3;
  numbers[0]=20;char instr[MAXNOFCHARINLINE];
- long int pos=0;
+ long int pos=0;int ctr=1;
  if(aa[0]==0) // indicates we should look for spinconfiguration which fits to T,H,E, ...
 {
  for (delta=1000.0;feof(fin_coq)==0                      //end of file
                     &&(n=inputline(fin_coq,numbers))>=NOF_USERDEF_MCPHAS_COLS+1   //error in line reading (8 old format, 9 new format)
-		    ;)
+		    &&ctr<=nomorethanthis;)
     { spincf spins(1,1,1,(int)numbers[9],(int)numbers[10]);
-      if(spins.load(fin_coq)==1){
+      if(spins.load(fin_coq)==1){++ctr;
       dd=check_distance(aa,numbers);
       if(n>=11){if((int)numbers[11]!=0)dd=delta+10;} // if mcphase failed do not use this structure
       if(n>=17){for(int ii=1;ii<=6;++ii)spins.epsilon(ii)=numbers[11+ii];}
@@ -123,10 +123,24 @@ int n,j;
     } }if(delta==1000.0)return 1; // no stable structure found
  } 
    else
- {// look for config number -Tin
-  for(n=1;n<=(int)aa[0];++n)
-  {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }
-  }snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,savmf.nofcomponents);
+ {// look for config number aa[0]
+  for(n=1;n<=(int)fabs(aa[0]);++n)
+  {pos=ftell(fin_coq); // process comment lines until new structure begins
+                 fgets(instr,MAXNOFCHARINLINE,fin_coq); 
+                 while (instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0) // pointer to 'ltrimstring' 
+                  {pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
+     j=fseek(fin_coq,pos,SEEK_SET);
+     if (j!=0){fprintf(stderr,"Error loading: wrong  file format\n");exit (EXIT_FAILURE);}
+   if(aa[0]<0)inputline(fin_coq,numbers); // input a parameter line if it is a .sps or .mf file
+   if(savmf.load(fin_coq)==0){return 1; }
+         snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,savmf.nofcomponents);
+   if(aa[0]<0){snprintf(outstr,MAXNOFCHARINLINE,"%s=%g %s=%g %s=%g %s=%g %s=%g %s=%g %s=%g n=%g spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",
+                        out[1],myround(numbers[1]),out[2],myround(numbers[2]),out[3],myround(numbers[3]),out[4],myround(numbers[4]),
+                        out[5],myround(numbers[5]),out[6],myround(numbers[6]),out[7],myround(numbers[7]),
+                        myround(numbers[8]),savmf.na(),savmf.nb(),savmf.nc(),(int)numbers[9],(int)numbers[10]);
+              extract_xyTHext(outstr,x,y,T,Hext,abc);}
+  }
+  
  }
  return 0; // ok structure found
 }

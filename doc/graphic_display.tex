@@ -277,40 +277,70 @@ excitations.
 %script2html_begin{displaydensities} 
 
 \begin{description} 
-\item[ display\_densities -f{[c 12 0.1]} mcphas.sps T Ha Hb Hc]
-\item[ display\_densities -f mcphas.sps x y]
-\item[ display\_densities -f{[c 12 0.1]} mcphas.sps out1 out2 out3 ou4 out5 out6 out7]
-\item[ display\_densities -f mcphas.sps n]
- if used with -f filename this file has to be a mcphas.mf or mcphas.sps or mcphas.tst file,
-the spin configuration
-   at given temperature T[K] (column 3 in mcphas.* output files)
-and magnetic effective field H[T] (columns 5,6,7 in mcphas.* output files)  
-    is read and extracted from this file and printed on screen (stdout), nothing
- else is done. Instead of temperature and magnetic field also the x y point coordinates
-in the phasediagram or the index n (from the sequence of spin configuartions) or
- out1,...,out7 (refers to the external parameters in column 1-7 in mcphas.* output files) can be given.
-the option -fc 12 0.1 displays a commented user readable information about the 12 largerst
-spin components in the primitive unit cell with absolute values larger than 0.1 (useful for
-inspection of numbers).
-\item[ display\_densities -tMSL \lbrack -prefix 001 \rbrack\, T Ha Hb Hc]
-\item[ display\_densities -tHex \lbrack-prefix 001\rbrack T Ha Hb Hc]
-\item[ display\_densities -tI \lbrack-prefix 001\rbrack T Ha Hb Hc]
- if used with -t... output to stdout a table with T Ha Hb Hc atom positions and
-for -tMSL 
-              magnetic moments $\langle Mx \rangle \langle My \rangle \langle Mz \rangle$, orbital moments and spin 
+\item[ display\_densities -f{[c 1 12 3 0.1]} {[-n 2]} mcphas.sps T Ha Hb Hc]
+\item[ display\_densities -f{[c 1 12 3 0.1]} {[-n 2]} mcphas.sps x y]
+\item[ display\_densities -f{[c 1 12 3 0.1]} {[-n 2]} mcphas.sps out1 out2 out3 ou4 out5 out6 out7]
+\item[ display\_densities -f{[c 1 12 3 0.1]} {[-n 2]} mcphas.sps n]
+ \begin{verbatim}
+  a) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,
+   the spin configuration at given temperature T[K] and magnetic effective field H[T]
+   is read and extracted from this file and printed on screen (stdout),
+   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>),
+   a simple graphics to represent the configuration is created in results/spins_prim.jvx 
+   Note: - T Ha Hb Hc stand for the 3rd 5th 6th 7th column in mcphas.* output files
+         (may have different meaning if out3 out5 out6 out7 is set in mcphas.ini)
+         - out1,...,out7 refers to column 1-7 in mcphas.* output files
+  
+   b) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,
+   the spin configuration at a given x,y point is read and extracted from this file ,
+   and printed on screen (stdout) etc. as 1)
+   Note: x y stands for the 1st and 2nd column in mcphas.* output files
+         (may have different meaning if out1 or out2 is set in mcphas.ini)
+   c) if used with -f filen n,  this file has to be a mcphas.tst file,
+   the spin configuration number n
+   is read and extracted from this file and printed on screen (stdout),
+   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>)
+   a simple graphics to represent the configuration is created in results/spins_prim.jvx 
+  
+a&b&c) - if used with -fc min max n lim a human readable format is output for spin components
+  with index from min to max, only n numbers exceeding  
+   absolute value of lim, e.g. -fc 1 13 3 0.1 outputs I1,I2,...,I13, however only at maximum 
+   3 numbers for each atom which are all larger (absolute value) than 0.1. 
+      - if option -n 5 ist present and not -fc only I1,..,I5 are output for each atom 
+                         (mind: number 5<=nofcomponents)
+      - if option -n 5 and option -fc are present - information is output only for
+                          atoms 1,2,3,4,5 (mind in this case 5<=nofatoms 
+\end{verbatim}
+\item[ display\_densities -tMSL \lbrack -n 2 \rbrack \lbrack -prefix 001 \rbrack\, T Ha Hb Hc]
+\item[ display\_densities -tHex  \lbrack -n 2 \rbrack \lbrack-prefix 001\rbrack x y]
+\item[ display\_densities -tI  \lbrack -n 2 \rbrack \lbrack-prefix 001\rbrack out1 out2 out3 out4 out5 out6 out7]
+\item[ display\_densities -tL2 4.5  \lbrack -n 2 \rbrack \lbrack-prefix 001\rbrack T Ha Hb Hc]
+ if used with -t... output to stdout a table with T Ha Hb Hc atom positions, i.e. it triggers a  table mode. 
+   in this mode spins is used without a filename, the information is read from 
+   results/mcphas.*  and output is created for the configuration which matches 
+   best the external parameters x y or T Ha Hb Hc or out1-out7 specified in the command line.
+   If no external parameters are given, a table is created containing all configurations which 
+   are available in the output files of mcphas/mcdisp. 
+   for table the options are:
+\begin{verbatim}
+       -tMSL ... magnetic moments $\langle Mx \rangle \langle My \rangle \langle Mz \rangle$, 
+              orbital moments and spin 
               of each atom in the magnetic unitc cell , for 
        -tHex  exchange fields and for 
        -tI    with expectation values of interaction operators $\langle I \rangle$.
-
+       -tL2 4.5  ... a table with average squared longitudinal bond elongations up to bond
+                     length 4.5 Angstroem, only atoms with phonon degrees of freedom are considered
+                     (useful for estimating elastic energy contributions of different bonds)
+       -n 3   ....  only print out for atom number 3 the relevant information, omit other atoms 
+\end{verbatim}
 \item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack T Ha Hb Hc [h k l E]]
 \item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack out1 out2 ... out7 [h k l E]]
 \item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack  x y]
- if used without a filename, the information is read from results/mcphas.* res
-ults/mcdisp.*
-   output files and 3d graphical animations are created.
-\end{description} 
+ graphic / excitation mode 
+   also in this mode spins is used without a filename, the information is read from 
+   results/mcphas.* results/mcdisp.* , for graphical animations the options are: 
 \begin{verbatim}
-   options are:
+   
          -c ... calculate chargedensity
          -s ... calculate spindensity
          -o ... calculate angular orbital momentum density
@@ -318,23 +348,80 @@ ults/mcdisp.*
          -j ... calculate currentdensity
          -p i j k ... calculate projection of spin/orbital/current/magnetic moment density
                   along direction i j k, e.g. 0 0 1
-         -div    ... calculate divergence of spin/orbital/current/magnetic moment density
+         -div    ... calculate divergence of spin/orbital/current/magnetic moment density  
          -S  ... show arrow indicating spin
          -L  ... show arrow indicating orbital angular momentum
-         -M  ... show arrow indicating magnetic moment
+         -M  ... show arrow indicating magnetic moment (for cluster show total moment)
+         -Mi ... show arrow indicating magnetic moment (for cluster show individual moments)
          -P  ... calculate phononic displacement
-         note, that in order to animate changes in the above quantities, the corresponding
-         switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion
-         modules have to be capable of calculating the corresponding observables.
- 
+         -pel  ... show arrow indicating electric dipole moment
+         -eps ... create eps (postscript) files in addition to jvx (javaview) output
+         -fst ... create fst (fullprof viewer) files in addition to jvx (javaview) output
+
+Note, that in order to animate changes in the above quantities, the corresponding
+switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion
+modules have to be capable of calculating the corresponding observables. In this
+case mcdisp produces files results/mcdisp.qev .pev .sev etc. which contain the 
+correlation function for the observable (for displacements this corresponds to 
+the phonon eigenvector for phonon displacements in results/mcdisp.qep; for magnetic
+moments this corresponds to the spinwave eigenvector  in results/mcdisp.qem, ... )
+
          -prefix 001 ... use input file(s) results/001mc* instead of results/mc*
- 
-   examples:
-        display_densities -c 2 0 0 1
-        ...calculates the charge density at T=2K and H=(0,0,1) Tesla
-        display_densities  -tI 2 0 0 1 
-        ... outputs a table with atomic positions and expectations values <I> 
+\end{verbatim} 
+\item[display\_densities \lbrack-symop|-symoa  \lbrack-\rbrack 3 cryststruc.cif\rbrack  -q mcdisp.qep h k l \lbrack E \rbrack ]
+
+\begin{verbatim}
+ also in this mode spins is used without a filename, the information is read from 
+results/mcphas.* results/mcdisp.*  for files containing the eigenvectors 
+corresponding  to correlation functions of
+observables (see manual Evaluating results - Graphical Visualisation of Spin
+and Charge  Oscillations of Excitations) can be evaluated using the eigenvector
+mode. The filename corresponding to the observable (e.g. for magnetic moment,
+phonon displacement it is mcdisp.qem, mcdisp.qep, respectively) and the propagation
+vector q=(hkl) and the energy have to be given and the program looks for the 
+closest match and prints out the eigenvector as stored in the file and also 
+in human readable form.
+Using option -symop the symmetry operations in a .cif file under the tag
+ loop_
+ _space_group_symop_id
+ _space_group_symop_operation_xyz
+ 1 'y+1/4, x+3/4, -z+1/4'
+ 2 'y+1/4, -x+3/4, -z+1/4'
+are read and spins outputs the eigenvector after applying the specified symmetry 
+operation assuming
+that the observable is a polar vector, e.g. phonon displacememnts. Use option -symoa 
+for axial vectors such as the magnetic moment.
+If a negative sign is specified for the symmetry operation (e.g. -3), all symmetry operations
+are employed and characters are output (provided that the eigenvector is invariant).
+If in the .cif file the character table of the point group is provided, then 
+the irreducible representation is identified. The .cif file has to contain a 
+character table as follows:
+_point_group_name D4h
+_point_group_classes                   'E  EI C42 C42I 2C4 2C4I 2C2 2C2I 2C2d 2C2dI '
+_point_group_space_symmetry_operations '16 8  11  3    13  5    1   9    6    14'
+loop_
+_irrep_point_group
+_character_point_group
+A1g ' 1  1  1  1  1  1  1  1  1  1'
+A1u ' 1 -1  1 -1  1 -1  1 -1  1 -1'
+If energy is omitted, then all energies in the qep file for the wave vectors are
+scanned and the characters are output and  the  irrep are determined.
 \end{verbatim}
+\end{description} 
+
+\begin{verbatim}
+   examples:
+       spins -c 2 0 0 1
+    ...calculates the charge density at T=2K and H=(0,0,1) Tesla and produces jvx file to view
+    spins -tI 2 0 0 1 
+    ... outputs a table with atomic positions and expectations values <I> 
+    spins -M 2 0 0 1   0.5 0  0  23
+    ...calculates the magnetic moment precession  at T=2K and H=(0,0,1) Tesla for an excitation at
+      (hkl)=(0.5 0 0) at 23 meV - produces a jvx file with animation
+
+\end{verbatim}
+
+
 %script2html_end{displaydensities} 
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page

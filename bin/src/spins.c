@@ -12,6 +12,8 @@
 #include "elements.c"
 
 #define MAXDEG 100    // maximal degeneracy
+#define MAXNOFSPINCF 10000000 // maximal number of spinconfigurations to be loaded
+#define MAXNOFATOMS  10000
 void help_and_exit()
     { printf ("\n\
 program spins - popout spin/exchange field configuration\n"
@@ -23,10 +25,10 @@ use as\n\
     or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps out1 out2 out3 out4 out5 out6 out7\n\
     or: spins -f[c 1 13 3 0.1] [-n 2] mcphas.tst n\n\
   2) table-mode \n\
-    or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
-    or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
-    or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
-    or: spins -tL2 4.5 [-prefix 001] T Ha Hb Hc \n\
+    or: spins -tMSL [-n 2] [-prefix 001] [T Ha Hb Hc] \n\
+    or: spins -tHex [-n 2] [-prefix 001] [x y] \n\
+    or: spins -tI  [-n 2] [-prefix 001] [out1 out2 out3 out4 out5 out6 out7] \n\
+    or: spins -tL2 4.5 [-n 2] [-prefix 001] [T Ha Hb Hc] \n\
   3) graphic-mode\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [ h k l E]\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
@@ -60,11 +62,15 @@ a&b&c) - if used with -fc min max n lim a human readable format is output for sp
    from min to max, only n numbers exceeding  \n\
    absolute value of lim, e.g. -fc 1 13 3 0.1 outputs I1,I2,...,I13, however only at maximum 3 numbers \n\
    for each atom which are all larger (absolute value) than 0.1. \n\
-      - if option -n 5 ist present only I1,..,I5 are output (mind 5<=nofcomponents)\n\
+      - if option -n 5 ist present and not -fc only I1,..,I5 are output for each atom (mind: number 5<=nofcomponents)\n\
+      - if option -n 5 and option -fc are present - information is output only for atoms 1,2,3,4,5 (mind in this case 5<=nofatoms \n\
  \n\
 2) table mode \n\
-   if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
-   output files and tables or 3d graphical animations are created.\n\
+   in this mode spins is used without a filename, the information is read from \n\
+   results/mcphas.*  and output is created for the configuration which matches \n\
+   best the external parameters x y or T Ha Hb Hc or out1-ou7 specified in the command line.\n\
+   If no external parameters are given, a table is created containing all configurations which \n\
+   are available in the output files of mcphas/mcdisp. \n\
    for table the options are:\n\
        -tMSL ... output to stdout a table with T Ha Hb Hc atom positions and with \n\
               magnetic moments <Mx> <My> <Mz>, orbital moments and spin \n\
@@ -74,8 +80,10 @@ a&b&c) - if used with -fc min max n lim a human readable format is output for sp
        -tL2 4.5  ... a table with average squared longitudinal bond elongations up to bond\n\
                      length 4.5 Angstroem, only atoms with phonon degrees of freedom are considered\n\
                      (useful for estimating elastic energy contributions of different bonds)\n\
+       -n 3   ....  only print out for atom number 3 the relevant information, omit other atoms \n\
 3) graphic / excitation mode \n\
-   for graphical animations the options are: \n\
+   also in this mode spins is used without a filename, the information is read from \n\
+   results/mcphas.* results/mcdisp.* , for graphical animations the options are: \n\
          -c ... calculate chargedensity\n\
          -s ... calculate spindensity\n\
          -o ... calculate angular orbital momentum density\n\
@@ -104,7 +112,8 @@ a&b&c) - if used with -fc min max n lim a human readable format is output for sp
          -prefix 001 ... use input file(s) results/001mc* instead of results/mc*\n\
  \n\
 4) eigenvector mode:\n\
-         for files containing the eigenvectors corresponding to correlation functions of\n\
+         also in this mode spins is used without a filename, the information is read from \n\
+         results/mcphas.* results/mcdisp.*  for files containing the eigenvectors corresponding to correlation functions of\n\
          observables (see manual Evaluating results - Graphical Visualisation of Spin and Charge \n\
          Oscillations of Excitations) can be evaluated using the eigenvector mode.\n\
          The filename corresponding to the observable (e.g. for magnetic moment, phonon displacement \n\
@@ -510,8 +519,9 @@ fprintf(stderr,"# ***********************************************************\n"
 
  FILE * fin, * fout;
  int i,minl=1,maxl=1,eps=0,fst=0;
+int nomorethanthis=MAXNOFSPINCF;
  cryststruct cs,cs4;
- 
+ bool longtable=false;
  char outstr[MAXNOFCHARINLINE];
  char tstr[MAXNOFCHARINLINE];
  char infilename[MAXNOFCHARINLINE];
@@ -519,7 +529,7 @@ fprintf(stderr,"# ***********************************************************\n"
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
  Vector nmin(1,3),nmax(1,3);
  Matrix N(1,3,1,3); // demagnetisation factor
-  int dim=28,nofcomp=1000000000;
+  int dim=28,nofcomp=1000000000,nofat=MAXNOFATOMS;
  int os=0,maxn=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
  double xx=0,yy=0,zz=0,limit=0,tL2=0;
 graphic_parameters gp;
@@ -540,15 +550,21 @@ snprintf(gp.title,MAXNOFCHARINLINE,"output of program spins");
 if (strncmp(argv[os+1],"-symo",5)==0) {os+=3;// here we could enter some function to select desired symop from file
                                     }
  if (strcmp(argv[os+1],"-q")==0) {if(argc>5+os){return spins_q(argc,argv);}else{fprintf(stderr,"Error spins: too few arguments for opiont -q\n");exit(EXIT_FAILURE);}}
- else if (strcmp(argv[os+1],"-f")==0||strcmp(argv[1],"-fc")==0)
- { os=2;if (strcmp(argv[os+1],"-fc")==0){os+=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
-                                      maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
-                                     }
-   if (strncmp(argv[os],"-n",2)==0){nofcomp=(int)strtod(argv[os+1],NULL);os+=2;}
-   fin = fopen_errchk (argv[os], "rb");printf("#* program spins ... reading from file %s\n",argv[os]);   
+ else if (strcmp(argv[os+1],"-f")==0||strcmp(argv[os+1],"-fc")==0)
+ {os+=2;if (strcmp(argv[os-1],"-fc")==0){minl=(int)strtod(argv[os],NULL);maxl=(int)strtod(argv[os+1],NULL);
+                                      maxn=(int)strtod(argv[os+2],NULL);limit=strtod(argv[os+3],NULL);
+                                     os+=4;}
+   if (strncmp(argv[os],"-n",2)==0){if(strcmp(argv[1],"-fc")==0)nofat=(int)strtod(argv[os+1],NULL);
+                                    else nofcomp=(int)strtod(argv[os+1],NULL);
+                                    os+=2;}
+   fin = fopen_errchk (argv[os], "rb");strcpy(infilename,argv[os]);printf("#* program spins ... reading from file %s\n",infilename);   
  }
  else { if (strncmp(argv[os+1],"-t",2)==0){os+=1;fout=stdout;
-                          if (strncmp(argv[1],"-tL2",4)==0){os=2;tL2=strtod(argv[2],NULL);}
+                          if (strncmp(argv[1],"-tL2",4)==0){os+=1;tL2=strtod(argv[2],NULL);}
+                          if(argc>os+2)if (strncmp(argv[os+1],"-n",2)==0){nofat=(int)strtod(argv[os+2],NULL);
+                                                                 os+=2;
+                                           // printf("output only for atom %i\n",nofat);
+                                              }
                                        }
        else  // second ... other options with graphics !!
  {if(strcmp(argv[1],"-c")==0){os=1;}
@@ -613,7 +629,7 @@ break;
  default: help_and_exit();break;
 }
   }
-  if(strcmp(argv[os+1],"-div")==0){os+=1;doijk=1;}
+  if(argc>os+1)if(strcmp(argv[os+1],"-div")==0){os+=1;doijk=1;}
   else if(strcmp(argv[os+1],"-p")==0){os+=4;
   xx=strtod(argv[3],NULL);
   yy=strtod(argv[4],NULL);
@@ -625,7 +641,7 @@ break;
   doijk=3;
                                      }
 
-if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;gp.spins_colour=3; gp.spins_scale_moment=1;//arrowdim=SPIN_EV_DIM;
+if(argc>os+1)if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;gp.spins_colour=3; gp.spins_scale_moment=1;//arrowdim=SPIN_EV_DIM;
                               snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the spins");}
 else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;gp.spins_colour=2; gp.spins_scale_moment=1;//arrowdim=ORBMOM_EV_DIM;
                                    snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the orbital angular momenta");}
@@ -637,11 +653,11 @@ else if(strncmp(argv[1+os],"-pel",4)==0){os+=1;arrow=5;gp.spins_colour=4; gp.spi
                                    snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the electric dipole moments");
                                    }
 
-if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
-if(strcmp(argv[1+os],"-eps")==0){os+=1;eps=1;}
-if(strcmp(argv[1+os],"-fst")==0){os+=1;fst=1;}
+if(argc>os+1)if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
+if(argc>os+1)if(strcmp(argv[1+os],"-eps")==0){os+=1;eps=1;}
+if(argc>os+1)if(strcmp(argv[1+os],"-fst")==0){os+=1;fst=1;}
 }
-if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
+if(argc>os+1)if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
  
@@ -652,7 +668,6 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
  printf("# reading from file %s\n",infilename);
  
  }
-
 // --------------------- load crystal structure information from mcphas.j for further processing  -----------------
 //   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)
  par inputpars("mcphas.j",prefix);
@@ -661,7 +676,7 @@ char *out[NOF_USERDEF_MCPHAS_COLS+1];
 for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){out[col]=new char[20];}
 
  if (strncmp(argv[1],"-t",2)!=0&&strcmp(argv[1],"-fc")!=0){
-  fout = fopen_errchk ("./results/spins.out", "w"); // unless it is table option
+  fout = fopen_errchk ("./results/spins.out", "w"); // unless it is table -t* or -fc options
    cs.print_mcdiff_in_header(fout,"spins",0);
 fprintf(fout,"\
 #   0.73250   0.00000                       -1.43200 -1.43200  0.71600  0.00000 -0.71600  1.43200  0.00000\n\
@@ -694,7 +709,10 @@ double lnZ,U,x,y;
 if ((strcmp(argv[1],"-f")==0||strcmp(argv[1],"-fc")==0)&&argc<3+os){
                  // in this case we have exactly one argument left,
                  // i.e.  aa[1] becomes a number of a spinconfig in a file
+                 if(argc<2+os){fprintf(stderr,"Error spins - option -f / -fc requires at least one argument to identify spin configuration in file\n");exit(EXIT_FAILURE); }
                  aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[0]);
+                 if(mystrnstr(infilename, ".sps\0", MAXNOFCHARINLINE)!=NULL||
+                    mystrnstr(infilename, ".mf\0", MAXNOFCHARINLINE)!=NULL)aa[0]=-aa[0];
                  }
                            
 else{if(argc-1==2+os||argc-1==6+os+apf){
@@ -722,6 +740,9 @@ else{if(argc-1==2+os||argc-1==6+os+apf){
      if(argc-1==NOF_USERDEF_MCPHAS_COLS+os||argc-1==NOF_USERDEF_MCPHAS_COLS+4+os+apf)
      {aa[0]=0;for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS;++i)aa[i]=strtod(argv[i+os],NULL);
      } else
+     if(strncmp(argv[1],"-t",2)==0&&argc==os+1+apf) // this is true for -t* options and no parameters - should print all
+      {longtable=true;aa[0]=-1;nomorethanthis=1;}
+     else
      {
       fprintf(stderr,"#Error program spins - wrong number of arguments %i (optional %i)!\n",argc-1,os);
       exit(1);
@@ -729,11 +750,12 @@ else{if(argc-1==2+os||argc-1==6+os+apf){
     } 
 double T=0; Vector Hext(1,HEXT_DIMENSION);
 
-if(check_for_best(fin,aa,savmf,x,y,T,Hext,outstr,out,inputpars.cs.abc))
+if(check_for_best(fin,aa,savmf,x,y,T,Hext,outstr,out,inputpars.cs.abc,nomorethanthis))
   {fclose (fin);fprintf(stderr,"#!!! Error program spins - no stable structure found !!!\n");exit(1);}
-fclose (fin);
+if(!longtable){fclose (fin);}
+
+
 // ----------------------------output configuration ----------------------------------------------------------------
-for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){delete []out[col];}
 
   printf("#! %s - configuration\n",outstr);
   fprintf(stdout,"# Components of the Demagnetisation Tensor in SI Units\n");
@@ -745,11 +767,13 @@ for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){delete []out[col];}
     fprintf(stdout,"#!Nkk=%g\n",N(3,3));
 if(nofcomp>savmf.nofcomponents){nofcomp=savmf.nofcomponents;}
 if(nofcomp<savmf.nofcomponents){printf("#! printing only nofcomponents=%i components\n",nofcomp);}
-  if (strncmp(argv[1],"-t",2)!=0){
+  if (strncmp(argv[1],"-t",2)!=0){ // do not execute this for -t* options
+if(nofat>savmf.nofatoms){nofat=savmf.nofatoms;}
+if(nofat<savmf.nofatoms){printf("#! printing only nofatoms=%i atoms\n",nofat);}
   if(strcmp(argv[1],"-fc")==0){
 if(strcmp(argv[os]+strlen(argv[os])-3,".mf")==0)
-{savmf.print_commented(stdout,"Hex",minl,maxl,maxn,limit);}
-else{savmf.print_commented(stdout,"I",minl,maxl,maxn,limit);}
+{savmf.print_commented(stdout,"Hex",minl,maxl,maxn,limit,1,nofat);}
+else{savmf.print_commented(stdout,"I",minl,maxl,maxn,limit,1,nofat);}
                        exit(0);} // exit for -fc option
   else {savmf.print(stdout,nofcomp);}}
 
@@ -789,7 +813,7 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
-  if (strcmp(argv[1],"-f")==0||strcmp(argv[1],"-fc")==0)
+  if (strcmp(argv[1],"-f")==0)
  { inputpars.savelattice(fout);
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    fprintf(fout,"#! strain tensor: eps1=%4.4g (epsii) eps2=%4.4g (epsjj) eps3=%4.4g (epskk) eps4=%4.4g (2epsjk) eps5=%4.4g (2epsik) eps6=%4.4g (2epsij)\n",
@@ -840,7 +864,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
 
   exit(0);
 }
-// FROM HERE ON IT IS ONLY EXECUTED IF GRAPHICS ARE DESIRED ... 
+// FROM HERE ON IT IS ONLY EXECUTED IF GRAPHICS ARE DESIRED OR -t OPTION IS PRESENT... 
 
 gp.read();
 
@@ -896,7 +920,10 @@ fprintf(fout,"#          corresponding exchange fields [meV]- if passed to mcdif
 else  //now table options
  { fprintf(fout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
  //fprintf(fout,"# 1 2  3  4  5           6     7     8     9       10      11      12   13   14                  15   16   17   18   19   20\n");
- fprintf(fout,"# external parameters {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
+ //fprintf(fout,"# external parameters {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
+ fprintf(fout,"#");
+ for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)fprintf(fout,"%s ",out[col]);
+ fprintf(fout," n nr1 nr2 nr3 {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
  if (strcmp(argv[1],"-tMSL")==0)  fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)]\n");
  else if (strcmp(argv[1],"-tI")==0) fprintf(fout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
  else if (strcmp(argv[1],"-tHex")==0) fprintf(fout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
@@ -913,7 +940,7 @@ Vector h(1,inputpars.cs.nofcomponents);
 Vector I(1,inputpars.cs.nofcomponents);
 h=0;for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 {(*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hext,T);} // initialize Icalc module parameter storage
-
+nextsavmf:
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
     hh=savmf.m(i,j,k);
@@ -961,18 +988,24 @@ switch(arrow)
          for(nt=1;nt<=dim4;++nt){spinconf.m(i,j,k)(nt+i4-1)=momi(nt);};i4+=dim4;
          break;
 }
-
+   
 // output atoms and moments in primitive unit cell to fout  ------------------------------------
 if(arrow==4&&(*inputpars.jjj[ii]).module_clust==true){
     for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).cs.nofatoms;++nt)
      {dd3=spinconf.pos_dabc(i,j,k,ii4, cs4);
       dd0=spinconf.pos_dr123(i,j,k,ii4, cs4);
-      if (strncmp(argv[1],"-t",2)==0){
-              fprintf(fout," %s ", outstr);
+      if (strncmp(argv[1],"-t",2)==0&&(nofat==MAXNOFATOMS||nofat==ii)){
+              //fprintf(fout," %s ", outstr);
+       double value;
+      for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)
+       {extract(outstr,out[col],value); fprintf(fout,"%g ",myround(value));}
+      fprintf(fout," %i %i %i %i ",savmf.n(),savmf.na(),savmf.nb(),savmf.nc());
+                                  
                                      }
       fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
             cs4.sipffilenames[ii4],dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
-      if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0){
+      if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0)
+      if(nofat==MAXNOFATOMS||nofat==ii){
             fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(1+3*(ii4-1))));
             fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(2+3*(ii4-1))));
             fprintf(fout," %4.4f\n",myround(1e-5,spinconf.m(i,j,k)(3+3*(ii4-1))));
@@ -1011,12 +1044,17 @@ for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){hhh(nt)=hh(nt+inputpars.cs.nofcomp
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
     Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
-    dd=abc_in_ijk.Inverse()*dd3; 
-    snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
+    dd=abc_in_ijk.Inverse()*dd3;
+ if(nofat==MAXNOFATOMS||nofat==ii)
+ {{ snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
             cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
     if (strcmp(argv[1],"-tL2")!=0) {     
     if (strncmp(argv[1],"-t",2)==0){
-       fprintf(fout,"%s ",outstr);
+       //fprintf(fout,"%s ",outstr);
+       double value;
+      for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)
+       {extract(outstr,out[col],value); fprintf(fout,"%g ",myround(value));}
+      fprintf(fout," %i %i %i %i ",savmf.n(),savmf.na(),savmf.nb(),savmf.nc());
                                    }
       fprintf(fout,"%s",tstr);
     }
@@ -1055,9 +1093,9 @@ for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){hhh(nt)=hh(nt+inputpars.cs.nofcomp
     L2_calc(tL2,i,j,k,ii,fout,outstr,tstr,nmin,nmax,savmf,p,T,h,Hext,inputpars);
    }
    else   fprintf(fout,"\n");
-
+ }}
 // -----------------------------------------------------------------------------------------------
-
+   
 
 if(density){
 switch(argv[1][1]) // dimension definition from jjjpar.hpp
@@ -1117,7 +1155,11 @@ if(phonon==1)  // if module allows to calculate position  - use this for graphic
   }
 }
 }}
-             
+if(longtable){if(check_for_best(fin,aa,savmf,x,y,T,Hext,outstr,out,inputpars.cs.abc,1))
+              {for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){delete []out[col];};fclose(fin);exit(0);}
+              goto nextsavmf;
+             }
+else {for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){delete []out[col];}}
 if (strncmp(argv[1],"-t",2)==0){exit(0);}
   fclose (fout);
    

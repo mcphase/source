@@ -328,15 +328,18 @@ int spincf::load(FILE * fin_coq)
   {pos=ftell(fin_coq);if (pos==-1) return 0; //end of file reached
    s=fgets(instr,MAXNOFCHARINLINE,fin_coq);if (s==NULL) return 0;
   }
-  j=fseek(fin_coq,pos,SEEK_SET); if (j!=0) return 0;
+  j=fseek(fin_coq,pos,SEEK_SET); if (j!=0) return 0; 
+// now we are after comment lines
+
+// now determine the supercell dimension before reading the spinconfig
 nn1=0;
 j=0;
 while ((i=inputline (fin_coq, na))!=0)  
    {for (l=1;l<=nofcomponents*nofatoms-2;++l){inputline (fin_coq, nb);}
     nn1=i;i=inputline (fin_coq, nc);++j;}
 // j (nofspins in b direction)determined
-if (nn1==0) return 0; // no block to read any more 
-nn2=j;
+if (nn1==0) return 0; // failure - no block to read 
+nn2=j; 
 
 //how much is nofc ??
 for (k=0;j==nn2;++k)
@@ -349,7 +352,7 @@ nofa=nn1;
 nofb=nn2;    
 nofc=k;
 
-//  printf("n1=%i n2=%i n3=%i\n",nofa,nofb,nofc);
+//  printf("# n1=%i n2=%i n3=%i\n",nofa,nofb,nofc);
   
   j=fseek(fin_coq,pos,SEEK_SET); if (j!=0) return 0;
 
