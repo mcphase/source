@@ -22,7 +22,7 @@ int j;  // index of spinstructure
 double T; // temperature
 double cv; // specific heat
 Vector m,mabc,Pel,Pelabc,Pel0,Pelabc0,totalJ; 
-Matrix cel;
+Matrix cel,chi;
 Vector Hint; // the vector Hint stored in physprop refers always to the 
              // internal field in the sample 
  // moment and H field and electrical polarisation (Pel0 refers to 

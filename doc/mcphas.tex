@@ -616,7 +616,7 @@ In order that {\prg McPhase} can calculate the standard deviation between
  can be given in the subdirectory {\prg ./fit}. The filenames and the data-format
  are the same as the output files of {\prg McPhas}, e.g. {\prg mcphas.fum}, {\prg mcphas.hkl}
  etc. {\prg McPhase} looks into the directory {\prg ./fit} and if it finds any
- of these files, the standard deviation is increased correspondingly (in case option {\prg -chi} is
+ of these files, the standard deviation is increased correspondingly (in case option {\prg -chi2} is
 used the output contains deviation squared and error squared).
 
 What measurement data can be used to calculate a standard deviation ?
@@ -685,7 +685,7 @@ Options are:
 \begin{description}
 \item[\prg   -h]  to  print help and version of {\prg McPhas}.
 \item[\prg   -stamax 14]  end mcphas\index{mcphas} if standard deviation exceeds 14.
-\item[\prg   -chi] output instead of sta the $\chi^2$ for each experimental data point, i.e. output
+\item[\prg   -chi2] output instead of sta the $\chi^2$ for each experimental data point, i.e. output
                $\delta^2$ (deviation squared) and err$^2$ ( error squared) 
                for each experimental data point so that the fitting programs ({\prg simannfit, searchspace}
                can calculate $\chi^2$ and minimize it.
@@ -718,6 +718,8 @@ will influence the excitations, see eplanation of option -cd for
 \item[\prg  -cel  0.0001] to compute elastic constants by applying stress of 0.0001 GPa. This needs more computation
      time, because one by one each component of the stress tensor is set to 0.0001 GPa and a mean field loop is done
      to compute the results strains. In this way, elastic constants can be obtained, which can be compared to experiment.
+\item[\prg  -chi  0.01] to compute magnetic susceptibility by applying/increasing a magnetic field of 0.01 T 
+                   in three orthogonal directions, store result in mcphas.chi  (needs more computation time)
 \item[\prg   -cv  0.01]   to compute specific heat by applying temperature step of 0.01K and computing derivative of energy u         
 \item[\prg   -v]  to  enable verbose mode with lots of messages of {\prg McPhas}. Specifically
 the verbose mode enables the following features:
@@ -849,6 +851,8 @@ u=f+Ts=f-T\partial f/\partial T=\frac{1}{N_b}\sum_{s,i} \epsilon^s_i \frac{e^{-\
                            electrical polarisation (if charges are given in the sipf files and the sum of charges
                            taken for the crystal is zero).
 
+\item [\prg mcphas.cel]    for option -cel, contains the elastic constants
+\item [\prg mcphas.chi]    for option -chi, contains the magnetic susceptibility
 \item [\prg mcphas1.j1 .j1 .j2 ...] 
                spin-spin correlation functions for sub-lattice 1 neighbour 1 2 ...
 	       (linear combination is proportional to magnetostriction)

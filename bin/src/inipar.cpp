@@ -77,7 +77,7 @@ printf ("                   2) x and y columns are read and also output in outpu
 printf ("                      temperature/fields/stresses\n");   
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
-printf ("          -chi    ... instead of sta calculate chi2\n");
+printf ("          -chi2   ... instead of sta calculate chi2\n");
 printf ("          -a     append output files (do not overwrite) \n");
 printf ("          -cd     add classical dipole  interaction using Ewald summation, \n");
 printf ("                  Bowden J.Phys.C:solid state phys. 14(1981) L827  \n");
@@ -87,8 +87,12 @@ printf ("          -doeps refine strain epsilon selfconsistently using elastic,m
 printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz and optional djdeps1-6\n");
 printf ("          -linepscf with -doeps use zero strain single ion Hamiltonian for every mean field iteration\n");
 printf ("          -linepsjj with -doeps use zero strain two ion interaction Hamiltonian for every mean field iteration\n");
-printf ("          -cel  0.0001  ... compute elastic constants by applying stress of 0.0001 GPa (needs more computation time)\n");
-printf ("          -cv  0.01  ... compute specific heat by applying temperature step of 0.01K and computing derivative of energy u\n");
+printf ("          -chi  0.01  ... compute magnetic susceptibility by applying/increasing a magnetic field of 0.01 T \n");
+printf ("                   in three orthogonal directions, store result in mcphas.chi  (needs more computation time)\n");
+printf ("          -cel  0.0001  ... compute elastic constants by applying stress of 0.0001 GPa \n");
+printf ("                   store results in mcphas.cel (needs more computation time)\n");
+printf ("          -cv  0.01  ... compute specific heat by applying temperature step of 0.01K and computing derivative of\n");
+printf ("                     energy u, store result in mcphas.fum\n");
 printf ("          -prefix 001    try to read files starting with 001, e.g.\n");
 printf (" 		    001mcphas.ini, if these exist, otherwise take\n"); 
 printf (" 		    standard input files, check if in mcphas.ini there are\n");

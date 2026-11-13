@@ -19,7 +19,7 @@ physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,cryststruct 
  Hint=Vector(1,HEXT_DIMENSION);
  totalJ=Vector(1,cs.nofcomponents);
  cel=Matrix(1,6,1,6);
-
+ chi=Matrix(1,3,1,3);
  jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,cs.nofcomponents*cs.nofcomponents*cs.nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkli+1];for(i=0;i<=maxnofhkli;++i){hkli[i]=Vector(1,10);}
@@ -43,6 +43,7 @@ physproperties::physproperties (const physproperties & p)
   Pelabc0=Vector(1,3); Pel0=Vector(1,3);
   Hint=Vector(1,HEXT_DIMENSION);
   cel=Matrix(1,6,1,6);cel=p.cel;
+  chi=Matrix(1,3,1,3);chi=p.chi;
   cv=p.cv;
   Hint=p.Hint; 
   Pel=p.Pel;Pelabc=p.Pelabc;
@@ -492,7 +493,7 @@ if(ini.cel!=0.0)
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
    fprintf(fout,"# Elastic Constants from input file (note these cannot be compared to experiment because\n"); 
-   fprintf(fout,"# they do not take into account that the atomic positions / moments etc relax when the crystal is strained\n",ini.prefix);
+   fprintf(fout,"# they do not take into account that the atomic positions / moments etc relax when the crystal is strained\n");
    inputpars.saveCel(fout,false);
    inputpars.saveCel(fout,true);
    
@@ -512,6 +513,45 @@ if(ini.cel!=0.0)
     }
    for (i=1;i<=5;++i)for(j=i+1;j<=6;++j)
     { fprintf (fout, " %4.4g ",myround(cel(i,j)));
+    }
+ 
+    fprintf(fout,"\n");
+   fclose(fout);
+  }
+//-----------------------------------mcphas.chi ----------------------------------------------------  
+if(ini.Hchi!=0.0)
+ {errno = 0;  
+  strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas.chi");
+    if (verbose==1)printf("saving %s\n",outfilename);
+    if (htfailed!=0){chi=0;}
+  if (washere==0)
+  {
+   fout = fopen_errchk (outfilename,filemode);
+   fprintf(fout, "#output file of program %s ",MCPHASVERSION);
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+   fprintf(fout,"#!<--mcphas.mcphas.chi-->\n");
+   fprintf(fout,"#*********************************************************\n");
+   fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
+   fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
+   fprintf(fout,"#**********************************************************\n");
+   
+   fprintf(fout,"# Magnetic susceptiblity computed by applying magnetic field of %g T and calculating magnetic moment\n",ini.Hchi);
+   fprintf(fout,"# Unit conversion: muB*NA/T=5584.8973464 emu/mol   i.e.   1 muB/T f.u. = 5584.8973464  emu/mol \n");
+      str[0]='\0';
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "  chi11 chi22  chi33  chi12 chi21 chi13 chi31 chi23 chi32(muB/Tion)");
+   ini.print_usrdefcolhead(fout,str);
+   fclose(fout);
+   }
+   strcpy(outfilename+10+strlen(prefix),"mcphas.chi"); 
+   fout = fopen_errchk (outfilename,"a");
+   if (verbose==1)printf(" .... saving magnetic susceptibility in %s\n",outfilename);
+   ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
+   for (i=1;i<=3;++i)
+    { fprintf (fout, " %4.4g ",myround(chi(i,i)));
+    }
+   for (i=1;i<=3;++i)for(j=i+1;j<=3;++j)
+    { fprintf (fout, " %4.4g  %4.4g ",myround(chi(i,j)),myround(chi(j,i)));
     }
  
     fprintf(fout,"\n");

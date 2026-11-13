@@ -35,7 +35,15 @@ perl -l -n -e "unlink" reduce_unitcell_sipf.del
 
 # 0) distribute C-C bonding electron equally on both C, put Ni-C bond electron on Ni, Tm-C on Tm, Tm-Ni on Tm
 # 
- reduce_unitcell -delatoms 5:3+--0.5:4+--0.5,6:2+--1,7:2+--1,8:2+--1,9:2+--1,10:1+--1,11:1+--1,12:1+--1,13:1+--1,14:1+--1,15:1+--1,16:1+--1,17:1+--1 results/makenn.j > mnn.j
+# E1 C-C bond charge as 0 0.5 z as C1
+# E2 E3 C-Ni bonds at 
+# E4 Tm - C bond charge at
+# E5 Tm - Ni bond charge at
+# E6 Tm-Tm bond
+# reduce_unitcell -delatoms 5:3+--0.5:4+--0.5,6:2+--1,7:2+--1,8:2+--1,9:2+--1,10:1+--1,11:1+--1,12:1+--1,13:1+--1,14:1+--1,15:1+--1,16:1+--1,17:1+--1 results/makenn.j > mnn.j
+# from mcphase 6.1 on we can use delEstr to create the string
+ . delEstr -v 'E1*=1.0 E2*=1 E3*=1 E4*=0,1 E5*=0,1 E6*=0,1'
+ reduce_unitcell -delatoms $MCPHASE_DELESTR  results/makenn.j > mnn.j
 
 getvalue.pl -c +7.749e-01 0 7 1 0 mnn.j
 

@@ -252,7 +252,7 @@ the view of 4 jvx files by typing: javaview densplt.*.jvx
 
 
 \subsection{Programs {\prg display\_densities}\index{display\_densities}  - display of the superstructure
-and excitations}\label{displaydensities}
+and excitations calling the program {\prg spins}\index{spins}}\label{displaydensities}
 
 %script2html_begin{displaydensities} 
 
@@ -275,6 +275,13 @@ excitations.
 
 
 %script2html_begin{displaydensities} 
+\PP In the following table I see many options which are not for graphical display, how does
+this come ?
+
+\EE {\prg display\_densities} is actually a script which calls the program {\prg spins}\index{spins}
+to create the graphical objects and then opens a display using the java program
+{\prg JvxAnimator}\index{JvxAnimator}. {\prg spins} has also nongraphical features, which are
+included in the following for completeness:
 
 \begin{description} 
 \item[ display\_densities -f{[c 1 12 3 0.1]} {[-n 2]} mcphas.sps T Ha Hb Hc]

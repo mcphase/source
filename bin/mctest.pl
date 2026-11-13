@@ -1,140 +1,352 @@
 #!/usr/bin/perl
-use File::Copy;
-use Getopt::Long;
-use Cwd qw(getcwd);
+use strict;
+use warnings;
+use Getopt::Long qw(GetOptions);
+use File::Temp qw(tempfile);
 
-BEGIN{@ARGV=map{glob($_)}@ARGV}
-unless ($#ARGV >=0)
-{
-print STDERR << "EOF";
+my $target;
+my $help;
+my $output_only = 0;
 
-program to test a simple script (windows and linux syntax are acceptable)
- 
- usage: perl test.pl [options] test.bat
+GetOptions(
+    'win'    => sub { set_target('win', \$target) },
+    'lin'    => sub { set_target('lin', \$target) },
+    'help|h' => \$help,
+) or usage();
 
-will execute the script test.bat line by line and stop with an error message
-if an error occurs.
+usage() if $help || !@ARGV;
 
-For testing  goto directory demo and look out for testing batch files
-named test*.bat
+my @files = @ARGV;
+my $host = ($^O =~ /MSWin/i) ? 'win' : 'lin';
+$target = $host unless defined $target;
 
-- use such a file to test mcphase, e.g.:
-mctest test_ndcu2_mcphasit.bat
+my $out = "#!/bin/bash\nset -e\n";
+$out .= bash_helper_function() if $target eq 'lin';
 
-- to test a mcphase installation with all tests type
-mctest test*.bat
+my @nodes;
+for my $file (@files) {
+    open(my $in, '<', $file)
+        or die "mctest: cannot open '$file': $!\n";
+    my @lines = <$in>;
+    close($in) or die "mctest: cannot close '$file': $!\n";
 
-- to test a specific command occuring in several test-batch files, e.g. makenn, try
-to run all these batch files. First, check by searching all test-batch files with
-grep makenn test*.bat
- ... and run them by:
-grep -l makenn test*.bat | xargs mctest
+    my $i = 0;
+    my $parsed = parse_block($file, \@lines, \$i, 0);
+    push @nodes, @$parsed;
+}
 
-- generate a list of test by 
-ls -1 test* 
-  and paste and copy some files into dd using
-cat > dd
- terminate by Ctrl^C, then execute these tests by
-cat dd | xargs mctest
+my $script = render_script(\@nodes, $target, !$output_only);
 
-Note on limitations: mctest will not process correctly some commands such as
- bind, bindkey, break, breaksw,  case,  complete, continue,
-  do, done,  elif, else,  endif, endsw, fc, fg,  fi, for
-foreach,  goto,  if,  local, login, logout,  nice, nohup, notify,
-onintr, popd,  pushd,  read, readonly, rehash, repeat, sched, setenv, 
-settc, setty, setvar, switch, suspend,  then,  trap, true, type, ulimit, 
-umask, unalias, uncomplete, unhash, unlimit, unset, unsetenv,
-until, where,  while
+# -win/-lin select the output format. If the selected format differs from
+# the host, print the translated script without executing it.
+if ($output_only) {
+    print $script;
+    exit 0;
+}
+
+run_script($script, $target);
+
+sub set_target {
+    my ($new, $ref) = @_;
+    die "mctest: choose only one of -win and -lin\n"
+        if defined $$ref && $$ref ne $new;
+    $$ref = $new;
+    $output_only = 1;
+}
+
+
+
+sub parse_block {
+    my ($file, $lines, $index_ref, $inside_loop) = @_;
+    my @nodes;
+
+    while ($$index_ref < @$lines) {
+        my $line_no = $$index_ref + 1;
+        my $line = $lines->[$$index_ref];
+        ++$$index_ref;
+
+        my $trim = $line;
+        $trim =~ s/^\s+//;
+        $trim =~ s/\s+$//;
+
+        if ($trim =~ /^done\b/i) {
+            die "mctest: unexpected 'done' at $file line $line_no\n"
+                unless $inside_loop;
+            return \@nodes;
+        }
+
+        if ($trim =~ /^for\s+([A-Za-z_]\w*)\s+in\s+(.*?)\s*;\s*do\s*$/i) {
+            my ($var, $list) = ($1, $2);
+            my $body = parse_block($file, $lines, $index_ref, 1);
+            push @nodes, {
+                type => 'loop',
+                file => $file,
+                line => $line_no,
+                var  => $var,
+                list => $list,
+                body => $body,
+            };
+            next;
+        }
+
+        if ($trim =~ /^for\s+([A-Za-z_]\w*)\s+in\s+(.*?)\s+do\s*$/i) {
+            my ($var, $list) = ($1, $2);
+            my $body = parse_block($file, $lines, $index_ref, 1);
+            push @nodes, {
+                type => 'loop',
+                file => $file,
+                line => $line_no,
+                var  => $var,
+                list => $list,
+                body => $body,
+            };
+            next;
+        }
+
+        push @nodes, {
+            type => 'line',
+            file => $file,
+            line => $line_no,
+            text => $line,
+        };
+    }
+
+    die "mctest: missing 'done' for loop in $file\n" if $inside_loop;
+    return \@nodes;
+}
+
+sub bash_helper_function {
+    return <<'BASH';
+mctest_helper() {
+    local helper="$1"
+    shift
+    local output rc line name value
+
+    output=$("${MCTEST_PERL:-perl}" "$MCPHASE_DIR/bin/$helper" "$@")
+    rc=$?
+    if [ "$rc" -ne 0 ]; then
+        return "$rc"
+    fi
+
+    while IFS= read -r line; do
+        case "$line" in
+            "export "*)
+                line=${line#export }
+                ;;
+            "set "*)
+                line=${line#set }
+                ;;
+            *=*)
+                ;;
+            *)
+                continue
+                ;;
+        esac
+
+        name=${line%%=*}
+        value=${line#*=}
+        name=$(printf '%s' "$name" | tr -d '[:space:]')
+        if [ -n "$name" ]; then
+            export "$name=$value"
+        fi
+    done <<EOF
+$output
 EOF
-exit(1);
-}else{print STDERR "#* $0 *\n";}
-
-$ct=0;$start_time=time();
-foreach(@ARGV)
-{$file=$_;$tim[$ct]=time();
-
-unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-$linenr=0;   
-while($line=<Fin>)
-
-     {++$linenr;
-      # do some substitutions to allow windows and linux batches 
-if ($^O=~/MSWin/){$line=~s/^\s*rem/#/i; # i ... case insensitive pattern matching
-                  $line=~s/^\s*rm\s/del /;
-                  $line=~s/^\s*cp\s/copy /;
-                  $line=~s|/|\\|ig;
-                  $line=~s|'|"|ig;
-# mcphas commands with second parameter having an eval
-@com1=(
-'fact',
-'fermicol',
-'fillcol',
-'potcol',
-'setvariable',
-'shiftc',
-      );
- foreach(@com1){
-                  $line=~s|($_[^\s]*\s+[^\s]*\s+[^\s]+)\\([^\s]+\s)|$1/$2|ig;}
-# mcphas commands with other parameters having a eval
-#'fitcol',4,5
-# fitfermi 1 2 3 4 5
-# ga 1 3 4 5
-# gauss 1 2 3 4
-# gauss2d  1-9
-# gausscol 2 3 4
-# ...
-                 $line=~s/chmod/# chmod/g;
-                 } else
-                 {$line=~s/^\s*call\s//i;
-                  $line=~s/^\s*del\s/rm /i;
-                  $line=~s/^\s*copy\s/cp /i;
-                  $line=~s/^\s*rem/#/i;
-                  $line=~s|\\|/|ig;
-                  
-                 }
-
-# treat setting of environmental variables: if windows syntax is used - transform it to 
-# linux syntax
-$line=~s/^\s*set\s/export /i;
-$line=~s/%(\w+)%/\$$1/g;
-
-# substitute variables by values
-
-$i=0;foreach $name (@var)
-{$line=~s/\$$name/$val[$i]/g; 
-++$i;
+}
+BASH
 }
 
-if ($^O=~/MSWin/){$line=~s/^\s*([\w]+)\.pl/perl \%MCPHASE_DIR\%\\bin\\$1.pl/;
-# print $line."\n";
-             }
-     unless ($line=~/^\s*[#\n]/){
-               if($line=~/^\s*cd/i){$line=~s/^\s*cd//;$line=~s/\n//;$line=~s/\s*//;
-                                    unless(chdir($line)){die "\nError  executing command \ncd  $line in $file line number $linenr\n";}
-                                   } # cd
-	       elsif($line=~/^\s*export\s/){$line=~s/^\s*export\s*//;
-                                    unless($line=~/\w+=/){die "\nError  executing command \nexport $line in $file line number $linenr\n";}
-                                   @n=split("=",$line);
-               
-                                   unshift @var, $n[0];$n[1]=~s/\n//;
-                                   unshift @val, $n[1];
-                                   } # export
-               else
-                                   {
-                                     if(system($line)){die "\nError  executing command \n $line in $file line number $linenr \n";}
-                                   }
-                                } # no comment line
-   } # next line
-close Fin; $tim[$ct]=int(time()-$tim[$ct]);
-print "#************************************************\n";
-print "# mctest <".$file. "> in ".$tim[$ct]."s OK\n";
-print "#************************************************\n";
-++$ct;
-} # next batch file
-$ct=0;foreach(@ARGV)
-{$file=$_;
-print "# mctest <".$file. "> in ".$tim[$ct]." s OK\n";++$ct;
+sub helper_perl {
+    return $ENV{MCTEST_PERL} if defined $ENV{MCTEST_PERL}
+        && $ENV{MCTEST_PERL} ne '';
+    return 'perl';
 }
-print "#**** END program mctest Total Time: ".(time()-$start_time)." s ******\n";
 
 
+sub render_script {
+    my ($nodes, $target, $diagnostics) = @_;
+
+    my $out;
+    if ($target eq 'lin') {
+        $out = "#!/bin/bash\nset -e\n";
+    } else {
+        $out = "\@echo off\n";
+    }
+    $out .= bash_helper_function() if $target eq 'lin';
+    $out .= render_nodes($nodes, $target, undef, $diagnostics);
+    return $out;
+}
+
+sub render_nodes {
+    my ($nodes, $target, $loop_var, $diagnostics) = @_;
+    my $out = '';
+
+    for my $node (@$nodes) {
+        if ($node->{type} eq 'loop') {
+            $out .= render_loop($node, $target, $diagnostics);
+            next;
+        }
+
+        my $text = $node->{text};
+        $text =~ s/\r?\n$//;
+        my $translated = translate_line($text, $target, $loop_var);
+
+        # Comments and blank lines are emitted without diagnostics.
+        if ($text =~ /^\s*(?:#|rem\b|$)/i || !$diagnostics) {
+            $out .= $translated . "\n";
+            next;
+        }
+
+        my $where = $node->{file} . ':' . $node->{line};
+        my $message = 'mctest: failed at ' . $where . ': ' . $text;
+
+        if ($target eq 'lin') {
+            $out .= "if { $translated; }; then :; else\n";
+            $out .= "  rc=\$?\n";
+            $out .= "  printf '%s\\n' " . shell_quote($message) . " >&2\n";
+            $out .= "  exit \$rc\n";
+            $out .= "fi\n";
+        } else {
+            $out .= $translated . "\n";
+            $out .= "if errorlevel 1 (\n";
+            $out .= "  echo $message\n";
+            $out .= "  exit /b 1\n";
+            $out .= ")\n";
+        }
+    }
+
+    return $out;
+}
+
+sub render_loop {
+    my ($node, $target, $diagnostics) = @_;
+    my $var = $node->{var};
+    my $list = $node->{list};
+    my $out = '';
+
+    if ($target eq 'lin') {
+        $out .= "for $var in $list; do\n";
+        $out .= render_nodes($node->{body}, $target, $var, $diagnostics);
+        $out .= "done\n";
+        return $out;
+    }
+
+    my @values = expand_batch_list($list, $node->{file}, $node->{line});
+    my $batch_var = uc(substr($var, 0, 1));
+    $out .= "for %%$batch_var in (" . join(' ', @values) . ") do (\n";
+    $out .= render_nodes($node->{body}, $target, $batch_var, $diagnostics);
+    $out .= ")\n";
+    return $out;
+}
+
+
+sub expand_batch_list {
+    my ($list, $file, $line) = @_;
+
+    if ($list =~ /^\$\(seq\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\)$/) {
+        my ($start, $step, $end) = ($1, $2, $3);
+        die "mctest: zero seq step at $file line $line\n" if $step == 0;
+
+        my @values;
+        my $value = $start;
+        my $guard = 0;
+        while (($step > 0 && $value <= $end + 1e-9) ||
+               ($step < 0 && $value >= $end - 1e-9)) {
+            push @values, format_number($value);
+            $value += $step;
+            die "mctest: seq range too large at $file line $line\n"
+                if ++$guard > 100000;
+        }
+        return @values;
+    }
+
+    # Ordinary lists and globs are passed through for cmd.exe to expand.
+    $list =~ s/^\s+//;
+    $list =~ s/\s+$//;
+    return split(/\s+/, $list);
+}
+
+sub format_number {
+    my ($n) = @_;
+    my $s = sprintf('%.10f', $n);
+    $s =~ s/0+$//;
+    $s =~ s/\.$//;
+    return $s;
+}
+
+sub translate_line {
+    my ($line, $target, $loop_var) = @_;
+    my $out = $line;
+
+    if ($target eq 'lin') {
+        $out =~ s/^\s*rem\b/#/i;
+        $out =~ s/^\s*call\s+//i;
+        $out =~ s/^\s*copy\s+/cp /i;
+        $out =~ s/^\s*del\s+/rm /i;
+        $out =~ s/^\s*set\s+([A-Za-z_]\w*)\s*=\s*(.*)$/export $1="$2"/i;
+        $out =~ s/%([A-Za-z_]\w*)%/\$$1/g;
+
+        # Convert legacy helper invocations to the common assignment protocol.
+        if ($out =~ /^\s*(?:\.\s+)?(getvalue|getvariable|rpvalue|chi2)(\.pl)?\b(.*)$/i) {
+            my ($helper, $suffix, $args) = ($1, $2, $3);
+            $helper .= '.pl' unless defined $suffix;
+            return "mctest_helper $helper$args";
+        }
+        if ($out =~ /^\s*\.\s+delEstr\b(.*)$/i) {
+            return "MCPHASE_DELESTR=\$(perl \"\$MCPHASE_DIR/bin/delEstr.pl\"$1); " .
+                "export MCPHASE_DELESTR";
+        }
+    } else {
+        $out =~ s/^\s*export\s+([A-Za-z_]\w*)\s*=\s*(.*)$/set "$1=$2"/i;
+        $out =~ s/^\s*cp\s+/copy /i;
+        $out =~ s/^\s*rm\s+/del /i;
+        $out =~ s/\$([A-Za-z_]\w*)/%$1%/g;
+        $out =~ s/^\s*#/rem /;
+
+        if ($loop_var) {
+            $out =~ s/%\Q$loop_var\E%/%%$loop_var/g;
+            $out =~ s/\$\Q$loop_var\E/%%$loop_var/g;
+        }
+
+        if ($out =~ /^\s*(?:\.\s+)?(getvalue|getvariable|rpvalue|chi2)(\.pl)?\b(.*)$/i) {
+            my ($helper, $suffix, $args) = ($1, $2, $3);
+            $helper .= '.pl' unless defined $suffix;
+            return "call mctest_helper.bat $helper$args";
+        }
+    }
+
+    return $out;
+}
+
+sub shell_quote {
+    my ($s) = @_;
+    $s =~ s/'/'\\''/g;
+    return "'" . $s . "'";
+}
+
+
+sub run_script {
+    my ($script, $target) = @_;
+    my ($fh, $tmp) = tempfile('mctestXXXXXX',
+        SUFFIX => ($target eq 'lin' ? '.sh' : '.bat'),
+        UNLINK => 1);
+
+    print {$fh} $script
+        or die "mctest: cannot write temporary script: $!\n";
+    close($fh)
+        or die "mctest: cannot close temporary script: $!\n";
+
+    if ($target eq 'lin') {
+        chmod 0700, $tmp;
+        system('bash', $tmp);
+    } else {
+        system($ENV{COMSPEC} || 'cmd.exe', '/c', $tmp);
+    }
+
+    exit($? == -1 ? 127 : ($? >> 8));
+}
+
+sub usage {
+    print STDERR "Usage: mctest.pl [-win|-lin] script [script ...]\n";
+    exit 2;
+}

@@ -72,7 +72,7 @@ void helpexit()
           "  Other Observables:\n"
           "         -M  ...magnetic moment: calculate expectation values and transition matrix\n"
           "                       elements for magnetic moment M (muB)instead of I, for conversion to\n"
-          "                       emu/mol multiply by muB*NA=5584.8973464\n"  
+          "                       emu/mol multiply by muB*NA=0.55848973464\n"  
           "         -P  ...phonon displacement: calculate phonon displacement in A instead of I\n"
           "         -pel ..electric dipole moment: calculate electrical dipole moment pel in |e|pm\n"
           "                       instead of I\n"

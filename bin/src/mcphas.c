@@ -23,7 +23,8 @@ const char * filemode="w";
  
 // main program
 int main (int argc, char **argv)
-{ int j,l,doeps=0,linepscf=0,linepsjj=0,tracetest=0;bool inc_cd=false,do_chi2=false;double cel=0.0,cv=0;
+{ int j,l,doeps=0,linepscf=0,linepsjj=0,tracetest=0;bool inc_cd=false,do_chi2=false;
+  double cel=0.0,cv=0,Hchi=0;
   int options=0; // this integer indicates how many command strings belong to 
                  //options 
 
@@ -46,12 +47,15 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
    if (strcmp(argv[im],"-cd")==0) {inc_cd=true;if (options<im)options=im;} // do classical dipole interaction 
-   if (strcmp(argv[im],"-chi")==0) {do_chi2=true;if (options<im)options=im;} // output devitaion squared and error squared after sta= 
+   if (strcmp(argv[im],"-chi2")==0) {do_chi2=true;if (options<im)options=im;} // output devitaion squared and error squared after sta= 
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
    if (strcmp(argv[im],"-linepsjj")==0) {linepsjj=1;if (options<im)options=im;} // do exchange strain epsilon calculation linear
    if (strcmp(argv[im],"-cel")==0&&im+1<=argc-1)
                                  {cel=strtod (argv[im+1], NULL);  // read stress to apply
+                                  if (options<im+1)options=im+1;}
+   if (strcmp(argv[im],"-chi")==0&&im+1<=argc-1)
+                                 {Hchi=strtod (argv[im+1], NULL);  // read field to apply
                                   if (options<im+1)options=im+1;}
    if (strcmp(argv[im],"-cv")==0&&im+1<=argc-1)
                                   {cv=strtod (argv[im+1], NULL);  // read stress to apply
@@ -94,7 +98,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
 
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
    ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;ini.include_cd=inc_cd;ini.do_chi2=do_chi2;
-   ini.cel=cel; ini.cv=cv;
+   ini.cel=cel; ini.cv=cv; ini.Hchi=Hchi;
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
@@ -150,8 +154,9 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
           } // doeps
  
  if(verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
-  if(verbose==1&&do_chi2){printf("option -chi: outputting deviation squared and error squared for each data point to fit\n");}
+  if(verbose==1&&do_chi2){printf("option -chi2: outputting deviation squared and error squared for each data point to fit\n");}
 if(verbose==1&&cel!=0.0){printf("option -cel %g: calculating elastic constants by applying additional stress of %g\n",ini.cel,ini.cel);}
+if(verbose==1&&Hchi!=0.0){printf("option -chi %g: calculating magnetic susceptiblity by applying additional magnetic field of %g\n",ini.Hchi,ini.Hchi);}
  if(verbose==1&&cv!=0.0){printf("option -cv %g: calculating specific heat by applying small temperature step %g\n",ini.cv,ini.cv);}
           
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
@@ -336,7 +341,19 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
           else                 physprop.cel=s.Inverse();     
           //myPrintMatrix(s,"Matrix s:");
          }
-
+        if(Hchi!=0)
+         {physproperties pp(physprop);
+          Matrix chi(1,3,1,3);//myPrintVector(pp.sps.epsilon,"Initial Strain");
+          int Hchi_not_stable=0;
+          for(int n=1;n<=3;++n){h(n)+=Hchi;if(verbose){printf("Applying");Vector field(h(1,3));myPrintVector(field,"Stress Hi Hj Hk (T)");}
+                                Hchi_not_stable+=htcalc(h,T,ini,inputpars,testqs,testspins,pp,tracetest);
+                                h(n)-=Hchi;if(verbose){myPrintVector(pp.m,"Calculated Moment");}
+                                for(int m=1;m<=3;++m)chi(n,m)=(pp.m(m)-physprop.m(m))/Hchi;
+                               }  
+         if(Hchi_not_stable!=0)physprop.chi=0;
+          else                 physprop.chi=chi;     
+          //myPrintMatrix(s,"Matrix s:");
+         }
          ini.maxspinchange=maxspinchange;
          ini.maxnofmfloops=maxnofmfloops;
          ini.maxstamf=maxstamf;

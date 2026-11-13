@@ -64,8 +64,8 @@ for my $arg (@expanded_args) {
                 unless $value =~
                     /\A[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\z/;
 
-            die "Value '$value' in '$item' must be greater than 0 and less than 1\n"
-                unless $value > 0 && $value <= 1;
+            die "Value '$value' in '$item' must be >= 0 and <= 1\n"
+                unless $value >= 0 && $value <= 1;
         }
 
         die "Duplicate name '$name'\n" if exists $weights{$name};
@@ -109,7 +109,7 @@ sub is_phonon_sipf {
 
     # Exclude names beginning with E followed by an uppercase letter,
     # for example EROC.sipf. Names such as ErOC.sipf are allowed.
-    return 0 if $filename =~ /\AE[A-Z]/;
+    return 0 if $filename =~ /\AE[A-Z,0-9]/;
 
     open my $fh, '<', $path
         or die "Cannot open SIPF file '$path': $!\n";
@@ -242,29 +242,47 @@ for my $source (@sipfs) {
         push @{ $shells[-1]{neighbours} }, $neighbour->{index};
     }
 
-    my @parts = ($source->{index});
-    my $values = $weights{$stem};
-    my @verbose_parts;
+ my @parts = ($source->{index});
+my $values = $weights{$stem};
+my @verbose_parts;
 
-    # Each input value applies to the corresponding neighbour shell.
-    my $shell_count = @shells < @$values ? scalar(@shells) : scalar(@$values);
-    for my $shell_number (0 .. $shell_count - 1) {
-        my $shell = $shells[$shell_number];
-        my $share = $values->[$shell_number] / @{ $shell->{neighbours} };
+# Accumulate shares for repeated neighbour indices.
+my %share_by_index;
+my @index_order;
 
-        for my $index (@{ $shell->{neighbours} }) {
+# Each input value applies to the corresponding neighbour shell.
+my $shell_count = @shells < @$values
+    ? scalar(@shells)
+    : scalar(@$values);
+
+for my $shell_number (0 .. $shell_count - 1) {
+    my $shell = $shells[$shell_number];
+    my $share = $values->[$shell_number] / @{ $shell->{neighbours} };
+
+    for my $index (@{ $shell->{neighbours} }) {
+        if (!exists $share_by_index{$index}) {
+            push @index_order, $index;
+            $share_by_index{$index} = 0;
+        }
+        $share_by_index{$index} += $share;
+    }
+}
+
+# Format and add each index once, using its summed share.
+for my $index (@index_order) {
+    my $share = $share_by_index{$index};
     my $formatted = sprintf('%.2g', $share);
     $formatted =~ s/^0(?=\.)//;
+
+    next if $formatted == 0;
 
     push @parts, "$index+--$formatted";
 
     if ($verbose) {
         my $filename = basename($filename_by_index{$index});
         push @verbose_parts, "$formatted * $filename";
-        }
-     }
-
     }
+}
 
     push @output, join(':', @parts) if @parts > 1;
 if ($verbose && @parts > 1) {
