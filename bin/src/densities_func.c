@@ -1,7 +1,9 @@
 /*****************************************************************/
-// functions for programs charges, spindensity, orbmomdensity momdensity
-//                        currdensities
+// functions for programs spins
 /*****************************************************************/
+
+
+
 
 double check_distance(double * aa,float * numbers)
 {double dd;
@@ -340,3 +342,228 @@ double Edesired;
 if(deg>-T)return true; else return false;
 
 }
+
+
+int jvx_create(LoadedInput& LI,
+    int argc,
+    char** argv,
+    spincf & densitycf,
+    spincf & spinconf,
+    spincf & sc_phonon,
+    Vector & h,
+    Vector & hh,
+    double & x,
+    double & y)
+{
+             Vector hkl(1,3);hkl=0;double E;E=0;
+             Vector gjmbHxc(1,3);gjmbHxc=0;
+             spincf densityev_real(densitycf*0.0);
+             spincf densityev_imag(densitycf*0.0);
+             spincf spinconfev_real(spinconf*0.0);
+             spincf spinconfev_imag(spinconf*0.0);
+             spincf spinconfpev_real(spinconf*0.0);
+             spincf spinconfpev_imag(spinconf*0.0);
+            // to do jvx output of static structure put zeros into these spinconfigurations
+
+// check sipffilenames and put radius= ... in case single ion module is
+//  capable of calculating position 
+for(int ii=1;ii<=LI.inputpars->cs.nofatoms;++ii)
+{Vector pos(1,3);   
+  for(int nt=1;nt<=LI.inputpars->cs.nofcomponents;++nt){h(nt)=hh(nt+LI.inputpars->cs.nofcomponents*(ii-1));}
+  if(true==(*LI.inputpars->jjj[ii]).pcalc(pos,LI.T,h,LI.Hext,(*LI.inputpars->jjj[ii]).Icalc_parstorage))
+ {double charge;charge=(*LI.inputpars->jjj[ii]).charge;if(charge==0)charge=0.01;
+   snprintf(LI.cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g",
+           charge,LI.gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
+  // if we can determine from sipffilename the element --> put r g b information
+    
+  unsigned int r,g,b; char element []  ="E\0";double radius=0.3333;
+   element[0]=toupper((*LI.inputpars->jjj[ii]).sipffilename[0]);
+   if(isalpha((*LI.inputpars->jjj[ii]).sipffilename[1]))
+   element[1]=tolower((*LI.inputpars->jjj[ii]).sipffilename[1]);
+  for(int i=0;i<NOFELEMENTS_RGB;++i)
+   if(0==strncmp(element,elstr[i],2)){
+r=(unsigned int)(unsigned char)elstr[i][2];
+g=(unsigned int)(unsigned char)elstr[i][3];
+b=(unsigned int)(unsigned char)elstr[i][4];
+radius=strtod(elstr[i]+5,NULL);
+   snprintf(LI.cs.sipffilenames[ii],MAXNOFCHARINLINE,"pointcharge %g |e| radius=%g %s r=%i g=%i b=%i",
+           charge,LI.gp.scale_pointcharges*radius*signum(charge)*pow((double)fabs(charge),0.3333),
+           element,r,g,b);
+//    printf("%s scale=%g radius=%g charge=%g sig(charge)=%g pow=%g  estr=%s\n",LI.cs.sipffilenames[ii],
+//LI.gp.scale_pointcharges,radius,charge,signum(charge),pow((double)fabs(charge),0.3333),elstr[i]+5);
+
+}
+
+// printf("#! atom %i %s displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,LI.cs.sipffilenames[ii],ii,pos(1),ii,pos(2),ii,pos(3));
+  printf("#! atom %i  displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,ii,pos(1),ii,pos(2),ii,pos(3));
+ }
+}
+
+// create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
+   LI.fin = fopen_errchk ("./results/spins.jvx", "w");
+    LI.gp.showprim=0;LI.gp.spins_wave_amplitude=0;
+     densitycf.jvx_cd(LI.fin,LI.outstr,LI.cs,LI.gp,0.0,densityev_real,densityev_imag,hkl,LI.T,gjmbHxc,LI.Hext,LI.cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon);
+    fclose (LI.fin);
+
+// create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
+   LI.fin = fopen_errchk ("./results/spins_prim.jvx", "w");
+     LI.gp.showprim=1;
+     densitycf.jvx_cd(LI.fin,LI.outstr,LI.cs,LI.gp,0.0,densityev_real,densityev_imag,hkl,LI.T,gjmbHxc,LI.Hext,LI.cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon);
+    fclose (LI.fin);
+
+//***************************************************************************************************************
+//***************************************************************************************************************
+//***************************************************************************************************************
+// try movie - a spinwave picture  ... including phonons and spindensity changes ...
+//***************************************************************************************************************
+//***************************************************************************************************************
+// check if there is a second 
+for(int i=LI.os+1;i<argc;++i){
+if(strcmp(argv[i],"-prefix")==0){strcpy(LI.prefix,argv[i+1]); // read alternative LI.prefix
+                                   fprintf(stdout,"# prefix for qee qep etc input filenames: %s\n",LI.prefix);
+ 				   LI.os+=2;}
+                       }
+if(argc-1==NOF_USERDEF_MCPHAS_COLS+4+LI.os)LI.os+=NOF_USERDEF_MCPHAS_COLS-4;
+if(argc-1==6+LI.os)LI.os-=2;  // 
+//argc-1==8+LI.os  ... ok 
+if (argc-1==8+LI.os){
+              // double E;
+              char outhklstr[MAXNOFCHARINLINE];
+             LI.gp.spins_wave_amplitude=1.0;LI.gp.spins_show_ellipses=1.0;LI.gp.spins_show_oscillation=1.0;
+             LI.gp.phonon_wave_amplitude=1.0;LI.gp.phonon_scale_static_displacements=1.0;
+//----------------------------------------------------------------------------------------------------------
+ 
+           if(LI.arrow>0){
+             strcpy(LI.infilename,"./results/");strcpy(LI.infilename+10,LI.prefix);
+             switch(LI.arrow)
+             {case 1: strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qes");LI.fin = fopen(LI.infilename, "rb");
+                      if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qes", "rb");
+                      break;
+              case 2: strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qeo");LI.fin = fopen(LI.infilename, "rb");
+                      if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qeo", "rb");
+                      break;
+              case 3: strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qem");LI.fin = fopen(LI.infilename, "rb");
+                      if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qem", "rb");
+                      break;
+              case 4: fprintf(stderr,"mcdisp: output of individual moment oscillation in eigenvector file mcdisp.qemi not yet implemented - thus exiting program spins\n");
+                      strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qemi");LI.fin = fopen(LI.infilename, "rb");
+                      if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qemi", "rb");
+                      break;   
+              case 5: strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qpe");LI.fin = fopen(LI.infilename, "rb");
+                      if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qpe", "rb");
+                      break;                   
+             }
+             check_for_best_excitation_and_close(LI.fin,LI.gp,"qev",spinconf,spinconfev_real,spinconfev_imag,
+                          x,y,LI.T,LI.Hext,LI.outstr,outhklstr,"moment oscillation",hkl,E,argc,argv,LI.os,
+                          LI.inputpars->cs.abc,LI.inputpars->cs.nofatoms,LI.doijk, LI.xx,LI.yy,LI.zz,LI.dim);
+
+             }//arrow
+     
+//----------------------------------------------------------------------------------------------------------
+            if(LI.phonon>0){
+             strcpy(LI.infilename,"./results/");strcpy(LI.infilename+10,LI.prefix);
+             strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qep");LI.fin = fopen(LI.infilename, "rb");
+                      if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qep", "rb");
+             check_for_best_excitation_and_close(LI.fin,LI.gp,"qep",spinconf,spinconfpev_real,spinconfpev_imag,
+                          x,y,LI.T,LI.Hext,LI.outstr,outhklstr,"phonon LI.oscillation",hkl,E,argc,argv,LI.os,
+                          LI.inputpars->cs.abc,LI.inputpars->cs.nofatoms,LI.doijk, LI.xx,LI.yy,LI.zz,LI.dim);
+
+             }//phonon
+//----------------------------------------------------------------------------------------------------------
+            if(LI.density){
+             strcpy(LI.infilename,"./results/");strcpy(LI.infilename+10,LI.prefix);
+             switch(argv[1][1]) // dimension deLI.finition from jjjpar.hpp
+                {case 'c': strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qee");LI.fin = fopen(LI.infilename, "rb");
+                           if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qee", "rb");
+                           break;
+                 case 's': strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qsd");LI.fin = fopen(LI.infilename, "rb");
+                           if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qsd", "rb");
+                           break;
+                 case 'o': strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qod");LI.fin = fopen(LI.infilename, "rb");
+                           if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qod", "rb");
+                           break;
+                 case 'm': fprintf(stderr,"Error spins: magnetic moment density oscillation not yet implemented\n");return false;break;
+                             // would have to look into qsd and qod files !!
+                 case 'j': strcpy(LI.infilename+10+strlen(LI.prefix),"mcdisp.qod");LI.fin = fopen(LI.infilename, "rb");
+                           if(LI.fin==NULL)LI.fin = fopen_errchk ("./results/mcdisp.qod", "rb");
+                           break;
+                }
+             check_for_best_excitation_and_close(LI.fin,LI.gp,"qee/qsd/qod",densitycf,densityev_real,densityev_imag,
+          x,y,LI.T,LI.Hext,LI.outstr,outhklstr,"density oscillation",hkl,E,argc,argv,LI.os,
+          LI.inputpars->cs.abc,LI.inputpars->cs.nofatoms,LI.doijk, LI.xx,LI.yy,LI.zz,LI.dim);
+
+             }//LI.gp.show_density
+//----------------------------------------------------------------------------------------------------------           
+              LI.gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set
+                        // in case he wants to overwrite some default settings
+              if(LI.arrow==0)LI.gp.spins_scale_moment=0;
+              if(LI.density==0)LI.gp.show_density=0;
+              // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
+              // omega t= phase
+              double phase;
+             // complex <double> im(0,1);
+              for(int i=0;i<LI.gp.nof_frames;++i)
+              {phase=2*3.1415*i/(LI.gp.nof_frames-1);
+               printf("\n********************************************\n");
+               printf(" calculating movie sequence %i(%i)\n",i+1,LI.gp.nof_frames);
+               printf("********************************************\n");
+               char filename[MAXNOFCHARINLINE];
+               snprintf(filename,MAXNOFCHARINLINE,"./results/spins.%02d.jvx",i+1);
+               LI.fin = fopen_errchk (filename, "w");LI.gp.showprim=0;
+                     densitycf.jvx_cd(LI.fin,outhklstr,LI.cs,LI.gp,
+                                  phase,densityev_real,densityev_imag,hkl,LI.T,hh,LI.Hext,LI.cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
+               fclose (LI.fin);
+               snprintf(filename,MAXNOFCHARINLINE,"./results/spins_prim.%02d.jvx",i+1);
+               LI.fin = fopen_errchk (filename, "w");LI.gp.showprim=1;
+                     densitycf.jvx_cd(LI.fin,outhklstr,LI.cs,LI.gp,
+                                  phase,densityev_real,densityev_imag,hkl,LI.T,hh,LI.Hext,LI.cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
+               fclose (LI.fin);
+              }
+          printf("# %s\n",outhklstr);
+          }
+fprintf(stderr,"# %s\n",LI.outstr);
+fprintf(stderr,"# ************************************************************************\n");
+fprintf(stderr,"# *             end of program spins running at \n");
+fprintf(stderr,"# * Reference: M. Rotter PRB 79 (2009) 140405R\n");
+fprintf(stderr,"# * \n");
+fprintf(stderr,"# * view jvx file by:\n");
+fprintf(stderr,"# * javaview results/spins.jvx\n");
+fprintf(stderr,"# * java JvxAnimator \"results/spins.*.jvx\" \n");
+fprintf(stderr,"# ************************************************************************\n");
+ return 0;
+}
+
+
+void section4header (FILE * fout)
+{
+fprintf(fout,"\
+#\n\
+# %%SECTION 4%% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS\n\
+#\n\
+#\n\
+# here follows the description of the magnetic unit cell with respect\n\
+# to the primitive crystallographic unit cell:\n\
+# 'nr1', 'nr2', 'nr3' ...the crystallographic unit cell has to be taken\n\
+#                        nr1 nr2 and nr3 times along r1 r2 and r3,\n\
+#                        respectively to get magnetic unit cell\n\
+# 'nat' denotes the number of magnetic atoms in magnetic unit cell\n\
+#\n\
+# It follows a list of nat lines with to describe the magnetic moment configuration\n\
+# Notes:\n\
+# 'atom-filename' means the single ion property filename of this magnetic atom:\n\
+#                 -it must contain the Formfactor Coefficients (e.g. see international tables)\n\
+#                                      Lande factor\n\
+#                                      Neutron Scattering Length (10^-12 cm) \n\
+#                 -it may contain a    Debey Waller Factor\n\
+# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1)\n\
+# 'dr1','dr2' and 'dr3' refer to the primitive lattice given below\n\
+# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons\n\
+#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz\n\
+#                have to be given, which refer to an right handed orthogonal coordinate system \n\
+#                defined by y||b, z||(a x b) and x normal to y and z\n\
+#  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components \n\
+# 'mf1' 'mf2' 'mf3' (optional line, used to go beyond dipole approx for formfactor)\n\
+#                                     denote the corresponding exchange fields in meV\n\
+#\n");
+}
+

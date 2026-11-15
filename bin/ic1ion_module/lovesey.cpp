@@ -282,7 +282,7 @@ void lovesey_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::v
    int i,j,ns=getdim(n,l);                                      // Number of states = ^{4l+2}C_{n}
 
    std::string errormsg("lovesey_Qq(): Unable to calculate the A(K,K') or B(K,K') matrix\n");
-   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5]};
+   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5],0,0};
    int K,Kp,Q,Qp;
    sMat<double> Akk,Bkk,ckk,Qmat,QLmat,QSmat;
    Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);

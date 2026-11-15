@@ -607,7 +607,7 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
       
    }
 // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
+   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON) break; }
 
    if (T<0){printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
                          printf ("Number   Excitation Energy\n");

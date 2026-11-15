@@ -240,7 +240,7 @@ coq2jjj.o: coq2jjj.c paramete.hpp martin.h
 jjj2j.o: jjj2j.c par.hpp jjj2j.h jjjpar.hpp vector.h
 	$(CCC) $(CFLAGS) $<
 
-spins.o: spins.c elements.c densities_func.c spincf.hpp  martin.h vector.h graphic_parameters.hpp cryststruct.hpp par.hpp jjjpar.hpp ../../version
+spins.o: spins.c elements.c densities_func.c spins_q.c spins_parse.c spincf.hpp  martin.h vector.h graphic_parameters.hpp cryststruct.hpp par.hpp jjjpar.hpp ../../version
 	$(CCC) $(CFLAGS) $<
 
 spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp jjjpar.hpp martin.h vector.h ../../version

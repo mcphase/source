@@ -402,7 +402,7 @@ void icf1ion_module::icf_expJ(  complexdouble *zV, double *vE, Vector & T, Matri
    int Esz, ind_j;
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    std::vector<double> E, me;  E.reserve(Hsz);
-   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON || vE[Esz+1]==0) break; }
+   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON) break; }
 
    if (T(T.Lo())<0)
    {  Esz = (int)(-T(T.Lo()));
@@ -1123,7 +1123,7 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
 {
    if (l>3||l<0) { std::cerr << "Sorry only s-, p-, d- and f-electrons supported at present\n"; exit(0); }
 
-   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5]};
+   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5],0,0};
    std::string errormsg("lovesey_Qq(): Unable to calculate the A(K,K') or B(K,K') matrix\n");
 
    fstates_t gs = hunds_gs(n, l);
