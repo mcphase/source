@@ -44,7 +44,17 @@ if ($output_only) {
     exit 0;
 }
 
-run_script($script, $target);
+my $start_time = time();
+my $status = run_script($script, $target);
+
+if ($status == 0) {
+    my $elapsed = int(time() - $start_time);
+    print "#************************************************\n";
+    print "# mctest <$files[0]> in ${elapsed}s OK\n";
+    print "#************************************************\n";
+}
+
+exit $status;
 
 sub set_target {
     my ($new, $ref) = @_;
@@ -121,6 +131,14 @@ mctest_helper() {
     local helper="$1"
     shift
     local output rc line name value
+
+    # The extensionless legacy files are shell wrappers. Call their Perl
+    # implementations directly instead of passing the wrappers to Perl.
+    case "$helper" in
+        getvalue|getvariable|rpvalue|chi2)
+            helper="${helper}.pl"
+            ;;
+    esac
 
     output=$("${MCTEST_PERL:-perl}" "$MCPHASE_DIR/bin/$helper" "$@")
     rc=$?
@@ -343,7 +361,8 @@ sub run_script {
         system($ENV{COMSPEC} || 'cmd.exe', '/c', $tmp);
     }
 
-    exit($? == -1 ? 127 : ($? >> 8));
+    return($? == -1 ? 127 : ($? >> 8));
+
 }
 
 sub usage {

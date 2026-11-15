@@ -23,6 +23,7 @@ $col=eval $col;
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $exp=$ARGV[0];shift @ARGV;
+$exp =~s/c0/\$linenumber/g;
 $exp =~s/c(\d+)/\$numbers[\1-1]/g; print $exp."\n";
 
   foreach (@ARGV)
@@ -30,12 +31,12 @@ $exp =~s/c(\d+)/\$numbers[\1-1]/g; print $exp."\n";
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
    print "<".$file;
    open (Fout, ">range.out");
+   $linenumber=0;
    while($line=<Fin>)
    {
       if ($line=~/^\s*#/) {print Fout $line;}
-       else{$l=$line;$line=~s/D/E/g;@numbers=split(" ",$line); $e= eval $exp;
-                     @numbers=split(" ",$l);
-                       $numbers[$col-1]=$e;
+       else{++$linenumber;$l=$line;$line=~s/D/E/g;@numbers=split(" ",$line); $e= eval $exp;
+                  $numbers[$col-1]=$e;
            	  $i=0;foreach (@numbers)
 		  {++$i;print Fout $numbers[$i-1]." ";}
                   print Fout "\n";

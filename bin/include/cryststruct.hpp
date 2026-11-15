@@ -6,23 +6,37 @@
 
 #define MAXNOFATOMS 5000
 
-class cryststruct
-{ public:
-int nofatoms,nofcomponents,maxnofatoms;
-   float x[MAXNOFATOMS],y[MAXNOFATOMS],z[MAXNOFATOMS];
-  char * sipffilenames[MAXNOFATOMS];
-   Matrix r;
-   Vector abc;
+class cryststruct {
+public:
+    int nofatoms;
+    int nofcomponents;
+    int maxnofatoms;
 
-cryststruct() // constructor
-{nofatoms=0;nofcomponents=3,maxnofatoms=MAXNOFATOMS;
- r=Matrix(1,3,1,3);
- abc=Vector(1,6);abc=0;
- abc(4)=90;
- abc(5)=90;
- abc(6)=90;
+    float x[MAXNOFATOMS];
+    float y[MAXNOFATOMS];
+    float z[MAXNOFATOMS];
+    char* sipffilenames[MAXNOFATOMS];
 
-}
+    Matrix r;
+    Vector abc;
+
+    cryststruct()
+        : nofatoms(0),
+          nofcomponents(3),
+          maxnofatoms(MAXNOFATOMS),
+          r(1, 3, 1, 3),
+          abc(1, 6)
+    {
+        for (int i = 0; i < MAXNOFATOMS; ++i) {
+            x[i] = y[i] = z[i] = 0.0f;
+            sipffilenames[i] = NULL;
+        }
+
+        abc = 0;
+        abc(4) = 90;
+        abc(5) = 90;
+        abc(6) = 90;
+    }
 
 cryststruct(const cryststruct & p) // copy constructor
 {nofatoms=p.nofatoms;nofcomponents=p.nofcomponents,maxnofatoms=p.maxnofatoms;

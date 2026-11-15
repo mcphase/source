@@ -218,31 +218,69 @@ double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setn
                          case 10: iptr=&nofa;snprintf(hs,40,"supercell-nr1");break;
                          case 11: iptr=&nofb;snprintf(hs,40,"nr2");break;
                          case 12: iptr=&nofc;snprintf(hs,40,"nr3");break;
-                         default: ptr=&totalJ[i-12];snprintf(hs,40,"<I%i>",i-12);break;
+                         default: //ptr=&totalJ[i-12];snprintf(hs,40,"<I%i>",i-12);break;
+{
+    const int component = i - 12;
+    if (component >= 1 && component <= nofcomponents()) {
+        ptr = &totalJ[component];
+        snprintf(hs, sizeof(hs), "<I%i>", component);
+    } else {
+        // This column has no corresponding totalJ entry.
+        ptr = nullptr;
+        iptr = nullptr;
+        snprintf(hs, sizeof(hs), "unknown");
+    }
+    break;
+}
                  }
 
-if(setnn){if(nnerr[i]!=0&&i<=nofcolsin)
-          {if(ptr==NULL&&iptr==NULL)
-           {
- if(verbose==1)fprintf(stdout,"sta_mcphas.fum warning: exp value %g cannot be fitted in column %i in file ./fit/mcphas.fum\n",nn[i],i);
-           }else{double d2;double e2=nnerr[i]*nnerr[i];
-            if(iptr==NULL){d2=(nn[i]-(*ptr)); if(nnerr[i]<0)d2=fabs(nn[i])-fabs((*ptr));
-                           d2*=d2;
-                          if(verbose)fprintf(stdout,"stacalc_mphas.xyt: col %i  value %g err %g - calcvalue %g\n",i,nn[i],nnerr[i],(*ptr));}
-            else          {d2=(nn[i]-(*iptr));if(nnerr[i]<0)d2=fabs(nn[i])-abs((*iptr));
-                            d2*=d2;
-                           if(verbose)fprintf(stdout,"stacalc_mphas.xyt: col %i  value %g err %g - calcvalue %i\n",i,nn[i],nnerr[i],(*iptr));}
-             sta+=d2/e2;
-             if(ini.do_chi2){fprintf(stdout,"#!xyt sta= %g %g\n",d2,e2);}
-        
-           }
-          }
-          if(iptr==NULL)nn[i]=(*ptr);else nn[i]=(*iptr);
-          switch(i){case 8: case 9:   snprintf(num,40,"%ip ",(*iptr));break;
-                    case 10: case 11: snprintf(num,40,"%i x ",(*iptr));break;
-                    case 12:          snprintf(num,40,"%i ",(*iptr));break;
-                    default: snprintf(num,40,"%4.4g ",myround(nn[i]));
-                   }
+if(setnn){
+    if (i <= nofcolsin && nnerr[i] != 0) {
+        if (ptr == nullptr && iptr == nullptr) {
+            if (verbose == 1) {
+                fprintf(stdout,
+                    "sta_mcphas.fum warning: exp value %g cannot be fitted "
+                    "in column %i in file ./fit/mcphas.fum\n",
+                    nn[i], i);
+            }
+        } else {
+            double d2;
+            const double e2 = nnerr[i] * nnerr[i];
+
+            if (iptr == nullptr) {
+                d2 = nn[i] - *ptr;
+                if (nnerr[i] < 0) d2 = fabs(nn[i]) - fabs(*ptr);
+                if (verbose) {
+                    fprintf(stdout,
+                        "stacalc_mphas.xyt: col %i value %g err %g - calcvalue %g\n",
+                        i, nn[i], nnerr[i], *ptr);
+                }
+            } else {
+                d2 = nn[i] - *iptr;
+                if (nnerr[i] < 0) d2 = fabs(nn[i]) - abs(*iptr);
+                if (verbose) {
+                    fprintf(stdout,
+                        "stacalc_mphas.xyt: col %i value %g err %g - calcvalue %i\n",
+                        i, nn[i], nnerr[i], *iptr);
+                }
+            }
+
+            d2 *= d2;
+            sta += d2 / e2;
+            if (ini.do_chi2) fprintf(stdout, "#!xyt sta= %g %g\n", d2, e2);
+        }
+    }
+
+    // Only replace nn[i] when this column has a calculated value.
+    if (ptr != nullptr) nn[i] = *ptr;
+    else if (iptr != nullptr) nn[i] = *iptr;
+
+    switch (i) {
+        case 8: case 9:   snprintf(num, 40, "%ip ", *iptr); break;
+        case 10: case 11: snprintf(num, 40, "%i x ", *iptr); break;
+        case 12:          snprintf(num, 40, "%i ", *iptr); break;
+        default:          snprintf(num, 40, "%4.4g ", myround(nn[i])); break;
+    }
           snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE-strlen(outstr),"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
          }else
          {

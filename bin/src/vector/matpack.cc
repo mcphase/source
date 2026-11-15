@@ -139,7 +139,7 @@ void Mat::Error (int err, const char* msg, ...)
     if (err > 0)
 	snprintf(message,sizeof(message),"Error %d: ", err);
     else
-	snprintf(message,sizeof(message),"Error: ");
+	snprintf(message,sizeof(message),"Error:    ");
 
     va_start(argptr,msg);
 //    int l = message ? strlen(message) : 0;
@@ -150,9 +150,9 @@ void Mat::Error (int err, const char* msg, ...)
 
     // don't bother about error any more
     if (behaviour == IgnoreError || behaviour == SuppressWarning) return;
-    
     // else print error message
     cerr << message << endl;
+    cerr << msg << endl;
 
     if (behaviour == DisregardError) return;
 
