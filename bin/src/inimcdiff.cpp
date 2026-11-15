@@ -459,7 +459,7 @@ printf("\n");
 
 // input section 3 *********************************************************
   instr[0]='#';
- eps=Matrix(1,3,1,3);r1=Vector(1,3);r2=Vector(1,3);r3=Vector(1,3);H=Vector(1,HEXT_DIMENSION);
+ eps=Matrix(1,3,1,3);r1=Vector(1,3);r2=Vector(1,3);r3=Vector(1,3);H=Vector(1,HEXT_DIMENSION);H=0;
  
  nr1=0;nr2=0; nr3=0;
  while (instr[strspn(instr," \t")]=='#'&&nr1*nr2*nr3==0) 

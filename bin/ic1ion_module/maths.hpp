@@ -366,7 +366,7 @@ template <class T> void sMat<T>::pset(int rs, int rn, int cs, int cn, const sMat
 
    rs--; cs--;
    if(!m._ls.empty())
-   {
+   { /*
       // Sets elements with rs:rn,cs:cn to zero if any are nonzero
       it_s = _ls.lower_bound(_ind(rs,cs));
       it_n = _ls.lower_bound(_ind(rn,cn));
@@ -376,6 +376,20 @@ template <class T> void sMat<T>::pset(int rs, int rn, int cs, int cn, const sMat
             _ls.erase(it_s);
          it_s++;
       }
+      */
+     for (typename std::map<_ind, T>::iterator it = _ls.begin();
+     it != _ls.end(); )
+{
+    if (it->first.r >= rs && it->first.r < rn &&
+        it->first.c >= cs && it->first.c < cn)
+    {
+        it = _ls.erase(it);  // C++11: returns the next iterator
+    }
+    else
+    {
+        ++it;
+    }
+}
 
       // Sets new elements rs:rc,cs:cn from the values of the matrix m
       for (it=m._ls.begin(); it!=m._ls.end(); it++)

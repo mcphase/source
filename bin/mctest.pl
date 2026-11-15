@@ -366,6 +366,39 @@ sub run_script {
 }
 
 sub usage {
-    print STDERR "Usage: mctest.pl [-win|-lin] script [script ...]\n";
+    
+print STDERR << "EOF";
+
+program to test a simple script (windows and linux syntax are acceptable)
+ 
+ usage: mctest.pl [-win|-lin] script [script ...]
+
+will execute the script test.bat line by line and stop with an error message
+if an error occurs.
+
+For testing  goto directory demo and look out for testing batch files
+named test*.bat
+
+- use such a file to test mcphase, e.g.:
+mctest test_ndcu2_mcphasit.bat
+
+- to test a mcphase installation with all tests type
+mctest test*.bat
+
+- to test a specific command occuring in several test-batch files, e.g. makenn, try
+to run all these batch files. First, check by searching all test-batch files with
+grep makenn test*.bat
+ ... and run them by:
+grep -l makenn test*.bat | xargs mctest
+
+- generate a list of test by 
+ls -1 test* 
+  and paste and copy some files into dd using
+cat > dd
+ terminate by Ctrl^C, then execute these tests by
+cat dd | xargs mctest
+
+Note on limitations: mctest will not process correctly some commands
+EOF
     exit 2;
 }

@@ -1030,7 +1030,7 @@ void crosscheck_H_E(Vector & Hext,Vector & Habc,Vector & Eabc,Vector & abc)
  { dadbdc2ijk(v,Habc,abcu);
   w=Hext(1,3);
   if(Norm(w)>SMALL_FIELD&&Norm(v-w)>SMALL_FIELD)
-  {fprintf(stderr,"# Error reading mcphas/mcdisp.mf - Habc and Hijk both given and  Ha=%g Hb=%g Hc=%g and Hi=%g Hj=%g Hk=%g values do not agree ! \n",
+  {fprintf(stderr,"# Error reading mcphas/mcdisp.mf/mcdiff.in - Habc and Hijk both given and  Ha=%g Hb=%g Hc=%g and Hi=%g Hj=%g Hk=%g values do not agree ! \n",
    Habc(1),Habc(2),Habc(3),w(1),w(2),w(3));exit(EXIT_FAILURE);}
   for(int col=1;col<=3;++col){Hext(col)=v(col);}
  } else
