@@ -258,6 +258,7 @@ s.gp.read();
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 int main (int argc, char **argv)
 { double x,y;
+  char  tstr [MAXNOFCHARINLINE];
 
 LoadedInput LI;
 
@@ -288,7 +289,8 @@ default:
     fprintf(stdout,"#!Nkk=%g\n",LI.N(3,3));
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
+//    Print   Header
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 switch (LI.mode) {
 case OperationMode::File:
  switch (LI.fileMode) {
@@ -367,7 +369,8 @@ default: break;
 }
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
- 
+//             Column Headers 
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 switch (LI.mode) {
  case OperationMode::Graphical:
@@ -382,36 +385,36 @@ switch (LI.mode) {
  fprintf(LI.fout,"#          corresponding exchange fields [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
 	break;
 // .............................................................................                                
-case OperationMode::Table:
-  fprintf(stdout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",LI.savmf->na(),LI.savmf->nb(),LI.savmf->nc(),LI.cs4.nofatoms*LI.savmf->na()*LI.savmf->nb()*LI.savmf->nc());
- //fprintf(stdout,"# 1 2  3  4  5           6     7     8     9       10      11      12   13   14                  15   16   17   18   19   20\n");
- //fprintf(stdout,"# external parameters {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
- fprintf(stdout,"#");
- for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)fprintf(stdout,"%s ",LI.out.data()[col]);
- fprintf(stdout," n nr1 nr2 nr3 {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
+case OperationMode::Table: 
+  {fprintf(stdout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",LI.savmf->na(),LI.savmf->nb(),LI.savmf->nc(),LI.cs4.nofatoms*LI.savmf->na()*LI.savmf->nb()*LI.savmf->nc());
+   tstr[0]='\0';for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)snprintf(tstr,MAXNOFCHARINLINE,"%s %s",tstr,LI.out.data()[col]);
+ snprintf(tstr,MAXNOFCHARINLINE,"%s n nr1 nr2 nr3 {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ",tstr);
   switch (LI.tableMode) 
         {
    case TableMode::TMSL:
-     fprintf(stdout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)]\n");
+     snprintf(tstr,MAXNOFCHARINLINE,"%s <Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)]\n",tstr);
      break;
    case TableMode::TI:
-     fprintf(stdout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
+     snprintf(tstr,MAXNOFCHARINLINE,"%s <I1> <I2> <I3> ... <Inofcomponents>\n",tstr);
      break;
    case TableMode::THex:
-     fprintf(stdout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
+     snprintf(tstr,MAXNOFCHARINLINE,"%s <Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n",tstr);
      break;
    case TableMode::TL2:
-     fprintf(stdout,"bondlength_to_neighbour [A]  elongation^2 [A^2]\n");
+     snprintf(tstr,MAXNOFCHARINLINE,"%s bondlength_to_neighbour [A]  elongation^2 [A^2]\n",tstr);
      nlimits_calc(LI.nmin,LI.nmax, LI.tL2,LI.p);
    default: break ;
         }
-   break;
+    printf("# ");print_col_numbers(stdout,tstr);
+   printf("\n#%s",tstr);
+   break;}
   default: break; 
  }       
 
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 //    M E A N F I E L D - P R O C E S S I N G - loop all atoms
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 spincf spinconf(LI.savmf->na(),LI.savmf->nb(),LI.savmf->nc(),LI.cs4.nofatoms,3);
 spincf sc_phonon(LI.savmf->na(),LI.savmf->nb(),LI.savmf->nc(),LI.cs4.nofatoms,3);
@@ -539,22 +542,23 @@ for(int nt=1;nt<=LI.inputpars->cs.nofcomponents;++nt){hhh(nt)=hh(nt+LI.inputpars
      }
 
 Vector dd(1,3);
-char  tstr [MAXNOFCHARINLINE];
     dd0=LI.p.Inverse()*dd3;
 dd0(1)*=LI.savmf->na();dd0(2)*=LI.savmf->nb();dd0(3)*=LI.savmf->nc();
     Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,LI.cs.abc);
     dd=abc_in_ijk.Inverse()*dd3;
  if(doTableLine)
- { snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
+ {  if(LI.mode==OperationMode::Table)
+    {snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
             LI.cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
-   switch(LI.tableMode) {
-     case TableMode::TL2: {     
+        
         double value;
       for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)
        {extract(LI.outstr,LI.out.data()[col],value); fprintf(LI.fout,"%g ",myround(value));}
       fprintf(LI.fout," %i %i %i %i ",LI.savmf->n(),LI.savmf->na(),LI.savmf->nb(),LI.savmf->nc());
       fprintf(LI.fout,"%s",tstr);
-      break;     }
+       } 
+    
+   switch(LI.tableMode) { 
      case TableMode::TMSL :
      case TableMode::None :
        { 

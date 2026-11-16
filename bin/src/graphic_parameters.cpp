@@ -40,10 +40,10 @@ read();
 
 int graphic_parameters::read()
 {FILE * fin;float nn[2*MAXLINES+1];nn[0]=2*MAXLINES;
-fin=fopen("results/graphic_parameters.set","rb");
+fin=fopen("results/graphic_parameters.gp","rb");
 if (fin==NULL) return 0;
 char lstr[MAXNOFCHARINLINE];
-//std::fstream FILEIN; FILEIN.open("results/graphic_parameters.set", std::fstream::in);
+//std::fstream FILEIN; FILEIN.open("results/graphic_parameters.gp", std::fstream::in);
 //std::string strline;
 //if(FILEIN.fail()==true) return 0;
 

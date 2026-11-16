@@ -211,8 +211,8 @@ VerticalFlowLayout verticalFlowLayout21 = new VerticalFlowLayout();
 	 **************************************/
 	
 	// Read-Button
-//    btnRead.setText("Read file results/graphic_parameters.set");		// display-text of the button
-//	btnRead.setToolTipText("Reads Data from file results/graphic_parameters.set");	// tooltiptext of button
+//    btnRead.setText("Read file results/graphic_parameters.gp");		// display-text of the button
+//	btnRead.setToolTipText("Reads Data from file results/graphic_parameters.gp");	// tooltiptext of button
     // action-listener for button
 /*	btnRead.addActionListener(new java.awt.event.ActionListener()
 		{
@@ -223,8 +223,8 @@ VerticalFlowLayout verticalFlowLayout21 = new VerticalFlowLayout();
 		});
 */
 	// Write-Button
-    btnWrite.setText("Write file results/graphic_parameters.set and recalculate");
-	btnWrite.setToolTipText("Writes Data to file results/graphic_parameters.set; Resets the runtime-parameters!");
+    btnWrite.setText("Write file results/graphic_parameters.gp and recalculate");
+	btnWrite.setToolTipText("Writes Data to file results/graphic_parameters.gp; Resets the runtime-parameters!");
     btnWrite.addActionListener(new java.awt.event.ActionListener() 
 		{
 		public void actionPerformed(ActionEvent e) 
@@ -495,7 +495,7 @@ VerticalFlowLayout verticalFlowLayout21 = new VerticalFlowLayout();
 		strWorkingDir = strWorkingDir + strFileSeparator;
 	}
 	// Add Filename to working-directory
-	strWorkingDir = strWorkingDir + "results/graphic_parameters.set";
+	strWorkingDir = strWorkingDir + "results/graphic_parameters.gp";
 
   }
 //Start the applet
@@ -585,7 +585,7 @@ VerticalFlowLayout verticalFlowLayout21 = new VerticalFlowLayout();
   void ReadFromIni(String strFileName)
   {	
 	m_IniFile.SetFileName(strFileName);
-//	DisplayStatus("Reading results/graphic_parameters.set-File !");
+//	DisplayStatus("Reading results/graphic_parameters.gp-File !");
     int iRet = m_IniFile.Read();
 
 	if (iRet != 0)

@@ -247,7 +247,7 @@ a&b&c) - if used with -fc min max n lim a human readable format is output for sp
  results/spins*.eps (postscript), results/spins*.fst (fp_studio), \n\
  results/spins.out (ascii) and results/spins*.jvx (javaview)\n\n\
  the graphics output format can be fine tuned in .sps and .qev input files\n"
-" or results/graphic_parameters.set by show_abc_unitcell,\n"
+" or results/graphic_parameters.gp by show_abc_unitcell,\n"
 " show_primitive_crystal_unitcell, spins_scale_moment, spins_wave_amplitude\n\
  show_magnetic_unitcell, show_atoms, scale_view_1,scale_view_2, scale_view_3 ...\n\n\
  jvx files can be viewed by:\n\
@@ -429,17 +429,22 @@ else if (argc > 1 && strcmp(argv[1],"-tMSL") == 0) {
     s.tableMode = TableMode::TMSL;
     s.os = 1;
 }
-else if (!parseEigenvectorOptions(argc, argv, firstEigenvectorArg, s, error)) {
+else 
+{ for( int i = 1 ; i < argc ; ++i)
+  { if(strcmp(argv[i],"-q") == 0)
+    {s.mode = OperationMode::Eigenvector;
+ if (!parseEigenvectorOptions(argc, argv, firstEigenvectorArg, s, error)) {
     std::cerr << "Error: " << error << '\n';
     return false;
+      } else  {return true;}
+    }
+   }
 }
-
-
-
+s.mode = OperationMode::Graphical;
     return true;
 }
 
-// to be done for table and graphical mode 
+// to be done for table and graphical mode - get the correct .mf filename
 void getinfilename(LoadedInput& s, int argc, char** argv)
 {if(argc>s.os+1)if(strcmp(argv[1+s.os],"-prefix")==0){strcpy(s.prefix,argv[2+s.os]); // read s.prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",s.prefix);
@@ -489,7 +494,7 @@ fprintf(stderr,"# ***********************************************************\n"
     //       return false;
     //   }
 // check command line
-detectOperationMode(argc,argv,s);
+if(!detectOperationMode(argc,argv,s)){return false;}
 
 s.prefix[0]='\0';
 // options without graphics just screendump <I> or exchange field configuration at given HT
@@ -512,13 +517,13 @@ if (s.fileMode == FileMode::FC)
 break;
  case OperationMode::Table:
     // Table-mode work
- s.os+=1;s.fout=stdout;
+    s.fout=stdout;
                           if (strncmp(argv[1],"-tL2",4)==0){s.os+=1;s.tL2=strtod(argv[2],NULL);}
                           if(argc>s.os+2)if (strncmp(argv[s.os+1],"-n",2)==0){s.nofat=(int)strtod(argv[s.os+2],NULL);
                                                                  s.os+=2;
                                            // printf("output only for atom %i\n",s.nofat);
                                               }
-  getinfilename(s,argc,argv);
+  getinfilename(s,argc,argv); //  get the correct .mf filename
   break;
  // second ... other options with graphics !!
  case OperationMode::Graphical:

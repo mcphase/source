@@ -14,6 +14,11 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.List;
 import javax.imageio.metadata.IIOMetadataNode;
+import java.awt.Desktop;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.*;
 
 public class JvxAnimator {
     static final int W = 900, H = 700;
@@ -22,9 +27,121 @@ public class JvxAnimator {
     boolean showLabels = true;
     boolean autoRotate;
     int frameDelayMs=100; // Default: 10 frames per second
+    Path gpInput;
+    String gpPrefix;
 
 Vec sceneCenter;
 double sceneRadius;
+
+void loadGpSettings(Path file) throws IOException {
+    if (!Files.exists(file)) return;
+
+    if (gpPrefix == null || gpPrefix.isBlank()) {
+        throw new IllegalStateException("gpPrefix must be set before loading settings");
+    }
+
+    String parameterNames =
+            "(arrowSize|pitch|yaw|zoom|translationX|translationY)";
+
+    Pattern prefixedAssignment = Pattern.compile(
+        "^\\s*" + Pattern.quote(gpPrefix + "_") + parameterNames +
+        "\\s*=\\s*([-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?)"
+    );
+
+    Pattern generalAssignment = Pattern.compile(
+        "^\\s*" + parameterNames +
+        "\\s*=\\s*([-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?)"
+    );
+
+    Map<String, Double> prefixed = new HashMap<>();
+    Map<String, Double> general = new HashMap<>();
+
+    for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
+        Matcher m = prefixedAssignment.matcher(line);
+        if (m.find()) {
+            prefixed.put(m.group(1), Double.parseDouble(m.group(2)));
+            continue;
+        }
+
+        m = generalAssignment.matcher(line);
+        if (m.find()) {
+            general.put(m.group(1), Double.parseDouble(m.group(2)));
+        }
+    }
+
+    applySetting("arrowSize", prefixed, general,
+            value -> camera.arrowHead = value);
+    applySetting("pitch", prefixed, general,
+            value -> camera.pitch = Math.toRadians(value));
+    applySetting("yaw", prefixed, general,
+            value -> camera.yaw = Math.toRadians(value));
+    applySetting("zoom", prefixed, general,
+            value -> camera.zoom = value);
+    applySetting("translationX", prefixed, general,
+            value -> camera.panX = value);
+    applySetting("translationY", prefixed, general,
+            value -> camera.panY = value);
+}
+
+private static void applySetting(
+        String name,
+        Map<String, Double> prefixed,
+        Map<String, Double> general,
+        java.util.function.DoubleConsumer setter) {
+
+    Double value = prefixed.containsKey(name)
+            ? prefixed.get(name)
+            : general.get(name);
+
+    if (value != null) {
+        setter.accept(value);
+    }
+}
+
+
+void saveGpSettings() {
+    Path output = Path.of("results", "graphic_parameters.gp");
+
+    try {
+        Files.createDirectories(output.getParent());
+
+        List<String> lines = Files.exists(output)
+                ? new ArrayList<>(Files.readAllLines(output, StandardCharsets.UTF_8))
+                : new ArrayList<>();
+        String prefix = gpPrefix + "_";
+
+        putSetting(lines, prefix + "arrowSize", Double.toString(camera.arrowHead));
+        putSetting(lines, prefix + "pitch", Double.toString(Math.toDegrees(camera.pitch)));
+        putSetting(lines, prefix + "yaw", Double.toString(Math.toDegrees(camera.yaw)));
+        putSetting(lines, prefix + "zoom", Double.toString(camera.zoom));
+        putSetting(lines, prefix + "translationX", Double.toString(camera.panX));
+        putSetting(lines, prefix + "translationY", Double.toString(camera.panY));
+
+        Files.write(output, lines, StandardCharsets.UTF_8);
+
+        // Opening an editor is best-effort; saving still succeeds if this isn't supported.
+        //if (Desktop.isDesktopSupported()) {
+        //    Desktop.getDesktop().open(output.toFile());
+       // }
+    } catch (Exception e) {
+        System.err.println("Could not save/open graphic settings: " + e.getMessage());
+    }
+}
+
+static void putSetting(List<String> lines, String key, String value) {
+    Pattern assignment = Pattern.compile(
+        "^\\s*" + Pattern.quote(key) + "\\s*=.*$"
+    );
+
+    for (int i = 0; i < lines.size(); i++) {
+        if (assignment.matcher(lines.get(i)).matches()) {
+            lines.set(i, key + "=" + value);
+            return;
+        }
+    }
+    lines.add(key + "=" + value);
+}
+
 
     static class Vec {
         double x, y, z;
@@ -162,29 +279,16 @@ void calculateSceneBounds() {
         boolean commandLineGif = false;
 int initialFps = 10;
 List<String> inputFiles = new ArrayList<>();
+Path gpFile = null;
 
-/* for (int i = 0; i < args.length; i++) {
-if (args[i].equals("-c")) {
-    commandLineGif = true;
-} else if (args[i].equals("-r")) {
-        rotate = true;
-    } else if (args[i].equals("-s")) {
-        if (i + 1 >= args.length) {
-            throw new IllegalArgumentException("-s requires an FPS value from 1 to 60");
-        }
-        initialFps = Integer.parseInt(args[++i]);
-        if (initialFps < 1 || initialFps > 60) {
-            throw new IllegalArgumentException("FPS must be from 1 to 60");
-        }
-    } else {
-        inputFiles.add(args[i]);
-    }
-}
-*/
 for (int i = 0; i < args.length; i++) {
     String arg = args[i];
-
-    if (arg.equals("-c")) {
+     if (args[i].equals("-gp")) {
+        if (++i >= args.length) {
+            throw new IllegalArgumentException("Missing file after -gp");
+        }
+        gpFile = Path.of(args[i]);
+    } else if (arg.equals("-c")) {
         commandLineGif = true;
     } else if (arg.equals("-r")) {
         rotate = true;
@@ -205,10 +309,33 @@ for (Path path : expandInput(arg)) {
 }
 
 if (inputFiles.isEmpty()) {
-    System.err.println("Usage: java JvxAnimator [-c][-r] [-s fps] file1.jvx ...");
+    System.err.println("""
+
+Usage: java JvxAnimator [-c][-r] [-s fps] [-gp settings.gp] file1.jvx ... 
+
+Program to create an animation from  a sequence of .jvx files each describing
+a 3d-scene.
+
+Options: 
+
+-c     do not show anything - just create a .gif animation and a .mp4 file
+-r     rotate the scene
+-s     fps for more than one .jvx file the speed of animation in frames per second
+-gp    load graphic parameter settings from a file, e.g. settings.gp
+
+At closing of the program the graphic parameter settings are saved in 
+results/graphic_parameters.gp, settings are for example:
+
+arrowSize=0.18
+pitch=20.05352282957881
+yaw=-31.51267873219528
+zoom=1.0
+translationX=0.0
+translationY=0.0
+
+""");
     throw new IllegalArgumentException("No JVX input files specified");
 }
-
 
 
 List<Model> models = new ArrayList<>();
@@ -227,6 +354,12 @@ int startFps = initialFps;
 
     JvxAnimator animator = new JvxAnimator(models, startRotation, startFps);
 
+animator.gpPrefix = Path.of(inputFiles.get(0)).getFileName().toString();
+
+if (gpFile != null) {
+    animator.loadGpSettings(gpFile);
+}
+
 if (commandLineGif) {
     Path output = Path.of(System.getProperty("user.dir"), "animation.gif");
     animator.export(output); // Use the same exporter as the Export GIF button.
@@ -239,6 +372,14 @@ SwingUtilities.invokeLater(animator::show);
 
     void show() {
         window = new JFrame("JVX Animation");
+window.addWindowListener(new WindowAdapter() {
+    @Override
+    public void windowClosing(WindowEvent e) {
+        saveGpSettings();
+    }
+});
+Runtime.getRuntime().addShutdownHook(new Thread(this::saveGpSettings));
+
         preview = new Preview();
 JToggleButton depthButton =
         new JToggleButton("Depth shading", depthShading);

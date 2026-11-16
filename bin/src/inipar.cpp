@@ -300,7 +300,7 @@ void inipar::print_usrdefcolhead(FILE *fout,char * str)
  for(i=1;i<=usrdefcols[0];++i)
   {for(int j=0;j<(int)strlen(colhead[clcod[i]]);++j)if(colhead[clcod[i]][j]!=' ')
     snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%c",colhead[clcod[i]][j]); 
-  snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header)," ");
+    snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header)," ");
   }
  snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",str);
  print_col_numbers(fout,header);

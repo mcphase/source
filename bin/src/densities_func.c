@@ -494,7 +494,7 @@ if (argc-1==8+LI.os){
 
              }//LI.gp.show_density
 //----------------------------------------------------------------------------------------------------------           
-              LI.gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set
+              LI.gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.gp
                         // in case he wants to overwrite some default settings
               if(LI.arrow==0)LI.gp.spins_scale_moment=0;
               if(LI.density==0)LI.gp.show_density=0;

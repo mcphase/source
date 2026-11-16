@@ -219,7 +219,7 @@ while(deg){fin = fopen_errchk (s.eigenvector.qFile.c_str(), "rb");
  sci[-(int)T]=spincf(spinconfev_imag);
  }
 
- if(s.eigenvector.cif.empty()) // if a cif file was given in the command line
+ if(!s.eigenvector.cif.empty()) // if a cif file was given in the command line
                   {if(s.eigenvector.symmetryIndex<0) // label of symoperation in table)
                    {int nofsymop=-s.eigenvector.symmetryIndex;// label of symoperation in table;
                     complex<double> ch[nofsymop+1];

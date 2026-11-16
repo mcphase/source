@@ -73,9 +73,9 @@ static int** newmat (int nrl, int nrh, int ncl, int nch)
 {
     int* v;
     int **M;
-    register int** m;
-    register int rsize = nrh-nrl+1; 
-    register int csize = nch-ncl+1;
+     int** m;
+     int rsize = nrh-nrl+1; 
+     int csize = nch-ncl+1;
 
     if ((m = new int*[rsize])) {
 	M = m - nrl;
@@ -314,8 +314,8 @@ IntMatrix& IntMatrix::operator = (int value)
     if (ncol != nrow)
       Matpack.Error("Matrix& Matrix::operator=(double): non square matrix\n");
 
-    register int **m = M + rl;
-    register int i;
+     int **m = M + rl;
+     int i;
     copyval( M[rl]+cl, Zero, ncol*nrow );
     for (i = cl; i <= ch; i++) (*m++)[i] = value;
     return *this;
@@ -427,9 +427,9 @@ int operator == (const IntMatrix& A, int value)
 
     int rl = A.rl;
     int size = A.nrow;
-    register int **a = A.M + rl;
-    register int *c;
-    register int i;
+     int **a = A.M + rl;
+     int *c;
+     int i;
     int retval = 1;
     int diag = 0;
     while (size) {
@@ -457,9 +457,9 @@ int operator == (int value, const IntMatrix& A)
 
     int rl = A.rl;
     int size = A.nrow;
-    register int **a = A.M + rl;
-    register int *c;
-    register int i;
+     int **a = A.M + rl;
+     int *c;
+     int i;
     int retval = 1;
     int diag = 0;
     while (size) {
@@ -501,9 +501,9 @@ int operator != (const IntMatrix& A, int value)
 
     int rl = A.rl;
     int size = A.nrow;
-    register int **a = A.M + rl;
-    register int *c;
-    register int i;
+     int **a = A.M + rl;
+     int *c;
+     int i;
     int retval = 0;
     int diag = 0;
     while (size) {
@@ -528,9 +528,9 @@ int operator != (int value, const IntMatrix& A)
 
     int rl = A.rl;
     int size = A.nrow;
-    register int **a = A.M + rl;
-    register int *c;
-    register int i;
+     int **a = A.M + rl;
+     int *c;
+     int i;
     int retval = 0;
     int diag = 0;
     while (size) {
@@ -583,9 +583,9 @@ int Min (const IntMatrix &d)
 // Returns the smallest element of this matrix.
 //
 {
-    register int n = d.ncol*d.nrow-1;
-    register int* src = d.M[d.rl]+d.cl;
-    register int* minp = src++;
+     int n = d.ncol*d.nrow-1;
+     int* src = d.M[d.rl]+d.cl;
+     int* minp = src++;
     while (n--) {
 	if (*src < *minp) minp = src; 
 	src++; 
@@ -602,9 +602,9 @@ int Min (const IntMatrix &d, int& i, int& j)
 {
 //  Matpack.Error("int Min (const IntMatrix &d, int& i, int& j) NOT YET IMPLEMENTED");
 //  return 0;
-    register int n = d.ncol*d.nrow-1, im=0;
-    register int* src = d.M[d.rl]+d.cl;
-    register int* minp = src++;
+     int n = d.ncol*d.nrow-1, im=0;
+     int* src = d.M[d.rl]+d.cl;
+     int* minp = src++;
     while (n--) {
 	if (*src < *minp) { minp = src; im = n; }
 	src++; 
@@ -620,9 +620,9 @@ int Max (const IntMatrix &d)
 // Returns the largest element of this matrix.
 //
 {
-    register int n = d.ncol*d.nrow-1;
-    register int* src = d.M[d.rl]+d.cl;
-    register int* maxp = src++;
+     int n = d.ncol*d.nrow-1;
+     int* src = d.M[d.rl]+d.cl;
+     int* maxp = src++;
     while (n--) {
 	if (*src > *maxp) maxp = src; 
 	src++; 
@@ -639,9 +639,9 @@ int Max (const IntMatrix &d, int& i, int& j)
 {
 //  Matpack.Error("int Max (const IntMatrix &d, int& i, int& j) NOT YET IMPLEMENTED");
 //  return 0;
-    register int n = d.ncol*d.nrow-1, im=0;
-    register int* src = d.M[d.rl]+d.cl;
-    register int* maxp = src++;
+     int n = d.ncol*d.nrow-1, im=0;
+     int* src = d.M[d.rl]+d.cl;
+     int* maxp = src++;
     while (n--) {
 	if (*src > *maxp) { maxp = src; im = n; }
 	src++; 
@@ -692,8 +692,8 @@ void IntMatrix::Set (int_mapper fcn)
 //  Sets all matrix elements by applying the given function
 //
 {
-    register int n = ncol*nrow;
-    register int* src = M[rl]+cl;
+     int n = ncol*nrow;
+     int* src = M[rl]+cl;
     while (n--) {*src = (*fcn)(*src); src++;}
 }
 
@@ -706,8 +706,8 @@ void IntMatrix::Set (int_matrix_index_mapper fcn)
 // The vector will be changed inplace.
 //
 {
-    register int r,c;
-    register int* src = M[rl]+cl;
+     int r,c;
+     int* src = M[rl]+cl;
  
     for (r = rl; r <= rh; r++) 
       for (c = cl; c <= ch; c++) {
@@ -723,8 +723,8 @@ IntMatrix& IntMatrix::ShiftIndex (int row, int col)
 // in columns and rows. The matrix will be changed inplace.
 //
 {
-    register int **v;
-    register int n;
+     int **v;
+     int n;
 
     if (this->Empty()) 
       Matpack.Error("IntMatrix::ShiftIndex: matrix is not allocated");
@@ -768,9 +768,9 @@ IntVector IntMatrix::Column (int i) const
       Matpack.Error("IntMatrix::Column(int): index out of range (%d)\n",i); 
 
     IntVector A(rl,rh);
-    register int **m = M + rl;
-    register int  *v = A.V + rl;
-    register int rsize = nrow;
+     int **m = M + rl;
+     int  *v = A.V + rl;
+     int rsize = nrow;
     while (rsize--) *v++ = (*m++)[i];
     return A.Value();
 }

@@ -7,6 +7,7 @@ use File::Temp qw(tempfile);
 my $target;
 my $help;
 my $output_only = 0;
+my $while_id = 0;
 
 GetOptions(
     'win'    => sub { set_target('win', \$target) },
@@ -31,7 +32,8 @@ for my $file (@files) {
     close($in) or die "mctest: cannot close '$file': $!\n";
 
     my $i = 0;
-    my $parsed = parse_block($file, \@lines, \$i, 0);
+    my $parsed = parse_block($file, \@lines, \$i, undef);
+
     push @nodes, @$parsed;
 }
 
@@ -67,7 +69,7 @@ sub set_target {
 
 
 sub parse_block {
-    my ($file, $lines, $index_ref, $inside_loop) = @_;
+    my ($file, $lines, $index_ref, $terminator) = @_;
     my @nodes;
 
     while ($$index_ref < @$lines) {
@@ -79,29 +81,72 @@ sub parse_block {
         $trim =~ s/^\s+//;
         $trim =~ s/\s+$//;
 
-        if ($trim =~ /^done\b/i) {
-            die "mctest: unexpected 'done' at $file line $line_no\n"
-                unless $inside_loop;
+        # Close the current block.
+        if ($trim =~ /^(done|fi)\b/i) {
+            my $found = lc($1);
+            die "mctest: unexpected '$found' at $file line $line_no\n"
+                unless defined $terminator && $found eq $terminator;
             return \@nodes;
         }
 
-        if ($trim =~ /^for\s+([A-Za-z_]\w*)\s+in\s+(.*?)\s*;\s*do\s*$/i) {
-            my ($var, $list) = ($1, $2);
-            my $body = parse_block($file, $lines, $index_ref, 1);
+        # Parse: if CONDITION; then   or   if CONDITION
+        if ($trim =~ /^if\s+(.+?)\s*(?:;\s*then)?\s*$/i) {
+            my $condition = $1;
+            $condition =~ s/\s*;\s*then\s*$//i;
+
+            # If "then" wasn't on the if line, require it on the next line.
+            if ($trim !~ /;\s*then\s*$/i) {
+                my $then_line = $lines->[$$index_ref] // '';
+                $then_line =~ s/^\s+//;
+                $then_line =~ s/\s+$//;
+                die "mctest: expected 'then' after if at $file line $line_no\n"
+                    unless $then_line =~ /^then$/i;
+                ++$$index_ref;
+            }
+
+            my $body = parse_block($file, $lines, $index_ref, 'fi');
             push @nodes, {
-                type => 'loop',
+                type => 'if',
                 file => $file,
                 line => $line_no,
-                var  => $var,
-                list => $list,
+                condition => $condition,
                 body => $body,
             };
             next;
         }
 
-        if ($trim =~ /^for\s+([A-Za-z_]\w*)\s+in\s+(.*?)\s+do\s*$/i) {
+        # Parse the two while forms used in the script:
+        # while [ ... ]
+        # do
+        if ($trim =~ /^while\s+(.+?)\s*$/i) {
+            my $condition = $1;
+            $condition =~ s/\s*;\s*do\s*$//i;
+
+            if ($trim !~ /;\s*do\s*$/i) {
+                my $do_line = $lines->[$$index_ref] // '';
+                $do_line =~ s/^\s+//;
+                $do_line =~ s/\s+$//;
+                die "mctest: expected 'do' after while at $file line $line_no\n"
+                    unless $do_line =~ /^do$/i;
+                ++$$index_ref;
+            }
+
+            my $body = parse_block($file, $lines, $index_ref, 'done');
+            push @nodes, {
+                type => 'while',
+                file => $file,
+                line => $line_no,
+                condition => $condition,
+                body => $body,
+            };
+            next;
+        }
+
+        # Parse for loops.
+        if ($trim =~ /^for\s+([A-Za-z_]\w*)\s+in\s+(.*?)\s*;\s*do\s*$/i
+            || $trim =~ /^for\s+([A-Za-z_]\w*)\s+in\s+(.*?)\s+do\s*$/i) {
             my ($var, $list) = ($1, $2);
-            my $body = parse_block($file, $lines, $index_ref, 1);
+            my $body = parse_block($file, $lines, $index_ref, 'done');
             push @nodes, {
                 type => 'loop',
                 file => $file,
@@ -121,9 +166,10 @@ sub parse_block {
         };
     }
 
-    die "mctest: missing 'done' for loop in $file\n" if $inside_loop;
+    die "mctest: missing '$terminator' in $file\n" if defined $terminator;
     return \@nodes;
 }
+
 
 sub bash_helper_function {
     return <<'BASH';
@@ -188,7 +234,7 @@ sub render_script {
     if ($target eq 'lin') {
         $out = "#!/bin/bash\nset -e\n";
     } else {
-        $out = "\@echo off\n";
+        $out = "\@echo off\nsetlocal EnableDelayedExpansion\n";
     }
     $out .= bash_helper_function() if $target eq 'lin';
     $out .= render_nodes($nodes, $target, undef, $diagnostics);
@@ -204,7 +250,58 @@ sub render_nodes {
             $out .= render_loop($node, $target, $diagnostics);
             next;
         }
+        if ($node->{type} eq 'if') {
+            if ($target eq 'lin') {
+                $out .= "if $node->{condition}; then\n";
+                $out .= render_nodes(
+                    $node->{body}, $target, $loop_var, $diagnostics
+                );
+                $out .= "fi\n";
+            } else {
+                my $batch_condition =
+                    batch_file_condition($node->{condition},
+                                         $node->{file}, $node->{line});
+                $out .= "if $batch_condition (\n";
+                $out .= render_nodes(
+                    $node->{body}, $target, $loop_var, $diagnostics
+                );
+                $out .= ")\n";
+            }
+            next;
+        }
 
+        if ($node->{type} eq 'while') {
+            if ($target eq 'lin') {
+                $out .= "while $node->{condition}; do\n";
+                $out .= render_nodes(
+                    $node->{body}, $target, $loop_var, $diagnostics
+                );
+                $out .= "done\n";
+            } else {
+                my ($var, $value) =
+                    $node->{condition} =~
+                    /^\[\s*\$([A-Za-z_]\w*)\s+-eq\s+(-?\d+)\s*\]$/;
+
+                die "mctest: unsupported -win while condition at "
+                  . "$node->{file}:$node->{line}: $node->{condition}\n"
+                    unless defined $var;
+
+                my $id = ++$while_id;
+                my $start = "MCTEST_WHILE_${id}";
+                my $end   = "MCTEST_ENDWHILE_${id}";
+
+                $out .= ":$start\n";
+                $out .= "if not \"%$var%\"==\"$value\" goto $end\n";
+                $out .= render_nodes(
+                    $node->{body}, $target, $loop_var, $diagnostics
+                );
+                $out .= "goto $start\n";
+                $out .= ":$end\n";
+            }
+            next;
+        }
+
+      
         my $text = $node->{text};
         $text =~ s/\r?\n$//;
         my $translated = translate_line($text, $target, $loop_var);
@@ -318,7 +415,7 @@ sub translate_line {
         $out =~ s/^\s*export\s+([A-Za-z_]\w*)\s*=\s*(.*)$/set "$1=$2"/i;
         $out =~ s/^\s*cp\s+/copy /i;
         $out =~ s/^\s*rm\s+/del /i;
-        $out =~ s/\$([A-Za-z_]\w*)/%$1%/g;
+        $out =~ s/\$([A-Za-z_]\w*)/!$1!/g;
         $out =~ s/^\s*#/rem /;
 
         if ($loop_var) {
@@ -332,6 +429,25 @@ sub translate_line {
             return "call mctest_helper.bat $helper$args";
         }
     }
+         # Bash positional arguments.
+        $out =~ s/\$\*/%*/g;
+        $out =~ tr{/}{\\};
+
+        # rm -> delete files. This handles file paths and wildcards, not directories.
+        $out =~ s/^\s*rm\s+/del \/q /i;
+
+        # cp -> overwrite destination files.
+        $out =~ s/^\s*cp\s+/copy \/Y /i;
+
+        # Convert trailing Bash background marker to cmd.exe's start command.
+        if ($out =~ s/\s*&\s*$//) {
+            $out = 'start "" /b ' . $out;
+        }
+        # Replace Bash kill commands with an editable taskkill filter.
+        if ($out =~ /^\s*kill\b/) {
+            return 'taskkill /FI "WINDOWTITLE eq PLEASE ENTER WINDOW TITLE" /IM *';
+        }
+
 
     return $out;
 }
@@ -340,6 +456,32 @@ sub shell_quote {
     my ($s) = @_;
     $s =~ s/'/'\\''/g;
     return "'" . $s . "'";
+}
+
+sub batch_file_condition {
+    my ($condition, $file, $line) = @_;
+
+    $condition =~ s/^\s+|\s+$//g;
+
+    my ($negated, $path);
+
+    if ($condition =~ /^test\s+-f\s+(.+)$/i) {
+        ($negated, $path) = (0, $1);
+    } elsif ($condition =~ /^test\s+!\s+-f\s+(.+)$/i) {
+        ($negated, $path) = (1, $1);
+    } elsif ($condition =~ /^\[\s*!?\s*-f\s+(.+?)\s*\]$/i) {
+        $path = $1;
+        $negated = ($condition =~ /^\[\s*!/i) ? 1 : 0;
+    } else {
+        die "mctest: unsupported -win if condition at "
+          . "$file:$line: $condition\n";
+    }
+
+    $path =~ s/^\s+|\s+$//g;
+    $path =~ s/^(['"])(.*)\1$/$2/;
+    $path =~ tr{/}{\\};
+
+    return ($negated ? 'not exist' : 'exist') . " \"$path\"";
 }
 
 
@@ -375,6 +517,10 @@ program to test a simple script (windows and linux syntax are acceptable)
 
 will execute the script test.bat line by line and stop with an error message
 if an error occurs.
+
+Options: 
+ -win / -lin     generate from the script  output for windows /linux , which can be
+                pasted in  a  .bat / script file, respectively
 
 For testing  goto directory demo and look out for testing batch files
 named test*.bat

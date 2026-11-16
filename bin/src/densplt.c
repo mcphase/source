@@ -170,8 +170,8 @@ break;
  default: help_and_exit();break;
 }
 
-if(gp.read())printf("#reading graphic parameters from results/graphic_parameters.set\n");
-// read graphic parameters which are set by user in file results/graphic_parameters.set
+if(gp.read())printf("#reading graphic parameters from results/graphic_parameters.gp\n");
+// read graphic parameters which are set by user in file results/graphic_parameters.gp
 //  if(jjjps.module_type!=0&&jjjps.module_type!=2&&jjjps.module_type!=4)
 //  {fprintf(stderr,"ERROR densplt: calculation not possible for this single ion module\n");exit(EXIT_FAILURE);}
 //  if (jjjps.module_type==0&&jjjps.gJ!=0)
