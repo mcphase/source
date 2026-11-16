@@ -439,8 +439,8 @@ else
       } else  {return true;}
     }
    }
-}
 s.mode = OperationMode::Graphical;
+}
     return true;
 }
 
@@ -477,22 +477,6 @@ fprintf(stderr,"# * %s                                      *\n",MCPHASVERSION);
 fprintf(stderr,"# ***********************************************************\n");
  
 
-
-    // Move the command-line parsing block here.
-    // Change local variables to state members, for example:
-    //   fin       -> s.fin
-    //   gp        -> s.gp
-    //   prefix    -> s.prefix
-    //   nofat     -> s.nofat
-    //   os        -> s.os
-    //
-    // For each error that currently calls exit(...), report it and return
-    // false instead. Example:
-    //
-    //   if (too_few_arguments) {
-    //       fprintf(stderr, "Error: too few arguments\n");
-    //       return false;
-    //   }
 // check command line
 if(!detectOperationMode(argc,argv,s)){return false;}
 

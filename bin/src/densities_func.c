@@ -122,7 +122,7 @@ int n,j;
      j=fseek(fin_coq,pos,SEEK_SET);
      if (j!=0){fprintf(stderr,"Error loading: wrong  file format\n");exit (EXIT_FAILURE);}
    
-    } }if(delta==1000.0)return 1; // no stable structure found
+    } }if(delta==1000.0){printf("# loading failed - no stable structure\n");return 1;} // no stable structure found
  } 
    else
  {// look for config number aa[0]
@@ -135,7 +135,8 @@ int n,j;
      if (j!=0){fprintf(stderr,"Error loading: wrong  file format\n");exit (EXIT_FAILURE);}
    if(aa[0]<0)inputline(fin_coq,numbers); // input a parameter line if it is a .sps or .mf file
    if(savmf.load(fin_coq)==0){return 1; }
-         snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,savmf.nofcomponents);
+     snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",
+              savmf.n()*savmf.nofatoms,savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,savmf.nofcomponents);
    if(aa[0]<0){snprintf(outstr,MAXNOFCHARINLINE,"%s=%g %s=%g %s=%g %s=%g %s=%g %s=%g %s=%g n=%g spins nr1=%i nr2=%i nr3=%i nofatoms=%i in primitive basis nofcomponents=%i",
                         out[1],myround(numbers[1]),out[2],myround(numbers[2]),out[3],myround(numbers[3]),out[4],myround(numbers[4]),
                         out[5],myround(numbers[5]),out[6],myround(numbers[6]),out[7],myround(numbers[7]),

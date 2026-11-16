@@ -660,12 +660,15 @@ if(LI.phonon==1)  // if module allows to calculate position  - use this for grap
                     };
 }
  
-}// if cluster or atoms
+}
+} // if cluster or atoms - else
 } // for ii
 } // for ijk
+
 if(LI.longtable){if(check_for_best(LI.fin,LI.aa,*LI.savmf,x,y,LI.T,LI.Hext,LI.outstr,LI.out.data(),LI.inputpars->cs.abc,1))
-              {fclose(LI.fin);exit(0);}
-                           }
+              {fclose(LI.fin);return 0;}
+                printf("#  next HT\n");
+                }
 else {
       moretoprint=false;}
 } // while moretoprint
@@ -721,7 +724,7 @@ const int status =jvx_create(LI, argc, argv, densitycf, spinconf, sc_phonon, h, 
     LI.cs.sipffilenames[i] = nullptr;
   }
  return status;
-}
+
 }
 
 
