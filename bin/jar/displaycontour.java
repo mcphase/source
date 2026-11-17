@@ -86,9 +86,44 @@ static int noffiles;
  static ChartPanel panel;
  public ChartPanel chartPanel;
  static   DataOutputStream GnuOutputStream;
+ static XYBlockRenderer renderer;
+ static PaintScaleLegend zscale;
+
+private static final int[] red = {
+    0,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,  0,  0,  0,  0,  0,
+       0,  7, 23, 39, 55, 71, 87,103,
+       119,135,151,167,183,199,215,231,
+       247,255,255,255,255,255,255,255,
+       255,255,255,255,255,255,255,255,
+       255,246,228,211,193,175,158,140
+};
+
+private static final int[] green = {
+    0,  0,  0,  0,  0,  0,  0,  0,
+       0, 11, 27, 43, 59, 75, 91,107,
+       123,139,155,171,187,203,219,235,
+       251,255,255,255,255,255,255,255,
+       255,255,255,255,255,255,255,255,
+       255,247,231,215,199,183,167,151,
+       135,119,103, 87, 71, 55, 39, 23,
+       7,  0,  0,  0,  0,  0,  0,  0
+};
+
+private static final int[] blue = {
+    0,143,159,175,191,207,223,239,
+       255,255,255,255,255,255,255,255,
+       255,255,255,255,255,255,255,255,
+       255,247,231,215,199,183,167,151,
+       135,119,103, 87, 71, 55, 39, 23,
+       7,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,  0,  0,  0,  0,  0,
+       0,  0,  0,  0,  0,  0,  0,  0
+};
 
 public void windowClosing(WindowEvent e) {
-         windowclose();
+         windowclose(); 
         }
 static public void windowclose(){
         if(jpgfilename.length()!=0)
@@ -149,7 +184,8 @@ GnuOutputStream.writeBytes(gVlines);
 
  GnuOutputStream.writeBytes("set xlabel '"+chart.getXYPlot().getDomainAxis().getLabel()+"'\n");
  GnuOutputStream.writeBytes("set ylabel '"+chart.getXYPlot().getRangeAxis().getLabel()+"'\n");
- GnuOutputStream.writeBytes("set title '"+chart.getTitle()+"'\n");
+ GnuOutputStream.writeBytes("set cblabel '"+zAxis.getLabel()+"'\n");
+ GnuOutputStream.writeBytes("set title '"+chart.getTitle().getText()+"'\n");
  GnuOutputStream.writeBytes("set out '"+jpgfilename+"'\n");
 GnuOutputStream.writeBytes("""
 #set size ratio 2
@@ -273,7 +309,7 @@ replot
                 Title, xText, yText, dataset,
                 PlotOrientation.VERTICAL, false, false, false);
 
-         XYBlockRenderer renderer = new XYBlockRenderer();
+         renderer = new XYBlockRenderer();
           XYPlot plot = (XYPlot) chart.getPlot();
 //         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 //         plot.setBackgroundPaint(Color.lightGray);
@@ -287,51 +323,32 @@ for(int i=0;i<noffiles;++i){
                            plot.setDataset(i,dataset);
          reload_data(i);
                                }
-int[] red =
-    {  0,  0,  0,  0,  0,  0,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0,
-       0,  7, 23, 39, 55, 71, 87,103,
-       119,135,151,167,183,199,215,231,
-       247,255,255,255,255,255,255,255,
-       255,255,255,255,255,255,255,255,
-       255,246,228,211,193,175,158,140};
-    int[] green =
-    {  0,  0,  0,  0,  0,  0,  0,  0,
-       0, 11, 27, 43, 59, 75, 91,107,
-       123,139,155,171,187,203,219,235,
-       251,255,255,255,255,255,255,255,
-       255,255,255,255,255,255,255,255,
-       255,247,231,215,199,183,167,151,
-       135,119,103, 87, 71, 55, 39, 23,
-       7,  0,  0,  0,  0,  0,  0,  0};
-    int[] blue =
-    {  0,143,159,175,191,207,223,239,
-       255,255,255,255,255,255,255,255,
-       255,255,255,255,255,255,255,255,
-       255,247,231,215,199,183,167,151,
-       135,119,103, 87, 71, 55, 39, 23,
-       7,  0,  0,  0,  0,  0,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0};
 
      if(xmax<=xmin||ymax<=ymin||zmax<=zmin){System.out.println("No data to plot");System.exit(1);}
-      xAxis.setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
-      yAxis.setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
+     // xAxis.setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
+     // yAxis.setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
+     xAxis.setLowerMargin(0);
+     xAxis.setUpperMargin(0);
+     yAxis.setLowerMargin(0);
+     yAxis.setUpperMargin(0);
+      xAxis.setRange(xmin, xmax);
+      yAxis.setRange(ymin, ymax);
 
   if(logy){
      LogAxis xlogAxis = new LogAxis(xText);
-     xlogAxis.setLowerMargin(0.15);
-     xlogAxis.setUpperMargin(0.15);
+     xlogAxis.setLowerMargin(0);
+     xlogAxis.setUpperMargin(0);
      plot.setRangeAxis(0,xlogAxis);
-     if(xmin-(xmax-xmin)*0.04>0)
-     {xlogAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);}
+     if(xmin>0)
+     {xlogAxis.setRange(xmin,xmax);}
            }
 if(logx){
      LogAxis ylogAxis = new LogAxis(yText);
+     ylogAxis.setLowerMargin(0);
+     ylogAxis.setUpperMargin(0);
      plot.setDomainAxis(0,ylogAxis);
-     if(ymin-(ymax-ymin)*0.04>0)
-     {ylogAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);}
+     if(ymin>0)
+     {ylogAxis.setRange(ymin,ymax);}
          }
 
     
@@ -341,7 +358,7 @@ if(logx){
          scale.add(value,new Color(red[i],green[i],blue[i]));
 
                                   }
-         PaintScaleLegend zscale = new PaintScaleLegend(scale,zAxis);
+         zscale = new PaintScaleLegend(scale,zAxis);
         zscale.setVisible(true);
           chart.addSubtitle(zscale);
          renderer.setPaintScale(scale);
@@ -395,6 +412,18 @@ plot.addAnnotation(t);
          return chart;
     }
 
+private void updateColorScale() {
+    LookupPaintScale scale = new LookupPaintScale(zmin, zmax, Color.red);
+
+    for (int i = 0; i < 64; i++) {
+        double value = zmin + i * (zmax - zmin) / 64.0;
+        scale.add(value, new Color(red[i], green[i], blue[i]));
+    }
+
+    renderer.setPaintScale(scale);
+    zscale.setScale(scale);
+    zAxis.setRange(zmin, zmax);
+}
     /**
      * Creates a sample dataset.
      *
@@ -452,7 +481,7 @@ zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
        System.out.println("        options:   -o file.jpg create a jpg file on exiting, also create file.jpg.gnu to be used in gnuplot");
        System.out.println("                   -c file.jpg create a jpg file and exit immediately, also create file.jpg.gnu ");
        System.out.println("                   -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
-       System.out.println("                   -xmax -ymin -ymax -zmin -zmax -xtext -ytext -title  similar");
+       System.out.println("                   -xmax -ymin -ymax -zmin -zmax -xtext -ytext -ztext -title  similar");
        System.out.println("                   -logx -logy -logz  make x(y,z) a logarithmic axis");
        System.out.println("                   -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
        System.out.println("                          a text to be written as line label can be added by inserting | and adding the text");
@@ -680,8 +709,14 @@ protected void reload_data(int i)
       // replace tabs by spaces
       strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
 
-             if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
-             {// remove the comment
+String trimmed = strLine.trim();
+if (trimmed.isEmpty()) {
+    continue;
+}
+
+
+if (trimmed.startsWith("#")) {
+    strLine = trimmed.substring(1);// remove the comment
               strLine = strLine.substring(1, strLine.length());
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
@@ -768,10 +803,9 @@ protected void reload_data(int i)
       // System.out.println("y:"+ymin+" "+ymax);
       // System.out.println("z:"+zmin+" "+zmax);
           
-       
                      
-      chart.getXYPlot().getDomainAxis().setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
-      chart.getXYPlot().getRangeAxis().setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
+      chart.getXYPlot().getDomainAxis().setRange(new Range(xmin,xmax),true,true);
+      chart.getXYPlot().getRangeAxis().setRange(new Range(ymin,ymax),true,true);
       
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                  else {
@@ -794,7 +828,10 @@ protected void reload_data(int i)
                    
                }
               }
-             
+      if (zscale != null && renderer != null) {
+    updateColorScale();
+        }
+
     //double[] myDatay = {stringToDouble(strLine,0),stringToDouble(strLine,0)};
    }}
  catch(EOFException e)
