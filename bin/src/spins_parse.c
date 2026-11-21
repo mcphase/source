@@ -512,6 +512,18 @@ break;
  // second ... other options with graphics !!
  case OperationMode::Graphical:
     // Graphical-mode work
+// Initialize the graphic parameters here, using s.gp.
+s.gp.show_abc_unitcell=1.0;
+s.gp.show_primitive_crystal_unitcell=1.0;
+s.gp.show_magnetic_unitcell=1.0;
+s.gp.show_atoms=1.0;
+s.gp.scale_view_1=1.0;
+s.gp.scale_view_2=1.0;
+s.gp.scale_view_3=1.0;
+s.gp.spins_scale_moment=0;
+s.gp.show_density=0;
+snprintf(s.gp.title,MAXNOFCHARINLINE,"output of program spins");
+
   if(strcmp(argv[1],"-c")==0){s.os=1;}
   if(strcmp(argv[1],"-s")==0){s.os=1;}
   if(strcmp(argv[1],"-o")==0){s.os=1;} 
@@ -519,6 +531,33 @@ break;
   if(strcmp(argv[1],"-j")==0){s.os=1;}
   if(s.os==1)
   {s.gp.show_density=1;s.density=1;
+if (argc > s.os + 1) {
+    if (std::strcmp(argv[s.os + 1], "-div") == 0) {
+        s.os += 1;
+        s.doijk = 1;
+    } else if (std::strcmp(argv[s.os + 1], "-p") == 0) {
+        // -p plus three direction values must be present.
+        if (argc <= s.os + 4) {
+         } else {
+            s.xx = std::strtod(argv[s.os + 2], NULL);
+            s.yy = std::strtod(argv[s.os + 3], NULL);
+            s.zz = std::strtod(argv[s.os + 4], NULL);
+
+            const double rr = std::sqrt(s.xx * s.xx +
+                                        s.yy * s.yy +
+                                        s.zz * s.zz);
+            if (rr == 0.0) {
+ std::cerr << "Error: zero-length direction vector\n";return false;
+            } else {
+                s.xx /= rr;
+                s.yy /= rr;
+                s.zz /= rr;
+                s.os += 4; // Point to the last consumed argument.
+                s.doijk = 3;
+            }
+        }
+    }
+}
 
 switch(argv[1][1]) // dimension definition from jjjpar.hpp
 {case 'c': s.dim=CHARGEDENS_EV_DIM;
@@ -576,34 +615,6 @@ break;
   }
   
 
-if (argc > s.os + 1) {
-    if (std::strcmp(argv[s.os + 1], "-div") == 0) {
-        s.os += 1;
-        s.doijk = 1;
-    } else if (std::strcmp(argv[s.os + 1], "-p") == 0) {
-        // -p plus three direction values must be present.
-        if (argc <= s.os + 4) {
-            // Handle missing direction values.
-        } else {
-            s.xx = std::strtod(argv[s.os + 2], NULL);
-            s.yy = std::strtod(argv[s.os + 3], NULL);
-            s.zz = std::strtod(argv[s.os + 4], NULL);
-
-            const double rr = std::sqrt(s.xx * s.xx +
-                                        s.yy * s.yy +
-                                        s.zz * s.zz);
-            if (rr == 0.0) {
-                // Handle a zero-length direction vector.
-            } else {
-                s.xx /= rr;
-                s.yy /= rr;
-                s.zz /= rr;
-                s.os += 4; // Point to the last consumed argument.
-                s.doijk = 3;
-            }
-        }
-    }
-}
 
 /*
 if(argc>s.os+1)if(strcmp(argv[1+s.os],"-S")==0){s.os+=1;s.arrow=1;s.gp.spins_colour=3; s.gp.spins_scale_moment=1;//arrowdim=SPIN_EV_DIM;
@@ -668,18 +679,7 @@ break;
 default: break;
 }
 
-    // Initialize the graphic parameters here, using s.gp.
-s.gp.show_abc_unitcell=1.0;
-s.gp.show_primitive_crystal_unitcell=1.0;
-s.gp.show_magnetic_unitcell=1.0;
-s.gp.show_atoms=1.0;
-s.gp.scale_view_1=1.0;
-s.gp.scale_view_2=1.0;
-s.gp.scale_view_3=1.0;
-s.gp.spins_scale_moment=0;
-s.gp.show_density=0;
-snprintf(s.gp.title,MAXNOFCHARINLINE,"output of program spins");
-
+    
     // After options have set s.prefix:
 // --------------------- load crystal structure information from mcphas.j for further processing  -----------------
 //   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)

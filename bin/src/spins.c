@@ -350,6 +350,7 @@ case OperationMode::File:
                   LI.gp,0.0,(*LI.savmf)*0.0,(*LI.savmf)*0.0,
                   hkl1,LI.T,gjmbHxc1,LI.Hext,LI.cs,magmom,magmom * 0.0,magmom* 0.0,magmom * 0.0);
     fclose (LI.fin);
+    LI.savmf->print(stdout,LI.nofcomp);
      break; }
    default: break;
                      }
@@ -547,17 +548,17 @@ dd0(1)*=LI.savmf->na();dd0(2)*=LI.savmf->nb();dd0(3)*=LI.savmf->nc();
     Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,LI.cs.abc);
     dd=abc_in_ijk.Inverse()*dd3;
  if(doTableLine)
- {  if(LI.mode==OperationMode::Table)
-    {snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
-            LI.cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
-        
+ {    if(LI.mode==OperationMode::Table)
+    {  
         double value;
       for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col)
        {extract(LI.outstr,LI.out.data()[col],value); fprintf(LI.fout,"%g ",myround(value));}
       fprintf(LI.fout," %i %i %i %i ",LI.savmf->n(),LI.savmf->na(),LI.savmf->nb(),LI.savmf->nc());
-      fprintf(LI.fout,"%s",tstr);
        } 
-    
+     snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
+            LI.cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
+     fprintf(LI.fout,"%s",tstr);
+      
    switch(LI.tableMode) { 
      case TableMode::TMSL :
      case TableMode::None :

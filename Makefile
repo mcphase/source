@@ -7,27 +7,30 @@
 # Description:   Makefile for the program package
 #
 # CHECKLIST - how to make a new distribution of McPhase:
-#   -> edit always in mcphase~mcphase, then
+#   -> edit always in mcphase~mcphase, 
 #                                 make git
 #                                 make
 #               
 #               IF NECESSARY: *********************************
-#               .  oputdated: get newest version from repository
-#                  git pull ssh://martin_rotter@git.kenai.com/mcphase~mcphase master
-#               .  compile mcphaseexplorer under windows and test
+#               .  oputdated: get newest version from repository (in mcphase~mcphase):
+#                  git pull origin  master6_1
+#               .  compile mcphaseexplorer 
 #                              mcphaseexplorer compiled using netbeans if modified, in order 
 #                               to use it: click on project right click package as zip. look in 
 #                               Output/Netbeans_mpe/dist/ and unzip mcphaseexplorer.zip
-#                               unzip it 
-#                               move ions directory from old version to new and replace old version
+#                               - store current bin/mcphaseexplorer as backup
+#                               - unzip it 
+#                               - move ions directory from old version to new and replace old version
 #                               in mcphas/bin/mcphaseexplorer* with new version.
-#               .   make java [ compile java in bin/jar,usually not required because java needs recompile only when changes are made]
-#               .  update manual and latex -> manual.pdf
-#                              cd doc and delete directory manual
-#                              latex2html -local_icons manual.tex  
-#                                         [maybe necessary to adapt manual.tex style, usepackage
-#                                          so that latex can run without problems on it]
-#					on MAC latex2html needs edit vi /opt/homebrew/Cellar/latex2html/2025/l2hconf.pm
+#                               - to avoid question on reload of .-jpg use own compiled  org-netbeans-modules-image.jar file:
+#                               cd bin ; mv mcphaseexplorer mcphaseexplorer_old ; unzip ../Output/Netbeansproject_mpe/McPhaseExplorer/dist/mcphaseexplorer.zip
+#                               mv mcphaseexplorer_old/ions  mcphaseexplorer/ ; cp ../Output/Netbeansproject_mpe/org-netbeans-modules-image.jar mcphaseexplorer/ide/modules/org-netbeans-modules-image.jar
+#
+#               .   make java [ compile java in Output/mcphase~mcphase/bin/jar, and make git to install it 
+#                              (usually not required because java needs recompile only when changes are made]
+#               .  update manual and latex in mcphase~mcphase/doc and create manual.pdf / html version with latex2html:
+#                               make git ; make manual
+#			        note: on MAC latex2html needs edit vi /opt/homebrew/Cellar/latex2html/2025/l2hconf.pm
 #                                               and insert 
 #$LATEX = '/Library/TeX/texbin/pdflatex';        # LaTeX $PDFLATEX = '/Library/TeX/texbin/pdflatex';     # pdfLaTeX
 #$LUALATEX = '/Library/TeX/texbin/luatex';       # LuaLaTeX $DVILUALATEX = '/Library/TeX/texbin/dviluatex'; # dviLuaLaTeX
@@ -37,48 +40,37 @@
 #                                       on MAC latex2html:  if preview.sty is missing ---> "sudo tlmgr install preview"
 #                                   --> this will create online manual in directory manual
 #                                       copy this manual to the webpage: mkdir manual  |   put -r manual     (puts all files recursively)
-#               .   outdated: push all changes to Kenai, e.g.
+#               .   outdated: push all changes to github, in mcphase~mcphase:
 #                   git add bin/src/formfactor.c (to add new source files in case this is needed)
 #                   git commit -a -m 'some changes in charges.c singleion.c'
-#                   git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_2
+#                   git push  -u origin master6_1
 #               OBLIGATORY: *********************************************
 #               .  update version information in version, version.tex
 #               .  update innosetup (version information) // izpack.xl
-#		.      start docker and type:  make  package
+#		.  type:  make  package
 #                               or make windows (for windows) and make tgz (for linux)
-#	           (does automatically make  clean, mcph.exe and mcph.tgz 
-#                   and converts all *.pl files dos2unix 
-#                   in bin, perhaps in examples,
+#	           (does automatically make clean, recompile, creates in $HOME McPhaseSetup6_1.exe and McPhaseSetup6_1.tgz 
+#                   and converts all *.pl files dos2unix in bin, perhaps in examples,
 #                    -k keep going even if errors occur)
-#               .  rename linux distribution file  $HOME/mcph.tgz to e.g. mcph5_2.tgz
-#               .  rename windows distribution file  $HOME/mcph.exe to e.g. mcph5_2.exe
 #               TESTING: *************************************************
 #                     run demo in linux and windows
-#                      - test demo and use stored examples to compare outputfiles using 
-#                        perl important_scripts\compare_mcphase_results.pl examplesold examplesnew
-#                      - (test examples) - test testic1ion
+#                      - test demo 
+#                      - in demo: mctest test*.bat
 #               update WEB PAGES: ****************************************
-#                                   - check all information and add new, update list of papers on mcphas, references
-#                                   - put .tgz and .exe and if available additional software on web
-#                                   - test if mcphase can be installed on different computer systems
+#                       - check all information and add new, update list of papers on mcphas, references
+#                       - put .tgz and .exe and if available additional software on web
+#                       - test if mcphase can be installed on different computer systems
 #               set GIT MASTER ******************************************* 
-#                              ... after the next commit we should create a new branch by
-#                              git checkout -b master5_5
-#                              outdated: git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_5
-#
-#
+#                        ... after the next commit we should create a new branch by
+#                        git checkout -b master6_2
+#                         outdated: git push origin master6_2
 #
 #               Note on compiling for windows on McOS: make sure MacPorts is installed from https://www.macports.org/install.php 
 #                                       and update it with : sudo port -v selfupdate
 #                                       using this the windows gnu compilers can be installed on Mac: 
 #                                                            sudo port install mingw-w64
 #
-#
-#                                       [ alternative: install izpack and izpack utils - izpack2exe
-#                                       search careful for 7zS.sxf ... in https://github.com/github/ghfw-build-extra/blob/master/7-Zip/7zSD.sfx
-#                                          and substitute the file in utils/wrapper/izpack2exe/ with that
-#                                           correct bugs in izpack2exe.py (format of config.txt errors)]
-#	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
+# 	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
 #				and then do: 
 #				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/16.2.0/lib/gcc/current/
 #           gfortran lSystem not found - then do:
@@ -102,19 +94,36 @@
 #
 #    Screen Saver
 #
-#It's pretty easy to make your own screen saver in IrfanView, really, all it is is a slideshow - sorry, no transitional effects or background music for this. If you have recommendations for more advanced software with these types of features, make a post in our forum. For clarity's sake, I'm using IrfanView 3.85 - I would expect the process to be quite similar in recent past, and near future versions of this popular program.
+#It's pretty easy to make your own screen saver in IrfanView, really, all it is is a slideshow - sorry, 
+# no transitional effects or background music for this. If you have recommendations for more 
+# advanced software with these types of features, make a post in our forum. For clarity's sake, 
+# I'm using IrfanView 3.85 - I would expect the process to be quite similar in recent past, 
+# and near future versions of this popular program.
 #
 #Choose the image files with which you want to create a screen saver.
 #Open IrfanView from the "Start" menu.
 #In IrfanView, from the Menu Bar choose "File", then "SlideShow".
-#Select image files and add them to your slideshow - they can be from anywhere on your computer. Put them in the order that you want them to display. Unless you decide to use the random image order options, then it would not matter in which order your files are added to the list.
-#Once you've added all your files, click the "Save as EXE/SCR file" button. For a screen saver, you want to choose "Create SCR file" in the next dialog box.
+#Select image files and add them to your slideshow - they can be from anywhere on your computer. 
+# Put them in the order that you want them to display. Unless you decide to use the random image 
+# order options, then it would not matter in which order your files are added to the list.
+# Once you've added all your files, click the "Save as EXE/SCR file" button. For a screen saver, 
+# you want to choose "Create SCR file" in the next dialog box.
 #Then select "Create" and the screen saver should be magically created for you.
 # Author(s):     M. Rotter
 #
-#  Last Update:	  16.4.2025
+#  Last Update:	  20.11.2026
 #
 #**********************************************************************
+# On macOS, use Homebrew GCC's current library location unless supplied externally.
+ifeq ($(shell uname -s),Darwin)
+  ifeq ($(origin GFORTRANLIB),undefined)
+    BREW_GCC_PREFIX := $(shell brew --prefix gcc 2>/dev/null)
+    ifneq ($(strip $(BREW_GCC_PREFIX)),)
+      GFORTRANLIB := -L$(BREW_GCC_PREFIX)/lib/gcc/current
+    endif
+  endif
+endif
+export GFORTRANLIB
 
 include bin/src/Makefile.common
 
@@ -126,6 +135,19 @@ VERSION := $(shell sed -nE \
 	's/.*MCPHASVERSION[[:space:]]+"[^"]*([0-9]+\.[0-9]+)".*/\1/p' \
 	"version" | head -n 1)
 VERSION_TAG := $(subst .,_,$(VERSION))
+
+.PHONY: all allwin git manual vector vectorwin package windows tgz \
+        clean cleanexe java winno help
+
+.PHONY: help
+help:
+	@echo "McPhase targets:"
+	@echo "  make              Build the main programs and examples"
+	@echo "  make allwin       Cross-compile Windows programs"
+	@echo "  make manual       Build the manual"
+	@echo "  make package      Build Windows and Linux packages"
+	@echo "  make clean        Remove generated build files"
+	@echo "  make git          get newer files using rsync from repository in Output/mcphase~mpchase/"
 
 
 all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan 
@@ -214,11 +236,11 @@ java    :
 	cd ./bin/jar ; make
 
 package :  
-	make manual windows  tgz  
+	$(MAKE) manual windows  tgz  
 
 windows: 
-	make manual clean cleanexe allwin 
-	make clean 
+	$(MAKE) manual clean cleanexe allwin 
+	$(MAKE) clean 
 	unix2dos ./bin/*.pl ./demo/*.bat
 	substitute sleep wait ./demo/*.bat 
 	unix2dos ./examples/cecu2a/fit/watch*.bat
@@ -256,17 +278,17 @@ windows:
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
 #	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/zulu26.30.11-ca-jdk26.0.1-win_x64 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
-	make winno
+	$(MAKE) winno
 
 winno:
 	dot_clean -mv ./
 #	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
-	cd bin/iss ; make clean ; make ; make clean
+	cd bin/iss ; $(MAKE) clean ; $(MAKE) ; $(MAKE) clean
 	mv Output/McPhaseSetup*.exe $(HOME)/
 
 tgz : 
-	make manual cleanexe clean all 
-	make clean 
+	$(MAKE) manual cleanexe clean all 
+	$(MAKE) clean 
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
 	substitute wait sleep ./demo/*.bat 
@@ -314,10 +336,10 @@ tgz :
 
 clean:
 	rm -f ./Makefile.sav
-	cd ./doc ; make clean
-	cd ./tutorial ; make clean
-	cd ./examples ; make clean
-	cd ./bin/jar ; make clean
+	cd ./doc ; $(MAKE) clean
+	cd ./tutorial ; $(MAKE) clean
+	cd ./examples ; $(MAKE) clean
+	cd ./bin/jar ; $(MAKE) clean
 	cd ./bin/src/vector && $(MAKE) clean
 	cd ./bin/src/functions && $(MAKE) clean
 	cd ./bin/phonon_module && $(MAKE) clean

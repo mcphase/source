@@ -667,10 +667,10 @@ fprintf(fout,"      <lineSet  arrow=\"show\" line=\"show\" color=\"show\">\n");
 fprintf(fout,"        <lines>\n");
   for(i=0;i<ctr;++i)fprintf(fout,"          <l>%i %i</l>\n",2*i,2*i+1);
 if (strncmp(gp.title+14,"currdensity",10)==0){
-  fprintf(fout,"<color type=\"rgb\">%i %i %i </color>\n",220,153,0);
+  fprintf(fout,"<color type=\"rgb\">%i %i %i </color>\n",180,123,80);
                                              }
  else
-    {fprintf(fout,"        <color type=\"rgb\">0 255 0</color>\n");}
+    {fprintf(fout,"        <color type=\"rgb\">0 150 0</color>\n");}
 fprintf(fout,"          <thickness>%g</thickness>\n",gp.scale_density_vectors);
 fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");

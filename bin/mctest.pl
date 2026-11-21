@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
 use File::Temp qw(tempfile);
+use File::DosGlob ();
+use File::Spec;
 
 my $target;
 my $help;
@@ -15,9 +17,28 @@ GetOptions(
     'help|h' => \$help,
 ) or usage();
 
+
 usage() if $help || !@ARGV;
 
-my @files = @ARGV;
+my @files;
+
+if ($^O =~ /MSWin/i) {
+    for my $arg (@ARGV) {
+        my @matches = File::DosGlob::glob($arg);
+
+        if (@matches) {
+            push @files, @matches;
+        } else {
+            # Keep the original argument so the later open reports
+            # a useful error if the pattern matched nothing.
+            push @files, $arg;
+        }
+    }
+} else {
+    @files = @ARGV;
+}
+warn "mctest: matched files: " . join(" ", @files) . "\n";
+
 my $host = ($^O =~ /MSWin/i) ? 'win' : 'lin';
 $target = $host unless defined $target;
 
@@ -34,10 +55,31 @@ for my $file (@files) {
     my $i = 0;
     my $parsed = parse_block($file, \@lines, \$i, undef);
 
+    push @nodes, {
+        type => 'file_marker',
+        file => $file,
+    };
     push @nodes, @$parsed;
+
 }
 
-my $script = render_script(\@nodes, $target, !$output_only);
+my $marker;
+
+if (!$output_only) {
+   my ($marker_fh, $marker_path) = tempfile(
+    'mctest-progressXXXXXX',
+    SUFFIX => '.txt',
+    UNLINK => 0
+);
+close($marker_fh)
+    or die "mctest: cannot close progress marker: $!\n";
+
+$marker = File::Spec->rel2abs($marker_path);
+}
+
+my ($script, $command_info) =
+    render_script(\@nodes, $target, !$output_only, $marker);
+
 
 # -win/-lin select the output format. If the selected format differs from
 # the host, print the translated script without executing it.
@@ -47,12 +89,15 @@ if ($output_only) {
 }
 
 my $start_time = time();
-my $status = run_script($script, $target);
+my $status = run_script($script, $target, $marker, $command_info);
+
+unlink $marker if defined $marker;
+
 
 if ($status == 0) {
     my $elapsed = int(time() - $start_time);
     print "#************************************************\n";
-    print "# mctest <$files[0]> in ${elapsed}s OK\n";
+    print "# mctest <" . join(' ', @files) . ">\n in ${elapsed}s OK\n";
     print "#************************************************\n";
 }
 
@@ -67,9 +112,40 @@ sub set_target {
 }
 
 
+sub is_batch_command {
+    my ($line) = @_;
+
+    $line =~ s/^\s+//;
+    return 0 if $line eq '' || $line =~ /^(?:call|start|rem|echo|set|if|for|goto|cd|copy|del|exit|taskkill)\b/i;
+
+    my $command;
+    if ($line =~ /^"([^"]+)"/) {
+        $command = $1;
+    } elsif ($line =~ /^(\S+)/) {
+        $command = $1;
+    } else {
+        return 0;
+    }
+
+    # If a command has an explicit extension, check that exact file.
+    if ($command =~ /\.(?:bat|cmd)$/i) {
+        return -f $command;
+    }
+    return 0 if $command =~ /\./;
+
+    # Check the current directory and PATH for command.bat / command.cmd.
+    my @dirs = (File::Spec->curdir(), File::Spec->path());
+    for my $dir (@dirs) {
+        for my $ext (qw(.bat .cmd)) {
+            return 1 if -f File::Spec->catfile($dir, "$command$ext");
+        }
+    }
+
+    return 0;
+}
 
 sub parse_block {
-    my ($file, $lines, $index_ref, $terminator) = @_;
+    my ($file, $lines, $index_ref, $terminator, $closed_by_ref) = @_;
     my @nodes;
 
     while ($$index_ref < @$lines) {
@@ -81,39 +157,69 @@ sub parse_block {
         $trim =~ s/^\s+//;
         $trim =~ s/\s+$//;
 
-        # Close the current block.
-        if ($trim =~ /^(done|fi)\b/i) {
+                # Close the current block, or return the first branch at "else".
+        if ($trim =~ /^(done|fi|else)\b/i) {
             my $found = lc($1);
+
+            if ($found eq 'else'
+                && defined($terminator)
+                && $terminator eq 'fi') {
+                $$closed_by_ref = 'else' if defined $closed_by_ref;
+                return \@nodes;
+            }
+
             die "mctest: unexpected '$found' at $file line $line_no\n"
                 unless defined $terminator && $found eq $terminator;
+
+            $$closed_by_ref = $found if defined $closed_by_ref;
             return \@nodes;
         }
 
-        # Parse: if CONDITION; then   or   if CONDITION
+
+                # Parse: if CONDITION; then  (or "if CONDITION" followed by "then")
         if ($trim =~ /^if\s+(.+?)\s*(?:;\s*then)?\s*$/i) {
             my $condition = $1;
             $condition =~ s/\s*;\s*then\s*$//i;
 
-            # If "then" wasn't on the if line, require it on the next line.
             if ($trim !~ /;\s*then\s*$/i) {
-                my $then_line = $lines->[$$index_ref] // '';
+                my $then_line = defined($lines->[$$index_ref])
+                    ? $lines->[$$index_ref] : '';
                 $then_line =~ s/^\s+//;
                 $then_line =~ s/\s+$//;
+
                 die "mctest: expected 'then' after if at $file line $line_no\n"
                     unless $then_line =~ /^then$/i;
                 ++$$index_ref;
             }
 
-            my $body = parse_block($file, $lines, $index_ref, 'fi');
+            my $closed_by;
+            my $then_body = parse_block(
+                $file, $lines, $index_ref, 'fi', \$closed_by
+            );
+
+            my $else_body = [];
+            if (defined $closed_by && $closed_by eq 'else') {
+                my $else_closed_by;
+                $else_body = parse_block(
+                    $file, $lines, $index_ref, 'fi', \$else_closed_by
+                );
+
+                die "mctest: missing 'fi' after else at $file line $line_no\n"
+                    unless defined $else_closed_by
+                        && $else_closed_by eq 'fi';
+            }
+
             push @nodes, {
                 type => 'if',
                 file => $file,
                 line => $line_no,
                 condition => $condition,
-                body => $body,
+                body => $then_body,
+                else_body => $else_body,
             };
             next;
         }
+
 
         # Parse the two while forms used in the script:
         # while [ ... ]
@@ -123,7 +229,8 @@ sub parse_block {
             $condition =~ s/\s*;\s*do\s*$//i;
 
             if ($trim !~ /;\s*do\s*$/i) {
-                my $do_line = $lines->[$$index_ref] // '';
+                my $do_line = defined($lines->[$$index_ref])
+    ? $lines->[$$index_ref] : '';
                 $do_line =~ s/^\s+//;
                 $do_line =~ s/\s+$//;
                 die "mctest: expected 'do' after while at $file line $line_no\n"
@@ -227,8 +334,10 @@ sub helper_perl {
 }
 
 
+
 sub render_script {
-    my ($nodes, $target, $diagnostics) = @_;
+    my ($nodes, $target, $diagnostics, $marker) = @_;
+    my %command_info = (_next_id => 0);
 
     my $out;
     if ($target eq 'lin') {
@@ -236,45 +345,83 @@ sub render_script {
     } else {
         $out = "\@echo off\nsetlocal EnableDelayedExpansion\n";
     }
+
     $out .= bash_helper_function() if $target eq 'lin';
-    $out .= render_nodes($nodes, $target, undef, $diagnostics);
-    return $out;
+
+    $out .= render_nodes(
+        $nodes, $target, undef, $diagnostics, $marker, \%command_info
+    );
+
+    return ($out, \%command_info);
 }
 
 sub render_nodes {
-    my ($nodes, $target, $loop_var, $diagnostics) = @_;
+    my ($nodes, $target, $loop_var, $diagnostics, $marker, $command_info) = @_;
     my $out = '';
 
     for my $node (@$nodes) {
+     
+
+        if ($node->{type} eq 'file_marker') {
+            my $file = $node->{file};
+            $file =~ s/[\r\n]//g;
+            $out .= "echo MCTEST_FILE: $file\n";
+            next;
+        }
+
+
         if ($node->{type} eq 'loop') {
-            $out .= render_loop($node, $target, $diagnostics);
+            $out .= render_loop($node, $target, $diagnostics,$marker, $command_info);
             next;
         }
         if ($node->{type} eq 'if') {
             if ($target eq 'lin') {
                 $out .= "if $node->{condition}; then\n";
                 $out .= render_nodes(
-                    $node->{body}, $target, $loop_var, $diagnostics
+                    $node->{body}, $target, $loop_var, $diagnostics,$marker, $command_info
                 );
+
+                if (@{$node->{else_body} || []}) {
+                    $out .= "else\n";
+                    $out .= render_nodes(
+                        $node->{else_body}, $target, $loop_var, $diagnostics,$marker, $command_info
+                    );
+                }
+
                 $out .= "fi\n";
             } else {
-                my $batch_condition =
-                    batch_file_condition($node->{condition},
-                                         $node->{file}, $node->{line});
-                $out .= "if $batch_condition (\n";
-                $out .= render_nodes(
-                    $node->{body}, $target, $loop_var, $diagnostics
+                my $id = ++$while_id;
+                my $else_label = "MCTEST_ELSE_${id}";
+                my $end_label  = "MCTEST_ENDIF_${id}";
+                my $condition = batch_file_condition(
+                    $node->{condition}, $node->{file}, $node->{line}
                 );
-                $out .= ")\n";
+
+                $out .= "if not $condition goto $else_label\n";
+                $out .= render_nodes(
+                    $node->{body}, $target, $loop_var, $diagnostics,$marker, $command_info
+                );
+
+                if (@{$node->{else_body} || []}) {
+                    $out .= "goto $end_label\n";
+                    $out .= ":$else_label\n";
+                    $out .= render_nodes(
+                        $node->{else_body}, $target, $loop_var, $diagnostics,$marker, $command_info
+                    );
+                    $out .= ":$end_label\n";
+                } else {
+                    $out .= ":$else_label\n";
+                }
             }
             next;
         }
+
 
         if ($node->{type} eq 'while') {
             if ($target eq 'lin') {
                 $out .= "while $node->{condition}; do\n";
                 $out .= render_nodes(
-                    $node->{body}, $target, $loop_var, $diagnostics
+                    $node->{body}, $target, $loop_var, $diagnostics,$marker, $command_info
                 );
                 $out .= "done\n";
             } else {
@@ -287,16 +434,24 @@ sub render_nodes {
                     unless defined $var;
 
                 my $id = ++$while_id;
-                my $start = "MCTEST_WHILE_${id}";
-                my $end   = "MCTEST_ENDWHILE_${id}";
+my $start = "MCTEST_WHILE_${id}";
+my $end   = "MCTEST_ENDWHILE_${id}";
 
-                $out .= ":$start\n";
-                $out .= "if not \"%$var%\"==\"$value\" goto $end\n";
-                $out .= render_nodes(
-                    $node->{body}, $target, $loop_var, $diagnostics
-                );
-                $out .= "goto $start\n";
-                $out .= ":$end\n";
+my $batch_condition;
+if ($node->{condition} =~ /^\[\s*\$([A-Za-z_]\w*)\s+-eq\s+(-?\d+)\s*\]$/) {
+    $batch_condition = "!$1! EQU $2";
+} else {
+    $batch_condition = batch_file_condition(
+        $node->{condition}, $node->{file}, $node->{line}
+    );
+}
+
+$out .= ":$start\n";
+$out .= "if not $batch_condition goto $end\n";
+$out .= render_nodes($node->{body}, $target, $loop_var, $diagnostics,$marker, $command_info);
+$out .= "goto $start\n";
+$out .= ":$end\n";
+
             }
             next;
         }
@@ -311,9 +466,25 @@ sub render_nodes {
             $out .= $translated . "\n";
             next;
         }
+if (defined $marker && $diagnostics) {
+    my $id = ++$command_info->{_next_id};
 
-        my $where = $node->{file} . ':' . $node->{line};
-        my $message = 'mctest: failed at ' . $where . ': ' . $text;
+    $command_info->{$id} = {
+        file    => $node->{file},
+        line    => $node->{line},
+        command => $text,
+    };
+
+    if ($target eq 'lin') {
+        $out .= qq{printf '%s\\n' '$id' > "\$MCTEST_MARKER"\n};
+    } else {
+        $out .= qq{>"%MCTEST_MARKER%" echo $id\n};
+    }
+}
+
+
+my $where = $node->{file} . ':' . $node->{line};
+my $message = 'mctest: failed at ' . $where . ': ' . $text;
 
         if ($target eq 'lin') {
             $out .= "if { $translated; }; then :; else\n";
@@ -334,14 +505,14 @@ sub render_nodes {
 }
 
 sub render_loop {
-    my ($node, $target, $diagnostics) = @_;
+    my ($node, $target, $diagnostics, $marker, $command_info) = @_;
     my $var = $node->{var};
     my $list = $node->{list};
     my $out = '';
 
     if ($target eq 'lin') {
         $out .= "for $var in $list; do\n";
-        $out .= render_nodes($node->{body}, $target, $var, $diagnostics);
+        $out .= render_nodes($node->{body}, $target, $var, $diagnostics,$marker, $command_info);
         $out .= "done\n";
         return $out;
     }
@@ -349,7 +520,7 @@ sub render_loop {
     my @values = expand_batch_list($list, $node->{file}, $node->{line});
     my $batch_var = uc(substr($var, 0, 1));
     $out .= "for %%$batch_var in (" . join(' ', @values) . ") do (\n";
-    $out .= render_nodes($node->{body}, $target, $batch_var, $diagnostics);
+    $out .= render_nodes($node->{body}, $target, $batch_var, $diagnostics,$marker, $command_info);
     $out .= ")\n";
     return $out;
 }
@@ -411,6 +582,8 @@ sub translate_line {
             return "MCPHASE_DELESTR=\$(perl \"\$MCPHASE_DIR/bin/delEstr.pl\"$1); " .
                 "export MCPHASE_DELESTR";
         }
+       $out =~ s{\\}{/}g;
+
     } else {
         $out =~ s/^\s*export\s+([A-Za-z_]\w*)\s*=\s*(.*)$/set "$1=$2"/i;
         $out =~ s/^\s*cp\s+/copy /i;
@@ -425,10 +598,11 @@ sub translate_line {
 
         if ($out =~ /^\s*(?:\.\s+)?(getvalue|getvariable|rpvalue|chi2)(\.pl)?\b(.*)$/i) {
             my ($helper, $suffix, $args) = ($1, $2, $3);
-            $helper .= '.pl' unless defined $suffix;
-            return "call mctest_helper.bat $helper$args";
+            my $helper_name = defined $suffix ? $helper . $suffix : $helper;
+            return "call mctest_helper.bat $helper_name$args";
         }
-    }
+        $out =~ s/^\s*([A-Za-z_]\w*)=(.*)$/set "$1=$2"/;
+
          # Bash positional arguments.
         $out =~ s/\$\*/%*/g;
         $out =~ tr{/}{\\};
@@ -448,6 +622,11 @@ sub translate_line {
             return 'taskkill /FI "WINDOWTITLE eq PLEASE ENTER WINDOW TITLE" /IM *';
         }
 
+        if (is_batch_command($out)) {
+            $out = "call $out";
+        }
+
+  }
 
     return $out;
 }
@@ -486,7 +665,7 @@ sub batch_file_condition {
 
 
 sub run_script {
-    my ($script, $target) = @_;
+    my ($script, $target, $marker, $command_info) = @_;
     my ($fh, $tmp) = tempfile('mctestXXXXXX',
         SUFFIX => ($target eq 'lin' ? '.sh' : '.bat'),
         UNLINK => 1);
@@ -497,11 +676,98 @@ sub run_script {
         or die "mctest: cannot close temporary script: $!\n";
 
     if ($target eq 'lin') {
-        chmod 0700, $tmp;
-        system('bash', $tmp);
-    } else {
-        system($ENV{COMSPEC} || 'cmd.exe', '/c', $tmp);
+    chmod 0700, $tmp;
+    local $ENV{MCTEST_MARKER} = $marker;
+    system('bash', $tmp);
+
+    my $raw_status = $?;
+
+    if ($raw_status == -1) {
+        return 127;
     }
+
+    my $signal = $raw_status & 127;
+    my $exit_code = $raw_status >> 8;
+
+    # Ctrl-C may appear either as SIGINT or as Bash exit status 130.
+    if ($signal == 2 || (!$signal && $exit_code == 130)) {
+        my $id;
+
+        if (defined $marker && open my $mf, '<', $marker) {
+            $id = <$mf>;
+            close $mf;
+            chomp $id if defined $id;
+        }
+
+        my $info = defined $id ? $command_info->{$id} : undef;
+
+        if ($info) {
+            print STDERR "mctest: stopped at line $info->{line} "
+                       . "of file $info->{file} in command: "
+                       . "$info->{command}\n";
+        } else {
+            print STDERR "mctest: stopped by Ctrl-C; "
+                       . "no command marker was found\n";
+        }
+
+        return 130;
+    }
+
+    return $signal ? 128 + $signal : $exit_code;
+}
+ else {
+#        system($ENV{COMSPEC} || 'cmd.exe', '/c', $tmp);
+        require Win32::Process;
+
+        # Restore the previous value automatically when this block exits.
+        local $ENV{MCTEST_MARKER} = $marker;
+
+        my $comspec = $ENV{COMSPEC} || 'cmd.exe';
+        my $command = qq{"$comspec" /d /c call "$tmp"};
+        my $process;
+
+        Win32::Process::Create(
+            $process,
+            $comspec,
+            $command,
+            0,          # do not inherit handles
+            0x00000010, # CREATE_NEW_CONSOLE
+            '.'
+        ) or die "mctest: cannot start cmd.exe: $!\n";
+
+        $process->Wait(Win32::Process::INFINITE());
+
+        my $exit_code;
+        $process->GetExitCode($exit_code)
+            or die "mctest: cannot get child exit code\n";
+
+        # This is the commonly reported Windows Ctrl-C status.
+        if ($exit_code == 3221225786) {
+            my $id;
+
+            if (defined $marker && open my $mf, '<', $marker) {
+                $id = <$mf>;
+                close $mf;
+                chomp $id if defined $id;
+            }
+
+            my $info = defined $id ? $command_info->{$id} : undef;
+
+            if ($info) {
+                print STDERR "mctest: stopped at line $info->{line} "
+                           . "of file $info->{file} in command: "
+                           . "$info->{command}\n";
+            } else {
+                print STDERR "mctest: stopped by Ctrl-C; "
+                           . "no command marker was found\n";
+            }
+
+            return 130;
+        }
+
+        return $exit_code;
+    }
+
 
     return($? == -1 ? 127 : ($? >> 8));
 

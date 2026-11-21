@@ -19,6 +19,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.*;
+import java.awt.Component;
+
 
 public class JvxAnimator {
     static final int W = 900, H = 700;
@@ -32,6 +34,103 @@ public class JvxAnimator {
 
 Vec sceneCenter;
 double sceneRadius;
+private Quaternion orientation = Quaternion.identity();
+private Point last;
+
+private Vec3 arcballPoint(int x, int y, int width, int height) {
+    double r = Math.min(width, height) / 2.0;
+    if (r <= 0) return new Vec3(0, 0, 1);
+
+    double sx = (x - width / 2.0) / r;
+    double sy = (height / 2.0 - y) / r;
+    double d2 = sx * sx + sy * sy;
+
+    if (d2 <= 1.0) {
+        return new Vec3(sx, sy, Math.sqrt(1.0 - d2));
+    }
+
+    double d = Math.sqrt(d2);
+    return new Vec3(sx / d, sy / d, 0);
+}
+
+
+static final class Vec3 {
+    final double x, y, z;
+
+    Vec3(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    double dot(Vec3 b) {
+        return x * b.x + y * b.y + z * b.z;
+    }
+
+    Vec3 cross(Vec3 b) {
+        return new Vec3(
+            y * b.z - z * b.y,
+            z * b.x - x * b.z,
+            x * b.y - y * b.x
+        );
+    }
+}
+
+static final class Quaternion {
+    final double w, x, y, z;
+
+    Quaternion(double w, double x, double y, double z) {
+        this.w = w;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    static Quaternion identity() {
+        return new Quaternion(1, 0, 0, 0);
+    }
+
+    static Quaternion fromTo(Vec3 a, Vec3 b) {
+        double dot = Math.max(-1, Math.min(1, a.dot(b)));
+        Vec3 c = a.cross(b);
+
+        if (dot < -0.999999) {
+            c = new Vec3(1, 0, 0).cross(a);
+            if (c.dot(c) < 1e-12) {
+                c = new Vec3(0, 1, 0).cross(a);
+            }
+            return normalized(new Quaternion(0, c.x, c.y, c.z));
+        }
+
+        return normalized(new Quaternion(1 + dot, c.x, c.y, c.z));
+    }
+
+    Quaternion multiply(Quaternion b) {
+        return new Quaternion(
+            w*b.w - x*b.x - y*b.y - z*b.z,
+            w*b.x + x*b.w + y*b.z - z*b.y,
+            w*b.y - x*b.z + y*b.w + z*b.x,
+            w*b.z + x*b.y - y*b.x + z*b.w
+        );
+    }
+
+    static Quaternion normalized(Quaternion q) {
+        double n = Math.sqrt(q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z);
+        return new Quaternion(q.w/n, q.x/n, q.y/n, q.z/n);
+    }
+
+    Vec3 rotate(Vec3 v) {
+        double tx = 2 * (y * v.z - z * v.y);
+        double ty = 2 * (z * v.x - x * v.z);
+        double tz = 2 * (x * v.y - y * v.x);
+
+        return new Vec3(
+            v.x + w * tx + (y * tz - z * ty),
+            v.y + w * ty + (z * tx - x * tz),
+            v.z + w * tz + (x * ty - y * tx)
+        );
+    }
+}
 
 void loadGpSettings(Path file) throws IOException {
     if (!Files.exists(file)) return;
@@ -513,7 +612,8 @@ addMouseListener(new MouseAdapter() {
 });
 
 addMouseMotionListener(new MouseMotionAdapter() {
-    @Override public void mouseDragged(MouseEvent e) {
+    @Override
+    public void mouseDragged(MouseEvent e) {
         if (last == null) return;
 
         int dx = e.getX() - last.x;
@@ -523,15 +623,23 @@ addMouseMotionListener(new MouseMotionAdapter() {
             camera.panX += dx / (double) getWidth();
             camera.panY += dy / (double) getHeight();
         } else {
-            camera.yaw += dx * 0.01;
-            camera.pitch += dy * 0.01;
-            camera.pitch = Math.max(-1.55, Math.min(1.55, camera.pitch));
+            Component source = e.getComponent();
+int width = source.getWidth();
+int height = source.getHeight();
+
+Vec3 from = arcballPoint(last.x, last.y, width, height);
+Vec3 to   = arcballPoint(e.getX(), e.getY(), width, height);
+
+Quaternion drag = Quaternion.fromTo(from, to);
+orientation = Quaternion.normalized(drag.multiply(orientation));
+
         }
 
         last = e.getPoint();
         repaint();
     }
 });
+
 
 
         }
@@ -570,12 +678,11 @@ Vec original = m.points.get(i).sub(center);
 
 // Convert Z-up model coordinates to this renderer's Y-up coordinates.
 Vec p = new Vec(original.x, original.z, -original.y);
-            double cy=Math.cos(camera.yaw), sy=Math.sin(camera.yaw);
-            double x=cy*p.x+sy*p.z, z=-sy*p.x+cy*p.z;
-            double cp=Math.cos(camera.pitch), sp=Math.sin(camera.pitch);
-            double y=cp*p.y-sp*z;
-            z=sp*p.y+cp*z;
-            rotated[i]=new Vec(x,y,z);
+
+// Apply the free 3D orientation instead of yaw and pitch.
+Vec3 r = orientation.rotate(new Vec3(p.x, p.y, p.z));
+rotated[i] = new Vec(r.x, r.y, r.z);
+
         }
 
         // Draw polygon faces, sorting back-to-front by average depth.

@@ -1065,7 +1065,7 @@ int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, Comple
 }
 
 //***********************************************************************
-// sub for calculation of charge density given a radiu R and polar angles teta,
+// sub for calculation of charge density given a radius R and polar angles teta,
 // fi and expansion coefficients alm
 //***********************************************************************
 double jjjpar::chargedensity_calc (double & teta,double & fi,double & R, Vector & moments)

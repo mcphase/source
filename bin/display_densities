@@ -13,56 +13,58 @@ if test -f results/spins.01.jvx
   rm results/spins.01.jvx
 fi
 
-if test -f results/graphic_parameters.set
+if test -f results/graphic_parameters.gp
  then
- echo "# using preset graphic parameters from file results/graphic_parameters.set"
- cp results/graphic_parameters.set results/.graphic_parameters.set
+ echo "# using preset graphic parameters from file results/graphic_parameters.gp"
  else
- echo "# this is initial graphic parameters file" > results/graphic_parameters.set
+ echo "# this is initial graphic parameters file" > results/graphic_parameters.gp
 fi
-
-while test -f results/graphic_parameters.set
+i=0
+while [ $i -eq 0 ]
 do
  spins $*
-if test -f results/spins.jvx
-then
-java JvxAnimator results/spins.jvx &
-rem1=$!
+ if test -f results/spins.jvx
+ then
+  java JvxAnimator -gp results/graphic_parameters.gp results/spins.jvx &
+  rem1=$!
+ 
+  if test -f results/spins_prim.jvx
+  then
+   java JvxAnimator -gp results/graphic_parameters.gp results/spins_prim.jvx &
+   rem2=$!
+  fi
 
-if test -f results/spins_prim.jvx
-then
-java JvxAnimator results/spins_prim.jvx &
-rem2=$!
-fi
+  if test -f results/spins_prim.01.jvx
+  then
+   java JvxAnimator -gp results/graphic_parameters.gp "results/spins_prim.*.jvx"  &
+   rem3=$!
+  fi
 
-if test -f results/spins_prim.01.jvx
-then
-java JvxAnimator "results/spins_prim.*.jvx"  &
-rem3=$!
-fi
-
-if test -f results/spins.01.jvx
-then
-java JvxAnimator "results/spins.*.jvx"  &
-rem4=$!
-fi
-
-
- java graphic_parameters_configurator 
-kill $rem1
-kill $rem2
-kill $rem3
-kill $rem4
- rm results/spins.jvx
- rm results/spins.*.jvx
- rm results/spins_prim.jvx
- rm results/spins_prim.*.jvx
-else
-  rm results/graphic_parameters.set
-fi
+  if test -f results/spins.01.jvx
+  then
+   java JvxAnimator -gp results/graphic_parameters.gp "results/spins.*.jvx"  &
+   rem4=$!
+  fi
+  cp results/graphic_parameters.gp results/.graphic_parameters.gp
+ 
+  java graphic_parameters_configurator 
+  # if graphic_parameters_configurator wants to exit,
+  #  it deletes results/graphic_parameters.gp - check and put i=1 to exit 
+  if [ ! -f results/graphic_parameters.gp ]
+   then
+    i=1
+    cp results/.graphic_parameters.gp results/graphic_parameters.gp
+  fi
+  kill $rem1
+  kill $rem2
+  kill $rem3
+  kill $rem4
+  rm results/spins.jvx
+  rm results/spins.*.jvx
+  rm results/spins_prim.jvx
+  rm results/spins_prim.*.jvx
+ else
+   i=1
+ fi
 done
-if test -f results/.graphic_parameters.set
-then
-cp results/.graphic_parameters.set results/graphic_parameters.set
-fi
 
