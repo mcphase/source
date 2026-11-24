@@ -107,6 +107,7 @@ void inimcdis::helpexit() // type info and error exit
     printf (" or as: mcdisp [options] [file]\n");
     printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
     printf ("Options:\n");
+    printf (" -hkl 0 1 0    ... calculate only for q=(0 1 0) instead of reading hkl values from mcdisp.par file\n");
     printf (" -jq           ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
     printf ("                   if energies are given for hkls in mcdisp.par, output file mcdisp_scaled.jq contains scaled parameters\n");
     printf ("                   such that energy of first hkl set corresponds to highest eigenvalue of J(Q)\n");

@@ -1774,6 +1774,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
    if(!calc_rixs&&!calcXobs)fprintf (foutdstot, "\n");              
    fprintf (foutqom, "\n");
    } // do jqfile
+if(ini.no_hkls){ini.Qindex=ini.nofhkls;}
 } // next hkl
 // END LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL LOOP HKL HKL HKL HKL HKL ------------------
 
@@ -1872,7 +1873,8 @@ int main (int argc, char **argv)
  int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
  int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0,calcXobs=0;
- bool include_cd=false;
+ bool include_cd=false,no_hkls=false;
+ Vector inHKL(1,3);inHKL=0;
  char mffile [MAXNOFCHARINLINE]; //default spin-configuration-input file
   snprintf(mffile,MAXNOFCHARINLINE,"mcdisp.mf");
  const char * filemode="w";
@@ -1945,6 +1947,13 @@ for (i=1;i<=argc-1;++i){
                       else if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
+                       else if(strcmp(argv[i],"-hkl")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -hkl needs argument(s)\n");exit(EXIT_FAILURE);}
+ 		                                  inHKL(1)=strtod(argv[i+1],NULL);++i;
+ 		                                  inHKL(2)=strtod(argv[i+1],NULL);++i;
+ 		                                  inHKL(3)=strtod(argv[i+1],NULL);++i;
+                                                  no_hkls=true;
+						  fprintf(stdout,"#option -hkl calculating q=(%g %g %g) only\n",inHKL(1),inHKL(2),inHKL(3));
+					         }
                        else if(strncmp(argv[i],"-h",2)==0) {errexit=1;}
               	       else{strcpy(mffile,argv[i]);}
                           
@@ -1962,8 +1971,11 @@ if(errexit==1){inimcdis ini;
    for(int ninis=0;ninis<inip.nofinis;++ninis)
 {inimcdis ini((*inip.inis[ninis]));
   if(inip.nofinis>1)printf("# Running mcdisp with prefix %s\n",ini.prefix);
-  if (ini.no_hkls)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
-  
+   if(no_hkls){ini.no_hkls=no_hkls;ini.hkls[1][1]=inHKL(1);ini.hkls[1][2]=inHKL(2);ini.hkls[1][3]=inHKL(3);
+              }
+   else if (ini.no_hkls)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
+
+ 
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(calc_rixs&&calcXobs){fprintf(stderr,"Error mcdisp: Options -X[observable] and -x -xa -xaf cannnot be used simultaneously, please use only one of these options\n");exit(EXIT_FAILURE);}
   if(do_Erefine&&(calc_rixs||calcXobs)){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf -X[observable]\n");exit(EXIT_FAILURE);}
