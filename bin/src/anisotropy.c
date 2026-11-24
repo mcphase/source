@@ -9,7 +9,7 @@
 const char * filemode="w";
 // for statistics 
 int isfull=0;
-int verbose=0;
+//int verbose=0;
 #include "myev.h"
 #include "mcphas_htcalc.c"
 #include "mcphas_fecalc.c"
@@ -71,7 +71,7 @@ fprintf(stderr,"#***************************************************************
 int poly=0,P,doeps=0;//single crystal
 // check command line
 // options ?
-int linepscf=0,linepsjj=0;int options=0;bool inc_cd=false;
+int linepscf=0,linepsjj=0;int options=0,verbose=0;bool inc_cd=false;
 for (int im=1;im<argc;++im) 
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) exit(EXIT_FAILURE); // display help message
@@ -145,7 +145,8 @@ fprintf(fout,
 }
 // ***********************************************
 if(do_sipffile){
- jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
+ jjjpar jjj(0,0,0,sipffilename,argc-9);
+  if(verbose==1){jjj.save_sipf("./results/_");}else{jjj.remove_sipf("./results/_");}
  int nofcomponents=argc-(P+3);
  Vector Hxc(1,nofcomponents);Hxc=0;fprintf(stdout,"# exchange fields:");
  for(int j=1;j<=nofcomponents;++j){Hxc(j)=strtod (argv[j+2+P], NULL); 
@@ -198,31 +199,38 @@ fprintf(stdout,"#\n#1    2        3\n#T(K) H(Tesla) Mpolycrystal(muB) \n");
 // as class par load  parameters from file
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
+char outfilename [MAXNOFCHARINLINE];
  inipar ini("mcphas.ini",prefix,"anisotropyit");
+// remove mcphas.log  file unless we are in -a mode
+  if(filemode[0]!='a'){strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
+                   strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
+  unlink(outfilename);
+                   }
  ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;ini.include_cd=inc_cd;
-ini.nofstapoints=0;
+ini.nofstapoints=0;ini.verbose=verbose;
  if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
- par inputpars("./mcphas.j",verbose ); inputpars.save("./results/_mcphas.j",0); 
+ par inputpars("./mcphas.j",ini.verbose ); 
+ if(ini.verbose==1) {inputpars.save("./results/_mcphas.j",0);}else{unlink("./results/_mcphas.j");} 
 if(doeps) {
 if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
-if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
+if(ini.verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
 
 // as class par load  parameters derivatives from file
- if(parload(ini.ipx,ini.prefix,"mcphas.djdx",verbose,inputpars))
- { if(!parload(ini.ipy,ini.prefix,"mcphas.djdy",verbose,inputpars,ini.ipx))
+ if(parload(ini.ipx,ini.prefix,"mcphas.djdx",ini.verbose,inputpars))
+ { if(!parload(ini.ipy,ini.prefix,"mcphas.djdy",ini.verbose,inputpars,ini.ipx))
        {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
-   if(!parload(ini.ipz,ini.prefix,"mcphas.djdz",verbose,inputpars,ini.ipx))
+   if(!parload(ini.ipz,ini.prefix,"mcphas.djdz",ini.verbose,inputpars,ini.ipx))
         {fprintf(stderr,"# Error - could not open mcphas.djdz \n");exit(1); }
  fprintf(stderr,"# ... these are no problems, continuing\n");
  }
                  
  // if mcphas.djdeps1-6 exist - read also those
- if(parload(ini.ipeps1,ini.prefix,"mcphas.djdeps1",verbose,inputpars))
- {parload(ini.ipeps2,ini.prefix,"mcphas.djdeps2",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps3,ini.prefix,"mcphas.djdeps3",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps4,ini.prefix,"mcphas.djdeps4",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps5,ini.prefix,"mcphas.djdeps5",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps6,ini.prefix,"mcphas.djdeps6",verbose,inputpars,ini.ipeps1);
+ if(parload(ini.ipeps1,ini.prefix,"mcphas.djdeps1",ini.verbose,inputpars))
+ {parload(ini.ipeps2,ini.prefix,"mcphas.djdeps2",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps3,ini.prefix,"mcphas.djdeps3",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps4,ini.prefix,"mcphas.djdeps4",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps5,ini.prefix,"mcphas.djdeps5",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps6,ini.prefix,"mcphas.djdeps6",ini.verbose,inputpars,ini.ipeps1);
  fprintf(stderr,"# ... these are no problems, continuing\n");
  }
 
@@ -231,10 +239,10 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
  if(((*ini.ipx)!=(*ini.ipeps1))>1){fprintf(stderr,"# Error - mcphas.djdx and mcphas.djdeps1 do not match in nofneighbours or neighbour positions\n");exit(1);}
   }
  
- if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
+ if(ini.verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
           } // doeps
  
- if(verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
+ if(ini.verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
  
  nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
@@ -244,7 +252,7 @@ if(doeps){printf("#Inverting Elastic Constants Matrix\n");
   inputpars.Cel.Inverse();
           }
   // here save single ion property files to results
-  inputpars.save_sipfs("./results/_");
+  if(ini.verbose==1){inputpars.save_sipfs("./results/_");}else{inputpars.remove_sipfs("./results/_");}
   //determine saturation momentum (used for scaling the plots, generation of qvectors)
   for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T(1)); // initialize eigenstate matrix
 
@@ -262,8 +270,8 @@ if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - ch
  // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
    testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
    ini.testspins=&testspins;
-   testspins.save("./results/_mcphas.tst",filemode);
-   qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins ,inputpars,Imax,"./results/mcphas.qvc",verbose);
+   if(ini.verbose==1){testspins.save("./results/_mcphas.tst",filemode);}else{unlink("./results/_mcphas.tst");}
+   qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins ,inputpars,Imax,"./results/mcphas.qvc",ini.verbose);
    ini.testqs=&testqs;
  // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs);
@@ -292,7 +300,7 @@ if(poly==0){
                  physprop.T,h(1),h(2),h(3));}
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T(1),H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
-  physprop.save(verbose,filemode,s,ini,inputpars,"anisotropy_"); 
+  physprop.save(filemode,s,ini,inputpars,"anisotropy_"); 
 
   } // H/T loop 
  }

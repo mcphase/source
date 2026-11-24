@@ -1592,7 +1592,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
     sta_int_without_antipeaks_weights+=dd_int_without_antipeaks_weights*dd_int_without_antipeaks_weights;
               }
               //initialize output file for display
-            snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.qom",ini.prefix);fout1 = fopen_errchk (filename,"w");
+            snprintf(filename,MAXNOFCHARINLINE,"./results/.mcdisp.qom");fout1 = fopen_errchk (filename,"w");
             fprintf (fout1, "#%s ",MCDISPVERSION);
             curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout1);
             fprintf (fout1, "#displayytext=I(barns/meV/sr/f.u.)\n");
@@ -1635,7 +1635,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
    // do refinement of energies by output of scattering cross section vs enrgy transfer if required
   if (do_Erefine==1&&!calc_rixs&&!calcXobs){double totint=0;
                 if(do_verbose==1){fprintf(stdout, "#refining calculation with exact calculation of energy dependence of scattering cross section\n");}
-          snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"w");
+          snprintf(filename,MAXNOFCHARINLINE,"./results/.mcdisp.dsigma");foutds1 = fopen_errchk (filename,"w");
           fprintf (foutds1, "#{%s ",MCDISPVERSION);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
           fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
@@ -1709,7 +1709,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
 //		    intensity=intcalc(ch,dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
 		    intensity=intcalc_Erefine(ch,Estp,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
 		     totint+=intensity*fabs(epsilon)/2;
-          snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
+          snprintf(filename,MAXNOFCHARINLINE,"./results/.mcdisp.dsigma");foutds1 = fopen_errchk (filename,"a");
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g ",myround(E),myround(intensity));
                      for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
@@ -1738,7 +1738,7 @@ if(!calc_rixs&&!calcXobs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false)
                      if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects erfine\n"); exit(EXIT_FAILURE); }
                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}
                         #endif
-                     snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
+                     snprintf(filename,MAXNOFCHARINLINE,"./results/.mcdisp.dsigma");foutds1 = fopen_errchk (filename,"a");
                       for(ithread=0; ithread<NUM_THREADS; ithread++) {vIntensity(tin[ithread]->iE) = tin[ithread]->intensity;
                                                                      (*chpointer[tin[ithread]->iE-1])  =(*thrdat.ch[ithread]); 
                       fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
@@ -1860,6 +1860,9 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
                         
      } 
 
+unlink("./results/.mcdisp.qom");
+unlink("./results/.mcdisp.dsigma");
+
 }
 
 //*************************************************************************************************
@@ -1960,16 +1963,19 @@ if(errexit==1){inimcdis ini;
 {inimcdis ini((*inip.inis[ninis]));
   if(inip.nofinis>1)printf("# Running mcdisp with prefix %s\n",ini.prefix);
   if (ini.no_hkls)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
-  ini.save();
-
+  
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(calc_rixs&&calcXobs){fprintf(stderr,"Error mcdisp: Options -X[observable] and -x -xa -xaf cannnot be used simultaneously, please use only one of these options\n");exit(EXIT_FAILURE);}
   if(do_Erefine&&(calc_rixs||calcXobs)){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf -X[observable]\n");exit(EXIT_FAILURE);}
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}
   if(ini.nofatoms!=inputpars.cs.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.cs.nofatoms);exit(EXIT_FAILURE);}
-  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
-  strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix,0);
-
+if(do_verbose==1){fprintf(stdout,"Saving input parameters mcphas.j to results/_*\n");
+  ini.save(); } else {ini.remove();}
+  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix); 
+ if(do_verbose==1){inputpars.save_sipfs(prefix);}else{inputpars.remove_sipfs(prefix);} 
+  strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");     
+if(do_verbose==1){inputpars.save(prefix,0);}else{unlink(prefix);}
+              
 int do_phonon=1;
 //calculate dispersion and save to files
 dispcalc(ini,inputpars,calc_rixs,calcXobs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_non_hermitian_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
@@ -2009,6 +2015,7 @@ std::cout << "# mcdisp was compiled without parallel processing option " << std:
    fprintf(stderr,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
    fprintf(stderr,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
    fprintf(stderr,"#************************************************************\n");
+
 
  return(0);
  

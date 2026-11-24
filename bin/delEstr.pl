@@ -114,7 +114,9 @@ sub is_phonon_sipf {
     open my $fh, '<', $path
         or die "Cannot open SIPF file '$path': $!\n";
 
-    my $first_line = <$fh> // '';
+    my $first_line = <$fh>;
+    $first_line = '' unless defined $first_line;
+
     close $fh;
 
     return $first_line =~ /\A#!MODULE=phonon/ ? 1 : 0;

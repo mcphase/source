@@ -1,6 +1,6 @@
 cd ../examples/tbcu2a
 
-mcphasit  -prefix test_ -v
+mcphasit  -prefix test_ 
 
 getvalue.pl -c -346.0 2 8 3 0 results/test_mcphas.fum
 getvalue.pl -c 2.94 2 10 3 0 results/test_mcphas.fum

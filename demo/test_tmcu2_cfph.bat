@@ -59,7 +59,7 @@ call setvariable xmax 20 mcphas.ini
 
 REM second with cf-Phonon interaction parameters
 call addj mcphasph.j results/mnn.j > mcphas.j
-call mcphasit -v -doeps
+call mcphasit -doeps
 call setup_mcdisp_mf 20  0 0 0    
 call mcdispit -prefix test_ -pinit 0.1
 

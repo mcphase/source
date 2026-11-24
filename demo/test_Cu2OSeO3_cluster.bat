@@ -44,7 +44,7 @@ call singleion -r cluster3.sipf 2 0 0 0  0 0 0  0 0 0  0 0 0  0 0 0
 call singleion -r cluster4.sipf 2 0 0 0  0 0 0  0 0 0  0 0 0  0 0 0
 getvariable.pl -c -26.592  Eigenvalues results/cluster1.sipf.levels.cef
 
-call mcphasit -v
+call mcphasit 
 range 2 4.9 5.1 results/mcphas.fum
 getvalue.pl -c -32.90033  1 8 52 0 results/mcphas.fum
 getvalue.pl -c 1.699 1 10 52 0 results/mcphas.fum

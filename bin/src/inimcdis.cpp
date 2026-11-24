@@ -187,6 +187,14 @@ void inimcdis::save()
   snprintf(savfilename,MAXNOFCHARINLINE,"results/_%s%s",prefix,parfile);
   save(savfilename);
 }
+
+// save parameters (which were read from mcdisp.par and mcdisp.mf)
+int inimcdis::remove()
+{char savfilename[MAXNOFCHARINLINE];
+  snprintf(savfilename,MAXNOFCHARINLINE,"results/_%s%s",prefix,parfile);
+ return unlink(savfilename)+unlink(mf_file);
+}
+
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save(const char * filename)
 { printf("Saving %s\n",filename);

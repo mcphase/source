@@ -42,57 +42,97 @@ warn "mctest: matched files: " . join(" ", @files) . "\n";
 my $host = ($^O =~ /MSWin/i) ? 'win' : 'lin';
 $target = $host unless defined $target;
 
-my $out = "#!/bin/bash\nset -e\n";
-$out .= bash_helper_function() if $target eq 'lin';
-
-my @nodes;
-for my $file (@files) {
-    open(my $in, '<', $file)
-        or die "mctest: cannot open '$file': $!\n";
-    my @lines = <$in>;
-    close($in) or die "mctest: cannot close '$file': $!\n";
-
-    my $i = 0;
-    my $parsed = parse_block($file, \@lines, \$i, undef);
-
-    push @nodes, {
-        type => 'file_marker',
-        file => $file,
-    };
-    push @nodes, @$parsed;
-
-}
-
 my $marker;
 
 if (!$output_only) {
-   my ($marker_fh, $marker_path) = tempfile(
-    'mctest-progressXXXXXX',
-    SUFFIX => '.txt',
-    UNLINK => 0
-);
-close($marker_fh)
-    or die "mctest: cannot close progress marker: $!\n";
+    my ($marker_fh, $marker_path) = tempfile(
+        'mctest-progressXXXXXX',
+        SUFFIX => '.txt',
+        UNLINK => 0
+    );
 
-$marker = File::Spec->rel2abs($marker_path);
-}
+    close($marker_fh)
+        or die "mctest: cannot close progress marker: $!\n";
 
-my ($script, $command_info) =
-    render_script(\@nodes, $target, !$output_only, $marker);
-
-
-# -win/-lin select the output format. If the selected format differs from
-# the host, print the translated script without executing it.
-if ($output_only) {
-    print $script;
-    exit 0;
+    $marker = File::Spec->rel2abs($marker_path);
 }
 
 my $start_time = time();
-my $status = run_script($script, $target, $marker, $command_info);
+
+# Translation-only mode: render each file independently, but print all
+# rendered scripts to stdout. Do not add execution diagnostics or markers.
+if ($output_only) {
+    for my $file (@files) {
+        open(my $in, '<', $file)
+            or die "mctest: cannot open '$file': $!\n";
+
+        my @lines = <$in>;
+
+        close($in)
+            or die "mctest: cannot close '$file': $!\n";
+
+        my $i = 0;
+        my $nodes = parse_block($file, \@lines, \$i, undef);
+
+        my @file_nodes = (
+            {
+                type => 'file_marker',
+                file => $file,
+            },
+            @$nodes,
+        );
+
+        my ($script, $command_info) =
+            render_script(\@file_nodes, $target, 0, undef);
+
+        print $script;
+    }
+
+    exit 0;
+}
+
+# Normal execution: each input is parsed, rendered, and executed separately.
+my $status = 0;
+
+for my $file (@files) {
+    open(my $in, '<', $file)
+        or do {
+            warn "mctest: cannot open '$file': $!\n";
+            $status = 1;
+            last;
+        };
+
+    my @lines = <$in>;
+
+    close($in)
+        or do {
+            warn "mctest: cannot close '$file': $!\n";
+            $status = 1;
+            last;
+        };
+
+    my $i = 0;
+    my $nodes = parse_block($file, \@lines, \$i, undef);
+
+    my @file_nodes = (
+        {
+            type => 'file_marker',
+            file => $file,
+        },
+        @$nodes,
+    );
+
+    my ($script, $command_info) =
+        render_script(\@file_nodes, $target, 1, $marker);
+
+
+    $status = run_script($script, $target, $marker, $command_info);
+
+    # Stop immediately on the first failed or interrupted input file.
+    last if $status != 0;
+}
 
 unlink $marker if defined $marker;
-
 
 if ($status == 0) {
     my $elapsed = int(time() - $start_time);
@@ -102,6 +142,7 @@ if ($status == 0) {
 }
 
 exit $status;
+
 
 sub set_target {
     my ($new, $ref) = @_;
@@ -462,7 +503,11 @@ $out .= ":$end\n";
         my $translated = translate_line($text, $target, $loop_var);
 
         # Comments and blank lines are emitted without diagnostics.
-        if ($text =~ /^\s*(?:#|rem\b|$)/i || !$diagnostics) {
+        if (
+    $text =~ /^\s*(?:#|rem\b|$)/i
+    || ($target eq 'win' && $text =~ /^\s*chmod\b/i)
+    || !$diagnostics
+) {
             $out .= $translated . "\n";
             next;
         }
@@ -470,10 +515,10 @@ if (defined $marker && $diagnostics) {
     my $id = ++$command_info->{_next_id};
 
     $command_info->{$id} = {
-        file    => $node->{file},
-        line    => $node->{line},
-        command => $text,
-    };
+    file    => $node->{file},
+    line    => $node->{line},
+    command => $translated,
+};
 
     if ($target eq 'lin') {
         $out .= qq{printf '%s\\n' '$id' > "\$MCTEST_MARKER"\n};
@@ -484,22 +529,32 @@ if (defined $marker && $diagnostics) {
 
 
 my $where = $node->{file} . ':' . $node->{line};
-my $message = 'mctest: failed at ' . $where . ': ' . $text;
+my $message;
+if ($target eq 'lin') {
+    $message = 'mctest: failed at ' . $where . ': ' . $text;
 
-        if ($target eq 'lin') {
-            $out .= "if { $translated; }; then :; else\n";
-            $out .= "  rc=\$?\n";
-            $out .= "  printf '%s\\n' " . shell_quote($message) . " >&2\n";
-            $out .= "  exit \$rc\n";
-            $out .= "fi\n";
-        } else {
-            $out .= $translated . "\n";
-            $out .= "if errorlevel 1 (\n";
-            $out .= "  echo $message\n";
-            $out .= "  exit /b 1\n";
-            $out .= ")\n";
-        }
-    }
+    $out .= "if { $translated; }; then :; else\n";
+    $out .= "  rc=\$?\n";
+    $out .= "  printf '%s\\n' " . shell_quote($message) . " >&2\n";
+    $out .= "  exit \$rc\n";
+    $out .= "fi\n";
+} else {
+    $message = 'mctest: failed at ' . $where . ': ' . $translated;
+
+    # Parentheses in an echo inside a parenthesized batch block must be escaped.
+    $message =~ s/([()])/^$1/g;
+
+    $out .= "ver >nul\n";          # clear a stale ERRORLEVEL
+$out .= $translated . "\n";
+$out .= "set \"MCTEST_RC=!ERRORLEVEL!\"\n";
+$out .= "if not \"!MCTEST_RC!\"==\"0\" (\n";
+$out .= "  echo $message\n";
+$out .= "  exit /b !MCTEST_RC!\n";
+$out .= ")\n";
+
+}
+
+   }     
 
     return $out;
 }
@@ -585,6 +640,12 @@ sub translate_line {
        $out =~ s{\\}{/}g;
 
     } else {
+# chmod is a Unix command; preserve it as a comment in Windows output.
+if ($out =~ /^(\s*)chmod\b/i) {
+    $out = $1 . 'rem ' . $out;
+    return $out;
+}
+
         $out =~ s/^\s*export\s+([A-Za-z_]\w*)\s*=\s*(.*)$/set "$1=$2"/i;
         $out =~ s/^\s*cp\s+/copy /i;
         $out =~ s/^\s*rm\s+/del /i;
@@ -596,16 +657,51 @@ sub translate_line {
             $out =~ s/\$\Q$loop_var\E/%%$loop_var/g;
         }
 
+                # Bash source/. command: call the corresponding batch file.
+        if ($out =~ /^\s*(?:source|\.)\s+("?)([^\s"']+)\1(.*)$/i) {
+            my ($file, $args) = ($2, $3);
+
+            # Use the .bat counterpart for a sourced shell script;
+            # add .bat when the command has no extension.
+            $file =~ s/\.sh$/.bat/i;
+            $file .= '.bat' unless $file =~ /\.(?:bat|cmd)$/i;
+
+            # Single quotes don't quote arguments in cmd.exe.
+            $args =~ s/'([^']*)'/"$1"/g;
+
+            $file =~ tr{/}{\\};
+            $args =~ s/\$([A-Za-z_]\w*)/!$1!/g;
+
+             return qq{call $file$args};
+        }
+
+
         if ($out =~ /^\s*(?:\.\s+)?(getvalue|getvariable|rpvalue|chi2)(\.pl)?\b(.*)$/i) {
             my ($helper, $suffix, $args) = ($1, $2, $3);
             my $helper_name = defined $suffix ? $helper . $suffix : $helper;
             return "call mctest_helper.bat $helper_name$args";
         }
+
         $out =~ s/^\s*([A-Za-z_]\w*)=(.*)$/set "$1=$2"/;
 
          # Bash positional arguments.
         $out =~ s/\$\*/%*/g;
-        $out =~ tr{/}{\\};
+
+        # Convert common relative/path arguments, but leave non-path expressions
+# such as 0.0863x(1.13+0.06)/(-6) unchanged.
+$out =~ s{
+    (?<![\w.])
+    (
+        (?:\.\.?/|[A-Za-z0-9_.-]+/)
+        [A-Za-z0-9_.-]+
+        (?:/[A-Za-z0-9_.-]+)*
+    )
+}{
+    my $path = $1;
+    $path =~ tr{/}{\\};
+    $path;
+}gex;
+
 
         # rm -> delete files. This handles file paths and wildcards, not directories.
         $out =~ s/^\s*rm\s+/del \/q /i;
@@ -621,6 +717,9 @@ sub translate_line {
         if ($out =~ /^\s*kill\b/) {
             return 'taskkill /FI "WINDOWTITLE eq PLEASE ENTER WINDOW TITLE" /IM *';
         }
+
+# cmd.exe does not treat single quotes as argument quotes.
+$out =~ s/'([^']*)'/"$1"/g;
 
         if (is_batch_command($out)) {
             $out = "call $out";
@@ -764,6 +863,28 @@ sub run_script {
 
             return 130;
         }
+
+
+if ($exit_code != 0) {
+    my $id;
+
+    if (defined $marker && open my $mf, '<', $marker) {
+        $id = <$mf>;
+        close $mf;
+        chomp $id if defined $id;
+    }
+
+    my $info = defined $id ? $command_info->{$id} : undef;
+
+    if ($info) {
+        print STDERR "mctest: failed at line $info->{line} "
+                   . "of file $info->{file} in command: "
+                   . "$info->{command}\n";
+    } else {
+        print STDERR "mctest: Windows script failed with exit code "
+                   . "$exit_code\n";
+    }
+}
 
         return $exit_code;
     }

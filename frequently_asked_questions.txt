@@ -5,6 +5,17 @@ Lines beginning with # are comment lines
 Lines beginning with #! are also comment lines, but some programs will
       read information from these lines
 
+-) What means -v after a command ?
+ The -v option (singleion, mcdisp, mcphas, mcdiff, ...)
+ usually denotes a verbose mode, which may be a bit
+ slower and yields more output about the calculation in progress.
+ In results/_* files are stored, which resemble input files of the
+ calculation - however, these files are generated using the numbers
+ which are actually used in the the calculation. They are useful to
+ check if an input file is correctly read, e.g. if in mcphas.j a number is
+ 0.1 and by mistake is entered as 0,1 (with a comma) the number will
+ be read as zero and in the results/_mcphas.j there will be a zero.
+
 MODULES SO1ION and CFIELD
 
 -) are modules cfield and so1ion different ?

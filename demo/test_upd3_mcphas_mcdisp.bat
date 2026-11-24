@@ -1,6 +1,6 @@
 cd ../examples/upd3
 
-call mcphasit -v
+call mcphasit 
 getvalue.pl -c -21.491 0 9 1 0 results/mcphas.fum
 call spins -f results/mcphas.mf 3 0 0 0 > mcdisp.mf
 call mcdispit -c -minE 0 -maxE 20

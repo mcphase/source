@@ -88,6 +88,7 @@ static int noffiles;
  static   DataOutputStream GnuOutputStream;
  static XYBlockRenderer renderer;
  static PaintScaleLegend zscale;
+ static Thread thread;
 
 private static final int[] red = {
     0,  0,  0,  0,  0,  0,  0,  0,
@@ -680,7 +681,24 @@ protected void reload_data(int i)
 
             fileIni = new File(file[i]);
             //?ffnen der Datei
-             DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
+             DataInputStream inStream =null;
+try{
+            inStream = new DataInputStream(new FileInputStream(fileIni));
+   } catch (FileNotFoundException e)
+    { try { // wait a second and try again
+            thread.sleep(500); 
+            inStream = new DataInputStream(new FileInputStream(fileIni));
+          }
+      catch (FileNotFoundException e1)
+    {
+     System.out.println("# end of program displaycontour  - " + e1.getLocalizedMessage());
+     System.exit(1);
+    }
+     catch (InterruptedException e2) {
+                    // suppress
+                }
+    
+  }
              String strLine;
              String sx;
              String sy;

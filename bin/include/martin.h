@@ -38,6 +38,8 @@ extern void   sort(float * v,int jmin,int & jmax,int * jnew); // sorting functio
  //                         sorted in ascending order 
  
 
+void print_number(FILE* fout, double x, double threshold);
+
 // function to print to stderr estimate of time until program end
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
 

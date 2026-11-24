@@ -106,6 +106,7 @@ public:
    void save (FILE *file,int & noindexchange,bool pd=false, bool ps=false); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
    void saveG(FILE * file); // save coupling constants G
+   int remove_sipf(const char * path); //remove = delete single ion parameter file filename from path*
    void save_sipf(const char * path); //save single ion parameter file filename to path*
    void save_sipf(FILE *file); //save single ion parameter file filename to path*
   void print_interaction(FILE * fout,int & pi,int & prl,int & prh,int & pcl,int & pch); 

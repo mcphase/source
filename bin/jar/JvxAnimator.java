@@ -130,6 +130,27 @@ static final class Quaternion {
             v.z + w * tz + (x * ty - y * tx)
         );
     }
+
+static Quaternion rotationAroundAxis(Vec3 axis, double angle) {
+    double length = Math.sqrt(
+        axis.x * axis.x + axis.y * axis.y + axis.z * axis.z
+    );
+    if (length == 0.0) {
+        throw new IllegalArgumentException("Rotation axis must be non-zero");
+    }
+
+    double half = angle / 2.0;
+    double s = Math.sin(half) / length;
+
+    return new Quaternion(
+        Math.cos(half),
+        axis.x * s,
+        axis.y * s,
+        axis.z * s
+    );
+}
+
+
 }
 
 void loadGpSettings(Path file) throws IOException {
@@ -140,7 +161,8 @@ void loadGpSettings(Path file) throws IOException {
     }
 
     String parameterNames =
-            "(arrowSize|pitch|yaw|zoom|translationX|translationY)";
+            "(arrowSize|orientationW|orientationX|orientationY|orientationZ|" +
+            "zoom|translationX|translationY)";
 
     Pattern prefixedAssignment = Pattern.compile(
         "^\\s*" + Pattern.quote(gpPrefix + "_") + parameterNames +
@@ -170,16 +192,35 @@ void loadGpSettings(Path file) throws IOException {
 
     applySetting("arrowSize", prefixed, general,
             value -> camera.arrowHead = value);
-    applySetting("pitch", prefixed, general,
-            value -> camera.pitch = Math.toRadians(value));
-    applySetting("yaw", prefixed, general,
-            value -> camera.yaw = Math.toRadians(value));
     applySetting("zoom", prefixed, general,
             value -> camera.zoom = value);
     applySetting("translationX", prefixed, general,
             value -> camera.panX = value);
     applySetting("translationY", prefixed, general,
             value -> camera.panY = value);
+
+    Double w = settingValue("orientationW", prefixed, general);
+    Double x = settingValue("orientationX", prefixed, general);
+    Double y = settingValue("orientationY", prefixed, general);
+    Double z = settingValue("orientationZ", prefixed, general);
+
+    if (w != null && x != null && y != null && z != null) {
+        double norm = Math.sqrt(w*w + x*x + y*y + z*z);
+        if (norm == 0.0) {
+            throw new IOException("Saved orientation quaternion has zero length");
+        }
+        orientation = Quaternion.normalized(new Quaternion(w, x, y, z));
+    }
+}
+
+private static Double settingValue(
+        String name,
+        Map<String, Double> prefixed,
+        Map<String, Double> general) {
+
+    return prefixed.containsKey(name)
+            ? prefixed.get(name)
+            : general.get(name);
 }
 
 private static void applySetting(
@@ -188,14 +229,13 @@ private static void applySetting(
         Map<String, Double> general,
         java.util.function.DoubleConsumer setter) {
 
-    Double value = prefixed.containsKey(name)
-            ? prefixed.get(name)
-            : general.get(name);
+    Double value = settingValue(name, prefixed, general);
 
     if (value != null) {
         setter.accept(value);
     }
 }
+
 
 
 void saveGpSettings() {
@@ -207,25 +247,30 @@ void saveGpSettings() {
         List<String> lines = Files.exists(output)
                 ? new ArrayList<>(Files.readAllLines(output, StandardCharsets.UTF_8))
                 : new ArrayList<>();
+
         String prefix = gpPrefix + "_";
 
         putSetting(lines, prefix + "arrowSize", Double.toString(camera.arrowHead));
-        putSetting(lines, prefix + "pitch", Double.toString(Math.toDegrees(camera.pitch)));
-        putSetting(lines, prefix + "yaw", Double.toString(Math.toDegrees(camera.yaw)));
+        putSetting(lines, prefix + "orientationW", Double.toString(orientation.w));
+        putSetting(lines, prefix + "orientationX", Double.toString(orientation.x));
+        putSetting(lines, prefix + "orientationY", Double.toString(orientation.y));
+        putSetting(lines, prefix + "orientationZ", Double.toString(orientation.z));
         putSetting(lines, prefix + "zoom", Double.toString(camera.zoom));
         putSetting(lines, prefix + "translationX", Double.toString(camera.panX));
         putSetting(lines, prefix + "translationY", Double.toString(camera.panY));
 
-        Files.write(output, lines, StandardCharsets.UTF_8);
+        // Remove obsolete settings so the file reflects the new design.
+        lines.removeIf(line ->
+                line.stripLeading().startsWith(prefix + "pitch=") ||
+                line.stripLeading().startsWith(prefix + "yaw="));
 
-        // Opening an editor is best-effort; saving still succeeds if this isn't supported.
-        //if (Desktop.isDesktopSupported()) {
-        //    Desktop.getDesktop().open(output.toFile());
-       // }
+        Files.write(output, lines, StandardCharsets.UTF_8);
+       System.out.println("JvxAnimator: saved graphic parameters to results/graphic_parameters.gp");
     } catch (Exception e) {
-        System.err.println("Could not save/open graphic settings: " + e.getMessage());
+        System.err.println("Could not save graphic settings: " + e.getMessage());
     }
 }
+
 
 static void putSetting(List<String> lines, String key, String value) {
     Pattern assignment = Pattern.compile(
@@ -284,10 +329,11 @@ static void putSetting(List<String> lines, String key, String value) {
     }
 
     static class Camera {
-        double yaw = -0.55, pitch = 0.35, zoom = 1.0;
-        double arrowHead = 0.18; // fraction of each arrow's length
-        double panX = 0, panY = 0; // fractions of the view width and height
-    }
+    double zoom = 1.0;
+    double arrowHead = 0.18; // fraction of each arrow's length
+    double panX = 0.0, panY = 0.0; // fractions of the view width and height
+}
+
 static List<Path> expandInput(String argument) throws IOException {
     Path patternPath = Path.of(argument);
 
@@ -425,12 +471,14 @@ Options:
 At closing of the program the graphic parameter settings are saved in 
 results/graphic_parameters.gp, settings are for example:
 
-arrowSize=0.18
-pitch=20.05352282957881
-yaw=-31.51267873219528
-zoom=1.0
-translationX=0.0
-translationY=0.0
+spins.01.jvx_arrowSize=0.18
+spins.01.jvx_zoom=1.0
+spins.01.jvx_translationX=0.0
+spins.01.jvx_translationY=0.0
+spins.01.jvx_orientationW=0.990901331204548
+spins.01.jvx_orientationX=0.0
+spins.01.jvx_orientationY=0.13459031100734833
+spins.01.jvx_orientationZ=0.0
 
 """);
     throw new IllegalArgumentException("No JVX input files specified");
@@ -579,8 +627,11 @@ window.setLocationByPlatform(true);
         
         timer = new javax.swing.Timer(frameDelayMs, e -> {
             frameIndex = (frameIndex + 1) % models.size();
-if (autoRotate) {
-    camera.yaw += 0.015;
+if (autoRotate) {Quaternion step = Quaternion.rotationAroundAxis(
+        new Vec3(0, 1, 0), 0.015
+    );
+    orientation = Quaternion.normalized(step.multiply(orientation));
+    
 }
 preview.repaint();
 
@@ -934,13 +985,19 @@ gce.setAttribute("disposalMethod","none");
                 }
                 if(i==0) {
                     IIOMetadataNode app=findNode(root,"ApplicationExtensions");
+if (app == null) {
+        app = new IIOMetadataNode("ApplicationExtensions");
+        root.appendChild(app);
+    }
                     if(app!=null) {
                         IIOMetadataNode ext=new IIOMetadataNode("ApplicationExtension");
                         ext.setAttribute("applicationID","NETSCAPE");
                         ext.setAttribute("authenticationCode","2.0");
                         ext.setUserObject(new byte[]{1,0,0}); // loop forever
                         app.appendChild(ext);
-                    }
+                    } else {
+        System.err.println("GIF metadata is missing the ApplicationExtensions node - impossible to set forever loop\n");
+                     }
                 }
                 meta.setFromTree(format,root);
                 writer.writeToSequence(new IIOImage(frames.get(i),null,meta),param);

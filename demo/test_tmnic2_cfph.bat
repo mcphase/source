@@ -78,7 +78,7 @@ getvalue.pl -c 269.86403 0 4 1 0 mcphasph.j
 
 # second with cf-Phonon interaction parameters 
  addj  mcphasph.j mnn.j > mcphas.j
- mcphasit -v -doeps  -prefix test_ 
+ mcphasit  -doeps  -prefix test_ 
 getvalue.pl -c 52.063 0 9 1 0 results/test_mcphas.fum
 
 # <h2> Magnetic Scattering </h2>

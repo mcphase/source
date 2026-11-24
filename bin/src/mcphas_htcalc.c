@@ -1,6 +1,6 @@
 // routines for mcphas for calculation of magnetic phases
 // htcalc.c
-void logfe(int j,int r, double sc,inipar & ini,par & inputpars,spincf & sps,int verbose,double fe,int thread_id)
+void logfe(int j,int r, double sc,inipar & ini,par & inputpars,spincf & sps,double fe,int thread_id)
 { char outfilename[MAXNOFCHARINLINE];
 FILE * felog; // logfile for q dependence of fe
 
@@ -90,9 +90,9 @@ FILE * felog; // logfile for q dependence of fe
                    strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                    strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                    felog=fopen_errchk(outfilename,"a");
-                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i fe=%10.6g\n#",inputpars.cs.nofatoms,inputpars.cs.nofcomponents,fe);}
+                   if (ini.verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i fe=%10.6g\n#",inputpars.cs.nofatoms,inputpars.cs.nofcomponents,fe);}
                     fprintf(felog,"%10.6g %10.6g %10.6g %3i %20.16g %3i %3i %3i %3i %i %10.6g %i\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,sc,thread_id);
-                   if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
+                   if (ini.verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
 	           fclose(felog);
                   delete []mq;
                  }
@@ -229,9 +229,9 @@ int s1=1,s2=2;
   for (tryrandom=0;(tryrandom<=ini.nofrndtries)&&j!=0;++tryrandom)
    {if (j>0){sps=(*testspins.configurations[j]);// take test-spinconfiguration
              #ifndef _THREADS
-	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)< "  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
+	     if (tryrandom==0&&ini.verbose==1) { printf ( "str%i(%ix%ix%i)< "  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #else
-	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)<[%i] "  ,j,sps.na(),sps.nb(),sps.nc(),thread_id+1); fflush(stdout); }
+	     if (tryrandom==0&&ini.verbose==1) { printf ( "str%i(%ix%ix%i)<[%i] "  ,j,sps.na(),sps.nb(),sps.nc(),thread_id+1); fflush(stdout); }
              #endif 
             
             while(sps.na()<ini.minnr1)sps.extend(s2,s1,s1); 
@@ -262,9 +262,9 @@ int s1=1,s2=2;
                 // for Monte Carlo we have minimum number of spins
              hkl=inputpars.rez.Transpose()*q;  
              #ifndef _THREADS
-   	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)< ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
+   	     if (tryrandom==0&&ini.verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)< ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #else
-   	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)<[%i] ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc(),thread_id+1); fflush(stdout); }
+   	     if (tryrandom==0&&ini.verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)<[%i] ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc(),thread_id+1); fflush(stdout); }
              #endif 
 	    }	 
     if (tryrandom>0){
@@ -282,7 +282,7 @@ int s1=1,s2=2;
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
 
       fe=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf);
-          if (fe>=2*FEMIN_INI && verbose==1) {
+          if (fe>=2*FEMIN_INI && ini.verbose==1) {
 	       if(j>0) printf ( ">for_str_%i(%ix%ix%i) "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">for(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                               fflush(stdout);}
@@ -293,7 +293,7 @@ int s1=1,s2=2;
              #ifndef _THREADS
 	       femin=fe; spsmin=sps;	   
                //printout fe
-	        if (verbose==1) printf("fe=%gmeV, str %i(%i)",fe,physprops.j,j);
+	        if (ini.verbose==1) printf("fe=%gmeV, str %i(%i)",fe,physprops.j,j);
              #else
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
              #endif 
@@ -305,25 +305,25 @@ int s1=1,s2=2;
                    mfcf mf1(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                if ((fered=fecalc(U,Eelastic,r,sc,Happ ,T,ini,inputpars,sps1,mf1))<=fe*(1.0000000000001)){mf=mf1;
 #ifndef _THREADS
-if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
+if (ini.verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
-                                 if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
+                                 if (ini.verbose==1){fprintf(stdout,">(%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
                                                                                                        }
                                                 }
                                        else {
-                                 if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%ife=%fmeV ",sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
+                                 if (ini.verbose==1){fprintf(stdout,">(%ix%ix%i)r%ife=%fmeV ",sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
                                             }
 
 #else
-                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
+                                 if (ini.verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
-                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
+                                 if (ini.verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%.15gmeV<(%ix%ix%i)fered=%.15g ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
                                                                                                        }
                                                 }
                                        else {
-                                 if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
+                                 if (ini.verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%ife=%fmeV ",thread_id+1,sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
                                             }
 #endif
                     spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
@@ -337,7 +337,7 @@ if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(
                     }}}} 
 
                  // display spinstructure
-                if (verbose==1)
+                if (ini.verbose==1)
                 {float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
 		 
 		 for (is=1;is<=inputpars.cs.nofatoms;++is)
@@ -376,7 +376,7 @@ if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(
                 }
 	     femin=fe; spsmin=sps;	   
             //printout fe
-	    if (verbose==1) printf("fe=%gmeV, str %i(%i)",fe,physprops.j,j);
+	    if (ini.verbose==1) printf("fe=%gmeV, str %i(%i)",fe,physprops.j,j);
              #else
              MUTEX_LOCK(&mutex_tests); 
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini); //0 means error in checkspincf/addspincf
@@ -390,26 +390,26 @@ if (verbose==1){fprintf(stdout,">(%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",sps.na(
             //delete mf;
              //printout fe
             #ifdef _THREADS
-	    if (tryrandom==ini.nofrndtries)if(verbose==1) {
+	    if (tryrandom==ini.nofrndtries)if(ini.verbose==1) {
                if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id+1,femin,physprops.j,j); 
 	       if(j>0) printf ( ">[%i]str %i(%ix%ix%i)done "  ,thread_id+1,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">[%i](%g %g %g)(%ix%ix%i)done ",thread_id+1,hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }
             #endif
-            if (tryrandom==ini.nofrndtries)if(verbose==1){printf("\n");}
+            if (tryrandom==ini.nofrndtries)if(ini.verbose==1){printf("\n");}
  
 	    
   // log fe if required
-   if (ini.logfevsQ==1) logfe(j,r,sc,ini,inputpars,sps,verbose,fe,thread_id);
+   if (ini.logfevsQ==1) logfe(j,r,sc,ini,inputpars,sps,fe,thread_id);
 
       }
 
-// if (verbose==1) {fprintf(stderr,"-");fflush(stderr);}
+// if (ini.verbose==1) {fprintf(stderr,"-");fflush(stderr);}
 } // <--- this bracket is necessary to embrace ComplexMatrix  definitions
   // necessary in this routine and make them live within this bracket. at closing the bracket
   // destructor is called correctly. On Apple without this 
   // bracket the compiler will exit intcalc_Erefine (pthread_exit) without freeing memory ...
-// if (verbose==1) {fprintf(stderr,"[%i]",thread_id);fflush(stderr);}
+// if (ini.verbose==1) {fprintf(stderr,"[%i]",thread_id);fflush(stderr);}
  
       #ifndef _THREADS
       return 1;
@@ -480,7 +480,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
                fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Hexti=%g Hextj=%g Hextk=%g\n",T,Happ(1),Happ(2),Happ(3));
                fclose(felog);
 	      }
- if (verbose==1)
+ if (ini.verbose==1)
  { strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
    strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
    fout= fopen_errchk (outfilename,"w");
@@ -645,7 +645,7 @@ if (femin>=FEMIN_INI) // did we find a stable structure ??
           return 2; else return 3;
  }
 else // if yes ... then
- {if(verbose==1){printf("... calculating physical properties ");fflush(stdout);}
+ {if(ini.verbose==1){printf("... calculating physical properties ");fflush(stdout);}
  if (physprops.j>0){ // take spinconfiguration ----
                      sps=(*testspins.configurations[physprops.j]);
                        if (sps.wasstable==0)
@@ -667,7 +667,7 @@ else // if yes ... then
 			(*testspins.configurations[physprops.j]).wasstable=sps.wasstable;    
                        }
 	      }
- if(verbose==1){printf("<");fflush(stdout);}
+ if(ini.verbose==1){printf("<");fflush(stdout);}
 /*    else     // ---- or take q vector 
             // removed because not necessary MR 15.12.15
             { sps.spinfromq(testqs.na(-physprops.j),testqs.nb(-physprops.j),
@@ -685,7 +685,7 @@ else // if yes ... then
   // now really calculate the physical properties
       mfcf mf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
       physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,Happ ,T,ini,inputpars,sps,mf,&physprops); 
-   if (ini.logfevsQ==1) logfe(physprops.j,r,sc,ini,inputpars,sps,verbose,physprops.fe,0);
+   if (ini.logfevsQ==1) logfe(physprops.j,r,sc,ini,inputpars,sps,physprops.fe,0);
 
       spincf magmom(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
@@ -697,7 +697,7 @@ else // if yes ... then
                     for(m1=1;m1<=3;++m1){magmom.m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
              // display spinstructure
-                if (verbose==1)
+                if (ini.verbose==1)
                 {//printf("");
 		 float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
 		 for (is=1;is<=inputpars.cs.nofatoms;++is)
@@ -725,7 +725,7 @@ else // if yes ... then
                 delete[]x;delete []y; delete []z;
 		}
   //printf("G");fflush(stdout);delete magmom;
-   if(verbose==1){printf(">");fflush(stdout);}
+   if(ini.verbose==1){printf(">");fflush(stdout);}
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofMCsteps==0){int eq=0;
    #ifndef _THREADS
@@ -734,7 +734,7 @@ else // if yes ... then
    if(thrdat.spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #endif
    
-   if(verbose){fprintf(stderr,"Warning htcalc.c: at T=%g K /  Hext= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
+   if(ini.verbose){fprintf(stderr,"Warning htcalc.c: at T=%g K /  Hext= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                             T,Norm(Happ),femin,physprops.j,physprops.fe);
    fprintf(stderr,"recalculation converged after %i loops and initial and final spin structures are ",r);
    if(eq==1){fprintf(stderr,"equal\n");}else{fprintf(stderr,"not equal\n");}}
@@ -757,7 +757,7 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
 //                printf("I\n");fflush(stdout);delete mf;
                               return 1;
                              }
- //if(verbose==1){printf(".\n");}
+ //if(ini.verbose==1){printf(".\n");}
 if(ini.nofMCsteps==0) physpropclc(Happ,T,sps,mf,physprops,ini,inputpars);
 else physprops.sps=sps;
 

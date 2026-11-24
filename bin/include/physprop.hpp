@@ -59,11 +59,11 @@ double xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,
  
 void update_maxnofhkls(int & mxnofhkli);
 // save physical properties to output files
-double save(int & verbose,const char * filemode, int & j,inipar & ini,par & inputpars,char * prefix);
+double save(const char * filemode, int & j,inipar & ini,par & inputpars,char * prefix);
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise
 // returns 1
-int read(int & verbose, par & inputpars,char * readprefix,inipar & ini);
+int read(par & inputpars,char * readprefix,inipar & ini);
 
 Vector Pdiveps0(); // electric Polarisation in V/m
 Vector mu0M();// magnetisation mu0*M(Tesla) 

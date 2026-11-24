@@ -41,6 +41,36 @@ public class PostscriptViewer extends JFrame implements ActionListener, Runnable
     JPanel p1;
     Demo demo;
 
+private long lastModified = -1;
+private long lastLength = -1;
+private boolean missingOnPreviousCheck = false;
+
+private final javax.swing.Timer fileCheckTimer =
+        new javax.swing.Timer(500, e -> checkPostscriptFile());
+
+private void checkPostscriptFile() {
+    File file = new File(url);
+
+    if (!file.isFile()) {
+        if (missingOnPreviousCheck) {
+            fileCheckTimer.stop();
+            System.exit(1);
+        }
+        missingOnPreviousCheck = true;
+        return;
+    }
+
+    missingOnPreviousCheck = false;
+
+    long modified = file.lastModified();
+    long length = file.length();
+
+    if (modified != lastModified || length != lastLength) {
+        lastModified = modified;
+        lastLength = length;
+        demo.repaint();
+    }
+}
 
     public void init(String s[]) {
         p1 = new JPanel(new BorderLayout());
@@ -75,7 +105,10 @@ public class PostscriptViewer extends JFrame implements ActionListener, Runnable
 
 //        url = PostscriptViewer.class.getResource(PostscriptFiles[0]);
           url=PostscriptFiles[0];
+          fileCheckTimer.start();
     }
+
+
 
 
     public void addOpenButton() {
@@ -86,30 +119,35 @@ public class PostscriptViewer extends JFrame implements ActionListener, Runnable
 
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() instanceof JButton) {
-            JFileChooser chooser = new JFileChooser();
-            File file = new File("psfiles");
-            if (file.exists()) {
-                chooser.setCurrentDirectory(file);
-            }
-            if (chooser.showOpenDialog(this) == 0) {
-                File theFile = chooser.getSelectedFile();
-                if (theFile != null) {
-                    try {
-                        //URI u= theFile.toURI();
-                        //url = u.toURL();
-                        url=theFile.getName();
-                    } catch (Exception ex) { ex.printStackTrace(); }
-                }
-            }
-        } else {
-            //String str = (String) PostscriptViewer.combo.getSelectedItem();
-            url = (String) PostscriptViewer.combo.getSelectedItem();
-//            System.out.println(str);
-            //url = Demo.class.getResource(str);
+    boolean fileSelected = false;
+
+    if (e.getSource() instanceof JButton) {
+        JFileChooser chooser = new JFileChooser();
+        File file = new File("psfiles");
+        if (file.exists()) {
+            chooser.setCurrentDirectory(file);
         }
-        new Thread(this).start();
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File theFile = chooser.getSelectedFile();
+            if (theFile != null) {
+                url = theFile.getAbsolutePath();
+                fileSelected = true;
+            }
+        }
+    } else {
+        url = (String) combo.getSelectedItem();
+        fileSelected = true;
     }
+
+    if (fileSelected) {
+        lastModified = -1;
+lastLength = -1;
+missingOnPreviousCheck = false;
+demo.repaint();
+
+    }
+}
 
 
     public void run() {
@@ -137,13 +175,14 @@ public class PostscriptViewer extends JFrame implements ActionListener, Runnable
                 fitInPage.scale(s,s);
                 g2.transform(fitInPage);
             }
-            try {
-//                  File file = new File(url);
-//                InputStream inputStream = url.openStream();
-                FileInputStream inputStream = new FileInputStream (url);
-                context.draw(inputStream);	
-                inputStream.close();
-            } catch (Exception e) {
+            try (FileInputStream inputStream = new FileInputStream(url)) {
+    context.draw(inputStream);inputStream.close();
+} catch (IOException e) {
+    // The timer handles a missing file and will exit if it remains missing.
+    System.err.println("Could not read " + url + ": " + e.getMessage());
+}
+                
+             catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -173,7 +212,7 @@ public class PostscriptViewer extends JFrame implements ActionListener, Runnable
                 for (int i = 0; i < PostscriptFiles.length; i++) {
                     combo.setSelectedIndex(i);
                     try {
-                        thread.sleep(6000);
+                        thread.sleep(600);
                     } catch (InterruptedException e) { return; }
                 }
             }

@@ -41,9 +41,27 @@ public class displaymag extends Panel implements Runnable {
  {newSeries[i] = new XYSeries(s.substring(i,i+1));
 
  fileIni = new File(file[i]);
-ff = new FileInputStream(fileIni);
-    DataInputStream inStream = new DataInputStream(ff);
 
+   
+try{         ff = new FileInputStream(fileIni);
+            
+   } catch (FileNotFoundException e)
+    { try { // wait a second and try again
+            Thread.sleep(500); 
+            ff = new FileInputStream(fileIni);
+            
+          }
+      catch (FileNotFoundException e1)
+    {
+     System.out.println("# end of program displaymag  - " + e1.getLocalizedMessage());
+     System.exit(1);
+    }
+     catch (InterruptedException e2) {
+                    // suppress
+                }
+    
+  }
+    DataInputStream inStream = new DataInputStream(ff);
     String strLine;
     String sx;
     String sy;

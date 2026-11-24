@@ -705,7 +705,8 @@ void spincf::print(FILE * fout,int & nofcomp) //print spinconfiguration to strea
  {for (j=1;j<=nofb;++j)
   {for (l=1;l<=nofcomponents*nofatoms;++l)if((l-1)%nofcomponents<nofcomp)
    {for (i=1;i<=nofa;++i)
-      {fprintf(fout," %4.4f",myround(1e-5,mom[in(i,j,k)](l)));
+      {//fprintf(fout," %4.4f",);
+print_number(fout,mom[in(i,j,k)](l),1e-5);
        }
     fprintf(fout,"\n");
     }

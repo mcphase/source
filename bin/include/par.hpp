@@ -80,6 +80,7 @@ void savelattice(FILE *fout);// save lattice to file
 void saveCel(FILE * file,bool inGPa); // save elastic constants to file in meV or GPa 
 void saveatoms(FILE *fout);// save atom positions and properties  to file
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
+void remove_sipfs(const char *path);   //delete single ion parameter files filename in path*
 void save_mcdiff_in (const char * program); // save structure in mcdiff.in program is program name calling this
 void set_nofcomponents (int  n); //sets the number of components in the interaction vector to n
 void increase_nofcomponents (int & n); //increases the number of components in the interaction vector

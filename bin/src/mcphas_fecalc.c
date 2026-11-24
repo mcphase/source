@@ -289,7 +289,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
  */
 
 Vector Hint(1,Happ.Hi());Hint=Happ;
-//if (verbose==1){fprintf(stderr,"f");fflush(stderr);}
+//if (ini.verbose==1){fprintf(stderr,"f");fflush(stderr);}
  double fe,dE; // free energy
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector sigma(1,6); // external stress tensor in Voigt notation and units meV/pVol
@@ -377,7 +377,7 @@ if(ini.doeps){ // set coupling matrix
 // --------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
 // for (r=0;r<=sdim;++r)
-//if (verbose==1){fprintf(stderr,"c");fflush(stderr);}
+//if (ini.verbose==1){fprintf(stderr,"c");fflush(stderr);}
 
 int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
             
@@ -639,7 +639,7 @@ if(exstr>0){int iparanz;
 // exstrictexstrictexstrict EXCHANGE STRICTION exstrictexstrictexstrictexstrictexstrict
 
    } // for m loop nofatoms
-//if (verbose==1){fprintf(stderr,"s");fflush(stderr);}
+//if (ini.verbose==1){fprintf(stderr,"s");fflush(stderr);}
 
 // Transform Coupling Coefficients into sparse matrix sMat:
 sMat<double> ** JS; JS= new sMat <double> *[(sdim+2)*(1+exstr)];   if (JS == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
@@ -652,7 +652,7 @@ JS[i][ln]=M2mat(JJ[i][ln]);
 //cout << JS[i][ln].display_full() << endl;
  } delete []JJ[i];
 }
-//if (verbose==1){fprintf(stderr,"t");fflush(stderr);}
+//if (ini.verbose==1){fprintf(stderr,"t");fflush(stderr);}
  delete []JJ;
 
 //printf("coupling coefficients JS ready\n");
@@ -693,7 +693,7 @@ if (ini.displayall==1)   // display spincf if button is pressed
 // mf loop for selfconsistency **********************************************************
 // mf loop for selfconsistency **********************************************************
 time_t start, start2;  
-//if (verbose==1){fprintf(stderr,"l");fflush(stderr);}
+//if (ini.verbose==1){fprintf(stderr,"l");fflush(stderr);}
 for (r=1;sta>ini.maxstamf;++r)
 {if (spinchange>ini.maxspinchange)
     {for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
@@ -702,7 +702,7 @@ for (r=1;sta>ini.maxstamf;++r)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){int im1=i-1,jm1=j-1,km1=k-1;
       delete Icalcpars[inputpars.cs.nofatoms*sps.in(im1,jm1,km1)+l-1];
      }}}} delete []Icalcpars;
-     if (verbose==1) {fprintf(stderr,"feDIV!MAXspinchangE");}
+     if (ini.verbose==1) {fprintf(stderr,"feDIV!MAXspinchangE");}
 #ifdef _THREADS
 MUTEX_LOCK (&mutex_ini_nofmaxspinchangeDIV);
 #endif
@@ -900,7 +900,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      sleep(200);
  }
    //for verbose mode do some outputs
- if (verbose==1)
+ if (ini.verbose==1)
  {if (time(0)-time_of_last_output>2)
   {time_of_last_output=time(0);
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
@@ -919,7 +919,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
   }
  }
 if (r>ini.maxnofmfloops){if(ini.nofMCsteps==0) 
-    {     if (verbose==1) {fprintf(stderr,"feDIV!MAXlooP");fflush(stderr);}
+    {     if (ini.verbose==1) {fprintf(stderr,"feDIV!MAXlooP");fflush(stderr);}
      for(i=0;i<(sdim+2)*(1+exstr);++i)delete []JS[i];
      delete []JS;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
@@ -1237,7 +1237,7 @@ if(physprops!=NULL)if(r>nofMC*WARMUP){
   MUTEX_UNLOCK (&mutex_tests);
   #endif
 
-if (verbose)
+if (ini.verbose)
  {if (time(0)-time_of_last_output>2)
   {time_of_last_output=time(0);
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
@@ -1296,7 +1296,7 @@ fprintf(fout ,"%g %g\n",E,(double)2.0*hi[iE]/nofMC);
 }
 fclose (fout);
 }
-// if(verbose)printf(" log Z=%g ",log(Z));
+// if(ini.verbose)printf(" log Z=%g ",log(Z));
 // for the moment just take U
 fe=U;
 

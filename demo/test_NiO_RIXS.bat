@@ -46,7 +46,7 @@ copy results/makenn.j mcphas.j
 
 
 echo "... calculate selfconsistently the magnetic structure"
-call mcphasit -v
+call mcphasit 
 getvalue.pl -c -57.3223 2 8 0 0 results/mcphas.fum
 
 echo "for spinwave calculate take magnetic structure which was calculated for T=2 K H=0"

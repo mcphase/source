@@ -163,6 +163,20 @@ if(ipeps3!=NULL)delete ipeps3;
 if(ipeps4!=NULL)delete ipeps4;    
 if(ipeps5!=NULL)delete ipeps5;    
 if(ipeps6!=NULL)delete ipeps6;    
+
+// remove temporary files
+char outfilename [MAXNOFCHARINLINE];
+strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix);
+                    
+strcpy(outfilename+11+strlen(prefix),"spins3dab.eps");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"spins.eps");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"spins3dab.eps");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"spins3dac.eps");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"spins3dbc.eps");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"mcphas.fum");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"mcphas_mc.hst");unlink(outfilename);
+strcpy(outfilename+11+strlen(prefix),"fe_status.dat");unlink(outfilename);
+
 }
 
 int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
@@ -570,6 +584,7 @@ int inipar::load (int & nofinis,char**lofpref)
   minnr3=0;
   maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;repeat=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
+  save_sps_file=0;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {if(!(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!')&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
@@ -683,6 +698,7 @@ int inipar::load (int & nofinis,char**lofpref)
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofspincorrs",nofspincorrs); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofhkls",maxnofhkls); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxQ",maxQ); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"save_sps_file",save_sps_file); 
 
        for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
@@ -870,6 +886,7 @@ checkpr(fout, "maxspinchange",maxspinchange,p.maxspinchange);
 checkpr(fout, "nofspincorrs",nofspincorrs,p.nofspincorrs);
 checkpr(fout, "maxnofhkls",maxnofhkls,p.maxnofhkls);
 checkpr(fout, "maxQ",maxQ,p.maxQ);
+checkpr(fout, "save_sps_file",save_sps_file,p.save_sps_file);
 
 }
 
@@ -901,7 +918,9 @@ void inipar::print (FILE * fout)
                   \n# to display all structures while iterating set displayall to 1\n# (mind that by using this option mcphas gets very slow) \
                   \ndisplayall=%i \
                   \n# to create a logfile of the propagation versus free energy  set logfevsQ to 1\n# (mind this uses a lot of disc space) \
-                  \nlogfevsQ=%i\n\n",exit_mcphas,pause_mcphas,displayall,logfevsQ);
+                  \nlogfevsQ=%i\n \
+                  \n# to save a mcphas.sps file with spin configuration \
+                  \nsave_sps_file=%i\n\n",exit_mcphas,pause_mcphas,displayall,logfevsQ,save_sps_file);
 
     fprintf(fout,"[XY PHASEDIAGRAM PARAMETERS]\n");
     fprintf(fout,"#xy phasediagram axes - parameters\n");
@@ -1052,6 +1071,8 @@ void inipar::print (FILE * fout)
     fprintf(fout," maxnofhkls=%i\n",maxnofhkls);
     fprintf(fout,"#  maximum scattering vector |Q|[1/A] for calculated hkl's\n");
     fprintf(fout," maxQ=%g\n",maxQ);
+    fprintf(fout,"#  to generate mcphas.sps file with spins <I> set save_sps_file to 1\n");
+    fprintf(fout," save_sps_file=%i\n",save_sps_file);
 }
  int colcod[]={-1,19,20,0,21,1,2,3}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
@@ -1090,7 +1111,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   minnr3=0;
   maxnofmfloops=1000;maxstamf=1e-5;bigstep=1;maxspinchange=100;zero=0;repeat=0;
 nofthreads=0;getnofthread(nofthreads);
-  nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;
+  nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;save_sps_file=0;
   nofstapoints=0;
   nofreppoints=0;
   nofconvrep=0;
@@ -1162,6 +1183,7 @@ printf("nofstapoints=%i\n",nofstapoints);
 //kopier-konstruktor 
 inipar::inipar (const inipar & p)
 { program= new char [strlen(p.program)+1];
+  verbose=p.verbose;
   strcpy(program,p.program);
   clcod=new int[8];
    for(int i=0;i<8;++i){clcod[i]=p.clcod[i];}
@@ -1198,7 +1220,7 @@ inipar::inipar (const inipar & p)
   noffailedpoints=p.noffailedpoints;
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
   displayall=p.displayall;logfevsQ=p.logfevsQ;demag=p.demag;
-  
+   
   calcmf_duration=p.calcmf_duration;
   calcsps_duration=p.calcsps_duration;
 
@@ -1231,6 +1253,7 @@ inipar::inipar (const inipar & p)
   nofspincorrs=p.nofspincorrs;
   maxnofhkls=p.maxnofhkls;
   maxQ=p.maxQ;
+  save_sps_file=p.save_sps_file;
   nofthreads=p.nofthreads;
 }
 

@@ -81,6 +81,7 @@ static int xy[]={0,0,0,0};
 //static Frame frame;
 //static Frame popup;
 //static ToolTipManager ToolTipManager;
+static Thread thread; 
 
   static class MyChartMouseListener implements ChartMouseListener {
  ChartPanel panel;
@@ -795,7 +796,24 @@ protected static void reload_data(int i){    try{
             double [][] bdata=new double [3][maxnofpoints];
             fileIni = new File(file[i]);
             //?ffnen der Datei
-             DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
+DataInputStream inStream =null;
+try{
+            inStream = new DataInputStream(new FileInputStream(fileIni));
+   } catch (FileNotFoundException e)
+    { try { // wait a second and try again
+            thread.sleep(500); 
+            inStream = new DataInputStream(new FileInputStream(fileIni));
+          }
+      catch (FileNotFoundException e1)
+    {
+     System.out.println("# end of program display  - " + e1.getLocalizedMessage());
+     System.exit(1);
+    }
+     catch (InterruptedException e2) {
+                    // suppress
+                }
+    
+  }
              String strLine;
              String sx;
              String sy;
@@ -976,9 +994,6 @@ try{
     }
     catch(EOFException e)
     {System.out.println("EOF: " + e.getLocalizedMessage());
-    }
-    catch (FileNotFoundException e)
-    {System.out.println("File not found: " + e.getLocalizedMessage());
     }
     //Sonstiger Dateifehler
     catch (IOException e)

@@ -56,9 +56,9 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
 // A=1e-10 m
 // i.e. |e|/A^2=1.602189e+1=16.02189 C/m^2
 physprops.Pel*=16.02189;
-  if(verbose==1){printf(".. calculating electrical Polarisation\n");}
+  if(ini.verbose==1){printf(".. calculating electrical Polarisation\n");}
 }else
-{physprops.Pel=0;if(verbose==1){printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);}}
+{physprops.Pel=0;if(ini.verbose==1){printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);}}
 
 
 // thermal expansion - magnetostricton correlation-functions
@@ -220,7 +220,7 @@ physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=
       }}}//}}}
 
    }}}physprops.nofhkls=j;
-if(verbose==1){printf(".. calculating (hkl) finished\n");}
+if(ini.verbose==1){printf(".. calculating (hkl) finished\n");}
 
    spincf * magmom;
     magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
@@ -259,7 +259,7 @@ delete[]x;delete []y; delete []z;
   //sps.display(text);
 delete []mq;
 delete magmom;
-if(verbose==1){printf(".. calculating physprops finished\n");}
+if(ini.verbose==1){printf(".. calculating physprops finished\n");}
 }
 }
 

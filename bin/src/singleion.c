@@ -716,7 +716,7 @@ Hstart=Hext;if(Hsteps){dH=Hend-Hstart;dH*=(1.0/Hsteps);}
  
 if (!do_sipf)
   {par inputpars("./mcphas.j",verbose);
-   inputpars.save_sipfs("./results/_");
+  if(verbose){inputpars.save_sipfs("./results/_");}else{inputpars.remove_sipfs("./results/_");}
    if(nofcomponents!=inputpars.cs.nofcomponents)fprintf(stderr,"#Warning: number of exchange field components read from command line not equal to that in mcphas.j - continuing...\n");
     colheader(observable,observable_nofcomponents,nofcomponents,Q,elevels,X0,lambda,HEnofcomp,calcX,unit,verbose);
     
@@ -732,7 +732,8 @@ if (!do_sipf)
 
   
   } else { // option -r sipffile
-   jjjpar jjj(0,0,0,sipffile,nofcomponents,verbose);jjj.save_sipf("./results/_");
+   jjjpar jjj(0,0,0,sipffile,nofcomponents,verbose);
+   if(verbose){jjj.save_sipf("./results/_");}else{jjj.remove_sipf("./results/_");}
    colheader(observable,observable_nofcomponents,nofcomponents,Q,elevels,X0,lambda,HEnofcomp,calcX,unit,verbose);
 
    do_a_sipf(jjj,nmax,pinit,ninit,maxE,Hext,Hxc,Q,

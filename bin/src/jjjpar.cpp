@@ -525,6 +525,20 @@ fprintf(file,"\n");
 fprintf(file,"\n");
 }
 
+//remove single ion parameter file filename from path*
+int jjjpar::remove_sipf(const char * path)
+{char * savfilename;
+ savfilename= new char[strlen(sipffilename)+strlen(path)+2];
+ strcpy(savfilename,path);
+ strcpy(savfilename+strlen(path),sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+char * pchr; pchr=strstr(savfilename+strlen(path),"/");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"/");}
+pchr=strstr(savfilename+strlen(path),"\\");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"\\");}
+return unlink(savfilename);
+ }
 //save single ion parameter file filename to path*
 void jjjpar::save_sipf(const char * path)
 {char * savfilename;

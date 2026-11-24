@@ -833,7 +833,7 @@ for(na = 1;na<=nr1;++na){
 // finally do reziprocal lattice from r1 r2 r3  (which were recomputed to yield magnetic unit cell in terms of ijk)
    rezcalc (r1, r2, r3, rez1, rez2, rez3);
 
-  save();
+  if(verbose){save();}else{unlink(savfilename);}
 }
 
 //kopier-konstruktor 

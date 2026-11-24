@@ -136,9 +136,10 @@ VERSION := $(shell sed -nE \
 	"version" | head -n 1)
 VERSION_TAG := $(subst .,_,$(VERSION))
 
+.DEFAULT_GOAL := all
+
 .PHONY: all allwin git manual vector vectorwin package windows tgz \
         clean cleanexe java winno help
-
 .PHONY: help
 help:
 	@echo "McPhase targets:"

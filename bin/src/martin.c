@@ -39,6 +39,15 @@ double fi=rnd(1)*2*PI;
 complex<double> c(r*cos(fi),r*sin(fi));
 return c;
 }
+
+void print_number(FILE* fout, double x, double threshold)
+{
+    if (abs(x) < threshold) {
+        fprintf(fout, " 0");
+    } else {
+        fprintf(fout, " %.4e", x);
+    }
+}
 #ifndef __linux_
 
  double rnd(float z){return  z*rand()/RAND_MAX;}

@@ -1,6 +1,6 @@
 cd ../examples/lumno3
 
-mcphasit -v
+mcphasit 
 
 echo "***********************************************"
 echo "LuMnO3 MCDIFF TO CALCULATE MAGNETIC DIFFRACTION"
@@ -27,7 +27,7 @@ call range 7 0.1 3000 results/mcdisp.trs
 range 5 1.019 1.021 results/mcdisp.qei
 range 6 -0.00001 0.0001  results/mcdisp.qei
 range 7 -0.00001 0.0001 results/mcdisp.qei
-getvalue.pl -c 0.654 9 10  6.52607  0 results/mcdisp.qei
+getvalue.pl -c 0.648 9 10  6.52584  0 results/mcdisp.qei
   
 cd ../../demo
 

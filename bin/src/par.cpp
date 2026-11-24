@@ -740,6 +740,15 @@ void par::save_sipfs(const char *path)   //save single ion parameter files filen
  }
 }
 
+void par::remove_sipfs(const char *path)   //save single ion parameter files filename to path*
+{int i;
+ for(i=1;i<=cs.nofatoms;++i)
+ {
+    (*jjj[i]).remove_sipf(path);
+  
+ }
+}
+
 void par::save_mcdiff_in (const char * program)
 {FILE * fout;Vector r(1,3),d(1,3);
   fout = fopen_errchk ("mcdiff.in", "w");

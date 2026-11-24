@@ -8,7 +8,7 @@
 #include<mcphas.h>
 
 
-int verbose=0;
+//int verbose=0;
 // for statistics 
 int isfull=0;
 
@@ -28,7 +28,7 @@ int main (int argc, char **argv)
   int options=0; // this integer indicates how many command strings belong to 
                  //options 
 
-  int im;
+  int im,verbose=0;
   double stamax=1e33;
   double sta=0;
   int nofreppoints=0,nofconvrep=0;
@@ -92,13 +92,20 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   Vector xv(1,3);
   Vector yv(1,3);
   Vector h(1,HEXT_DIMENSION);
-  
+
+                   
 
    inipar ini((*inip.inis[ninis]));
+
+ // remove mcphas.log  file unless we are in -a mode
+ if(filemode[0]!='a'){ strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
+                   strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
+  unlink(outfilename);}
 
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
    ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;ini.include_cd=inc_cd;ini.do_chi2=do_chi2;
    ini.cel=cel; ini.cv=cv; ini.Hchi=Hchi;
+   ini.verbose=verbose;
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
@@ -108,40 +115,45 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
 // as class par load  parameters from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.j");
 fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.j"); else fclose(fin);
- if(verbose==1){printf("reading parameters from file %s\n",prefix);}
- par inputpars(prefix,verbose); 
-// here save single ion property files to results
-  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
-// here save input two ion interaction parameters to results/_mcphas.j
-  strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
+ if(ini.verbose==1){printf("reading parameters from file %s and saving ./results/_\n",prefix);}
+ par inputpars(prefix,ini.verbose); 
 
+
+// here save single ion property files to results
+  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
+if(ini.verbose==1){inputpars.save_sipfs(prefix);}else{inputpars.remove_sipfs(prefix);}
+// here save input two ion interaction parameters to results/_mcphas.j
+  strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");
+if(ini.verbose==1){inputpars.save(prefix,0);}else{unlink(prefix);}
+           
 //if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
 //   {ini.defaultcolcode(5,4);ini.defaultcolcode(6,5);ini.defaultcolcode(7,6);} 
 //     // reset default colcode in ini for low symmetry by default case Hi Hj Hk should be stored
 //     // and not Ha Hb Hc ??? removed 26.11.25
       strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini");  
-  ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
+  if(ini.verbose==1){ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
+            } else {unlink(prefix);}
 
 if(doeps) {
 if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
-if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
+if(ini.verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
 
 // as class par load  parameters derivatives from file
- if(parload(ini.ipx,ini.prefix,"mcphas.djdx",verbose,inputpars))
- { if(!parload(ini.ipy,ini.prefix,"mcphas.djdy",verbose,inputpars,ini.ipx))
+ if(parload(ini.ipx,ini.prefix,"mcphas.djdx",ini.verbose,inputpars))
+ { if(!parload(ini.ipy,ini.prefix,"mcphas.djdy",ini.verbose,inputpars,ini.ipx))
        {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
-   if(!parload(ini.ipz,ini.prefix,"mcphas.djdz",verbose,inputpars,ini.ipx))
+   if(!parload(ini.ipz,ini.prefix,"mcphas.djdz",ini.verbose,inputpars,ini.ipx))
         {fprintf(stderr,"# Error - could not open mcphas.djdz \n");exit(1); }
  fprintf(stderr,"# ... these are no problems, continuing\n");
  }
                  
  // if mcphas.djdeps1-6 exist - read also those
- if(parload(ini.ipeps1,ini.prefix,"mcphas.djdeps1",verbose,inputpars))
- {parload(ini.ipeps2,ini.prefix,"mcphas.djdeps2",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps3,ini.prefix,"mcphas.djdeps3",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps4,ini.prefix,"mcphas.djdeps4",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps5,ini.prefix,"mcphas.djdeps5",verbose,inputpars,ini.ipeps1);
-  parload(ini.ipeps6,ini.prefix,"mcphas.djdeps6",verbose,inputpars,ini.ipeps1);
+ if(parload(ini.ipeps1,ini.prefix,"mcphas.djdeps1",ini.verbose,inputpars))
+ {parload(ini.ipeps2,ini.prefix,"mcphas.djdeps2",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps3,ini.prefix,"mcphas.djdeps3",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps4,ini.prefix,"mcphas.djdeps4",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps5,ini.prefix,"mcphas.djdeps5",ini.verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps6,ini.prefix,"mcphas.djdeps6",ini.verbose,inputpars,ini.ipeps1);
  fprintf(stderr,"# ... these are no problems, continuing\n");
  }
 
@@ -150,14 +162,14 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
  if(((*ini.ipx)!=(*ini.ipeps1))>1){fprintf(stderr,"# Error - mcphas.djdx and mcphas.djdeps1 do not match in nofneighbours or neighbour positions\n");exit(1);}
   }
  
- if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
+ if(ini.verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
           } // doeps
  
- if(verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
-  if(verbose==1&&do_chi2){printf("option -chi2: outputting deviation squared and error squared for each data point to fit\n");}
-if(verbose==1&&cel!=0.0){printf("option -cel %g: calculating elastic constants by applying additional stress of %g\n",ini.cel,ini.cel);}
-if(verbose==1&&Hchi!=0.0){printf("option -chi %g: calculating magnetic susceptiblity by applying additional magnetic field of %g\n",ini.Hchi,ini.Hchi);}
- if(verbose==1&&cv!=0.0){printf("option -cv %g: calculating specific heat by applying small temperature step %g\n",ini.cv,ini.cv);}
+ if(ini.verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
+  if(ini.verbose==1&&do_chi2){printf("option -chi2: outputting deviation squared and error squared for each data point to fit\n");}
+if(ini.verbose==1&&cel!=0.0){printf("option -cel %g: calculating elastic constants by applying additional stress of %g\n",ini.cel,ini.cel);}
+if(ini.verbose==1&&Hchi!=0.0){printf("option -chi %g: calculating magnetic susceptiblity by applying additional magnetic field of %g\n",ini.Hchi,ini.Hchi);}
+ if(ini.verbose==1&&cv!=0.0){printf("option -cv %g: calculating specific heat by applying small temperature step %g\n",ini.cv,ini.cv);}
           
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
   Vector Imom(1,inputpars.cs.nofcomponents);
@@ -168,19 +180,19 @@ if(verbose==1&&Hchi!=0.0){printf("option -chi %g: calculating magnetic susceptib
   inputpars.Cel.Inverse();
           }
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
-if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields\n");}
+if(ini.verbose==1){printf("determine saturation momentum running singleion calculations for different fields\n");}
 T=1.0;for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
       for (im=1;im<=inputpars.cs.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
                             (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
                             Imax(inputpars.cs.nofcomponents*(l-1)+im)=Imom(im);
-                           //if(verbose==1)printf("Imax(%i)=%g\n",inputpars.cs.nofcomponents*(l-1)+im,Imax(inputpars.cs.nofcomponents*(l-1)+im));
+                           //if(ini.verbose==1)printf("Imax(%i)=%g\n",inputpars.cs.nofcomponents*(l-1)+im,Imax(inputpars.cs.nofcomponents*(l-1)+im));
 			   }
       for (im=1;im<=3;++im){h1=0;h1ext=0;h1ext(im)=20; //just put some high field
                           (*inputpars.jjj[l]).mcalc(mmom,T,h1,h1ext,(*inputpars.jjj[l]).Icalc_parstorage);
                             mmax(3*(l-1)+im)=mmom(im);
-                           //if(verbose==1)printf("mmax(%i)=%g ",3*(l-1)+im,mmax(3*(l-1)+im));
+                           //if(ini.verbose==1)printf("mmax(%i)=%g ",3*(l-1)+im,mmax(3*(l-1)+im));
 			   }      }
-if(verbose==1)printf("... done\n");
+if(ini.verbose==1)printf("... done\n");
                             
 
 T=0.0;h=0;
@@ -191,11 +203,13 @@ T=0.0;h=0;
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
     testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
     ini.testspins=&testspins;
+
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
     strcpy(prefix+11+strlen(ini.prefix),"mcphas.tst");
-    testspins.save(prefix,"w");
+   if(ini.verbose==1){testspins.save(prefix,"w");
+                  }else{unlink(prefix);}
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.qvc");
-    qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins,inputpars,Imax,outfilename,verbose);
+    qvectors testqs (ini.qmin,ini.qmax,ini.deltaq,ini.maxqperiod,ini.maxnofspins,inputpars,Imax,outfilename,ini.verbose);
     ini.testqs=&testqs;
 // declare variable physprop (typa class physproperties)
 
@@ -226,10 +240,10 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
 // A=1e-10 m
 // i.e. |e|/A^2=1.602189e+1=16.02189 C/m^2
  physprop.Pel0*=16.02189;
-  if(verbose==1){printf(".. calculating electrical Polarisation\n");}
+  if(ini.verbose==1){printf(".. calculating electrical Polarisation\n");}
 }else
 {physprop.Pel0=0;
- if(verbose==1)printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);                              
+ if(ini.verbose==1)printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);                              
 }
 // ***********************************************
 #ifdef _THREADS
@@ -278,7 +292,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
   } 
           
 
-if(verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to the Bravais lattice unit vectors ^a=a/|a|  ^b=b/|b| ^c=c/|c|\n");
+if(ini.verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to the Bravais lattice unit vectors ^a=a/|a|  ^b=b/|b| ^c=c/|c|\n");
  if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
               {printf("Hi Hj Hk refer to components of magnetic field with respect to Euclidean Coordinates ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
 }
@@ -287,7 +301,7 @@ if(verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to
       physprop.Hint=h; // initialise Hint with H in order to work the
    // check if calculation results should and can be read (returns j=0)
 int parsread=1;
-j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix,ini);parsread=j;}
+j=1;if(readprefix[0]!='\0'){j=physprop.read(inputpars,readprefix,ini);parsread=j;}
                  // on successful read return j=0, otherwise
                  // return j=1
 // if read is not successful (j=1) then calculate physical properties at HT- point
@@ -330,9 +344,9 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          {physproperties pp(physprop);
           Matrix s(1,6,1,6);//myPrintVector(pp.sps.epsilon,"Initial Strain");
           int cel_not_stable=0;
-          for(int n=1;n<=6;++n){h(6+n)+=cel;if(verbose){printf("Applying");Vector stress(h(7,12));myPrintVector(stress,"Stress s1-6");}
+          for(int n=1;n<=6;++n){h(6+n)+=cel;if(ini.verbose){printf("Applying");Vector stress(h(7,12));myPrintVector(stress,"Stress s1-6");}
                                 cel_not_stable+=htcalc(h,T,ini,inputpars,testqs,testspins,pp,tracetest);
-                                h(6+n)-=cel;if(verbose){myPrintVector(pp.sps.epsilon,"Calculated Strain eps1-6");}
+                                h(6+n)-=cel;if(ini.verbose){myPrintVector(pp.sps.epsilon,"Calculated Strain eps1-6");}
                                 for(int m=1;m<=6;++m)s(n,m)=(pp.sps.epsilon(m)-physprop.sps.epsilon(m))/cel;
                                }  // sigma=cel* eps    eps=s*sigma
           // s and cel must be symmetric, thus if s is not - symmetrize it by averaging off diagonal elements
@@ -345,9 +359,9 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          {physproperties pp(physprop);
           Matrix chi(1,3,1,3);//myPrintVector(pp.sps.epsilon,"Initial Strain");
           int Hchi_not_stable=0;
-          for(int n=1;n<=3;++n){h(n)+=Hchi;if(verbose){printf("Applying");Vector field(h(1,3));myPrintVector(field,"Stress Hi Hj Hk (T)");}
+          for(int n=1;n<=3;++n){h(n)+=Hchi;if(ini.verbose){printf("Applying");Vector field(h(1,3));myPrintVector(field,"Stress Hi Hj Hk (T)");}
                                 Hchi_not_stable+=htcalc(h,T,ini,inputpars,testqs,testspins,pp,tracetest);
-                                h(n)-=Hchi;if(verbose){myPrintVector(pp.m,"Calculated Moment");}
+                                h(n)-=Hchi;if(ini.verbose){myPrintVector(pp.m,"Calculated Moment");}
                                 for(int m=1;m<=3;++m)chi(n,m)=(pp.m(m)-physprop.m(m))/Hchi;
                                }  
          if(Hchi_not_stable!=0)physprop.chi=0;
@@ -363,13 +377,13 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
        switch (j)
        {case 0:
             //good results -> save physical properties of HT-point
-	    //sta=(sta*ini.nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(ini.nofstapoints+1);
+	    //sta=(sta*ini.nofstapoints+physprop.save (filemode,j,inputpars))/(ini.nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
           if(strcmp(ini.prefix,readprefix)!=0||prefix[0]=='\0'||parsread!=0) 
             // save physprops and increase sta here if   (i) prefix is not equal readprefix 
             //                                       or  (ii) no prefix is used 
             //                                       or (iii) HT point has not been read from old calculation
-           {sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);ini.sta=sta;}
+           {sta+=physprop.save (filemode,j,ini,inputpars,ini.prefix);ini.sta=sta;}
           else
            {  // do not save physprops and do not increase sta if prefix=readprefix and HT point has been read from old calculation
                M=physprop.mu0M();// magnetisation mu0*M(Tesla) 
@@ -387,7 +401,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
                 ini.print_usrdefcols(stderr,x,y,T,physprop.Hint,inputpars.cs.abc,M,P,true);fprintf(stderr,"\n");
 // T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
 //                 physprop.T,physprop.Hint(1),physprop.Hint(2),physprop.Hint(3));
- 	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
+ 	         physprop.save (filemode,j,ini,inputpars,ini.prefix);
 		 //sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
      	      ++ini.noffailedpoints;
 	      break;	 

@@ -24,6 +24,8 @@ class inipar
   
   public:
 int *clcod;
+int verbose;
+
 
   bool outcolset; // indicates wether in mcphas.ini user has set some output columns
   bool defaultcolcode(int  col,int  colcode); // resets default columns if not set by user (outcolset==true)
@@ -51,8 +53,8 @@ int *clcod;
   int nofcalls; // number of calls to fecalc
 
   //MCPHASE RUNTIME CONTROL
-  int exit_mcphas,pause_mcphas,displayall,logfevsQ,demag;
-  
+  int exit_mcphas,pause_mcphas,displayall,logfevsQ,demag; 
+ 
   // XY PHASEDIAGRAM PARAMETERS
   Vector xv,yv,zero; // xT xHa xHb xHc ,  yT yHa yHb yHc, T0 Ha0 Hb0 Hc0
                      // ... extended (optional) xHi xHj xHk xEa xEb XEc xEi xEj xEk xs1 xs2 xs3 xs4 xs5 xs6
@@ -110,6 +112,8 @@ int *clcod;
   int maxnofhkls;
   // maximum q[1/A] for hkl's
   double maxQ;
+  // nonzero if mcphas.sps file  is to be generated
+  int save_sps_file;
 
 // ***************** intelligent functions **********************
  // set external field and Temperature given x and y

@@ -20,10 +20,8 @@ singleion -XM 0 1 -nt 100 -Esteps 300 200 -r Pr3p.sipf 5 1000 0 0  0 0 0 > dd
 
 # lorentz for comparison to -XM dynamic susceptibility option of singleion
 lorentz 2 0.2 -40 40 > res.dat
-# convolute (must be .pl because of eval in convolute command batch)
-convolute.pl  6 8 results/Pr3p.sipf.trs 1 2 res.dat > dd.bat
-chmod +x dd.bat
-./dd.bat > Ma.clc
+# convolute 
+convolute  6 8 results/Pr3p.sipf.trs 1 2 res.dat >  Ma.clc
 
 getvalue.pl -c 0.037 9 10 79.333 0 dd
 getvalue.pl -c 0.038  1 2 79.268 0 Ma.clc

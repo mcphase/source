@@ -315,7 +315,7 @@ int physproperties::nofcomponents()//
 
 //*********************************************************************************************************
 // methode save
-double physproperties::save (int & verbose, const char * filemode, int & htfailed,inipar & ini, par & inputpars,char * prefix)
+double physproperties::save ( const char * filemode, int & htfailed,inipar & ini, par & inputpars,char * prefix)
 { FILE *fout;
   char filename[MAXNOFCHARINLINE],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
   time_t curtime;
@@ -349,9 +349,9 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
   for(int i=1;i<=nn[0];++i)nnerr[i]=0; // clear errorbars for new read
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.fum");
-  if (verbose==1) printf("saving %s \n",outfilename);
+  if (ini.verbose==1) printf("saving %s \n",outfilename);
   if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eelastic=0;mabc=0;sps.epsilon=0;Pel=0;Pelabc=0;}
-  fumcols(nn,nnerr,nofcols,true,str,outstr,ini,ortho,inputpars,verbose);
+  fumcols(nn,nnerr,nofcols,true,str,outstr,ini,ortho,inputpars,ini.verbose);
   if (washere==0)
   {fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#output file of program %s ",MCPHASVERSION);
@@ -398,8 +398,8 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
      {if ((l=inputline(fout,nn,nnerr))!=0)
       {
        if(ini.checkTH(nn,T,Hint,inputpars.cs.abc)) // checks if T and Hint is in accordance with nn  
-         {sta=fumcols(nn,nnerr,l,true,str,outstr,ini,ortho,inputpars,verbose);
-          if(verbose==1){fprintf(stdout,"sta_mcphas.fum=%g\n",sta);}
+         {sta=fumcols(nn,nnerr,l,true,str,outstr,ini,ortho,inputpars,ini.verbose);
+          if(ini.verbose==1){fprintf(stdout,"sta_mcphas.fum=%g\n",sta);}
 	 }
       }
      }
@@ -413,9 +413,9 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
   for(int i=1;i<=nn[0];++i)nnerr[i]=0; // clear errorbars for new read
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.xyt");
-    if (verbose==1)printf("saving %s\n",outfilename);
+    if (ini.verbose==1)printf("saving %s\n",outfilename);
   if (htfailed!=0){j=0;totalJ=0;}
-  xytcols(nn,nnerr,nofcols,true,str,outstr,ini,verbose);
+  xytcols(nn,nnerr,nofcols,true,str,outstr,ini,ini.verbose);
   if (washere==0)
   {fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#output file of program %s ",MCPHASVERSION);
@@ -440,8 +440,8 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
      while(feof(fout)==0)
      {if ((l=inputline(fout,nn,nnerr))!=0)
       {if(ini.checkTH(nn,T,Hint,inputpars.cs.abc)) // checks if T and Hint is in accordance with nn  
-         {double s=xytcols(nn,nnerr,l,true,str,outstr,ini,verbose);
-          if(verbose==1){fprintf(stdout,"sta_mcphas.xyt=%g\n",s);}
+         {double s=xytcols(nn,nnerr,l,true,str,outstr,ini,ini.verbose);
+          if(ini.verbose==1){fprintf(stdout,"sta_mcphas.xyt=%g\n",s);}
           sta+=s;
 	 }
       }
@@ -453,19 +453,28 @@ double physproperties::save (int & verbose, const char * filemode, int & htfaile
 //-----------------------------------mcphasj*.j*------------------------------------------------------  
  nmax=nofspincorr; // look how many spincorrelationfunction we have indeed calculated - the 
                    // user wanted nofspincorr, but maybe it was fewer ...
+ int max=10000;
  for (l=1;l<=inputpars.cs.nofatoms;++l)
-      {if(nmax>(*inputpars.jjj[l]).paranz)
+      {if(max>(*inputpars.jjj[l]).paranz)max=(*inputpars.jjj[l]).paranz;
+       if(nmax>(*inputpars.jjj[l]).paranz)
        {nmax=(*inputpars.jjj[l]).paranz;
         fprintf(stderr,"Warning: calculation of nofspincorr=%i correlation functions not possible, \n",nofspincorr);
 fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are given.\n",l,(*inputpars.jjj[l]).paranz);
        }
       }
-       
+   
+if (washere==0&&filemode[0]!='a'){  // delete all files from previous runs 
+  for(i=1;i<=max;++i)for(l=1;l<=nofatoms();++l){
+strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas");
+  snprintf(filename,MAXNOFCHARINLINE,"%s%i.j%i",outfilename,l,i);
+  unlink(outfilename);
+    }}
 
   // only output nmax correlation functions ...
  for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms();++l){
   errno = 0;
-  if (verbose==1)printf("saving mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
+  if (ini.verbose==1)printf("saving mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas");
   snprintf(filename,MAXNOFCHARINLINE,"%s%i.j%i",outfilename,l,i);
@@ -514,12 +523,13 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
   }}
 
 //-----------------------------------mcphas.cel ----------------------------------------------------  
-if(ini.cel!=0.0)
- {errno = 0;  
+errno = 0;  
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.cel");
-    if (verbose==1)printf("saving %s\n",outfilename);
     if (htfailed!=0){cel=0;}
+if (washere==0&&filemode[0]!='a')unlink(outfilename);  // delete all files from previous runs 
+if(ini.cel!=0.0)
+ {if (ini.verbose==1)printf("saving %s\n",outfilename);
   if (washere==0)
   {
    fout = fopen_errchk (outfilename,filemode);
@@ -544,7 +554,7 @@ if(ini.cel!=0.0)
    }
    strcpy(outfilename+10+strlen(prefix),"mcphas.cel"); 
    fout = fopen_errchk (outfilename,"a");
-   if (verbose==1)printf(" .... saving elastic constants in %s\n",outfilename);
+   if (ini.verbose==1)printf(" .... saving elastic constants in %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
    for (i=1;i<=6;++i)
     { fprintf (fout, " %4.4g ",myround(cel(i,i)));
@@ -557,12 +567,14 @@ if(ini.cel!=0.0)
    fclose(fout);
   }
 //-----------------------------------mcphas.chi ----------------------------------------------------  
-if(ini.Hchi!=0.0)
- {errno = 0;  
+errno = 0;  
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.chi");
-    if (verbose==1)printf("saving %s\n",outfilename);
     if (htfailed!=0){chi=0;}
+if (washere==0&&filemode[0]!='a')unlink(outfilename);  // delete all files from previous runs 
+if(ini.Hchi!=0.0)
+ {
+  if (ini.verbose==1)printf("saving %s\n",outfilename);
   if (washere==0)
   {
    fout = fopen_errchk (outfilename,filemode);
@@ -583,7 +595,7 @@ if(ini.Hchi!=0.0)
    }
    strcpy(outfilename+10+strlen(prefix),"mcphas.chi"); 
    fout = fopen_errchk (outfilename,"a");
-   if (verbose==1)printf(" .... saving magnetic susceptibility in %s\n",outfilename);
+   if (ini.verbose==1)printf(" .... saving magnetic susceptibility in %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
    for (i=1;i<=3;++i)
     { fprintf (fout, " %4.4g ",myround(chi(i,i)));
@@ -599,8 +611,19 @@ if(ini.Hchi!=0.0)
 //-----------------------------------------mcphas*.hkl------------------------------------------------  
  errno = 0;
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+
+// delete all files from previous runs 
+ if (washere==0&&filemode[0]!='a'){
+  strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); unlink(outfilename);  
+  strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl"); unlink(outfilename);  
+  strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl"); unlink(outfilename);  
+  strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl"); unlink(outfilename);  
+                                  }
+
   strcpy(outfilename+10+strlen(prefix),"mcphas*.hkl");
-  if (verbose==1)printf("saving %s - neutrons and xrays\n",outfilename);
+ if(ini.maxnofhkls>0)
+ {
+  if (ini.verbose==1)printf("saving %s - neutrons and xrays\n",outfilename);
   if (washere==0)
   {//neutrons
    strcpy(outfilename+10+strlen(prefix),"mcphas.hkl");
@@ -698,12 +721,12 @@ if(ini.Hchi!=0.0)
    if(intensity==NULL){fprintf (stderr, "Out of memory for intensity\n");exit (EXIT_FAILURE);}
    //printf("nofhkls=%i\n",nofhkls);
    for (i=1;i<=nofhkls;++i) {intensity[i]=hkli[i](4);}
-  if (verbose==1)printf(" .... sorting hkl according to neutron intensities\n");
+  if (ini.verbose==1)printf(" .... sorting hkl according to neutron intensities\n");
    sort(intensity,1,nofhkls,inew); // sort according to ascending intensity
   //neutrons
    strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); 
    fout = fopen_errchk (outfilename,"a");
-   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   if (ini.verbose==1)printf(" .... saving %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
@@ -714,7 +737,7 @@ if(ini.Hchi!=0.0)
   if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasi.hkl");
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl");  }
    fout = fopen_errchk (outfilename,"a");
-   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   if (ini.verbose==1)printf(" .... saving %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
@@ -724,7 +747,7 @@ if(ini.Hchi!=0.0)
    if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasj.hkl");
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl");  }
    fout = fopen_errchk (outfilename,"a");
-   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   if (ini.verbose==1)printf(" .... saving %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
@@ -734,7 +757,7 @@ if(ini.Hchi!=0.0)
    if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphask.hkl");
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
    fout = fopen_errchk (outfilename,"a");
-   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   if (ini.verbose==1)printf(" .... saving %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
@@ -749,10 +772,14 @@ if(ini.Hchi!=0.0)
     }else{errno=0;}
    delete []inew;delete []intensity;
   }
+ }
 //---------------------------------------mcphas.sps--------------------------------------------------  
- errno = 0;
+errno = 0;
  strcpy(outfilename+10+strlen(prefix),"mcphas.sps");
-   if (verbose==1)printf("saving %s- spinconfiguration\n",outfilename);
+if (washere==0&&filemode[0]!='a')unlink(outfilename);  // delete all files from previous runs 
+if(ini.save_sps_file==1)
+ { 
+  if (ini.verbose==1)printf("saving %s- spinconfiguration\n",outfilename);
   if (washere==0)
   {  fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
@@ -796,11 +823,11 @@ else
      if (washere==0){fprintf(stderr,"Warning: Calculation of standard deviation using  ./fit/mcphas.sps not implemented\n");}
      fclose(fout);
     }else{errno=0;}
- 
+ }
 //---------------------------------------mcphas.mf--------------------------------------------------  
  errno = 0;
   strcpy(outfilename+10+strlen(prefix),"mcphas.mf");
-  if (verbose==1)printf("saving %s - mean field configuration\n",outfilename);
+  if (ini.verbose==1)printf("saving %s - mean field configuration\n",outfilename);
   if (washere==0)
   {  fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
@@ -861,7 +888,7 @@ return sta;
 
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise return 1
-int physproperties::read(int & verbose, par & inputpars,char * readprefix,inipar & ini)
+int physproperties::read( par & inputpars,char * readprefix,inipar & ini)
 { FILE *fin;int n;float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
   char filename[MAXNOFCHARINLINE],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
   int i,j2,l,nmax;
@@ -869,7 +896,7 @@ int physproperties::read(int & verbose, par & inputpars,char * readprefix,inipar
   int ortho=1; bool found=0;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
    Vector M(1,3),P(1,3); M=0;P=0; 
- if(verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,Hint,inputpars.cs.abc,M,P,true);}
+ if(ini.verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,Hint,inputpars.cs.abc,M,P,true);}
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
 // here read free energy etc if possible ... otherwise return 1
@@ -880,7 +907,7 @@ int physproperties::read(int & verbose, par & inputpars,char * readprefix,inipar
   errno = 0;char infilename[MAXNOFCHARINLINE];
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas.fum");
-  if (verbose==1) printf("reading %s \n",infilename);
+  if (ini.verbose==1) printf("reading %s \n",infilename);
    fin = fopen_errchk (infilename,"r");
 
 found=0;
@@ -888,7 +915,7 @@ found=0;
  while (feof(fin)==0&&0==(n=inputline(fin,nn))){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
    if(ini.demag!=0){
-    fumcols(nn,nnerr,n,false,str,outstr,ini,ortho,inputpars,verbose); // load parameters 
+    fumcols(nn,nnerr,n,false,str,outstr,ini,ortho,inputpars,ini.verbose); // load parameters 
                    // Hint is in the case of demag=1 the 
     M=mu0M();      // field which is input (=external field) to ::read
     P=Pdiveps0();  // corrected by the demagnetising field
@@ -898,7 +925,7 @@ found=0;
     found=ini.checkTH(nn,T,Hint,inputpars.cs.abc,M,P);
          }
    fclose(fin);
-   fumcols(nn,nnerr,n,false,str,outstr,ini,ortho,inputpars,verbose); // load parameters 
+   fumcols(nn,nnerr,n,false,str,outstr,ini,ortho,inputpars,ini.verbose); // load parameters 
    // check if stable, i.e. if free energy nn[8] is nonzero
    if(nn[8]==0) return 1; // 
 
@@ -912,7 +939,7 @@ found=0;
   errno = 0; 
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas.xyt");
-    if (verbose==1)printf("reading %s\n",infilename);
+    if (ini.verbose==1)printf("reading %s\n",infilename);
   fin = fopen_errchk (infilename,"r");
 // check x y T Hint[1] Hint[2] Hint[3] agrees and fe nonzero ?
 //then read j ... not necessary
@@ -942,7 +969,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
      // only read nmax correlation functions ...
  for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms();++l){
   errno = 0;
-  if (verbose==1)printf("reading mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
+  if (ini.verbose==1)printf("reading mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas");
   snprintf(filename,MAXNOFCHARINLINE,"%s%i.j%i",infilename,l,i);
@@ -968,12 +995,12 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
  errno = 0;
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas*.hkl");
-  if (verbose==1)printf("reading %s - neutrons and xrays\n",infilename);
+  if (ini.verbose==1)printf("reading %s - neutrons and xrays\n",infilename);
 
   //neutrons
    strcpy(infilename+10+strlen(readprefix),"mcphas.hkl"); 
    fin = fopen_errchk (infilename,"r");
-   if (verbose==1)printf(" .... reading %s\n",infilename);
+   if (ini.verbose==1)printf(" .... reading %s\n",infilename);
    // check x y T Hint[1] Hint[2] Hint[3] agrees and
   //then read hkli[1-4]
 
@@ -998,7 +1025,7 @@ update_maxnofhkls(nofhkls);
   if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphasi.hkl");
                 } else {strcpy(infilename+10+strlen(readprefix),"mcphasa.hkl");  }
    fin = fopen_errchk (infilename,"r");
-   if (verbose==1)printf(" .... reading %s\n",infilename);
+   if (ini.verbose==1)printf(" .... reading %s\n",infilename);
 
    // check x y T Hint[1] Hint[2] Hint[3] agrees and fe nonzero ?
 //then read hkli[5,6]
@@ -1019,7 +1046,7 @@ found=0;while(found==0){
    if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphasj.hkl");
                 } else {strcpy(infilename+10+strlen(readprefix),"mcphasb.hkl");  }
    fin = fopen_errchk (infilename,"r");
-   if (verbose==1)printf(" .... reading %s\n",infilename);
+   if (ini.verbose==1)printf(" .... reading %s\n",infilename);
     // check x y T Hint[1] Hint[2] Hint[3] agrees and fe nonzero ?
 //then read hkli[7,8]
 //fprintf (fin, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(Hint[1]),myround(Hint[2]),myround(Hint[3]));
@@ -1039,7 +1066,7 @@ found=0;while(found==0){
    if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphask.hkl");
                 } else {strcpy(infilename+10+strlen(readprefix),"mcphasc.hkl");  }
    fin = fopen_errchk (infilename,"r");
-   if (verbose==1)printf(" .... reading %s\n",infilename);
+   if (ini.verbose==1)printf(" .... reading %s\n",infilename);
    // check x y T Hint[1] Hint[2] Hint[3] agrees and fe nonzero ?
 //then read hkli[9,10]
 //fprintf (fin, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(Hint[1]),myround(Hint[2]),myround(Hint[3]));
@@ -1059,7 +1086,7 @@ found=0;while(found==0){
 //-----------------------------------------------------------------------------------------  
  errno = 0;
  strcpy(infilename+10+strlen(readprefix),"mcphas.sps");
-   if (verbose==1)printf("reasding %s- spinconfiguration\n",infilename);
+   if (ini.verbose==1)printf("reasding %s- spinconfiguration\n",infilename);
   fin = fopen_errchk (infilename,"r");
    // check x y T Hint[1] Hint[2] Hint[3] agrees and fe nonzero ?
 //then read sps  ... probably sps.read ...??
@@ -1079,7 +1106,7 @@ found=0;while(found==0){
 //-----------------------------------------------------------------------------------------  
  errno = 0;
   strcpy(infilename+10+strlen(readprefix),"mcphas.mf");
-  if (verbose==1)printf("reading %s - mean field configuration\n",infilename);
+  if (ini.verbose==1)printf("reading %s - mean field configuration\n",infilename);
      fin = fopen_errchk (infilename,"r");
 // check x y T Hint[1] Hint[2] Hint[3] agrees and fe nonzero ?
 //then read mf
@@ -1097,6 +1124,6 @@ found=0;while(found==0){
                } 
    fclose(fin);
    //-----------------------------------------------------------------------------------------  
-if(verbose==1)printf("..ok\n"); else printf("reading ");
+if(ini.verbose==1)printf("..ok\n"); else printf("reading ");
 return 0; 
  }
