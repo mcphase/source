@@ -658,7 +658,7 @@ input files {\prg mcphas.ini, mcphas.j, etc. } and type
 %script2html_begin{mcphasit} 
 
 \begin{description}
-\item[\prg mcphas [options] [file.htp]] to run the program generating stepwise $H-T$ values 
+\item[\prg mcphas [options] [file.htp|x y | T Hi Hj Hk | out1 out2 ... out7]] to run the program generating stepwise $H-T$ values 
               in a loop given by {\prg mcphas.ini\index{mcphas.ini}} (you can also press the
               symbol in the {\prg McPhase - Explorer} window). 
              If a .htp file is not given,then  xmin xmax xstep (xT xHa xHb xHc)
@@ -680,6 +680,11 @@ Rules when reading a .htp file:
 \item x and y columns are read and also written into output files, but are ignored for determination of
              temperature/fields/stresses
 \end{enumerate}
+
+Instead of a .htp file a simple calculation for only one set of external parameters
+can be triggered by providing either x,y or T,Hi,Hj,Hk or out1-out7 in the command line.
+The meaning of these external parameters x,y,out1-ou7 is defined by the settings in mcphas.ini.
+
 
 Options are:
 \begin{description}

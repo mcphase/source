@@ -68,13 +68,17 @@ if(Norm(x)>0.00001){ // normalize Vector x to unit length
 
 void inipar::errexit() // type info and error exit 
 {     printf (" \n%s \n",MCPHASVERSION);
-printf (" use as: mcphas [options] [file]\n");
+printf (" use as: mcphas [options] [file|x y|T Hi Hj Hk | out1 out2 ... out7]\n");
 printf (" [file] ... input file  with sets of x y T H Hi Hj Hk ... points \n");
 printf ("            file format output file mcphas.xyt,column meanings as defined in mcphas.ini by out*\n");
 printf ("            rules: 1) if both internal and external fields are given only that with the higher column number is used and\n");
 printf ("                      treated as internal/external dependent on the dmag switch in mcphas.ini\n");
 printf ("                   2) x and y columns are read and also output in output files, but are ignored for determination of\n");
-printf ("                      temperature/fields/stresses\n");   
+printf ("                      temperature/fields/stresses\n"); 
+printf ("  x y  ... instead of a file one x y value pair  can be given for a run with only this one set of external parameters\n"); 
+printf ("  T Hi Hj Hk  ... alternatively Temperature and magnetic field can be given\n"); 
+printf ("  out1-ou7  ... or also external parameters out1-out7 (as defined in mcphas.ini).\n"); 
+ 
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
 printf ("          -chi2   ... instead of sta calculate chi2\n");
@@ -179,7 +183,7 @@ strcpy(outfilename+11+strlen(prefix),"fe_status.dat");unlink(outfilename);
 
 }
 
-int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
+int usrdefcols[]={NOF_USRDEFCOLS, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
 
 #define COLHEADDIM 36	

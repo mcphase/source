@@ -16,7 +16,7 @@
 #include"testspin.hpp"
 
 #define EXTERNAL_PARAMETER_DIMENSION  HEXT_DIMENSION+7  // dimension of xv, yv zero (see below)
-
+#define NOF_USRDEFCOLS 7  // number of columns with external parameters defined by user in output files mcphas.fum ...
 
 
 class inipar

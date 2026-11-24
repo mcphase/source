@@ -251,9 +251,25 @@ if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - ch
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
 #endif
-fin=NULL; if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");
+int nof_args=argc-1-options;
+fin=NULL; 
+switch(nof_args){
+case 1: {ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");
                               printf("reading HT points from %s\n",argv[argc-1]);
-                             }   //input from file
+         break; }   //input from file
+case 2: ini.xmin=strtod (argv[options+1], NULL);ini.xmax=ini.xmin; // x y is given
+        ini.ymin=strtod (argv[options+2], NULL);ini.ymax=ini.ymin; // x y is given
+        break;
+case 4:ini.xmax=ini.xmin; // T Hi Hj Hk given
+       break;
+case 7:{ ini.xmax=ini.xmin;// out1. out7 given
+       for(int i=1;i<=NOF_USRDEFCOLS;++i){
+       nn[i]=strtod (argv[options+i], NULL);}
+       break; }
+default: fprintf(stderr,"error: mcphasit - wrong number of parameters after options (%i) - exiting\n",nof_args);
+        return 1;
+}
+
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
  { //begin initialize display file
@@ -273,7 +289,8 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
    if (ini.xmin>ini.xmax){dumm=ini.xmin;ini.xmin=ini.xmax;ini.xmax=dumm;}
    if (ini.ymin>ini.ymax){dumm=ini.ymin;ini.ymin=ini.ymax;ini.ymax=dumm;}
    
-   if(argc>options+1)  //should T-H values be read from file ?
+switch(nof_args){
+   case 1:  //should T-H values be read from file ?
    {while (feof(fin)==0&&(0==inputline(fin,nn)||ini.calcTHfromnn(x,y,T,h,nn,inputpars.cs)==false)){;}  // if yes -> input them
     if (feof(fin)!=0) goto endproper;
     //x=nn[1];y=nn[2];T=nn[3];h=0;h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
@@ -281,16 +298,25 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
     // --> replaced  above by      -------------^
    // ini.calcTHfromnn(T,h,nn,inputpars.cs): set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
    // returns true if successful  (NormH NormE x y are not used)
-    
+    break;
    }
-   else
+   case 2: ini.calcTHfromxy(T,h,x,y,inputpars.cs);
+    break;
+   case 4: T=strtod (argv[options+1], NULL);
+           h(1)=strtod (argv[options+2], NULL);
+           h(2)=strtod (argv[options+3], NULL);
+           h(3)=strtod (argv[options+4], NULL);
+    break;
+   case 7: ini.calcTHfromnn(x,y,T,h,nn,inputpars.cs);
+    break;
+ default:
    {
    //if parameters outside specified region then put them into it ...
     if (x<ini.xmin) x=ini.xmin;
     if (y<ini.ymin) y=ini.ymin;    
     ini.calcTHfromxy(T,h,x,y,inputpars.cs);
-  } 
-          
+  break;} 
+  }        
 
 if(ini.verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to the Bravais lattice unit vectors ^a=a/|a|  ^b=b/|b| ^c=c/|c|\n");
  if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
@@ -408,14 +434,15 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
 	 default:  ;
 	}
 
- if(fin!=NULL){   
-y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read from file
+ if(fin!=NULL){y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read from 
+                       // file or 
+if(nof_args>1){y=ini.ymax+ini.ystep;} // ext parameters given in command line
 
-    }
- }  
+    } // end of loop y
+ }  // end of loop x
 endproper:
   testspins.save(filemode);testqs.save(filemode);
-   if(argc>options+1) fclose(fin);
+   if(nof_args==1) fclose(fin);
    ini.finish_mcphas();
 #ifdef _THREADS
 for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
