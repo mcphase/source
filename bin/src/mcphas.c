@@ -254,6 +254,7 @@ if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - ch
 int nof_args=argc-1-options;
 fin=NULL; 
 switch(nof_args){
+case 0: break;
 case 1: {ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");
                               printf("reading HT points from %s\n",argv[argc-1]);
          break; }   //input from file

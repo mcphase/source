@@ -37,6 +37,7 @@ if (join('',@pars) =~/\-/) {
   GetOptions("help"=>\$helpflag,
              "av"=>\$avflag,
              "median"=>\$medianflag,
+             "middle"=>\$middleflag,
              "last"=>\$lastflag,
              "first"=>\$firstflag,
              "sum"=>\$sumflag,
