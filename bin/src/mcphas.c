@@ -332,7 +332,10 @@ j=1;if(readprefix[0]!='\0'){j=physprop.read(inputpars,readprefix,ini);parsread=j
                  // on successful read return j=0, otherwise
                  // return j=1
 // if read is not successful (j=1) then calculate physical properties at HT- point
-if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
+if (j==1){physprop.noffecalccalls=0;
+          physprop.nofmaxloopDiv=0;
+          physprop.nofmaxspinschangeDiv=0;
+          float rr=fmodf(ini.repeat-0.00001,1.0);
           double maxstamf=ini.maxstamf;int rep;
           int maxnofmfloops=ini.maxnofmfloops;
           double maxspinchange=ini.maxspinchange;
@@ -398,6 +401,7 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
          ini.maxspinchange=maxspinchange;
          ini.maxnofmfloops=maxnofmfloops;
          ini.maxstamf=maxstamf;
+         physprop.nofrepeats=rep;
          }
        Vector M(1,3);Vector P(1,3);M=0;P=0;
 
@@ -437,9 +441,10 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
 
  if(fin!=NULL){y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read from 
                        // file or 
-if(nof_args>1){y=ini.ymax+ini.ystep;} // ext parameters given in command line
+if(nof_args>1){break;} // ext parameters given in command line --> only one point, break
 
     } // end of loop y
+if(nof_args>1){break;} // ext parameters given in command line --> only one point, break
  }  // end of loop x
 endproper:
   testspins.save(filemode);testqs.save(filemode);

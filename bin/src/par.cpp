@@ -46,6 +46,7 @@ par::par (const char *filejjj,int  verbose)
 void par::load (const char *filejjj,int  verbose)
 { int i,j,n,l;
   FILE *fin_coq;
+  filename= new char [MAXNOFCHARINLINE]; snprintf(filename,MAXNOFCHARINLINE,"%s",filejjj);
   char instr[MAXNOFCHARINLINE];
   Vector hkl(1,3),hkl_rint(1,3);
   rez=Matrix(1,3,1,3);
@@ -135,6 +136,7 @@ void par::load (const char *filejjj,int  verbose)
 //kopier-konstruktor copy constructor
 par::par(const par & p)
 { int i;
+  filename= new char [MAXNOFCHARINLINE]; snprintf(filename,MAXNOFCHARINLINE,"%s",p.filename);
   cs.abc=p.cs.abc;
   cs.r=p.cs.r;rez=p.rez;
   cs.nofatoms=p.cs.nofatoms;
@@ -166,6 +168,7 @@ par::~par ()
   {delete []rems[i];}
   for(i=1;i<=cs.nofatoms;++i){delete jjj[i];}delete []jjj;
 // printf("hello end of destruktor par\n");   
+ delete []filename;
 }
 
 int par::newatom(jjjpar * p) //creates new atom from an existing and returns its index
@@ -400,11 +403,16 @@ Omega/=factor;
            }// ------------------------
          }}}}
     }}
-else{for(int i=1;i<=distribute.Rhi();++i){int sl=(int)distribute(i,1);
+else{bool distributemess=false;
+     for(int i=1;i<=distribute.Rhi();++i){int sl=(int)distribute(i,1);
 if(distribute(i,2)<0) {(*jjj[sl]).charge+=fabs(distribute(i,2))*(*jjj[n]).charge;
-fprintf(stderr,"charge on atom %i set to %g and overwriting sipf file %s \n",sl,(*jjj[sl]).charge,(*jjj[sl]).sipffilename);
+if(distributemess==false){distributemess=true;fprintf(stderr,"Resetting charges in sipf files: ");
+                          }
+fprintf(stderr,"atom %i, %s charge -> %g   ",sl,(*jjj[sl]).sipffilename,(*jjj[sl]).charge);
 (*jjj[sl]).save_sipf("./"); }
-       }}
+       }
+ if(distributemess==true)fprintf(stderr,"\n");
+   }
 
 // now completeley remove ion from the table of interactions jjj
 for (j=1;j<n;++j){nnn[j]=jjj[j];}
@@ -531,6 +539,7 @@ void par::add (par & p1)
 if(p1.cs.nofatoms<cs.nofatoms)
 {fprintf(stderr,"# Warning program addj: nofatoms=%i of 1. parameter set greater than %i - continuing, check result with care ! \n",cs.nofatoms,p1.cs.nofatoms);
 }
+ bool atpos_problem=false;
  for(i=1;i<=p1.cs.nofatoms;++i)
  {if (i>cs.nofatoms)
    {newatom(p1.jjj[i]);
@@ -541,15 +550,21 @@ if(p1.cs.nofatoms<cs.nofatoms)
    {
 i1=i;
 while(Norm((*jjj[i1]).xyz-(*p1.jjj[i]).xyz)>0.0001)
-{if(i1==i)fprintf(stderr,"# Problem program addj: atomic positions da db dc of atom number %i  at %g %g %g do not match atom %i at %g %g %g \n# ... trying to find a matching atom\n",
-i1,(*jjj[i1]).xyz(1),(*jjj[i1]).xyz(2),(*jjj[i1]).xyz(3),i,(*p1.jjj[i]).xyz(1),(*p1.jjj[i]).xyz(2),(*p1.jjj[i]).xyz(3));
+{if(i1==i){if(atpos_problem==false)
+ {atpos_problem=true;fprintf(stderr,"# Problem program addj: atomic positions da db dc in files %s and %s do not match - trying to find matching atoms ... \n",filename,p1.filename);
+ fprintf(stderr,"# atom_number da db dc (in %s) da db dc (in %s) -> matching position of atom_number in %s\n",filename,p1.filename,filename);
+ }
+ fprintf(stderr,"# %i    %g %g %g          %g %g %g ",
+i1,(*jjj[i1]).xyz(1),(*jjj[i1]).xyz(2),(*jjj[i1]).xyz(3),(*p1.jjj[i]).xyz(1),(*p1.jjj[i]).xyz(2),(*p1.jjj[i]).xyz(3));
+          }
 if(i1==cs.nofatoms)i1=0;
 ++i1;
-if(i1==i){fprintf(stderr,"# ... no matching atom found: adding new atom number %i with sipffilename=%s\n",cs.nofatoms+1,(*p1.jjj[i]).sipffilename);
+if(i1==i){fprintf(stderr," -> no matching atom found: adding new atom with sipffilename=%s atom number ",(*p1.jjj[i]).sipffilename);
 newatom(p1.jjj[i]);i1=cs.nofatoms;
 (*jjj[i1]).scalepars(0.0,0.0); // set jjjpars to zero - because there comes the add command in line 242
  }
 }
+if(i1!=i){fprintf(stderr," -> %i\n",i1);}
     if (strcmp((*jjj[i1]).sipffilename,(*p1.jjj[i]).sipffilename)!=0){
     fprintf(stderr,"# Warning program addj: adding parameter sets atom %i sipffilename %s does not match %s - taking %s for output\n",
 i,(*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename,(*jjj[i]).sipffilename);}

@@ -10,8 +10,8 @@ push @INC, $ENV{'MCPHASE_DIR'}.'/bin/';
 require 'elements.pl';
 
 print "#********************************************************\n";
-print "# makenn 230406 - create table with neighbors and interactions\n";
-print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
+print "# makenn 230406 - create table with neighbours and interactions\n";
+print "# Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
 $PI=3.14159265358979323846;
  $bvkA=25;
@@ -62,6 +62,7 @@ die "exiting" unless GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "jp:s"=>\$jp,
            "dm:s"=>\$dm,
            "d"=>\$d,
+           "v"=>\$verbose,
 	   "npc"=>\$npc,
            "nm"=>\$nm,
            "r"=>\$cfphr,
@@ -144,7 +145,7 @@ elsif(@rkky3d)
  #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
    $rfuncheader=" RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
    $rfuncheader=$rfuncheader."#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";
-   print "#calculating".$rfuncheader;
+   if($verbose){print "#calculating".$rfuncheader;}
 }
 elsif(@kaneyoshi3d)
   {$rkky=5;
@@ -161,7 +162,8 @@ elsif(@kaneyoshi3d)
    $rfuncheader=" kaneyoshi parametrization for the Bethe-Slater curve\n";
    $rfuncheader=$rfuncheader."# J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
    $rfuncheader=$rfuncheader."#with RD=sqrt(Ri^2/Di^2+Rj^2/Dj^2+Rk^2/Dk^2) with Di=$Da A Dj=$Db A Dk=$Dc A  and alpha=$aa\n";
-print "#calculating".$rfuncheader;}
+  if($verbose){print "#calculating".$rfuncheader;}
+   }
 elsif(@rkkz3d)
   {$rkky=6;
    $s=$rkkz3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -175,7 +177,8 @@ elsif(@rkkz3d)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
    $rfuncheader=" RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
    $rfuncheader=$rfuncheader."#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";
-print "#calculating".$rfuncheader;}
+   if($verbose){print "#calculating".$rfuncheader;}
+   }
 elsif(@rkkydummy)
   {$rkky=1;
    $s=$rkkydummy[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -184,7 +187,7 @@ elsif(@rkkydummy)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=eval $ARGV[0];shift @ARGV;
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
   $rfuncheader="RKKY interaction J(R)=A.cos(2.kf.R)/(2.kf.R)^3 for scale A=$scale meV and kf=$kf A^-1\n";
-   print "#calculating".$rfuncheader;
+   if($verbose){print "#calculating".$rfuncheader;}
   }
 elsif(@kaneyoshi)
   {$rkky=2;
@@ -197,7 +200,8 @@ elsif(@kaneyoshi)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$D=eval $ARGV[0];shift @ARGV;
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
    $rfuncheader="kaneyoshi parametrization for the Bethe-Slater curve\n#J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n";
-   print "#calculating ".$rfuncheader;}
+   if($verbose){print "#calculating ".$rfuncheader;}
+   }
 elsif(@rkkz)
   {$rkky=3;
     $s=$rkkz[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -207,7 +211,7 @@ elsif(@rkkz)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
 $rfuncheader="RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";
-   print "#calculating ".$rfuncheader;
+   if($verbose){print "#calculating ".$rfuncheader;}
   }
 elsif(defined $bvk)
   {#$bvk=1;
@@ -220,7 +224,7 @@ elsif(defined $bvk)
      # $bfk_file=$ARGV[0];shift @ARGV;
    $bfk_file=$bvk; 
    $bvk=1;
-   print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
+   if($verbose){print "creating phononic interactions from Born van Karman model in file $bfk_file\n";}
    # read interaction constants from file
    unless(open(Fin,$bfk_file)){ die "could not open $bfk_file\n";}
              $nof_springs=0;
@@ -244,7 +248,7 @@ elsif(defined $cfph)
  # shift @ARGV;
  #$_=$ARGV[0];if(/-r/){shift @ARGV;}
  if($cfph){$screeningfile=$cfph;}
- print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
+ if($verbose){print "creating crystal field phonon interactions from pointcharge model using program pointc\n";}
  #$screeningfile=$ARGV[0];
  $cfph=1;
 }
@@ -300,15 +304,16 @@ elsif(defined $e||defined $f||defined $dm||defined $jp)
  else {$classdip=1;} # without options calculate classical dipole interactions
  
 if($d) # for option -d
-  {$calcdist=1;print "putting distance of neighbors (A) to last column of makenn.j\n";}
+  {$calcdist=1;if($verbose){print "putting distance of neighbors (A) to last column of makenn.j\n";}}
 
 #******************************************************** get crystal structure 
 my ($latt,$p) = getlattice("./mcphas.j"); # gets lattice and atomic positions
 my ($a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents) = @{$latt};
 unless($tabout) {
- print "rmax=".$rmax." A\n";
+ if($verbose){print "rmax=".$rmax." A\n";
  print "a=".$a." b=".$b." c=".$c." alpha=".$alpha." beta=".$beta." gamma=".$gamma."\n";
  print "Primitive Lattice Vectors (rows) in units of lattice vectors [abc] :".$p."\n";
+            }
 }
 
 # define transformation matrix to calculate components of
@@ -351,7 +356,7 @@ $p= $p x $rtoijk; # primitive lattice in Euclidean ijk coordinates
 $pinv=inv($p); #invert this matrix for use later
 $pVolume=inner($p->slice(":,(0)"),crossp($p->slice(":,(1)"),$p->slice(":,(2)")));
 if($pVolume<0){die "Error makenn - primitive lattice not right handed \n";}
-unless($tabout){ print "Primitive Lattice Vectors (rows) in Euclidean Coordinates [A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}
+unless($tabout){if($verbose){ print "Primitive Lattice Vectors (rows) in Euclidean Coordinates [A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}}
     $r=0;
 # select a Vector from primitive lattice print $p->slice(":,(0)");
 # calculate Volume of primitive unit cell in A^3
@@ -484,20 +489,20 @@ else
 EOF
 
 }
-}} #fi tabout 
+}} #fi tabout  ********************************************************
 else
 {
-print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
+if($verbose){print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";}
 
      # initialize output file results/makenn$ext
   ($h,$l)=printlattice("./mcphas.j",">./results/makenn$ext");
-print "# number of atoms = $nofatoms\n calculating ...\n";
+if($verbose){print "# number of atoms = $nofatoms\n calculating ...\n";}
 }     
 
 # transform Qn=hkl to Qx Qy Qz(1/A)
 if(@rkkynest){# rtoijk contains real lattice
 # here we need reciprtocal lattice = 2pi * rtoijk^-1= 2pi * $invrtoijk
-print "# Option rkkynest with scale =".$rkkynest[0]."meV and nesting vector(s):";
+if($verbose){print "# Option rkkynest with scale =".$rkkynest[0]."meV and nesting vector(s):";}
 $hklnest="";
 for($n=1;$n<$#rkkynest;$n+=3)
      {my $h=$rkkynest[$n]; 
@@ -505,23 +510,24 @@ for($n=1;$n<$#rkkynest;$n+=3)
       my $l=$rkkynest[$n+2]; 
      $hklnest=$hklnest."($h $k $l)";
       my $hkl=pdl($h,$k,$l);
-      print $hkl;
+      if($verbose){print $hkl;}
       my $QxQyQz=2*$PI*($hkl x transpose($invrtoijk));
       $rkkynest[$n]=$QxQyQz->at(0,0);
       $rkkynest[$n+1]=$QxQyQz->at(1,0);
       $rkkynest[$n+2]=$QxQyQz->at(2,0);
 #     print       $rkkynest[$n]." ".$rkkynest[$n+1]." ".$rkkynest[$n+2];
      }
- print "\n";
+ if($verbose){print "\n";}
 
 }
 print_time_estimate_until_end(0.0);
 #********************************************************        
 @atoms=();   # initialize array to push output into ...
  for ($nnn=1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)    
- {unless($tabout){ if($nnn>$nofatoms){print "# splitting atom ".$nph[$nnn]." into nucleus and magnetic electron shell creating a new magnetic \n";}
+ {if($verbose){unless($tabout){ if($nnn>$nofatoms){print "# splitting atom ".$nph[$nnn]." into nucleus and magnetic electron shell creating a new magnetic \n";}
    print "# atom $nnn ...";} 
   if($nnn>$nofatoms){print "with shifted dc=".($z[$nnn]+0.1/$c)." to distinguish it from the nucleus at dc=".$z[$nnn]."...";}
+             }
      my $gJ=$gJ[$nnn];
      my $sipffilename=$sipf_file[$nnn];
      my ($rn)=new PDL ();
@@ -779,7 +785,7 @@ if($rfuncdone==1){close ff;}
      }
    }
    if($nofneighbours[$nnn]==-1){$nofneighbours[$nnn]=0;}
-   unless($tabout){print $nofneighbours[$nnn]." neighbours found\n";}
+   if($verbose){unless($tabout){print $nofneighbours[$nnn]." neighbours found\n";}}
    $n= qsorti($rn); 
 
 unless($tabout){printneighbourlist($Gmix,$h,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);}
@@ -1015,6 +1021,7 @@ for($i=2;$i<=7;++$i){ if(abs($Mc[$i]-$M[$i])>1e-4){die("ERROR makenn: input file
                      }
 } # fi bvk consistency check
 
+if($verbose){
 print "created files: results/makenn$ext     (interaction parameters)\n";
 print "               results/makenn.a*.pc   (pointcharge environment files)\n";
 if($rfunc){
@@ -1022,11 +1029,8 @@ print "               results/makenn.func.r  (interaction as function of r)\n";
 }
 if($bvk){
 print "               results/makenn.Cel     (elastic constants)\n";
-}
-print "********************************************************\n";
-print "               end of program makenn\n";
-print " Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
-print "********************************************************\n";
+}}
+print " ************** end of program makenn **************\n";
 if($npc){unlink("results/makenn.a*.pc");}
    exit;
 
@@ -1332,7 +1336,7 @@ sub getlattice {
     my $h = new FileHandle;
     my $n = 0;
     $nofcomponents=0;$nofmagneticatoms=0;
-
+   my $warning_printed=0;
   # input data int piddle
   if(open($h,$file))
   {      while(<$h>)
@@ -1373,7 +1377,8 @@ sub getlattice {
 
                                    ($nofneighbours[$n])=extract("nofneighbours",$_);
                                    ($diagonalexchange)=extract("diagonalexchange",$_);
-                                   if($diagonalexchange>1){print "# Warning program makenn: diagonalexchange=$diagonalexchange not implemented setting diagonalexchange=0\n";$diagonalexchange=0;}
+                                   if($diagonalexchange>1){if($warning_printed==0){print "# Warning program makenn: diagonalexchange=$diagonalexchange not implemented setting diagonalexchange=0\n";$warning_printed=1;}
+                                                          $diagonalexchange=0;}
                                    ($x[$n])=extract("da",$_);
                                    ($y[$n])=extract("db",$_);
                                    ($z[$n])=extract("dc",$_);
@@ -1910,6 +1915,8 @@ dkfR/deps1,2,3=-kfR/3 (see manual).
             -rkkz3d  dJ/deps1,2,3 = A.[(1-(kfR)^2).sin(2.kfR)-2.kfR.cos(2.kfR)]/(12.kfR^4)
  
  These derivatives are useful for the calculation of exchange striction effects. 
+
+        -v      verbose mode 
 
  Note: xyz refers to a right handed Euclidean coordinate system with 
  y||b, z||(a x b) and x perpendicular to y and z.

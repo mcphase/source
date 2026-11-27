@@ -402,8 +402,9 @@ void icf1ion_module::icf_expJ(  complexdouble *zV, double *vE, Vector & T, Matri
    int Esz, ind_j;
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    std::vector<double> E, me;  E.reserve(Hsz);
-   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON) break; }
-
+   for(Esz=0; Esz<Hsz; Esz++) {if(vE[Esz]==DBL_MAX){--Esz;break;} 
+                               E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON ) break; }
+   
    if (T(T.Lo())<0)
    {  Esz = (int)(-T(T.Lo()));
       printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T(T.Lo()),(int)(-T(T.Lo())));
@@ -1705,7 +1706,8 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
    int iJ, ind_j, Esz;
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || vE[Esz+1]==0) break; }
+   for(Esz=0; Esz<Hsz; Esz++) {if(vE[Esz]==DBL_MAX){--Esz;break;} 
+                                E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON) break; }
    if (T<0)
    {
       Esz = (int)(-T);
@@ -1978,7 +1980,8 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
       //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
        std::vector<double> eb, E; int Esz;
        if(i==j){ E.reserve(Hsz);
-             for(Esz=0; Esz<Hsz; Esz++) { E.push_back(en[Esz]-en[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || en[Esz+1]==0) break; }
+             for(Esz=0; Esz<Hsz; Esz++) {if(en[Esz]==DBL_MAX){--Esz;break;} 
+                                E.push_back(en[Esz]-en[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON) break; }
             eb.assign(Esz,0.);}
       for(iJ=0; iJ<sz; iJ++)
       {

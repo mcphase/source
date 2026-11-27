@@ -114,6 +114,8 @@ int verbose;
   double maxQ;
   // nonzero if mcphas.sps file  is to be generated
   int save_sps_file;
+  // nonzero if mcphas.cvg file  is to be generated
+  int save_cvg_file;
 
 // ***************** intelligent functions **********************
  // set external field and Temperature given x and y

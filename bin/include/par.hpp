@@ -17,7 +17,7 @@ class par
    
    
   public:
-  
+  char * filename;
   char *rems[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL];
   jjjpar **jjj; // pointer of field of exchange parameter sets
   //Vector gJ;

@@ -34,6 +34,9 @@ double Eelastic; // elastic energy per ion
 int nofatoms();
 int nofcomponents();
 
+// diagnostic
+int nofrepeats,noffecalccalls,nofmaxloopDiv,nofmaxspinschangeDiv;
+
 Vector *jj,*hkli; // spin spin correlation functions
 int maxnofhkls,nofhkls;
 spincf  sps;

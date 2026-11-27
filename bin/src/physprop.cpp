@@ -11,7 +11,10 @@ physproperties::physproperties (int & nofspincorrs,int & maxnofhkli,cryststruct 
  int i;
  nofspincorr=nofspincorrs;
  cs=cryststruct(csin);
-
+nofrepeats=0;
+noffecalccalls=0;
+nofmaxloopDiv=0;
+nofmaxspinschangeDiv=0;
  m=Vector(1,3); 
  mabc=Vector(1,3); 
  Pelabc=Vector(1,3); Pel=Vector(1,3);
@@ -52,6 +55,10 @@ physproperties::physproperties (const physproperties & p)
   nofhkls=p.nofhkls;
   u=p.u;fe=p.fe;Eelastic=p.Eelastic;
   washere=p.washere;
+  nofrepeats=p.nofrepeats;
+ noffecalccalls=p.noffecalccalls;
+ nofmaxloopDiv=p.nofmaxloopDiv;
+ nofmaxspinschangeDiv=p.nofmaxspinschangeDiv;
  maxnofhkls=p.maxnofhkls;
  nofspincorr=p.nofspincorr;
  cs=cryststruct(p.cs);
@@ -343,9 +350,11 @@ double physproperties::save ( const char * filemode, int & htfailed,inipar & ini
   if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g ",Hint(1),Hint(2),Hint(3));}
   ini.time_estimate_until_end(x,y);
   printf("\n");
+char outfilename[MAXNOFCHARINLINE];
+
 
 //-----------------------------------mcphas.fum ----------------------------------------------------  
-  errno = 0;char outfilename[MAXNOFCHARINLINE];
+  errno = 0;
   for(int i=1;i<=nn[0];++i)nnerr[i]=0; // clear errorbars for new read
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.fum");
@@ -522,6 +531,36 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
   }
   }}
 
+//---------------------------------------mcphas.cvg--------------------------------------------------  
+errno = 0;
+ strcpy(outfilename+10+strlen(prefix),"mcphas.cvg");
+if (washere==0&&filemode[0]!='a')unlink(outfilename);  // delete all files from previous runs 
+if(ini.save_cvg_file==1)
+ {if (ini.verbose==1)printf("saving %s- information about convergence\n",outfilename);
+  if (washere==0)
+  {  fout = fopen_errchk (outfilename,filemode);
+   fprintf(fout, "#output file of program %s ",MCPHASVERSION);
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+   fprintf(fout,"#!<--mcphas.mcphas.cvg-->\n");
+   fprintf(fout,"#*********************************************************\n");
+   fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
+   fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
+   fprintf(fout,"#**********************************************************\n");
+   str[0]='\0';
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "failed nofrepeats noffecalccalls nofmaxloopDiv nofmaxspinschangeDiv ");
+   ini.print_usrdefcolhead(fout,str);
+  fclose(fout);
+   }
+ fout = fopen_errchk (outfilename,"a");
+   if (ini.verbose==1)printf(" .... saving convergence information in %s\n",outfilename);
+   ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
+   
+  fprintf(fout,"%i %i %i %i %i\n",htfailed,nofrepeats,noffecalccalls,nofmaxloopDiv,nofmaxspinschangeDiv);
+   
+    
+   fclose(fout);
+  }
+
 //-----------------------------------mcphas.cel ----------------------------------------------------  
 errno = 0;  
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
@@ -552,7 +591,6 @@ if(ini.cel!=0.0)
    ini.print_usrdefcolhead(fout,str);
    fclose(fout);
    }
-   strcpy(outfilename+10+strlen(prefix),"mcphas.cel"); 
    fout = fopen_errchk (outfilename,"a");
    if (ini.verbose==1)printf(" .... saving elastic constants in %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
@@ -593,7 +631,6 @@ if(ini.Hchi!=0.0)
    ini.print_usrdefcolhead(fout,str);
    fclose(fout);
    }
-   strcpy(outfilename+10+strlen(prefix),"mcphas.chi"); 
    fout = fopen_errchk (outfilename,"a");
    if (ini.verbose==1)printf(" .... saving magnetic susceptibility in %s\n",outfilename);
    ini.print_usrdefcols(fout,x,y,T,Hint,inputpars.cs.abc,M,P,false);
@@ -614,11 +651,17 @@ if(ini.Hchi!=0.0)
 
 // delete all files from previous runs 
  if (washere==0&&filemode[0]!='a'){
-  strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); unlink(outfilename);  
+  strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); unlink(outfilename);
+if(ortho==0){
+  strcpy(outfilename+10+strlen(prefix),"mcphasi.hkl"); unlink(outfilename);  
+  strcpy(outfilename+10+strlen(prefix),"mcphasj.hkl"); unlink(outfilename);  
+  strcpy(outfilename+10+strlen(prefix),"mcphask.hkl"); unlink(outfilename);  
+  }
+else{  
   strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl"); unlink(outfilename);  
   strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl"); unlink(outfilename);  
   strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl"); unlink(outfilename);  
-                                  }
+   }                               }
 
   strcpy(outfilename+10+strlen(prefix),"mcphas*.hkl");
  if(ini.maxnofhkls>0)
@@ -773,6 +816,7 @@ if(ini.Hchi!=0.0)
    delete []inew;delete []intensity;
   }
  }
+
 //---------------------------------------mcphas.sps--------------------------------------------------  
 errno = 0;
  strcpy(outfilename+10+strlen(prefix),"mcphas.sps");
@@ -897,6 +941,7 @@ int physproperties::read( par & inputpars,char * readprefix,inipar & ini)
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
    Vector M(1,3),P(1,3); M=0;P=0; 
  if(ini.verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,Hint,inputpars.cs.abc,M,P,true);}
+
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
 // here read free energy etc if possible ... otherwise return 1

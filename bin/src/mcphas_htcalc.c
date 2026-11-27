@@ -460,6 +460,7 @@ int  htcalc (Vector & Happ,double T,inipar & ini,par & inputpars,qvectors & test
  int i,j,k,is;
  int start_nofmaxspinchangeDIV=ini.nofmaxspinchangeDIV;
  int start_nofmaxloopDIV=ini.nofmaxloopDIV;
+ int start_nofcalls=ini.nofcalls;
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
  Vector h1(1,inputpars.cs.nofcomponents),hkl(1,3);
@@ -640,8 +641,11 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  #endif
  THRLC_FREE(threadSpecificKey);
 #endif
+physprops.noffecalccalls=ini.nofcalls-start_nofcalls;
+physprops.nofmaxloopDiv=ini.nofmaxloopDIV-start_nofmaxloopDIV;
+physprops.nofmaxspinschangeDiv=ini.nofmaxspinchangeDIV-start_nofmaxspinchangeDIV;
 if (femin>=FEMIN_INI) // did we find a stable structure ??
- {if(ini.nofmaxspinchangeDIV-start_nofmaxspinchangeDIV<ini.nofmaxloopDIV-start_nofmaxloopDIV)
+ {if(physprops.nofmaxspinschangeDiv<physprops.nofmaxloopDiv)
           return 2; else return 3;
  }
 else // if yes ... then

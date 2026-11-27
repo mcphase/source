@@ -244,7 +244,8 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
       if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON && fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj) = 0.; } 
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<cb; Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
+   for(Esz=0; Esz<cb; Esz++) {if(VE.E(Esz)==DBL_MAX){--Esz;break;} 
+                              E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON) break; }
 
    // Does initialisations in case we need to recalculate the higher order multipolar matrices (e.g. for spins)
    complexdouble  *zmt=0;//*opmat=0,
@@ -324,7 +325,8 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
       if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON && fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj) = 0.; } 
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<cb; Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
+   for(Esz=0; Esz<cb; Esz++) { if(VE.E(Esz)==DBL_MAX){--Esz;break;} 
+                               E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON) break; }
 
    complexdouble *opmat=0, *zmt=0;
    zmt = new complexdouble[Hsz*cb];

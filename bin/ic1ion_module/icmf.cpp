@@ -137,7 +137,9 @@ void iceig::lcalc(icpars &pars, sMat<double>&H)
       nev += conf.states[imax].J2+1; if(exp(-(VEcso.E[i]-VEcso.E[0])/(208.510704))<DBL_EPSILON) break;   // 208.5==300K in 1/cm
    }
    if(nev>_Hsz) nev=_Hsz;
-   int info = ic_leig(H,_V,_E,nev); 
+   int info = ic_leig(H,_V,_E,nev);
+   // MR 27.11.2026 put remaining _E to DBL_MAX - to make epxectation values calculation OK
+    for (int i = nev; i < _Hsz; ++i)_E[i] = DBL_MAX;
    if(info!=0) { std::cerr << "iceig(H) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_V; _V=0; }
 }
 void iceig::lcalc(icpars &pars, sMat<double>&H, sMat<double>&iH)
@@ -154,6 +156,8 @@ void iceig::lcalc(icpars &pars, sMat<double>&H, sMat<double>&iH)
    }
    if(nev>_Hsz) nev=_Hsz;
    int info = ic_leig(H,iH,_zV,_E,nev); 
+   // MR 27.11.2026 put remaining _E to DBL_MAX - to make epxectation values calculation OK
+      for (int i = nev; i < _Hsz; ++i)_E[i] = DBL_MAX;
    if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
 }
 void iceig::lcalc(icpars &pars, complexdouble *H)
@@ -170,9 +174,12 @@ void iceig::lcalc(icpars &pars, complexdouble *H)
    }
    if(nev>_Hsz) nev=_Hsz;
    int info = ic_leig(_Hsz,H,_zV,_E,nev); 
+   // MR 27.11.2026 put remaining _E to DBL_MAX - to make epxectation values calculation OK
+      for (int i = nev; i < _Hsz; ++i)_E[i] = DBL_MAX;
    if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
 }
 #ifndef NO_ARPACK
+// acalc call the Arnoldi Algorithm in arpack
 void iceig::acalc(icpars &pars, sMat<double>&H)
 {
    if(_E!=0) { delete[]_E; _E=0; } if(_V!=0) { delete[]_V; _V=0; } if(_zV!=0) { delete[]_zV; _zV=0; }
@@ -193,7 +200,7 @@ void iceig::acalc(icpars &pars, sMat<double>&H)
    else
    {
       double *dH = H.f_array(); int info = ic_arpackeig(_Hsz,dH,_V,_E,nev); free(dH);
-      if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_V; _V=0; }
+        if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_V; _V=0; }
    }
 }
 void iceig::acalc(icpars &pars, sMat<double>&H, sMat<double>&iH)
@@ -216,7 +223,7 @@ void iceig::acalc(icpars &pars, sMat<double>&H, sMat<double>&iH)
    else
    {
       complexdouble *zH = zmat2f(H,iH); int info = ic_arpackeig(_Hsz,zH,_zV,_E,nev); free(zH);
-      if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
+        if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
    }
 }
 void iceig::acalc(icpars &pars, complexdouble *H)
@@ -239,7 +246,7 @@ void iceig::acalc(icpars &pars, complexdouble *H)
    else
    {
       int info = ic_arpackeig(_Hsz,H,_zV,_E,nev); 
-      if(info!=0) { std::cerr << "iceig::acalc() - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; exit(EXIT_FAILURE); }
+         if(info!=0) { std::cerr << "iceig::acalc() - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; exit(EXIT_FAILURE); }
    }
 }
 #endif
@@ -571,7 +578,8 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
       complexdouble *zmm = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble)); 
       complexdouble *vet = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble)); memcpy(vet,VE.zV(0),Hsz*Hsz*sizeof(complexdouble));
       F77NAME(zgemm)(&transa, &transb, &Hsz, &Hsz, &Hsz, &zalpha, vet, &Hsz, VE.zV(0), &Hsz, &zbeta, zmm, &Hsz);
-      for(int ii=0; ii<Hsz; ii++) { zmm[ii*Hsz+ii].r-=1.; summm += F77NAME(dzasum)(&Hsz, &zmm[ii*Hsz], &incx); if(VE.E(ii+1)==0) break; }
+      for(int ii=0; ii<Hsz; ii++) {if(VE.E[ii]==DBL_MAX){--ii;break;} 
+                                zmm[ii*Hsz+ii].r-=1.; summm += F77NAME(dzasum)(&Hsz, &zmm[ii*Hsz], &incx);  }
       std::cout << "#ic1ion: Sum(V^TV-I) = " << summm << "\n";
       free(zmm); free(vet);
    }
@@ -580,7 +588,8 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
       double *dmm = (double*)malloc(Hsz*Hsz*sizeof(double)); 
       double *vet = (double*)malloc(Hsz*Hsz*sizeof(double)); memcpy(vet,VE.V(0),Hsz*Hsz*sizeof(double));
       F77NAME(dgemm)(&transa, &transb, &Hsz, &Hsz, &Hsz, &alpha, vet, &Hsz, VE.V(0), &Hsz, &beta, dmm, &Hsz);
-      for(int ii=0; ii<Hsz; ii++) { dmm[ii*Hsz+ii]-=1.; summm += F77NAME(dasum)(&Hsz, &dmm[ii*Hsz], &incx); if(VE.E(ii+1)==0) break; }
+      for(int ii=0; ii<Hsz; ii++) {if(VE.E[ii]==DBL_MAX){--ii;break;} 
+                                 dmm[ii*Hsz+ii]-=1.; summm += F77NAME(dasum)(&Hsz, &dmm[ii*Hsz], &incx);  }
       std::cout << "#ic1ion: Sum(V^TV-I) = " << summm << "\n";
       free(dmm); free(vet);
    }
@@ -607,7 +616,8 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
       
    }
 // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON) break; }
+     for(Esz=0; Esz<J[0].nr(); Esz++) {if(VE.E(Esz)==DBL_MAX||VE.E(Esz)==-DBL_MAX){--Esz;break;} 
+                                       E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON) break; }
 
    if (T<0){printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
                          printf ("Number   Excitation Energy\n");

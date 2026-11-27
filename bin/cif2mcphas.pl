@@ -1461,7 +1461,7 @@ if($interact){
  copy("mcphas_magnetic_atoms.j","mcphas.j");
  system ("spinsfromq $na $nb $nc $h $k $l > .cif2mcphas.sps");
  system ("spins -f .cif2mcphas.sps 1");
-
+ unlink(".cif2mcphas.sps");
 unless(open(FIN, "results/spins.out")){die "Error cif2mcphas reading results/spins.out\n";}
 while (<FIN>) { last if ($_ =~/%SECTION 3/)   
               }

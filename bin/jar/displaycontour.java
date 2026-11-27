@@ -678,6 +678,7 @@ protected void reload_data(int i)
             int maxnofpoints=1000;int j=maxnofpoints;double xold=0,yold=0;bh=0;bw=0;
            while(j==maxnofpoints)           
            {double [][] data=new double [3][maxnofpoints];//={{0,1},{0,1},{0,1}};             
+        
 
             fileIni = new File(file[i]);
             //?ffnen der Datei
@@ -718,6 +719,13 @@ try{
                                  }
             
              j=0;int dxtf=0; int dytf=0;int dztf=0;
+            if(detxmin){xmin=1e30;}
+            if(detxmax){xmax=-1e30;}
+            if(detymin){ymin=1e30;}
+            if(detymax){ymax=-1e30;}
+            if(detzmin){zmin=1e30;}
+            if(detzmax){zmax=-1e30;}
+
              //Auslesen der Datei
             while (inStream.available() > 0&&j<maxnofpoints)
             {
@@ -735,7 +743,7 @@ if (trimmed.isEmpty()) {
 
 if (trimmed.startsWith("#")) {
     strLine = trimmed.substring(1);// remove the comment
-              strLine = strLine.substring(1, strLine.length());
+             // strLine = strLine.substring(1, strLine.length());
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
@@ -824,19 +832,20 @@ if (trimmed.startsWith("#")) {
                      
       chart.getXYPlot().getDomainAxis().setRange(new Range(xmin,xmax),true,true);
       chart.getXYPlot().getRangeAxis().setRange(new Range(ymin,ymax),true,true);
-      
+      if(logz&&j>0){for (int l=0;l<j;++l)
+                                    {if(data[2][l]>0){data[2][l]=Math.log(data[2][l]);}
+                                     else {data[2][l]=Math.log(zmin);}
+                                    }
+               
+                      zmax=Math.log(zmax);
+                      zmin=Math.log(zmin);
+                   }
+
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                  else {
                if (j>0)
                {double [][] series=new double [3][j];
-                   if(logz){for (int l=0;l<j;++l)
-                                    {if(data[2][l]>0){data[2][l]=Math.log(data[2][l]);}
-                                     else {data[2][l]=Math.log(zmin/(zmax-zmin));}
-                                    }
-               
-                      zmax=Math.log(zmax);
-                      zmin=Math.log(zmin/(zmax-zmin));
-                   }
+                   
                 // here fill the rest of the array with the same values
                 for(int jj=0;jj<j;++jj)
                   {series[0][jj]=data[0][jj];series[1][jj]=data[1][jj];series[2][jj]=data[2][jj];

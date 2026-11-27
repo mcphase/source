@@ -61,6 +61,7 @@ int ic_diag(sMat<double> &Hic, sMat<double> &iHic, complexdouble *z, double *eig
    }
    return info;
 }
+
 int ic_diag(int n, complexdouble *zm, complexdouble *z, double *eigval)
 {
    // Paramaters for ZHEEV
@@ -87,6 +88,7 @@ int ic_diag(int n, complexdouble *zm, complexdouble *z, double *eigval)
    }
    return info;
 }
+
 int ic_diag(sMat<double> &Hic, double *m, double *eigval)
 {
    // Paramaters for DSYEV
@@ -106,6 +108,7 @@ int ic_diag(sMat<double> &Hic, double *m, double *eigval)
    }
    return info;
 }
+
 int ic_diag(double *mz, int lda, int n, double *m, double *eigval)
 {
    // Paramaters for DSYEV
@@ -153,6 +156,7 @@ int ic_leig(sMat<double> &Hic, sMat<double> &iHic, complexdouble *z, double *eig
    }
    return info;
 }
+
 int ic_leig(int n, complexdouble *zm, complexdouble *z, double *eigval, int iu)
 {
    // Paramaters for DSYEV
@@ -200,67 +204,79 @@ int ic_leig(sMat<double> &Hic, double *m, double *eigval, int iu)
 
 #ifndef NO_ARPACK
 // --------------------------------------------------------------------------------------------------------------- //
-// Function to calculate some of the lowest energy eigenvectors/values of the Hamiltonian using ARPACK
+// Function to calculate some of the lowest energy eigenvectors/values of the Hamiltonian using ARPACK - Arnoldi
 // --------------------------------------------------------------------------------------------------------------- //
 int ic_arpackeig(int n, double *zm, double *z, double *eigval, int nev)
 {
-   // Doesn't work at present - needs debugging!
-   int ido=0,ncv=(2*nev>n?n:2*nev),iparam[]={1,0,10000,1,nev,0,1,0,0,0,0};
-   //         IPARAM={ISHIFT,,MAXITER,NB,NCONV,,MODE,NP,NUMOP,NUMOPB,NUMREO
-   int lworkl=3*ncv*ncv+6*ncv+1,info=0;  // Must be > 3*NCV**2 + 6*NCV
+   int ido=0,ncv=(2*nev>n?n:2*nev);
+   int iparam[] = {1, 0, 10000, 1, 0, 0, 1, 0, 0, 0, 0};
+   int lworkl=ncv * (ncv + 8)+1,info=0;  // Must be > 3*NCV**2 + 6*NCV
    char bmat='I';
    double tol=1e-12; 
 
-   char uplo = 'U'; int inc = 1; double alpha=1., beta=0.;
-
-   char whichp[]="SR";       // LM/SM==Largest/Smallest Magnitude; LA/SA==Algebraic; BE=balanced (half small/half large)
+   char uplo = 'U'; int inc = 1; double alpha=1., beta=0.,sigma=0.;
+   if(0 >= nev||nev >= n)return 99;
+   char whichp[]="SA";       // LM/SM==Largest/Smallest Magnitude; LA/SA==Algebraic; BE=balanced (half small/half large)
    int *ipntr=(int*)malloc(11*sizeof(int));
    double *resid=(double*)malloc(n*sizeof(double)), *v=(double*)malloc(n*ncv*sizeof(double));
    double *workd=(double*)malloc(3*n*sizeof(double)), *workl=(double*)malloc(lworkl*sizeof(double));
-// char trans='N'; 
    while(ido!=99)
    {
-      F77NAME(dnaupd)(&ido, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, ipntr, workd, workl, &lworkl, &info);
-      if(ido==1 || ido==-1)
-         F77NAME(dsymv)(&uplo, &n, &alpha, zm, &n, &workd[ipntr[0]], &inc, &beta, &workd[ipntr[1]], &inc);
-//       F77NAME(dgemv)(&trans, &n, &n, &alpha, zm, &n, &workd[ipntr[0]], &inc, &beta, &workd[ipntr[1]], &inc);
-   }
-   int rvec=1,*select=(int*)malloc(ncv*sizeof(int)); char howmny='A';
-   double *d=(double*)malloc(nev*sizeof(double)), *di=(double*)malloc(nev*sizeof(double)), *workev=(double*)malloc(3*ncv*sizeof(double));
-// F77NAME(dseupd)(&rvec, &howmny, select, d, z, &n, &alpha, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, 
-//                 ipntr, workd, workl, &lworkl, &info);
-   F77NAME(dneupd)(&rvec, &howmny, select, d, di, z, &n, &alpha, &alpha, workev, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, 
-                   ipntr, workd, workl, &lworkl, &info);
-   int i=1,j=2,ii; double elem; std::vector<int> ind(nev,0);
-   for(ii=0; ii<nev; ii++) { eigval[ii] = d[ii]; ind[ii] = ii; }
-   while(i<nev)
-   {
-      if(eigval[i-1]<=eigval[i]) { i=j; j++; }
-      else { elem = eigval[i-1]; eigval[i-1] = eigval[i]; eigval[i] = elem; ii=ind[i-1]; ind[i-1]=ind[i]; ind[i]=ii; i--; if(i==0) i=1; }
-   }
-   memcpy(v,z,n*nev*sizeof(double)); 
-   for(i=0; i<nev; i++) { memcpy(&z[i*n],&v[ind[i]*n+1],n*sizeof(double)); }
-   memset(&eigval[nev],0,(n-nev)*sizeof(double)); memset(&z[nev*n],0,(n-nev)*n*sizeof(double));
+      F77NAME(dsaupd)(&ido, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, ipntr, workd, workl, &lworkl, &info);
+      if (info < 0) {  // ARPACK reported an error
+        break;
+                    }
+switch (ido) {
+    case -1:
+    case 1:
+        F77NAME(dsymv)(&uplo, &n, &alpha, zm, &n,
+                       &workd[ipntr[0] - 1], &inc, &beta,
+                       &workd[ipntr[1] - 1], &inc);
+        break;
 
-   free(ipntr); free(resid); free(v); free(workd); free(workl); free(select); free(d); free(di); free(workev);
+    case 2:  // B*x; B is identity because bmat = 'I'
+        memmove(&workd[ipntr[1] - 1],
+                &workd[ipntr[0] - 1],
+                n * sizeof(double));
+        break;
+
+    case 99: // iteration complete
+        break;
+
+    default:
+        info = -999; // choose/document an application-specific error code
+        break;
+    }
+if (info != 0) break;
+   }
+   if(info!=0){free(ipntr); free(resid); free(v); free(workd); free(workl); return info;}
+   int rvec=1,*select=(int*)malloc(ncv*sizeof(int)); char howmny='A';
+    F77NAME(dseupd)(&rvec, &howmny, select, eigval, z, &n, &sigma, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, 
+                 ipntr, workd, workl, &lworkl, &info);
+   
+   if(info!=0){free(ipntr); free(resid); free(v); free(workd); free(workl); free(select);return info;}
+   for (int i = nev; i < n; ++i) eigval[i] = DBL_MAX;
+   memset(&z[nev*n],0,(n-nev)*n*sizeof(double));
+
+   free(ipntr); free(resid); free(v); free(workd); free(workl); free(select); 
 
    return info;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
-// Function to calculate some of the lowest energy eigenvectors/values of the Hamiltonian using ARPACK
+// Function to calculate some of the lowest energy eigenvectors/values of the Hamiltonian using ARPACK - Arnoldi
 // --------------------------------------------------------------------------------------------------------------- //
 int ic_arpackeig(int n, complexdouble *zm, complexdouble *z, double *eigval, int nev)
 {
    // Doesn't work at present - needs debugging!
-   int ido=0,ncv=(2*nev>n?n:2*nev),iparam[]={1,0,10000,1,nev,0,1,0,0,0,0};
-   //         IPARAM={ISHIFT,,MAXITER,NB,NCONV,,MODE,NP,NUMOP,NUMOPB,NUMREO
+   int ido=0,ncv=(2*nev>n?n:2*nev),iparam[]={1,0,10000,1,0,0,1,0,0,0,0};
    int lworkl=3*ncv*ncv+8*ncv,info=0;  // Must be > 3*NCV**2 + 5*NCV
    char bmat='I';
    double tol=1e-12; 
-
+   if(0 >= nev||nev >= n)return 99;
    char uplo = 'U'; int inc = 1;
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   complexdouble sigma = {0, 0};
 
    char whichp[]="SR";       // LM/SM==Largest/Smallest Magnitude; LR/SR==RealPart; LI/SI==ImaginaryPart
    double *rwork=(double*)malloc(ncv*sizeof(double)); int *ipntr=(int*)malloc(14*sizeof(int));
@@ -269,13 +285,42 @@ int ic_arpackeig(int n, complexdouble *zm, complexdouble *z, double *eigval, int
    while(ido!=99)
    {
       F77NAME(znaupd)(&ido, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, ipntr, workd, workl, &lworkl, rwork, &info);
-      if(ido==1 || ido==-1)
-         F77NAME(zhemv)(&uplo, &n, &zalpha, zm, &n, &workd[ipntr[0]], &inc, &zbeta, &workd[ipntr[1]], &inc);
+          if (info < 0) {  // ARPACK reported an error
+        break;
+                    }
+switch (ido) {
+    case -1:
+    case 1:
+          F77NAME(zhemv)(&uplo, &n, &zalpha, zm, &n, &workd[ipntr[0] - 1], &inc,&zbeta, &workd[ipntr[1] - 1], &inc);
+   
+        break;
+
+    case 2:  // B*x; B is identity because bmat = 'I'
+        memmove(&workd[ipntr[1] - 1],
+        &workd[ipntr[0] - 1],
+        n * sizeof(complexdouble));
+        break;
+
+    case 99: // iteration complete
+        break;
+
+    default:
+        info = -999; // choose/document an application-specific error code
+        break;
+    }
+if (info != 0) break;
+
+
+
    }
+   if(info!=0){free(ipntr); free(rwork); free(resid); free(v); free(workd); free(workl); return info;}
    int rvec=1,*select=(int*)malloc(ncv*sizeof(int)); char howmny='A';
-   complexdouble *d=(complexdouble*)malloc(nev*sizeof(complexdouble)), *workev=(complexdouble*)malloc(2*ncv*sizeof(complexdouble));
-   F77NAME(zneupd)(&rvec, &howmny, select, d, z, &n, &zalpha, workev, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, 
+   complexdouble *d=(complexdouble*)malloc((nev+1)*sizeof(complexdouble)), *workev=(complexdouble*)malloc(2*ncv*sizeof(complexdouble));
+   F77NAME(zneupd)(&rvec, &howmny, select, d, z, &n, &sigma, workev, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, 
                    ipntr, workd, workl, &lworkl, rwork, &info);
+   if(info!=0) { free(ipntr); free(rwork); free(resid); free(v); free(workd); free(workl); free(select); free(d); free(workev); return info; }
+
+
    int i=1,j=2,ii; double elem; std::vector<int> ind(nev,0);
    for(ii=0; ii<nev; ii++) { eigval[ii] = d[ii].r; ind[ii] = ii; }
    while(i<nev)
@@ -284,10 +329,11 @@ int ic_arpackeig(int n, complexdouble *zm, complexdouble *z, double *eigval, int
       else { elem = eigval[i-1]; eigval[i-1] = eigval[i]; eigval[i] = elem; ii=ind[i-1]; ind[i-1]=ind[i]; ind[i]=ii; i--; if(i==0) i=1; }
    }
    memcpy(v,z,n*nev*sizeof(complexdouble)); 
-   for(i=0; i<nev; i++) { memcpy(&z[i*n],&v[ind[i]*n+1],n*sizeof(complexdouble)); }
-   memset(&eigval[nev],0,(n-nev)*sizeof(double)); memset(&z[nev*n],0,(n-nev)*n*sizeof(complexdouble));
+   for(i=0; i<nev; i++) { memcpy(&z[i*n],&v[ind[i]*n],n*sizeof(complexdouble)); }
+   for (int i = nev; i < n; ++i)  eigval[i] = DBL_MAX;
+   memset(&z[nev*n],0,(n-nev)*n*sizeof(complexdouble));
 
-   if(info==0) { free(ipntr); free(rwork); free(resid); free(v); free(workd); free(workl); free(select); free(d); free(workev); }
+    free(ipntr); free(rwork); free(resid); free(v); free(workd); free(workl); free(select); free(d); free(workev); 
 
    return info;
 }

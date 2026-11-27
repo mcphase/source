@@ -589,6 +589,7 @@ int inipar::load (int & nofinis,char**lofpref)
   maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;repeat=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   save_sps_file=0;
+  save_cvg_file=0;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {if(!(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!')&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
@@ -703,6 +704,7 @@ int inipar::load (int & nofinis,char**lofpref)
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofhkls",maxnofhkls); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxQ",maxQ); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"save_sps_file",save_sps_file); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"save_cvg_file",save_cvg_file); 
 
        for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
@@ -891,6 +893,7 @@ checkpr(fout, "nofspincorrs",nofspincorrs,p.nofspincorrs);
 checkpr(fout, "maxnofhkls",maxnofhkls,p.maxnofhkls);
 checkpr(fout, "maxQ",maxQ,p.maxQ);
 checkpr(fout, "save_sps_file",save_sps_file,p.save_sps_file);
+checkpr(fout, "save_cvg_file",save_cvg_file,p.save_cvg_file);
 
 }
 
@@ -923,8 +926,10 @@ void inipar::print (FILE * fout)
                   \ndisplayall=%i \
                   \n# to create a logfile of the propagation versus free energy  set logfevsQ to 1\n# (mind this uses a lot of disc space) \
                   \nlogfevsQ=%i\n \
-                  \n# to save a mcphas.sps file with spin configuration \
-                  \nsave_sps_file=%i\n\n",exit_mcphas,pause_mcphas,displayall,logfevsQ,save_sps_file);
+                  \n# to save a mcphas.sps file with spin configurations \
+                  \nsave_sps_file=%i\n \ 
+                  \n# to save a mcphas.cvg file with convergence information \
+                  \nsave_cvg_file=%i\n\n",exit_mcphas,pause_mcphas,displayall,logfevsQ,save_sps_file,save_cvg_file);
 
     fprintf(fout,"[XY PHASEDIAGRAM PARAMETERS]\n");
     fprintf(fout,"#xy phasediagram axes - parameters\n");
@@ -1077,6 +1082,8 @@ void inipar::print (FILE * fout)
     fprintf(fout," maxQ=%g\n",maxQ);
     fprintf(fout,"#  to generate mcphas.sps file with spins <I> set save_sps_file to 1\n");
     fprintf(fout," save_sps_file=%i\n",save_sps_file);
+    fprintf(fout,"#  to generate mcphas.cvg file with information about convergence set save_cvg_file to 1\n");
+    fprintf(fout," save_cvg_file=%i\n",save_cvg_file);
 }
  int colcod[]={-1,19,20,0,21,1,2,3}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
@@ -1115,7 +1122,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   minnr3=0;
   maxnofmfloops=1000;maxstamf=1e-5;bigstep=1;maxspinchange=100;zero=0;repeat=0;
 nofthreads=0;getnofthread(nofthreads);
-  nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;save_sps_file=0;
+  nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;save_sps_file=0;save_cvg_file=0;
   nofstapoints=0;
   nofreppoints=0;
   nofconvrep=0;
@@ -1258,6 +1265,7 @@ inipar::inipar (const inipar & p)
   maxnofhkls=p.maxnofhkls;
   maxQ=p.maxQ;
   save_sps_file=p.save_sps_file;
+  save_cvg_file=p.save_cvg_file;
   nofthreads=p.nofthreads;
 }
 

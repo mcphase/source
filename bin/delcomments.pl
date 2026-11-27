@@ -10,7 +10,7 @@ unless ($#ARGV >=0)
 
 {print " program delcomments  used to remove all comment lines (starting with #) in a file, removed comments are printed to screen (stdout)\n";
 
- print " usage: delcomments [-s \"token\"] *.*  \n *.* .. filenname\n";
+ print " usage: delcomments [options] *.*  \n *.* .. filenname\n";
  print " -s ... option to remove comments beginning with \"token\" instead.\n";
  print "        e.g. delcomments -s \"#:\" to remove lines commented by the range command.\n";
  print " -k ... option to keep comments beginning with \"token\" .\n";
@@ -18,10 +18,12 @@ unless ($#ARGV >=0)
  print " -c ... option to remove comments and replace by empty line instead of deleteing the line\n";
  print " -fromline 10 ... option to remove comments only after line number 10\n";
  print " -toline 100  ... option to remove comments only until line number 100\n";
+ print " -v           ... option verbose to print every comment which is removed\n";
+ 
  exit 0;}else{print STDERR "#* $0 *";}
 
 
-
+$verbose=0;
 $delline=1;$commentstring = "#"; $fromline=1;$toline=1e100;$keep="1";
 while($ARGV[0]=~/^-/)
 {if ($ARGV[0]=~/^-c$/) { $delline=0;shift @ARGV;}
@@ -29,6 +31,7 @@ while($ARGV[0]=~/^-/)
  if ($ARGV[0]=~/^-k$/) { shift @ARGV; $keep = $ARGV[0]; shift @ARGV; } 
  if ($ARGV[0]=~/^-fromline$/) { $fromline = $ARGV[1]; shift @ARGV; shift @ARGV; } 
  if ($ARGV[0]=~/^-toline$/) { $toline = $ARGV[1]; shift @ARGV; shift @ARGV; } 
+  if ($ARGV[0]=~/^-v$/) { $verbose = 1; shift @ARGV; } 
 }
 #print "s".$commentstring."s\n";
 @ARGV=map{glob($_)}@ARGV;
@@ -44,7 +47,7 @@ while($ARGV[0]=~/^-/)
    while($line=<Fin>)
      {++$i;
        if ($fromline<=$i&&$i<=$toline&&$line=~/^\s*\Q$commentstring\E/
-           &&!($line=~/^\s*\Q$keep\E/)) {print $line;
+           &&!($line=~/^\s*\Q$keep\E/)) {if($verbose==1){print $line;}
                                          if($delline==0){print Fout "\n";}
                                          }
        else{print Fout $line;}
