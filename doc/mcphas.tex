@@ -806,7 +806,7 @@ curve(s).
 \label{magnetostrictiongraphic}
 \end{figure}
 
-\subsection{Output Files - {\prg mcphas.qvc,phs,sps,mf,fum,j1...,xyt,hkl} }\label{outputfiles}
+\subsection{Output Files - {\prg mcphas.qvc,phs,sps,mf,fum,j1...,xyt,hkl,cvg} }\label{outputfiles}
  (in directory ./results/ after a simulation run) 
 
 
@@ -905,6 +905,7 @@ will have domains with moments parallel to $a$ and $b$. The program will generat
  \item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments. The single ion module function
     {\prg mcalc} is used to evaluate the magnetic moment on each site.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
+ \item [\prg mcphasc.cvg]   information about convergence of mean field loops.
                             \end{description} 
 
 

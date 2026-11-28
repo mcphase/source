@@ -618,7 +618,11 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
        file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
        s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
        }noffiles=j;
-//       System.out.println(xText);
+
+      if(logz&&!detzmin){zmin=Math.log(zmin)/Math.log(10);}
+      if(logz&&!detzmax){zmax=Math.log(zmax)/Math.log(10);}
+// natural logarithm: exp(ln(10))=10  10^x=y exp(ln(10)*x)=y   
+// ln(10)*x=ln(y)  x=log(y)=ln(y)/ln(10)  ... Math.log returns natural i.e. Math.log=ln
         displaycontour demo = new displaycontour(title,prefxsize,prefysize);
         demo.pack();
         //RefineryUtilities.centerFrameOnScreen(demo);
@@ -832,13 +836,15 @@ if (trimmed.startsWith("#")) {
                      
       chart.getXYPlot().getDomainAxis().setRange(new Range(xmin,xmax),true,true);
       chart.getXYPlot().getRangeAxis().setRange(new Range(ymin,ymax),true,true);
-      if(logz&&j>0){for (int l=0;l<j;++l)
+      if(logz&&j>0){   if (detzmax){zmax=Math.log(zmax);}
+                      if (detzmin){zmin=Math.log(zmin);}
+                   for (int l=0;l<j;++l)
                                     {if(data[2][l]>0){data[2][l]=Math.log(data[2][l]);}
-                                     else {data[2][l]=Math.log(zmin);}
+                                     else{data[2][l]=zmin;}
+                                     if(data[2][l]<zmin){data[2][l]=zmin;}
                                     }
                
-                      zmax=Math.log(zmax);
-                      zmin=Math.log(zmin);
+                   
                    }
 
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
